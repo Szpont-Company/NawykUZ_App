@@ -246,7 +246,8 @@ fun LoginScreen() {
             Icon(
                 painter = painterResource(id = R.drawable.google_logo),
                 contentDescription = null,
-                modifier = Modifier.size(18.dp)
+                modifier = Modifier.size(18.dp),
+                tint = Color.Unspecified
             )
             Spacer(modifier = Modifier.width(12.dp))
             Text(
