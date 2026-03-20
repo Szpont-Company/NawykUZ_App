@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Check.</string>
+    <string name="welcome_sentence">Build habits. Win every day.</string>
+    <string name="LogIn">Log in</string>
+    <string name="Register">Register</string>
+    <string name="password">PASSWORD</string>
+    <string name="forgotPassword">Forgot password</string>
+    <string name="LogInBtn">Log in</string>
+    <string name="LogInGoogle">Continue with Google</string>
+    <string name="continueWith">or continue with</string>
+    <string name="login_privacy_1">"By logging in you accept our "</string>
+    <string name="login_privacy_2">ToS</string>
+    <string name="login_privacy_3">" and "</string>
+    <string name="login_privacy_4">privacy policy</string>
+</resources>
