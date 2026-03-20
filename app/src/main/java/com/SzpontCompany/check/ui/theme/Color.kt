@@ -26,5 +26,5 @@ val Red = Color(0xFFE24B4A)
 val BackgroundDark = Color(0xFF111112)
 val SurfaceDark = Color(0xFF1a1a1e)
 
-val BackgroundLight = Color(0xFFfdfdfd)
-val SurfaceLight = Color(0xFFfbfbfb)
+val BackgroundLight = Color(0xFFf4f4f0)
+val SurfaceLight = Color(0xFFffffff)
