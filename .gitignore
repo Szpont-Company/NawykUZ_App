@@ -1,0 +1,19 @@
+# Android
+*.iml
+.gradle/
+local.properties
+.idea/
+.DS_Store
+build/
+captures/
+*.apk
+*.aab
+
+# Firebase 
+google-services.json
+functions/.env
+functions/service-account.json
+
+# Node
+functions/node_modules/
+functions/lib/
