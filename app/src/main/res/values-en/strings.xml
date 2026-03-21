@@ -13,4 +13,8 @@
     <string name="login_privacy_2">ToS</string>
     <string name="login_privacy_3">" and "</string>
     <string name="login_privacy_4">privacy policy</string>
+    <string name="register_name">NAME AND LAST NAME</string>
+    <string name="passwordRule">min. 8 characters</string>
+    <string name="create_account">Create account</string>
+    <string name="register_notice1">By creating account you accept our </string>
 </resources>

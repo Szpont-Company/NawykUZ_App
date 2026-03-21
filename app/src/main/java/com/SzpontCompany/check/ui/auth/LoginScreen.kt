@@ -1,5 +1,9 @@
 package com.SzpontCompany.check.ui.auth
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -55,9 +59,9 @@ import com.SzpontCompany.check.ui.theme.Mint
 @Composable
 fun LoginScreen() {
     var selectedTab by remember { mutableStateOf(0) }
+    var name by remember { mutableStateOf("")}
     var email by remember { mutableStateOf("")}
     var password by remember { mutableStateOf("")}
-    var visible by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -137,152 +141,21 @@ fun LoginScreen() {
             }
         }
         Spacer(modifier = Modifier.height(24.dp))
-        Text(
-            text = "E-MAIL",
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.fillMaxWidth()
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        OutlinedTextField(
-            value = email,
-            onValueChange = {email = it},
-            placeholder = {Text("twoj@email.com")},
-            shape = RoundedCornerShape(12.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                unfocusedContainerColor = MaterialTheme.colorScheme.secondary,
-                focusedContainerColor = MaterialTheme.colorScheme.secondary,
-                focusedTextColor = MaterialTheme.colorScheme.onBackground,
-                unfocusedPlaceholderColor = MaterialTheme.colorScheme.onBackground
-            ),
-            singleLine = true,
-            modifier = Modifier
-                .fillMaxWidth()
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = stringResource(R.string.password),
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.fillMaxWidth()
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        OutlinedTextField(
-            value = password,
-            onValueChange = {password = it},
-            placeholder = {Text("●●●●●●●●")},
-            shape = RoundedCornerShape(12.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                unfocusedContainerColor = MaterialTheme.colorScheme.secondary,
-                focusedContainerColor = MaterialTheme.colorScheme.secondary,
-                focusedTextColor = MaterialTheme.colorScheme.onBackground,
-                unfocusedPlaceholderColor = MaterialTheme.colorScheme.onBackground
-            ),
-            visualTransformation = if (visible) VisualTransformation.None else PasswordVisualTransformation(),
-            trailingIcon = {
-                IconButton(onClick = {visible = !visible}) {
-                    Icon(
-                        imageVector = if (visible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                        contentDescription = null
-                    )
+        /// todo
+        AnimatedContent(
+            targetState = selectedTab,
+            label = "auth_tab",
+            transitionSpec = {
+                fadeIn() togetherWith fadeOut()
+            }
+        ) { tab ->
+            Column(modifier = Modifier.fillMaxWidth()) {
+                when (tab) {
+                    0 -> LogInForm(email, password, onEmailChange = {email = it}, onPasswordChange = {password = it}, onLogInClick = {}, onForgotPasswordClick = {}, onGoogleLogInClick = {})
+                    1 -> RegisterForm(name, email, password, onNameChange = {name = it}, onEmailChange = {email = it}, onPasswordChange = {password = it}, onRegisterClick = {}, onGoogleRegisterClick = {})
                 }
-            },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
-        )
-        Spacer(modifier = Modifier.height(32.dp))
-        Text(
-            text = stringResource(R.string.forgotPassword),
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.primary,
-            textAlign = TextAlign.End,
-            modifier = Modifier.fillMaxWidth()
-        )
-        Spacer(modifier = Modifier.height(24.dp))
-        Button(
-            onClick = { },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            shape = RoundedCornerShape(22),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.background,
-                contentColor = MaterialTheme.colorScheme.onBackground
-            ),
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurfaceVariant)
-        ) {
-            Text(
-                text = stringResource(R.string.LogInBtn),
-                style = MaterialTheme.typography.bodyLarge
-            )
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            HorizontalDivider(modifier = Modifier.weight(1f))
-            Text(
-                text = stringResource(R.string.continueWith),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(horizontal = 8.dp)
-            )
-            HorizontalDivider(modifier = Modifier.weight(1f))
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-        Button(
-            onClick = { },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            shape = RoundedCornerShape(22),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.background,
-                contentColor = MaterialTheme.colorScheme.onBackground
-            ),
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurfaceVariant)
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.google_logo),
-                contentDescription = null,
-                modifier = Modifier.size(18.dp),
-                tint = Color.Unspecified
-            )
-            Spacer(modifier = Modifier.width(12.dp))
-            Text(
-                text = stringResource(R.string.LogInGoogle),
-                style = MaterialTheme.typography.bodyLarge
-            )
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(
-                text = stringResource(R.string.login_privacy_1),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Text(
-                text = stringResource(R.string.login_privacy_2),
-                color = MaterialTheme.colorScheme.primary,
-                style = MaterialTheme.typography.labelMedium,
-                modifier = Modifier.clickable { }
-            )
-            Text(
-                    text = stringResource(R.string.login_privacy_3),
-                    style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Text(
-                text = stringResource(R.string.login_privacy_4),
-                color = MaterialTheme.colorScheme.primary,
-                style = MaterialTheme.typography.labelMedium,
-                modifier = Modifier.clickable { }
-            )
+            }
+
         }
     }
 }

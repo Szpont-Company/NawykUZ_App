@@ -12,4 +12,8 @@
     <string name="login_privacy_2">regulamin</string>
     <string name="login_privacy_3">" i "</string>
     <string name="login_privacy_4">politykę prywatności</string>
+    <string name="register_name">IMIĘ I NAZWISKO</string>
+    <string name="passwordRule">minimum 8 znaków</string>
+    <string name="create_account">Utwórz konto</string>
+    <string name="register_notice1">Rejestrując się, akceptujesz</string>
 </resources>
