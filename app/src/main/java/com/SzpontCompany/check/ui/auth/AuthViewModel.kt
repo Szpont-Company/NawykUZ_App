@@ -1,7 +1,7 @@
 package com.SzpontCompany.check.ui.auth
 
 import android.content.Context
-import androidx.browser.R
+import android.util.Log
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import androidx.lifecycle.ViewModel
@@ -23,6 +23,7 @@ class AuthViewModel : ViewModel() {
             val googleIdOption = GetGoogleIdOption.Builder()
                 .setServerClientId("919945083217-onoqped8qp5v39cp18eth082qd6supbt.apps.googleusercontent.com")
                 .setFilterByAuthorizedAccounts(false)
+                .setAutoSelectEnabled(false)
                 .build()
 
             val request = GetCredentialRequest.Builder()
@@ -39,6 +40,7 @@ class AuthViewModel : ViewModel() {
 
             Result.success(authResult.user)
         } catch (e: Exception) {
+            Log.e("GoogleSignIn", "Error: ${e::class.simpleName} - ${e.message}")
             Result.failure(e)
         }
     }

@@ -10,9 +10,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.SzpontCompany.check.ui.auth.LoginScreen
+import com.SzpontCompany.check.ui.theme.Cactus
 import com.SzpontCompany.check.ui.theme.CheckTheme
+import com.SzpontCompany.check.ui.theme.Coral
+import com.SzpontCompany.check.ui.theme.Indigo
 import com.SzpontCompany.check.ui.theme.Mint
-import com.SzpontCompany.check.ui.theme.Violet
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -21,7 +24,7 @@ class MainActivity : ComponentActivity() {
             statusBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT)
         )
         setContent {
-            CheckTheme(darkTheme = true, accent = Mint) {
+            CheckTheme(darkTheme = true, accent = Coral) {
                 LoginScreen()
             }
         }

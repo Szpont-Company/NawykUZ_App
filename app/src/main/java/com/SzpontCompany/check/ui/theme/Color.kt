@@ -13,13 +13,13 @@ val Pink40 = Color(0xFF7D5260)
 // Preset colors
 
 val Mint = Color(0xFF1d9e75)
-val Violet = Color(0xFF7F77DD)
+val Indigo = Color(0xFF7F77DD)
 val Coral = Color(0xFFD85A30)
-val Blue = Color(0xFF378ADD)
-val Pink = Color(0xFFD4537E)
-val Green = Color(0xFF639922)
+val Sky = Color(0xFF378ADD)
+val Rose = Color(0xFFD4537E)
+val Cactus = Color(0xFF639922)
 val Amber = Color(0xFFBA7517)
-val Red = Color(0xFFE24B4A)
+val Crimson = Color(0xFFE24B4A)
 
 // Background colors
 

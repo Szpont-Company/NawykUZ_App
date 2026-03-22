@@ -5,13 +5,11 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,8 +18,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -44,10 +40,30 @@ import com.SzpontCompany.check.ui.theme.CheckTheme
 import com.SzpontCompany.check.ui.theme.Mint
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.SzpontCompany.check.ui.theme.Amber
+import com.SzpontCompany.check.ui.theme.Cactus
+import com.SzpontCompany.check.ui.theme.Coral
+import com.SzpontCompany.check.ui.theme.Crimson
+import com.SzpontCompany.check.ui.theme.Indigo
+import com.SzpontCompany.check.ui.theme.Rose
+import com.SzpontCompany.check.ui.theme.Sky
+
+@Composable
+fun getLogoForAccent(accent: Color): Int {
+    return when (accent) {
+        Mint -> R.drawable.logo_mint
+        Indigo -> R.drawable.logo_indigo
+        Coral -> R.drawable.logo_coral
+        Sky -> R.drawable.logo_sky
+        Rose -> R.drawable.logo_rose
+        Cactus -> R.drawable.logo_cactus
+        Amber -> R.drawable.logo_amber
+        Crimson -> R.drawable.logo_crimson
+        else -> R.drawable.logo_mint
+    }
+}
 
 @Composable
 fun LoginScreen(viewModel: AuthViewModel = viewModel()) {
@@ -58,6 +74,7 @@ fun LoginScreen(viewModel: AuthViewModel = viewModel()) {
     var password by remember { mutableStateOf("") }
 
     val scope = rememberCoroutineScope()
+    val accent = MaterialTheme.colorScheme.primary
 
     fun onGoogleClick() {
         scope.launch {
@@ -81,14 +98,15 @@ fun LoginScreen(viewModel: AuthViewModel = viewModel()) {
         Box(
             modifier = Modifier
                 .size(72.dp)
-                .clip(RoundedCornerShape(20.dp)),
+                .clip(RoundedCornerShape(20.dp))
+                .background(MaterialTheme.colorScheme.primary),
             contentAlignment = Alignment.Center
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.logo),
+            Icon(
+                painter = painterResource(id = getLogoForAccent(accent)),
                 contentDescription = null,
                 modifier = Modifier.size(72.dp),
-                contentScale = ContentScale.Fit
+                tint = Color.Unspecified
             )
         }
         Spacer(modifier = Modifier.height(16.dp))
