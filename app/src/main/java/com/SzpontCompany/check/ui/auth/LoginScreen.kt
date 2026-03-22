@@ -1,16 +1,17 @@
 package com.SzpontCompany.check.ui.auth
 
+import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,23 +19,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Login
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -45,23 +34,41 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.SzpontCompany.check.R
 import com.SzpontCompany.check.ui.theme.CheckTheme
 import com.SzpontCompany.check.ui.theme.Mint
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
-fun LoginScreen() {
+fun LoginScreen(viewModel: AuthViewModel = viewModel()) {
+    val context = LocalContext.current
     var selectedTab by remember { mutableStateOf(0) }
-    var name by remember { mutableStateOf("")}
-    var email by remember { mutableStateOf("")}
-    var password by remember { mutableStateOf("")}
+    var name by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+
+    val scope = rememberCoroutineScope()
+
+    fun onGoogleClick() {
+        scope.launch {
+            val res = viewModel.signInWithGoogle(context)
+            res.onSuccess { user ->
+                Log.d("Auth", "Zalogowano: ${user?.displayName}")
+            }.onFailure { error ->
+                Log.e("Auth", "Błąd: ${error.message}")
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -74,15 +81,14 @@ fun LoginScreen() {
         Box(
             modifier = Modifier
                 .size(72.dp)
-                .clip(RoundedCornerShape(20.dp))
-                .background(MaterialTheme.colorScheme.primary),
+                .clip(RoundedCornerShape(20.dp)),
             contentAlignment = Alignment.Center
         ) {
-            Icon(
-                imageVector = Icons.Default.Check,
+            Image(
+                painter = painterResource(id = R.drawable.logo),
                 contentDescription = null,
-                tint = Color.White,
-                modifier = Modifier.size(32.dp)
+                modifier = Modifier.size(72.dp),
+                contentScale = ContentScale.Fit
             )
         }
         Spacer(modifier = Modifier.height(16.dp))
@@ -151,14 +157,21 @@ fun LoginScreen() {
         ) { tab ->
             Column(modifier = Modifier.fillMaxWidth()) {
                 when (tab) {
-                    0 -> LogInForm(email, password, onEmailChange = {email = it}, onPasswordChange = {password = it}, onLogInClick = {}, onForgotPasswordClick = {}, onGoogleLogInClick = {})
-                    1 -> RegisterForm(name, email, password, onNameChange = {name = it}, onEmailChange = {email = it}, onPasswordChange = {password = it}, onRegisterClick = {}, onGoogleRegisterClick = {})
+                    0 -> LogInForm(
+                        email, password, onEmailChange = {email = it}, onPasswordChange = {password = it},
+                        onLogInClick = {}, onForgotPasswordClick = {}, onGoogleLogInClick = {
+                            onGoogleClick()
+                        })
+                    1 -> RegisterForm(name, email, password, onNameChange = {name = it}, onEmailChange = {email = it}, onPasswordChange = {password = it},
+                        onRegisterClick = {}, onGoogleRegisterClick = {
+                            onGoogleClick()
+                        })
                 }
             }
-
         }
     }
 }
+
 
 @Composable
 @Preview(showBackground = true)

@@ -12,6 +12,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.SzpontCompany.check.ui.auth.LoginScreen
 import com.SzpontCompany.check.ui.theme.CheckTheme
 import com.SzpontCompany.check.ui.theme.Mint
+import com.SzpontCompany.check.ui.theme.Violet
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

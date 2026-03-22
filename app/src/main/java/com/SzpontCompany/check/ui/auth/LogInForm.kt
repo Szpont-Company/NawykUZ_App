@@ -115,7 +115,7 @@ fun LogInForm(
     )
     Spacer(modifier = Modifier.height(24.dp))
     Button(
-        onClick = { },
+        onClick = { onLogInClick() },
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
@@ -147,7 +147,7 @@ fun LogInForm(
     }
     Spacer(modifier = Modifier.height(8.dp))
     Button(
-        onClick = { },
+        onClick = { onGoogleLogInClick() },
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),

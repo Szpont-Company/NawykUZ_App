@@ -1,11 +1,9 @@
 package com.SzpontCompany.check.ui.auth
 
-import android.widget.Space
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -54,6 +52,7 @@ fun RegisterForm(
     onGoogleRegisterClick: () -> Unit
 ) {
     var visible by remember { mutableStateOf(false) }
+
 
     Text(
         text = stringResource(R.string.register_name),
@@ -161,7 +160,7 @@ fun RegisterForm(
     }
     Spacer(modifier = Modifier.height(16.dp))
     Button(
-        onClick = { },
+        onClick = { onRegisterClick() },
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
@@ -193,7 +192,7 @@ fun RegisterForm(
     }
     Spacer(modifier = Modifier.height(8.dp))
     Button(
-        onClick = { },
+        onClick = { onGoogleRegisterClick() },
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
