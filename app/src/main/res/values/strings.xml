@@ -15,5 +15,6 @@
     <string name="register_name">IMIĘ I NAZWISKO</string>
     <string name="passwordRule">minimum 8 znaków</string>
     <string name="create_account">Utwórz konto</string>
-    <string name="register_notice1">Rejestrując się, akceptujesz</string>
+    <string name="register_notice1">"Rejestrując się, akceptujesz "</string>
+    <string name="mailHint">twoj@email.com</string>
 </resources>

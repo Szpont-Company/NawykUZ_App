@@ -62,7 +62,7 @@ fun LogInForm(
     OutlinedTextField(
         value = email,
         onValueChange = {onEmailChange(it)},
-        placeholder = {Text("twoj@email.com")},
+        placeholder = {Text(stringResource(R.string.mailHint))},
         shape = RoundedCornerShape(12.dp),
         colors = OutlinedTextFieldDefaults.colors(
             unfocusedContainerColor = MaterialTheme.colorScheme.secondary,
