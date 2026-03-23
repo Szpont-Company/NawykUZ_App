@@ -26,6 +26,7 @@ fun buildColorScheme(accent: Color, darkTheme: Boolean) : ColorScheme {
     } else {
         lightColorScheme(
             primary = accent,
+            secondary = Color(0xFFf4f4f0),
             background = BackgroundLight,
             surface = SurfaceLight,
             onPrimary = Color.White,
