@@ -39,6 +39,7 @@ import com.SzpontCompany.check.ui.theme.Mint
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.res.painterResource
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.SzpontCompany.check.ui.theme.Amber
 import com.SzpontCompany.check.ui.theme.Cactus
@@ -74,6 +75,10 @@ fun LoginScreen(viewModel: AuthViewModel = viewModel()) {
     val scope = rememberCoroutineScope()
     val accent = MaterialTheme.colorScheme.primary
 
+    val recaptchaToken by viewModel.recaptchaToken.collectAsStateWithLifecycle()
+    val captchaVerified = recaptchaToken != null
+
+
     fun onGoogleClick() {
         scope.launch {
             val res = viewModel.signInWithGoogle(context)
@@ -92,7 +97,7 @@ fun LoginScreen(viewModel: AuthViewModel = viewModel()) {
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Spacer(modifier = Modifier.height(96.dp))
+        Spacer(modifier = Modifier.height(72.dp))
         Box(
             modifier = Modifier
                 .size(72.dp)
@@ -171,7 +176,9 @@ fun LoginScreen(viewModel: AuthViewModel = viewModel()) {
                 fadeIn() togetherWith fadeOut()
             }
         ) { tab ->
-            Column(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier
+                .fillMaxWidth()
+            ) {
                 when (tab) {
                     0 -> LogInForm(
                         email, password, onEmailChange = {email = it}, onPasswordChange = {password = it},
@@ -181,6 +188,8 @@ fun LoginScreen(viewModel: AuthViewModel = viewModel()) {
                     1 -> RegisterForm(name, email, password, onNameChange = {name = it}, onEmailChange = {email = it}, onPasswordChange = {password = it},
                         onRegisterClick = {}, onGoogleRegisterClick = {
                             onGoogleClick()
+                        }, captchaVerified = captchaVerified, onCaptchaClick = {
+                            viewModel.executeCaptcha()
                         })
                 }
             }

@@ -1,9 +1,12 @@
 package com.SzpontCompany.check.ui.auth
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -31,7 +34,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -39,6 +41,68 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.SzpontCompany.check.R
+
+enum class PwdStrength {
+    EMPTY, WEAK, MEDIUM , STRONG
+}
+
+fun evaluatePwdStrength(pwd: String): PwdStrength {
+    if(pwd.isEmpty()) return PwdStrength.EMPTY
+
+    var strengthScore = 0
+    if(pwd.length >= 8) strengthScore++
+    if(pwd.any {it.isUpperCase()}) strengthScore++
+    if(pwd.any {it.isDigit()}) strengthScore++
+    if(pwd.any { !it.isLetterOrDigit() }) strengthScore++
+
+    return when {
+        strengthScore <= 1 -> PwdStrength.WEAK
+        strengthScore <= 3 -> PwdStrength.MEDIUM
+        else -> PwdStrength.STRONG
+    }
+}
+
+@Composable
+fun PasswordStrengthIndicator(password: String, modifier: Modifier = Modifier) {
+    val strength = evaluatePwdStrength(password)
+
+    val activeColor = when (strength) {
+        PwdStrength.EMPTY -> Color.Transparent
+        PwdStrength.WEAK -> MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
+        PwdStrength.MEDIUM -> MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
+        PwdStrength.STRONG -> MaterialTheme.colorScheme.primary
+    }
+
+    val activePanels = when (strength) {
+        PwdStrength.EMPTY -> 0
+        PwdStrength.WEAK -> 2
+        PwdStrength.MEDIUM -> 3
+        PwdStrength.STRONG -> 4
+    }
+
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        repeat(4) {index ->
+            val isActive = index < activePanels
+
+            val color by animateColorAsState(
+                targetValue = if(isActive) activeColor else MaterialTheme.colorScheme.surfaceVariant,
+                animationSpec = tween(durationMillis = 300),
+                label = "panel_${index}_color"
+            )
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(6.dp)
+                    .background(color, RoundedCornerShape(3.dp))
+
+            )
+        }
+    }
+}
+
 
 @Composable
 fun RegisterForm(
@@ -49,7 +113,9 @@ fun RegisterForm(
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
     onRegisterClick: () -> Unit,
-    onGoogleRegisterClick: () -> Unit
+    onGoogleRegisterClick: () -> Unit,
+    captchaVerified: Boolean,
+    onCaptchaClick: () -> Unit
 ) {
     var visible by remember { mutableStateOf(false) }
 
@@ -130,35 +196,18 @@ fun RegisterForm(
         singleLine = true,
         modifier = Modifier.fillMaxWidth()
     )
-    // todo: wizualizacja sily hasla
     Spacer(modifier = Modifier.height(2.dp))
-    Row(
+    PasswordStrengthIndicator(
+        password = password,
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(24))
-            .background(MaterialTheme.colorScheme.primary),
-        horizontalArrangement = Arrangement.Center
-    ) {
-        HorizontalDivider(
-            modifier = Modifier.fillMaxWidth()
-        )
-    }
+            .padding(top=6.dp)
+    )
     Spacer(modifier = Modifier.height(16.dp))
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(22))
-            .background(MaterialTheme.colorScheme.background),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = "Captcha",
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.onBackground,
-        )
-    }
-    Spacer(modifier = Modifier.height(16.dp))
+    CaptchaBox(
+        verified = captchaVerified,
+        onCaptchaClick = { onCaptchaClick() }
+    )
     Button(
         onClick = { onRegisterClick() },
         modifier = Modifier
