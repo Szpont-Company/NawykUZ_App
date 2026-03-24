@@ -8,8 +8,11 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.SideEffect
 import com.SzpontCompany.check.ui.auth.LoginScreen
+import com.SzpontCompany.check.ui.dashboard.DashboardScreen
 import com.SzpontCompany.check.ui.theme.Cactus
 import com.SzpontCompany.check.ui.theme.CheckTheme
+import com.SzpontCompany.check.ui.theme.Rose
+import com.SzpontCompany.check.ui.theme.Sky
 
 
 class MainActivity : ComponentActivity() {
@@ -29,8 +32,9 @@ class MainActivity : ComponentActivity() {
         }
 
 
-            CheckTheme(darkTheme = darkTheme, accent = Cactus) {
-                LoginScreen()
+            CheckTheme(darkTheme = darkTheme, accent = Sky) {
+                DashboardScreen()
+                //LoginScreen()
             }
         }
     }
