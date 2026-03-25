@@ -1,48 +1,51 @@
 package com.SzpontCompany.check
 
+import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import com.SzpontCompany.check.ui.auth.LoginScreen
 import com.SzpontCompany.check.ui.theme.CheckTheme
-import com.SzpontCompany.check.ui.theme.Mint
+import com.SzpontCompany.check.ui.auth.AnimatedSplashScreen
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import com.SzpontCompany.check.ui.theme.Crimson
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+
         setContent {
-            CheckTheme(darkTheme = true, accent = Mint) {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
+            val darkTheme = true
+            SideEffect {
+                enableEdgeToEdge(
+                    statusBarStyle = if (darkTheme) {
+                        SystemBarStyle.dark(Color.TRANSPARENT)
+                    } else {
+                        SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT)
+                    }
+                )
+            }
+
+            var showSplash by remember { mutableStateOf(true) }
+
+            CheckTheme(darkTheme = darkTheme, accent = Crimson) {
+                if (showSplash) {
+                    AnimatedSplashScreen(
+                        onSplashFinished = {
+                            showSplash = false
+                        }
                     )
+                } else {
+                    LoginScreen()
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    CheckTheme(darkTheme = true, accent = Mint) {
-        Greeting("Android")
     }
 }

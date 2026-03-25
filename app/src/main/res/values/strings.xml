@@ -1,3 +1,23 @@
 <resources>
     <string name="app_name">Check.</string>
+    <string name="welcome_sentence">Buduj nawyki. Wygrywaj każdy dzień.</string>
+    <string name="login">Logowanie</string>
+    <string name="register">Rejestracja</string>
+    <string name="password">HASŁO</string>
+    <string name="forgot_password">Zapomniałem hasła</string>
+    <string name="login_btn">Zaloguj się</string>
+    <string name="login_google">Kontynuuj przez Google</string>
+    <string name="continue_with">lub kontynuuj przez</string>
+    <string name="login_privacy_1">"Logując się, akceptujesz"</string>
+    <string name="login_privacy_2">"regulamin"</string>
+    <string name="login_privacy_3">"i"</string>
+    <string name="login_privacy_4">politykę prywatności</string>
+    <string name="register_name">IMIĘ I NAZWISKO</string>
+    <string name="password_rule">minimum 8 znaków</string>
+    <string name="create_account">Utwórz konto</string>
+    <string name="register_notice1">"Rejestrując się, akceptujesz"</string>
+    <string name="mail_hint">twoj@email.com</string>
+    <string name="mail_reset_prompt">Wysłano link do resetu hasła. Sprawdź skrzynkę odbiorczą</string>
+    <string name="captcha_message">Nie jestem robotem</string>
+    <string name="captcha_privacy">Prywatność • Warunki</string>
 </resources>

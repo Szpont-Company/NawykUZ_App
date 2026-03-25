@@ -13,14 +13,28 @@ fun buildColorScheme(accent: Color, darkTheme: Boolean) : ColorScheme {
     return if (darkTheme) {
         darkColorScheme(
             primary = accent,
+            secondary = Color(0xFF30302e),
             background = BackgroundDark,
             surface = SurfaceDark,
+            onPrimary = Color.White,
+            onBackground = Color(0xFFE8E8E8),
+            onSurface = Color(0xFFE8E8E8),
+            onSurfaceVariant = Color(0xFF8A8A8A),  // labele, placeholdery
+            surfaceVariant = Color(0xFF2a2a2e),    // np. tło tab switcha
+            outline = Color(0xFF3a3a3e),           // obramowania TextField
         )
     } else {
         lightColorScheme(
             primary = accent,
+            secondary = Color(0xFFf4f4f0),
             background = BackgroundLight,
             surface = SurfaceLight,
+            onPrimary = Color.White,
+            onBackground = Color(0xFF111112),
+            onSurface = Color(0xFF111112),
+            onSurfaceVariant = Color(0xFF6B6B6B),
+            surfaceVariant = Color(0xFFE8E8E4),
+            outline = Color(0xFFCCCCC8),
         )
     }
 }

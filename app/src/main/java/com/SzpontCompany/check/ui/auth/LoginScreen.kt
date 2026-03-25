@@ -1,0 +1,268 @@
+package com.SzpontCompany.check.ui.auth
+
+import android.util.Log
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.Spring
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import com.SzpontCompany.check.R
+import com.SzpontCompany.check.ui.theme.Mint
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.res.painterResource
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.SzpontCompany.check.ui.theme.Amber
+import com.SzpontCompany.check.ui.theme.Cactus
+import com.SzpontCompany.check.ui.theme.Coral
+import com.SzpontCompany.check.ui.theme.Crimson
+import com.SzpontCompany.check.ui.theme.Indigo
+import com.SzpontCompany.check.ui.theme.Rose
+import com.SzpontCompany.check.ui.theme.Sky
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
+
+fun getLogoForAccent(accent: Color): Int {
+    return when (accent) {
+        Mint -> R.drawable.logo_mint
+        Indigo -> R.drawable.logo_indigo
+        Coral -> R.drawable.logo_coral
+        Sky -> R.drawable.logo_sky
+        Rose -> R.drawable.logo_rose
+        Cactus -> R.drawable.logo_cactus
+        Amber -> R.drawable.logo_amber
+        Crimson -> R.drawable.logo_crimson
+        else -> R.drawable.logo_mint
+    }
+}
+
+@Composable
+fun LoginScreen(viewModel: AuthViewModel = viewModel()) {
+    val context = LocalContext.current
+    var selectedTab by remember { mutableStateOf(0) }
+    var name by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+
+    val scope = rememberCoroutineScope()
+    val accent = MaterialTheme.colorScheme.primary
+
+    val recaptchaToken by viewModel.recaptchaToken.collectAsStateWithLifecycle()
+    val captchaVerified = recaptchaToken != null
+
+
+    fun onGoogleClick() {
+        scope.launch {
+            val res = viewModel.signInWithGoogle(context)
+            res.onSuccess { user ->
+                Log.d("Auth", "Zalogowano: ${user?.displayName}")
+            }.onFailure { error ->
+                Log.e("Auth", "Błąd: ${error.message}")
+            }
+        }
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .imePadding()
+            .verticalScroll(rememberScrollState())
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Spacer(modifier = Modifier.height(72.dp))
+        Box(
+            modifier = Modifier
+                .size(72.dp)
+                .clip(RoundedCornerShape(20.dp))
+                .background(MaterialTheme.colorScheme.primary),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                painter = painterResource(id = getLogoForAccent(accent)),
+                contentDescription = null,
+                modifier = Modifier.size(72.dp),
+                tint = Color.Unspecified
+            )
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = "Check",
+                style = MaterialTheme.typography.headlineLarge,
+                color = MaterialTheme.colorScheme.onBackground,
+                textAlign = TextAlign.Center,
+            )
+            Text(
+                text = ".",
+                style = MaterialTheme.typography.headlineLarge,
+                color = MaterialTheme.colorScheme.primary,
+            )
+        }
+
+        Text(
+            text = stringResource(R.string.welcome_sentence),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 8.dp, bottom = 24.dp),
+            textAlign = TextAlign.Center,
+        )
+
+        val tabTitles = listOf(stringResource(R.string.login), stringResource((R.string.register)))
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(24))
+                .background(MaterialTheme.colorScheme.surface)
+                .padding(vertical = 4.dp)
+        ) {
+
+            BoxWithConstraints(modifier = Modifier.matchParentSize()) {
+                val tabWidth = maxWidth / 2
+
+                val indicatorOffset by animateDpAsState(
+                    targetValue = tabWidth * selectedTab,
+                    animationSpec = spring(stiffness = Spring.StiffnessLow),
+                    label = "indicator_offset"
+                )
+
+                Box(
+                    modifier = Modifier
+                        .offset(x = indicatorOffset)
+                        .width(tabWidth)
+                        .fillMaxHeight()
+                        .clip(RoundedCornerShape(24))
+                        .background(MaterialTheme.colorScheme.primary)
+                )
+            }
+
+
+            Row(modifier = Modifier.fillMaxWidth()) {
+                tabTitles.forEachIndexed { index, title ->
+
+                    val textColor by animateColorAsState(
+                        targetValue = if (selectedTab == index) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
+                        label = "text_color"
+                    )
+
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(24))
+                            .clickable { selectedTab = index }
+                            .padding(vertical = 8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = title,
+                            color = textColor,
+                        )
+                    }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        AnimatedContent(
+            targetState = selectedTab,
+            label = "auth_tab",
+            transitionSpec = {
+                if (targetState > initialState) {
+                    (slideInHorizontally { width -> width } + fadeIn()).togetherWith(
+                        slideOutHorizontally { width -> -width } + fadeOut()
+                    )
+                } else {
+                    (slideInHorizontally { width -> -width } + fadeIn()).togetherWith(
+                        slideOutHorizontally { width -> width } + fadeOut()
+                    )
+                }
+            }
+        ) { tab ->
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                when (tab) {
+                    0 -> LogInForm(
+                        email,
+                        password,
+                        onEmailChange = { email = it },
+                        onPasswordChange = { password = it },
+                        onLogInClick = { scope.launch {
+                            val res = viewModel.signInWithEmail(email.trim(), password)
+                        }},
+                        onForgotPasswordClick = { scope.launch { viewModel.resetPassword(email) } },
+                        onGoogleLogInClick = {
+                            onGoogleClick()
+                        })
+
+                    1 -> RegisterForm(
+                        name,
+                        email,
+                        password,
+                        onNameChange = { name = it },
+                        onEmailChange = { email = it },
+                        onPasswordChange = { password = it },
+                        onRegisterClick = { scope.launch {
+                            val res = viewModel.signUpWithEmail(name, email.trim(), password)
+                        }},
+                        onGoogleRegisterClick = {
+                            onGoogleClick()
+                        },
+                        captchaVerified = captchaVerified,
+                        onCaptchaClick = {
+                            viewModel.executeCaptcha()
+                        })
+                }
+            }
+        }
+    }
+}
