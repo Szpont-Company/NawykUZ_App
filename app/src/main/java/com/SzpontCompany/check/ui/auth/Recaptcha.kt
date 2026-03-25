@@ -1,5 +1,9 @@
 package com.SzpontCompany.check.ui.auth
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -17,9 +21,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -32,6 +38,25 @@ fun CaptchaBox(
     onCaptchaClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val checkScale by animateFloatAsState(
+        targetValue = if (verified) 1f else 0f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "check_scale"
+    )
+
+    val boxColor by animateColorAsState(
+        targetValue = if (verified) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.background,
+        label = "box_color"
+    )
+
+    val borderColor by animateColorAsState(
+        targetValue = if (verified) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+        label = "border_color"
+    )
+
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -51,24 +76,18 @@ fun CaptchaBox(
                 modifier = Modifier
                     .size(24.dp)
                     .clip(RoundedCornerShape(4.dp))
-                    .background(
-                        if (verified) MaterialTheme.colorScheme.primary
-                        else MaterialTheme.colorScheme.background
-                    )
-                    .border(
-                        2.dp,
-                        if (verified) MaterialTheme.colorScheme.primary
-                        else MaterialTheme.colorScheme.onSurfaceVariant,
-                        RoundedCornerShape(4.dp)
-                    ),
+                    .background(boxColor)
+                    .border(2.dp, borderColor, RoundedCornerShape(4.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                if (verified) {
+                if (checkScale > 0f) {
                     Icon(
                         imageVector = Icons.Default.Check,
                         contentDescription = null,
                         tint = Color.White,
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier
+                            .size(16.dp)
+                            .scale(checkScale)
                     )
                 }
             }
