@@ -98,9 +98,9 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     suspend fun signUpWithEmail(name: String, email: String, password: String): Result<FirebaseUser> {
         return try {
             val authResult = auth.createUserWithEmailAndPassword(email, password).await()
-            authResult.user!!.sendEmailVerification()
 
             val user = authResult.user ?: throw Exception("User creation failed")
+            user.sendEmailVerification().await()
 
             val userData = mapOf(
                 "uid" to user.uid,

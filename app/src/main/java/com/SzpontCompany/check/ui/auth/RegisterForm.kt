@@ -1,5 +1,6 @@
 package com.SzpontCompany.check.ui.auth
 
+import android.widget.Toast
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
@@ -34,6 +35,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -117,6 +119,7 @@ fun RegisterForm(
     onCaptchaClick: () -> Unit
 ) {
     var visible by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
 
     Text(
@@ -175,7 +178,7 @@ fun RegisterForm(
     OutlinedTextField(
         value = password,
         onValueChange = {onPasswordChange(it)},
-        placeholder = {Text(stringResource(R.string.passwordRule))},
+        placeholder = {Text(stringResource(R.string.password_rule))},
         shape = RoundedCornerShape(12.dp),
         colors = OutlinedTextFieldDefaults.colors(
             unfocusedContainerColor = MaterialTheme.colorScheme.secondary,
@@ -208,7 +211,13 @@ fun RegisterForm(
         onCaptchaClick = { onCaptchaClick() }
     )
     Button(
-        onClick = { onRegisterClick() },
+        onClick = {
+            if(captchaVerified) {
+                onRegisterClick()
+            } else {
+                Toast.makeText(context, "Please verify the captcha", Toast.LENGTH_SHORT).show()
+            }
+        },
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
@@ -231,7 +240,7 @@ fun RegisterForm(
     ) {
         HorizontalDivider(modifier = Modifier.weight(1f))
         Text(
-            text = stringResource(R.string.continueWith),
+            text = stringResource(R.string.continue_with),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(horizontal = 8.dp)
@@ -259,7 +268,7 @@ fun RegisterForm(
         )
         Spacer(modifier = Modifier.width(12.dp))
         Text(
-            text = stringResource(R.string.LogInGoogle),
+            text = stringResource(R.string.login_google),
             style = MaterialTheme.typography.bodyLarge
         )
     }

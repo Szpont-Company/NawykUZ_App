@@ -2,20 +2,23 @@
 <resources>
     <string name="app_name">Check.</string>
     <string name="welcome_sentence">Build habits. Win every day.</string>
-    <string name="LogIn">Log in</string>
-    <string name="Register">Register</string>
+    <string name="login">Log in</string>
+    <string name="register">Register</string>
     <string name="password">PASSWORD</string>
-    <string name="forgotPassword">Forgot password</string>
-    <string name="LogInBtn">Log in</string>
-    <string name="LogInGoogle">Continue with Google</string>
-    <string name="continueWith">or continue with</string>
+    <string name="forgot_password">Forgot password</string>
+    <string name="login_btn">Log in</string>
+    <string name="login_google">Continue with Google</string>
+    <string name="continue_with">or continue with</string>
     <string name="login_privacy_1">By logging in you accept our</string>
     <string name="login_privacy_2">ToS</string>
     <string name="login_privacy_3">and</string>
     <string name="login_privacy_4">privacy policy</string>
     <string name="register_name">NAME AND LAST NAME</string>
-    <string name="passwordRule">min. 8 characters</string>
+    <string name="password_rule">min. 8 characters</string>
     <string name="create_account">Create account</string>
     <string name="register_notice1">By creating account you accept our</string>
-    <string name="mailHint">your@email.com</string>
+    <string name="mail_hint">your@email.com</string>
+    <string name="mail_reset_prompt">Password change link sent. Please check your email</string>
+    <string name="captcha_message">I\'m not a robot</string>
+    <string name="captcha_privacy">Privacy • Terms</string>
 </resources>

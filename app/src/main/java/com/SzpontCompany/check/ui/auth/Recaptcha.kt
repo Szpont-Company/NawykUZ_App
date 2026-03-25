@@ -28,6 +28,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.SzpontCompany.check.R
@@ -93,7 +94,7 @@ fun CaptchaBox(
             }
 
             Text(
-                text = "Nie jestem robotem",
+                text = stringResource(R.string.captcha_message),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onBackground
             )
@@ -109,7 +110,7 @@ fun CaptchaBox(
                 tint = Color.Unspecified
             )
             Text(
-                text = "Prywatność • Warunki",
+                text = stringResource(R.string.captcha_privacy),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 7.sp

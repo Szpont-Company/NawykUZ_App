@@ -62,7 +62,6 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
 
-@Composable
 fun getLogoForAccent(accent: Color): Int {
     return when (accent) {
         Mint -> R.drawable.logo_mint
@@ -155,7 +154,7 @@ fun LoginScreen(viewModel: AuthViewModel = viewModel()) {
             textAlign = TextAlign.Center,
         )
 
-        val tabTitles = listOf(stringResource(R.string.LogIn), stringResource((R.string.Register)))
+        val tabTitles = listOf(stringResource(R.string.login), stringResource((R.string.register)))
 
         Box(
             modifier = Modifier
