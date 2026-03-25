@@ -1,7 +1,6 @@
 package com.SzpontCompany.check.ui.auth
 
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.fadeIn

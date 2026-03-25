@@ -3,13 +3,11 @@ package com.SzpontCompany.check.ui.auth
 import android.app.Application
 import android.content.Context
 import android.util.Log
-import android.widget.Toast
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.exceptions.NoCredentialException
 import androidx.lifecycle.AndroidViewModel
-import com.SzpontCompany.check.R
+import androidx.lifecycle.viewModelScope
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
@@ -20,14 +18,18 @@ import com.google.android.recaptcha.RecaptchaException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
-import com.google.firebase.auth.userProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
@@ -127,6 +129,23 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
            Result.failure(e)
        }
     }
+
+    fun getUserAuthState(): Flow<FirebaseUser?> = callbackFlow {
+        val authStateListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
+            trySend(auth.currentUser)
+        }
+
+        auth.addAuthStateListener(authStateListener)
+
+        awaitClose { auth.removeAuthStateListener(authStateListener) }
+        }
+
+    val currentUser: StateFlow<FirebaseUser?> = getUserAuthState()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = auth.currentUser
+        )
 
     private fun initializeRecaptcha() {
         recaptchaScope.launch {
