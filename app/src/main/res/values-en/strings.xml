@@ -21,4 +21,18 @@
     <string name="mail_reset_prompt">Password change link sent. Please check your email</string>
     <string name="captcha_message">I\'m not a robot</string>
     <string name="captcha_privacy">Privacy • Terms</string>
+
+    <!-- Profile Card -->
+    <string name="profile_title">Profile</string>
+    <string name="profile_level">Level</string>
+    <string name="profile_habits">Habits</string>
+    <string name="profile_streak_days">Streak days</string>
+    <string name="profile_coins">Coins</string>
+    <string name="profile_battles_won">Battles won</string>
+    <string name="profile_effectiveness">Effectiveness</string>
+    <string name="profile_friends">Friends</string>
+    <string name="profile_settings_header">SETTINGS</string>
+    <string name="profile_edit">Edit profile</string>
+    <string name="profile_settings">Settings</string>
+    <string name="profile_logout">Log out</string>
 </resources>

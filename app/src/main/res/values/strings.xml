@@ -20,4 +20,18 @@
     <string name="mail_reset_prompt">Wysłano link do resetu hasła. Sprawdź skrzynkę odbiorczą</string>
     <string name="captcha_message">Nie jestem robotem</string>
     <string name="captcha_privacy">Prywatność • Warunki</string>
+
+    <!-- PROFILE CARD-->
+    <string name="profile_title">Profil</string>
+    <string name="profile_level">Poziom</string>
+    <string name="profile_habits">Nawyki</string>
+    <string name="profile_streak_days">Streak dni</string>
+    <string name="profile_coins">Monety</string>
+    <string name="profile_battles_won">Battle wygrane</string>
+    <string name="profile_effectiveness">Skuteczność</string>
+    <string name="profile_friends">Znajomi</string>
+    <string name="profile_settings_header">USTAWIENIA</string>
+    <string name="profile_edit">Edytuj profil</string>
+    <string name="profile_settings">Ustawienia</string>
+    <string name="profile_logout">Wyloguj się</string>
 </resources>
