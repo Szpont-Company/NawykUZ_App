@@ -203,7 +203,7 @@ fun RegisterForm(
             .fillMaxWidth()
             .padding(top=6.dp)
     )
-    Spacer(modifier = Modifier.height(16.dp))
+    Spacer(modifier = Modifier.height(8.dp))
     CaptchaBox(
         verified = captchaVerified,
         onCaptchaClick = { onCaptchaClick() }
@@ -265,32 +265,10 @@ fun RegisterForm(
         )
     }
     Spacer(modifier = Modifier.height(16.dp))
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Text(
-            text = stringResource(R.string.register_notice1),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+
+        TermsText(
+            onTosClick = { /*TODO*/ },
+            onPrivacyClick = { /*TODO*/ },
+            type = TermsType.SIGN_UP
         )
-        Text(
-            text = stringResource(R.string.login_privacy_2),
-            color = MaterialTheme.colorScheme.primary,
-            style = MaterialTheme.typography.labelMedium,
-            modifier = Modifier.clickable { }
-        )
-        Text(
-            text = stringResource(R.string.login_privacy_3),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Text(
-            text = stringResource(R.string.login_privacy_4),
-            color = MaterialTheme.colorScheme.primary,
-            style = MaterialTheme.typography.labelMedium,
-            modifier = Modifier.clickable { }
-        )
-    }
 }

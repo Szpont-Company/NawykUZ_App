@@ -1,6 +1,7 @@
 package com.SzpontCompany.check.ui.auth
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.fadeIn
@@ -227,19 +228,39 @@ fun LoginScreen(viewModel: AuthViewModel = viewModel()) {
                 }
             }
         ) { tab ->
-            Column(modifier = Modifier
-                .fillMaxWidth()
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
             ) {
                 when (tab) {
                     0 -> LogInForm(
-                        email, password, onEmailChange = {email = it}, onPasswordChange = {password = it},
-                        onLogInClick = {}, onForgotPasswordClick = {}, onGoogleLogInClick = {
+                        email,
+                        password,
+                        onEmailChange = { email = it },
+                        onPasswordChange = { password = it },
+                        onLogInClick = { scope.launch {
+                            val res = viewModel.signInWithEmail(email.trim(), password)
+                        }},
+                        onForgotPasswordClick = { scope.launch { viewModel.resetPassword(email) } },
+                        onGoogleLogInClick = {
                             onGoogleClick()
                         })
-                    1 -> RegisterForm(name, email, password, onNameChange = {name = it}, onEmailChange = {email = it}, onPasswordChange = {password = it},
-                        onRegisterClick = {}, onGoogleRegisterClick = {
+
+                    1 -> RegisterForm(
+                        name,
+                        email,
+                        password,
+                        onNameChange = { name = it },
+                        onEmailChange = { email = it },
+                        onPasswordChange = { password = it },
+                        onRegisterClick = { scope.launch {
+                            val res = viewModel.signUpWithEmail(name, email.trim(), password)
+                        }},
+                        onGoogleRegisterClick = {
                             onGoogleClick()
-                        }, captchaVerified = captchaVerified, onCaptchaClick = {
+                        },
+                        captchaVerified = captchaVerified,
+                        onCaptchaClick = {
                             viewModel.executeCaptcha()
                         })
                 }

@@ -171,33 +171,11 @@ fun LogInForm(
         )
     }
     Spacer(modifier = Modifier.height(16.dp))
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Text(
-            text = stringResource(R.string.login_privacy_1),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Text(
-            text = stringResource(R.string.login_privacy_2),
-            color = MaterialTheme.colorScheme.primary,
-            style = MaterialTheme.typography.labelMedium,
-            modifier = Modifier.clickable { }
-        )
-        Text(
-            text = stringResource(R.string.login_privacy_3),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Text(
-            text = stringResource(R.string.login_privacy_4),
-            color = MaterialTheme.colorScheme.primary,
-            style = MaterialTheme.typography.labelMedium,
-            modifier = Modifier.clickable { }
-        )
-    }
+
+    TermsText(
+        onTosClick = { /*TODO*/ },
+        onPrivacyClick = { /*TODO*/ },
+        type = TermsType.LOGIN,
+    )
 }
 
