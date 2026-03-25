@@ -58,6 +58,9 @@ import com.SzpontCompany.check.ui.theme.Crimson
 import com.SzpontCompany.check.ui.theme.Indigo
 import com.SzpontCompany.check.ui.theme.Rose
 import com.SzpontCompany.check.ui.theme.Sky
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 
 @Composable
 fun getLogoForAccent(accent: Color): Int {
@@ -104,6 +107,8 @@ fun LoginScreen(viewModel: AuthViewModel = viewModel()) {
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
+            .imePadding()
+            .verticalScroll(rememberScrollState())
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
