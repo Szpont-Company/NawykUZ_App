@@ -10,7 +10,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.rounded.ArrowBackIosNew
+import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -57,26 +57,26 @@ fun SettingsScreen(
         LanguageSelector()
         Spacer(modifier = Modifier.height(24.dp))
 
-        // --- POWIADOMIENIA ---
+// --- POWIADOMIENIA ---
         SectionHeader(text = stringResource(R.string.settings_section_notifications))
         SettingsListGroup {
             SettingsRowChevron(
                 title = stringResource(R.string.settings_push_notifications),
                 subtitle = "Codziennie · 08:00",
-                iconRes = null, // TODO: Dodaj ikonę dzwonka w tle primary
+                icon = Icons.Rounded.Notifications,
                 onClick = { /* TODO */ }
             )
             HorizontalDivider(color = MaterialTheme.colorScheme.background, thickness = 2.dp)
             SettingsRowSwitch(
                 title = stringResource(R.string.settings_battle_notifications),
-                iconRes = null, // TODO: Dodaj ikonę "A"
+                icon = Icons.Rounded.FlashOn,
                 isChecked = true,
                 onCheckedChange = { /* TODO */ }
             )
             HorizontalDivider(color = MaterialTheme.colorScheme.background, thickness = 2.dp)
             SettingsRowSwitch(
                 title = stringResource(R.string.settings_events_challenges),
-                iconRes = null, // TODO: Dodaj ikonę kalendarza
+                icon = Icons.Rounded.Event,
                 isChecked = true,
                 onCheckedChange = { /* TODO */ }
             )
@@ -88,7 +88,7 @@ fun SettingsScreen(
         SettingsListGroup {
             SettingsRowSwitch(
                 title = stringResource(R.string.settings_step_counter),
-                iconRes = null,
+                icon = Icons.Rounded.DirectionsWalk,
                 isChecked = true,
                 onCheckedChange = { /* TODO */ }
             )
@@ -96,13 +96,13 @@ fun SettingsScreen(
             SettingsRowChevron(
                 title = stringResource(R.string.settings_daily_step_goal),
                 subtitle = "8 000 kroków",
-                iconRes = null,
+                icon = Icons.Rounded.Flag,
                 onClick = { /* TODO */ }
             )
             HorizontalDivider(color = MaterialTheme.colorScheme.background, thickness = 2.dp)
             SettingsRowSwitch(
                 title = stringResource(R.string.settings_friends_location),
-                iconRes = null,
+                icon = Icons.Rounded.LocationOn,
                 isChecked = true,
                 onCheckedChange = { /* TODO */ }
             )
@@ -115,14 +115,14 @@ fun SettingsScreen(
             SettingsRowChevron(
                 title = stringResource(R.string.settings_profile_privacy),
                 subtitle = "Publiczny",
-                iconRes = null,
+                icon = Icons.Rounded.Lock,
                 onClick = { /* TODO */ }
             )
             HorizontalDivider(color = MaterialTheme.colorScheme.background, thickness = 2.dp)
             SettingsRowChevron(
                 title = stringResource(R.string.settings_about_app),
                 subtitle = "Check. v1.0.0",
-                iconRes = null,
+                icon = Icons.Rounded.Info,
                 onClick = { /* TODO */ }
             )
         }
@@ -223,7 +223,8 @@ fun SettingsListGroup(content: @Composable ColumnScope.() -> Unit) {
 fun SettingsRowChevron(
     title: String,
     subtitle: String? = null,
-    iconRes: Int?,
+    icon: androidx.compose.ui.graphics.vector.ImageVector? = null,
+    iconColor: Color = MaterialTheme.colorScheme.primary,
     onClick: () -> Unit
 ) {
     Row(
@@ -233,7 +234,10 @@ fun SettingsRowChevron(
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // TODO: Miejsce na ikonę (np. dzwonek w tle)
+        if (icon != null) {
+            SettingsIcon(icon = icon, containerColor = iconColor)
+            Spacer(modifier = Modifier.width(16.dp))
+        }
         Column(modifier = Modifier.weight(1f)) {
             Text(text = title, color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Medium)
             if (subtitle != null) {
@@ -253,7 +257,8 @@ fun SettingsRowChevron(
 fun SettingsRowSwitch(
     title: String,
     subtitle: String? = "Włączone",
-    iconRes: Int?,
+    icon: androidx.compose.ui.graphics.vector.ImageVector? = null,
+    iconColor: Color = MaterialTheme.colorScheme.primary,
     isChecked: Boolean,
     onCheckedChange: (Boolean) -> Unit
 ) {
@@ -263,7 +268,11 @@ fun SettingsRowSwitch(
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // TODO: Miejsce na ikonę
+        if (icon != null) {
+            SettingsIcon(icon = icon, containerColor = iconColor)
+            Spacer(modifier = Modifier.width(16.dp))
+        }
+
         Column(modifier = Modifier.weight(1f)) {
             Text(text = title, color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Medium)
             if (subtitle != null) {
@@ -544,6 +553,28 @@ fun LanguageButton (
             color = textColor,
             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
             fontSize = 14.sp
+        )
+    }
+}
+
+@Composable
+fun SettingsIcon(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    containerColor: Color = MaterialTheme.colorScheme.primary,
+    tint: Color = Color.White
+) {
+    Box(
+        modifier = Modifier
+            .size(36.dp)
+            .clip(RoundedCornerShape(10.dp))
+            .background(containerColor),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+    	    tint = tint,
+            modifier = Modifier.size(20.dp)
         )
     }
 }
