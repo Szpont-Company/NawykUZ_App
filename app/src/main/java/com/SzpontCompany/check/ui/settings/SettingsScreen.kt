@@ -510,9 +510,10 @@ fun LanguageSelector() {
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.surface)
-            .padding(8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
+            .background(Color((0xFF151517)))
+            .padding(6.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         LanguageButton(
             text = "Polski",
@@ -520,7 +521,6 @@ fun LanguageSelector() {
             modifier = Modifier.weight(1f),
             onClick = { selectedLanguage = "Polski" }
         )
-        Spacer(modifier = Modifier.width(8.dp))
         LanguageButton(
             text = "English",
             isSelected = selectedLanguage == "English",
@@ -531,29 +531,48 @@ fun LanguageSelector() {
 }
 
 @Composable
-fun LanguageButton (
+fun LanguageButton(
     text: String,
     isSelected: Boolean,
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
-    val backgroundColor = if (isSelected) MaterialTheme.colorScheme.background else Color.Transparent
-    val textColor = if (isSelected) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onSurfaceVariant
+    val backgroundColor = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f) else Color.Transparent
+    val borderColor = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
+    val textColor = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+
+    val flag = when (text) {
+        "Polski" -> "🇵🇱"
+        "English" -> "🇺🇸"
+        else -> ""
+    }
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .clip(RoundedCornerShape(12.dp))
             .background(backgroundColor)
+            .border(1.5.dp, borderColor, RoundedCornerShape(12.dp))
             .clickable { onClick() }
-            .padding(vertical = 12.dp),
+            .padding(vertical = 12.dp, horizontal = 12.dp),
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = text,
-            color = textColor,
-            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-            fontSize = 14.sp
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = flag,
+                fontSize = 18.sp
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = text,
+                color = textColor,
+                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                fontSize = 14.sp
+            )
+        }
     }
 }
 
