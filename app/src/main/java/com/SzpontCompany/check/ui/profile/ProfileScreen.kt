@@ -34,7 +34,9 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 
 @Composable
-fun ProfileScreen() {
+fun ProfileScreen(
+    onSettingsClick: () -> Unit = {}
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -65,7 +67,8 @@ fun ProfileScreen() {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(bottom = 12.dp)
         )
-        SettingsSection()
+
+        SettingsSection(onSettingsClick = onSettingsClick)
 
         Spacer(modifier = Modifier.height(100.dp))
     }
@@ -250,7 +253,9 @@ fun StatCard(modifier: Modifier = Modifier, value: String, label: String, valueC
 }
 
 @Composable
-fun SettingsSection() {
+fun SettingsSection(
+    onSettingsClick: () -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -267,7 +272,7 @@ fun SettingsSection() {
             icon = Icons.Default.Settings,
             iconTint = MaterialTheme.colorScheme.onSurfaceVariant,
             title = stringResource(R.string.profile_settings),
-            onClick = { /* TODO */ }
+            onClick = onSettingsClick
         )
     }
 

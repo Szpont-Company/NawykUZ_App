@@ -548,7 +548,7 @@ fun LanguageSelector() {
             .clip(RoundedCornerShape(16.dp))
             .background(Color((0xFF151517)))
             .padding(6.dp),
-        horizontalArrangement = Arrangement.Center,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         LanguageButton(
