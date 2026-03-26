@@ -31,6 +31,7 @@ import com.SzpontCompany.check.ui.theme.CheckTheme
 import com.SzpontCompany.check.ui.theme.Mint
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Brush
 
 @Composable
 fun ProfileScreen() {
@@ -105,22 +106,26 @@ fun UserHeaderSection() {
         Box(contentAlignment = Alignment.BottomEnd) {
             Box(
                 modifier = Modifier
-                    .size(80.dp)
+                    .size(86.dp)
+                    .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
+                    .padding(6.dp)
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.primary),
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = "MK", color = Color.White, fontSize = 32.sp, fontWeight = FontWeight.Bold)
+                Text(text = "MK", color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.Bold)
             }
             Box(
                 modifier = Modifier
-                    .background(Color(0xFFBA7517), RoundedCornerShape(8.dp))
-                    .padding(horizontal = 6.dp, vertical = 2.dp)
+                    .offset(x = 8.dp, y = 4.dp)
+                    .background(Color(0xFFBA7517), RoundedCornerShape(12.dp))
+                    .border(2.dp, MaterialTheme.colorScheme.background, RoundedCornerShape(12.dp))
+                    .padding(horizontal = 8.dp, vertical = 2.dp)
             ) {
-                Text("Lvl 8", color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                Text("Lvl 8", color = MaterialTheme.colorScheme.background, fontSize = 11.sp, fontWeight = FontWeight.Bold)
             }
         }
-        Spacer(modifier = Modifier.width(16.dp))
+        Spacer(modifier = Modifier.width(24.dp))
         Column {
             Text(
                 text = "Marek Kowalski", // zostawiawmy hardcored, jak bedzie baza zmienimy
@@ -132,21 +137,23 @@ fun UserHeaderSection() {
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(10.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Box(
                     modifier = Modifier
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f), RoundedCornerShape(12.dp))
                         .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(12.dp))
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                        .padding(horizontal = 10.dp, vertical = 4.dp)
                 ) {
-                    Text("🔥 21-dniowy streak", color = MaterialTheme.colorScheme.primary, fontSize = 12.sp)
+                    Text("🔥 21-dniowy streak", color = MaterialTheme.colorScheme.primary, fontSize = 11.sp, fontWeight = FontWeight.Medium)
                 }
                 Box(
                     modifier = Modifier
+                        .background(Color(0xFFBA7517).copy(alpha = 0.15f), RoundedCornerShape(12.dp))
                         .border(1.dp, Color(0xFFBA7517), RoundedCornerShape(12.dp))
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                        .padding(horizontal = 10.dp, vertical = 4.dp)
                 ) {
-                    Text("Top 14", color = Color(0xFFBA7517), fontSize = 12.sp)
+                    Text("Top 14", color = Color(0xFFBA7517), fontSize = 11.sp, fontWeight = FontWeight.Medium)
                 }
             }
         }
@@ -158,6 +165,7 @@ fun LevelAndXpBar() {
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .border(1.dp, MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(16.dp))
             .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(16.dp))
             .padding(16.dp)
     ) {
@@ -172,12 +180,23 @@ fun LevelAndXpBar() {
                     color = MaterialTheme.colorScheme.onBackground,
                     fontWeight = FontWeight.Bold
                 )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "1 240 / 1 600 XP", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
+                Spacer(modifier = Modifier.width(12.dp))
+                Text(
+                    text = "1 240 / 1 600 XP",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium
+                )
             }
-            Text(text = "→ ${stringResource(R.string.profile_level)} 9", color = Color(0xFFBA7517), fontSize = 12.sp, fontWeight = FontWeight.Bold)
+            Text(
+                text = "→ ${stringResource(R.string.profile_level)} 9",
+                color = Color(0xFFBA7517),
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold
+            )
         }
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(14.dp))
+
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -186,9 +205,14 @@ fun LevelAndXpBar() {
         ) {
             Box(
                 modifier = Modifier
-                    .fillMaxWidth(0.7f)
+                    .fillMaxWidth(0.77f)
                     .fillMaxHeight()
-                    .background(Color(0xFFBA7517), RoundedCornerShape(4.dp))
+                    .background(
+                        brush = Brush.horizontalGradient(
+                            colors = listOf(Color(0xFFD85A30), Color(0xFFBA7517))
+                        ),
+                        shape = RoundedCornerShape(4.dp)
+                    )
             )
         }
     }
@@ -215,12 +239,13 @@ fun StatCard(modifier: Modifier = Modifier, value: String, label: String, valueC
     Column(
         modifier = modifier
             .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(16.dp))
+            .border(1.dp, MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(16.dp))
             .padding(vertical = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = value, fontSize = 24.sp, fontWeight = FontWeight.Bold, color = valueColor)
+        Text(text = value, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = valueColor)
         Spacer(modifier = Modifier.height(4.dp))
-        Text(text = label, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(text = label, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Medium)
     }
 }
 
