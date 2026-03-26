@@ -41,4 +41,26 @@
     <string name="badge_10k_steps">10k steps</string>
     <string name="badge_battle_5">Battle x5</string>
     <string name="badge_streak_100">Streak 100</string>
+
+    <!-- SETTINGS CARD -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_section_appearance">APPEARANCE</string>
+    <string name="settings_theme_dark">Dark</string>
+    <string name="settings_theme_light">Light</string>
+    <string name="settings_theme_auto">Auto</string>
+    <string name="settings_section_accent">ACCENT COLOR</string>
+    <string name="settings_section_language">LANGUAGE</string>
+    <string name="settings_section_notifications">NOTIFICATIONS</string>
+    <string name="settings_push_notifications">Push notifications</string>
+    <string name="settings_battle_notifications">Battle notifications</string>
+    <string name="settings_events_challenges">Events and challenges</string>
+    <string name="settings_section_activity">ACTIVITY</string>
+    <string name="settings_step_counter">Step counter</string>
+    <string name="settings_daily_step_goal">Daily step goal</string>
+    <string name="settings_friends_location">Friends location</string>
+    <string name="settings_section_privacy_account">PRIVACY AND ACCOUNT</string>
+    <string name="settings_profile_privacy">Profile privacy</string>
+    <string name="settings_about_app">About app</string>
+    <string name="settings_delete_account">Delete account</string>
+    <string name="settings_delete_account_warning">Irreversible action</string>
 </resources>
