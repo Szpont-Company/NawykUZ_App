@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -53,7 +54,7 @@ fun SettingsScreen(
 
         // --- JĘZYK ---
         SectionHeader(text = stringResource(R.string.settings_section_language))
-        // TODO: Komponent LanguageSelector
+        LanguageSelector()
         Spacer(modifier = Modifier.height(24.dp))
 
         // --- POWIADOMIENIA ---
@@ -489,5 +490,60 @@ fun AccentColorSelector() {
                 }
             }
         }
+    }
+}
+
+@Composable
+fun LanguageSelector() {
+    var selectedLanguage by remember { mutableStateOf("Polski") }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.surface)
+            .padding(8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        LanguageButton(
+            text = "Polski",
+            isSelected = selectedLanguage == "Polski",
+            modifier = Modifier.weight(1f),
+            onClick = { selectedLanguage = "Polski" }
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        LanguageButton(
+            text = "English",
+            isSelected = selectedLanguage == "English",
+            modifier = Modifier.weight(1f),
+            onClick = { selectedLanguage = "English" }
+        )
+    }
+}
+
+@Composable
+fun LanguageButton (
+    text: String,
+    isSelected: Boolean,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    val backgroundColor = if (isSelected) MaterialTheme.colorScheme.background else Color.Transparent
+    val textColor = if (isSelected) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onSurfaceVariant
+
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(12.dp))
+            .background(backgroundColor)
+            .clickable { onClick() }
+            .padding(vertical = 12.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = text,
+            color = textColor,
+            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+            fontSize = 14.sp
+        )
     }
 }

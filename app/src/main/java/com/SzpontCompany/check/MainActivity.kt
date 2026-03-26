@@ -14,6 +14,7 @@ import com.SzpontCompany.check.ui.theme.CheckTheme
 import com.SzpontCompany.check.ui.auth.AnimatedSplashScreen
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import com.SzpontCompany.check.ui.settings.SettingsScreen
 import com.SzpontCompany.check.ui.theme.Crimson
 
 
@@ -43,7 +44,8 @@ class MainActivity : ComponentActivity() {
                         }
                     )
                 } else {
-                    LoginScreen()
+                   // LoginScreen()
+                    SettingsScreen {  }
                 }
             }
         }
