@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -17,7 +16,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -38,38 +36,35 @@ fun SettingsScreen(
     ) {
         Spacer(modifier = Modifier.height(48.dp))
 
-        // --- TOP BAR ---
         SettingsTopBar(onBackClick = onBackClick)
         Spacer(modifier = Modifier.height(32.dp))
 
-        // --- WYGLĄD ---
         SectionHeader(text = stringResource(R.string.settings_section_appearance))
         ThemeSelector()
         Spacer(modifier = Modifier.height(24.dp))
 
-        // --- KOLOR AKCENTU ---
         SectionHeader(text = stringResource(R.string.settings_section_accent))
         AccentColorSelector()
         Spacer(modifier = Modifier.height(24.dp))
 
-        // --- JĘZYK ---
         SectionHeader(text = stringResource(R.string.settings_section_language))
         LanguageSelector()
         Spacer(modifier = Modifier.height(24.dp))
 
-// --- POWIADOMIENIA ---
         SectionHeader(text = stringResource(R.string.settings_section_notifications))
         SettingsListGroup {
             SettingsRowChevron(
                 title = stringResource(R.string.settings_push_notifications),
                 subtitle = "Codziennie · 08:00",
                 icon = Icons.Rounded.Notifications,
+                baseColor = Mint,
                 onClick = { /* TODO */ }
             )
             HorizontalDivider(color = MaterialTheme.colorScheme.background, thickness = 2.dp)
             SettingsRowSwitch(
                 title = stringResource(R.string.settings_battle_notifications),
                 icon = Icons.Rounded.FlashOn,
+                baseColor = Coral,
                 isChecked = true,
                 onCheckedChange = { /* TODO */ }
             )
@@ -77,18 +72,20 @@ fun SettingsScreen(
             SettingsRowSwitch(
                 title = stringResource(R.string.settings_events_challenges),
                 icon = Icons.Rounded.Event,
+                baseColor = Indigo,
                 isChecked = true,
                 onCheckedChange = { /* TODO */ }
             )
         }
         Spacer(modifier = Modifier.height(24.dp))
 
-        // --- AKTYWNOŚĆ ---
+
         SectionHeader(text = stringResource(R.string.settings_section_activity))
         SettingsListGroup {
             SettingsRowSwitch(
                 title = stringResource(R.string.settings_step_counter),
                 icon = Icons.Rounded.DirectionsWalk,
+                baseColor = Sky,
                 isChecked = true,
                 onCheckedChange = { /* TODO */ }
             )
@@ -96,26 +93,28 @@ fun SettingsScreen(
             SettingsRowChevron(
                 title = stringResource(R.string.settings_daily_step_goal),
                 subtitle = "8 000 kroków",
-                icon = Icons.Rounded.Flag,
+                icon = Icons.Rounded.Adjust,
+                baseColor = Cactus,
                 onClick = { /* TODO */ }
             )
             HorizontalDivider(color = MaterialTheme.colorScheme.background, thickness = 2.dp)
             SettingsRowSwitch(
                 title = stringResource(R.string.settings_friends_location),
                 icon = Icons.Rounded.LocationOn,
+                baseColor = Rose,
                 isChecked = true,
                 onCheckedChange = { /* TODO */ }
             )
         }
         Spacer(modifier = Modifier.height(24.dp))
 
-        // --- PRYWATNOŚĆ I KONTO ---
         SectionHeader(text = stringResource(R.string.settings_section_privacy_account))
         SettingsListGroup {
             SettingsRowChevron(
                 title = stringResource(R.string.settings_profile_privacy),
                 subtitle = "Publiczny",
                 icon = Icons.Rounded.Lock,
+                baseColor = Indigo,
                 onClick = { /* TODO */ }
             )
             HorizontalDivider(color = MaterialTheme.colorScheme.background, thickness = 2.dp)
@@ -123,13 +122,14 @@ fun SettingsScreen(
                 title = stringResource(R.string.settings_about_app),
                 subtitle = "Check. v1.0.0",
                 icon = Icons.Rounded.Info,
+                baseColor = Amber,
                 onClick = { /* TODO */ }
             )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // --- USUŃ KONTO ---
+
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -141,16 +141,22 @@ fun SettingsScreen(
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Column {
+                SettingsIcon(
+                    icon = Icons.Rounded.DeleteOutline,
+                    baseColor = Crimson
+                )
+                Spacer(modifier = Modifier.width(16.dp))
+
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = stringResource(R.string.settings_delete_account),
                         color = Crimson,
                         fontWeight = FontWeight.Medium,
                         fontSize = 16.sp
                     )
+                    Spacer(modifier = Modifier.height(2.dp))
                     Text(
                         text = stringResource(R.string.settings_delete_account_warning),
                         color = Crimson.copy(alpha = 0.6f),
@@ -224,7 +230,7 @@ fun SettingsRowChevron(
     title: String,
     subtitle: String? = null,
     icon: androidx.compose.ui.graphics.vector.ImageVector? = null,
-    iconColor: Color = MaterialTheme.colorScheme.primary,
+    baseColor: Color = MaterialTheme.colorScheme.primary,
     onClick: () -> Unit
 ) {
     Row(
@@ -235,7 +241,7 @@ fun SettingsRowChevron(
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (icon != null) {
-            SettingsIcon(icon = icon, containerColor = iconColor)
+            SettingsIcon(icon = icon, baseColor = baseColor)
             Spacer(modifier = Modifier.width(16.dp))
         }
         Column(modifier = Modifier.weight(1f)) {
@@ -258,7 +264,7 @@ fun SettingsRowSwitch(
     title: String,
     subtitle: String? = "Włączone",
     icon: androidx.compose.ui.graphics.vector.ImageVector? = null,
-    iconColor: Color = MaterialTheme.colorScheme.primary,
+    baseColor: Color = MaterialTheme.colorScheme.primary,
     isChecked: Boolean,
     onCheckedChange: (Boolean) -> Unit
 ) {
@@ -269,7 +275,7 @@ fun SettingsRowSwitch(
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (icon != null) {
-            SettingsIcon(icon = icon, containerColor = iconColor)
+            SettingsIcon(icon = icon, baseColor = baseColor)
             Spacer(modifier = Modifier.width(16.dp))
         }
 
@@ -296,6 +302,30 @@ fun SettingsRowSwitch(
         )
     }
 }
+
+@Composable
+fun SettingsIcon(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    baseColor: Color = MaterialTheme.colorScheme.primary
+) {
+
+    Box(
+        modifier = Modifier
+            .size(36.dp)
+            .clip(RoundedCornerShape(10.dp))
+            .background(baseColor.copy(alpha = 0.15f)),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = baseColor,
+            modifier = Modifier.size(20.dp)
+        )
+    }
+}
+
+
 
 @Composable
 fun ThemeSelector() {
@@ -425,7 +455,7 @@ fun AutoThemePreview() {
 
 @Composable
 fun FakeUIElements(isLight: Boolean = false, isAuto: Boolean = false) {
-    val elementColor = if (isLight) Color(0xFFE8E8E4) else Color(0xFF2A2A2E)
+    val elementColor = if (isLight) Color(0xFFD0D0CC) else Color(0xFF42424A)
 
     Column(
         modifier = Modifier
@@ -435,23 +465,23 @@ fun FakeUIElements(isLight: Boolean = false, isAuto: Boolean = false) {
     ) {
         Box(
             modifier = Modifier
-                .fillMaxWidth(0.8f)
+                .fillMaxWidth(0.85f)
                 .height(6.dp)
                 .clip(RoundedCornerShape(3.dp))
                 .background(MaterialTheme.colorScheme.primary)
         )
-        Spacer(modifier = Modifier.height(8.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        Spacer(modifier = Modifier.height(10.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Box(
                 modifier = Modifier
-                    .width(24.dp)
+                    .width(28.dp)
                     .height(6.dp)
                     .clip(RoundedCornerShape(3.dp))
                     .background(if (isAuto) Color.Transparent else elementColor)
             )
             Box(
                 modifier = Modifier
-                    .width(16.dp)
+                    .width(20.dp)
                     .height(6.dp)
                     .clip(RoundedCornerShape(3.dp))
                     .background(if (isAuto) Color.Transparent else elementColor)
@@ -479,22 +509,28 @@ fun AccentColorSelector() {
                 modifier = Modifier
                     .size(48.dp)
                     .clip(androidx.compose.foundation.shape.CircleShape)
-                    .background(color)
-                    .border(
-                        width = if (isSelected) 3.dp else 0.dp,
-                        color = if (isSelected) Color.White else Color.Transparent,
-                        shape = androidx.compose.foundation.shape.CircleShape
-                    )
                     .clickable { selectedColor = color },
                 contentAlignment = Alignment.Center
             ) {
                 if (isSelected) {
                     Box(
                         modifier = Modifier
-                            .size(38.dp)
-                            .clip(androidx.compose.foundation.shape.CircleShape)
+                            .fillMaxSize()
+                            .border(2.dp, Color.White, androidx.compose.foundation.shape.CircleShape)
+                            .padding(6.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(androidx.compose.foundation.shape.CircleShape)
+                                .background(color)
+                        )
+                    }
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
                             .background(color)
-                            .border(3.dp, MaterialTheme.colorScheme.background, androidx.compose.foundation.shape.CircleShape)
                     )
                 }
             }
@@ -573,27 +609,5 @@ fun LanguageButton(
                 fontSize = 14.sp
             )
         }
-    }
-}
-
-@Composable
-fun SettingsIcon(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    containerColor: Color = MaterialTheme.colorScheme.primary,
-    tint: Color = Color.White
-) {
-    Box(
-        modifier = Modifier
-            .size(36.dp)
-            .clip(RoundedCornerShape(10.dp))
-            .background(containerColor),
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-    	    tint = tint,
-            modifier = Modifier.size(20.dp)
-        )
     }
 }
