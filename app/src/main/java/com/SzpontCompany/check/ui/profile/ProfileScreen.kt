@@ -29,6 +29,8 @@ import androidx.compose.ui.unit.sp
 import com.SzpontCompany.check.R
 import com.SzpontCompany.check.ui.theme.CheckTheme
 import com.SzpontCompany.check.ui.theme.Mint
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.ui.draw.alpha
 
 @Composable
 fun ProfileScreen() {
@@ -53,7 +55,8 @@ fun ProfileScreen() {
         StatsGridSection()
         Spacer(modifier = Modifier.height(24.dp))
 
-        // TODO: Odznaki
+        BadgesSection()
+        Spacer(modifier = Modifier.height(24.dp))
 
         Text(
             text = stringResource(R.string.profile_settings_header),
@@ -292,6 +295,61 @@ fun SettingsItem(icon: ImageVector, iconTint: Color, title: String, onClick: () 
         )
     }
 }
+
+
+@Composable
+fun BadgesSection() {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = stringResource(R.string.profile_badges_header),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(bottom = 12.dp)
+        )
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(horizontal = 2.dp)
+        ) {
+            item { BadgeItem(emoji = "🏆", label = stringResource(R.string.badge_week), isActive = true) }
+            item { BadgeItem(emoji = "🔥", label = stringResource(R.string.badge_streak_21), isActive = true) }
+            item { BadgeItem(emoji = "🚶", label = stringResource(R.string.badge_10k_steps), isActive = true) }
+            item { BadgeItem(emoji = "⚔️", label = stringResource(R.string.badge_battle_5), isActive = true) }
+            item { BadgeItem(emoji = "💎", label = stringResource(R.string.badge_streak_100), isActive = false) }
+        }
+    }
+}
+
+@Composable
+fun BadgeItem(emoji: String, label: String, isActive: Boolean) {
+    // aktywna -> obramowanie w kolorze primary,  nie -> przezroczyste
+    val borderColor = if (isActive) MaterialTheme.colorScheme.primary else Color.Transparent
+    // nieaktywna -> lekko przezroczysta cala odznaka
+    val alpha = if (isActive) 1f else 0.4f
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.alpha(alpha)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(68.dp)
+                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(16.dp))
+                .border(2.dp, borderColor, RoundedCornerShape(16.dp)),
+            contentAlignment = Alignment.Center
+        ) {
+            //narazie emoji , potem ewentualnie jakies image/icon
+            Text(text = emoji, fontSize = 28.sp)
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = label,
+            fontSize = 12.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+
 
 @Preview(showBackground = true)
 @Composable

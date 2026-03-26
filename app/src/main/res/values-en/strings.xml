@@ -35,4 +35,10 @@
     <string name="profile_edit">Edit profile</string>
     <string name="profile_settings">Settings</string>
     <string name="profile_logout">Log out</string>
+    <string name="profile_badges_header">BADGES</string>
+    <string name="badge_week">1 Week</string>
+    <string name="badge_streak_21">Streak 21</string>
+    <string name="badge_10k_steps">10k steps</string>
+    <string name="badge_battle_5">Battle x5</string>
+    <string name="badge_streak_100">Streak 100</string>
 </resources>
