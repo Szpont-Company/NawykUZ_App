@@ -2,21 +2,31 @@ package com.SzpontCompany.check.ui.auth
 
 import android.util.Log
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.Spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -39,6 +49,7 @@ import com.SzpontCompany.check.ui.theme.Mint
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.res.painterResource
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.SzpontCompany.check.ui.theme.Amber
 import com.SzpontCompany.check.ui.theme.Cactus
@@ -47,8 +58,10 @@ import com.SzpontCompany.check.ui.theme.Crimson
 import com.SzpontCompany.check.ui.theme.Indigo
 import com.SzpontCompany.check.ui.theme.Rose
 import com.SzpontCompany.check.ui.theme.Sky
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 
-@Composable
 fun getLogoForAccent(accent: Color): Int {
     return when (accent) {
         Mint -> R.drawable.logo_mint
@@ -74,6 +87,10 @@ fun LoginScreen(viewModel: AuthViewModel = viewModel()) {
     val scope = rememberCoroutineScope()
     val accent = MaterialTheme.colorScheme.primary
 
+    val recaptchaToken by viewModel.recaptchaToken.collectAsStateWithLifecycle()
+    val captchaVerified = recaptchaToken != null
+
+
     fun onGoogleClick() {
         scope.launch {
             val res = viewModel.signInWithGoogle(context)
@@ -89,10 +106,12 @@ fun LoginScreen(viewModel: AuthViewModel = viewModel()) {
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
+            .imePadding()
+            .verticalScroll(rememberScrollState())
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Spacer(modifier = Modifier.height(96.dp))
+        Spacer(modifier = Modifier.height(72.dp))
         Box(
             modifier = Modifier
                 .size(72.dp)
@@ -135,52 +154,112 @@ fun LoginScreen(viewModel: AuthViewModel = viewModel()) {
             textAlign = TextAlign.Center,
         )
 
-        Row(
+        val tabTitles = listOf(stringResource(R.string.login), stringResource((R.string.register)))
+
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(24))
                 .background(MaterialTheme.colorScheme.surface)
                 .padding(vertical = 4.dp)
         ) {
-            listOf(stringResource(R.string.LogIn), stringResource((R.string.Register))).forEachIndexed {index, title ->
+
+            BoxWithConstraints(modifier = Modifier.matchParentSize()) {
+                val tabWidth = maxWidth / 2
+
+                val indicatorOffset by animateDpAsState(
+                    targetValue = tabWidth * selectedTab,
+                    animationSpec = spring(stiffness = Spring.StiffnessLow),
+                    label = "indicator_offset"
+                )
+
                 Box(
                     modifier = Modifier
-                        .weight(1f)
+                        .offset(x = indicatorOffset)
+                        .width(tabWidth)
+                        .fillMaxHeight()
                         .clip(RoundedCornerShape(24))
-                        .background(
-                            if (selectedTab == index) MaterialTheme.colorScheme.primary
-                            else Color.Transparent
-                        )
-                        .clickable { selectedTab = index }
-                        .padding(vertical = 8.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = title,
-                        color = if (selectedTab == index) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
+                        .background(MaterialTheme.colorScheme.primary)
+                )
+            }
+
+
+            Row(modifier = Modifier.fillMaxWidth()) {
+                tabTitles.forEachIndexed { index, title ->
+
+                    val textColor by animateColorAsState(
+                        targetValue = if (selectedTab == index) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
+                        label = "text_color"
                     )
+
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(24))
+                            .clickable { selectedTab = index }
+                            .padding(vertical = 8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = title,
+                            color = textColor,
+                        )
+                    }
                 }
             }
         }
+
         Spacer(modifier = Modifier.height(24.dp))
-        /// todo
+
         AnimatedContent(
             targetState = selectedTab,
             label = "auth_tab",
             transitionSpec = {
-                fadeIn() togetherWith fadeOut()
+                if (targetState > initialState) {
+                    (slideInHorizontally { width -> width } + fadeIn()).togetherWith(
+                        slideOutHorizontally { width -> -width } + fadeOut()
+                    )
+                } else {
+                    (slideInHorizontally { width -> -width } + fadeIn()).togetherWith(
+                        slideOutHorizontally { width -> width } + fadeOut()
+                    )
+                }
             }
         ) { tab ->
-            Column(modifier = Modifier.fillMaxWidth()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
                 when (tab) {
                     0 -> LogInForm(
-                        email, password, onEmailChange = {email = it}, onPasswordChange = {password = it},
-                        onLogInClick = {}, onForgotPasswordClick = {}, onGoogleLogInClick = {
+                        email,
+                        password,
+                        onEmailChange = { email = it },
+                        onPasswordChange = { password = it },
+                        onLogInClick = { scope.launch {
+                            val res = viewModel.signInWithEmail(email.trim(), password)
+                        }},
+                        onForgotPasswordClick = { scope.launch { viewModel.resetPassword(email) } },
+                        onGoogleLogInClick = {
                             onGoogleClick()
                         })
-                    1 -> RegisterForm(name, email, password, onNameChange = {name = it}, onEmailChange = {email = it}, onPasswordChange = {password = it},
-                        onRegisterClick = {}, onGoogleRegisterClick = {
+
+                    1 -> RegisterForm(
+                        name,
+                        email,
+                        password,
+                        onNameChange = { name = it },
+                        onEmailChange = { email = it },
+                        onPasswordChange = { password = it },
+                        onRegisterClick = { scope.launch {
+                            val res = viewModel.signUpWithEmail(name, email.trim(), password)
+                        }},
+                        onGoogleRegisterClick = {
                             onGoogleClick()
+                        },
+                        captchaVerified = captchaVerified,
+                        onCaptchaClick = {
+                            viewModel.executeCaptcha()
                         })
                 }
             }

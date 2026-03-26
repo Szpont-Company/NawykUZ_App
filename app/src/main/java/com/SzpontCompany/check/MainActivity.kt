@@ -7,12 +7,14 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import com.SzpontCompany.check.ui.auth.LoginScreen
-import com.SzpontCompany.check.ui.dashboard.DashboardScreen
-import com.SzpontCompany.check.ui.theme.Cactus
 import com.SzpontCompany.check.ui.theme.CheckTheme
-import com.SzpontCompany.check.ui.theme.Rose
-import com.SzpontCompany.check.ui.theme.Sky
+import com.SzpontCompany.check.ui.auth.AnimatedSplashScreen
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import com.SzpontCompany.check.ui.theme.Crimson
 
 
 class MainActivity : ComponentActivity() {
@@ -20,21 +22,29 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-        val darkTheme = true
-        SideEffect {
-            enableEdgeToEdge(
-                statusBarStyle = if (darkTheme) {
-                    SystemBarStyle.dark(Color.TRANSPARENT)
+            val darkTheme = true
+            SideEffect {
+                enableEdgeToEdge(
+                    statusBarStyle = if (darkTheme) {
+                        SystemBarStyle.dark(Color.TRANSPARENT)
+                    } else {
+                        SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT)
+                    }
+                )
+            }
+
+            var showSplash by remember { mutableStateOf(true) }
+
+            CheckTheme(darkTheme = darkTheme, accent = Crimson) {
+                if (showSplash) {
+                    AnimatedSplashScreen(
+                        onSplashFinished = {
+                            showSplash = false
+                        }
+                    )
                 } else {
-                    SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT)
+                    LoginScreen()
                 }
-            )
-        }
-
-
-            CheckTheme(darkTheme = darkTheme, accent = Sky) {
-                DashboardScreen()
-                //LoginScreen()
             }
         }
     }

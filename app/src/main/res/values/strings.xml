@@ -1,20 +1,43 @@
 <resources>
     <string name="app_name">Check.</string>
     <string name="welcome_sentence">Buduj nawyki. Wygrywaj każdy dzień.</string>
-    <string name="LogIn">Logowanie</string>
-    <string name="Register">Rejestracja</string>
+    <string name="login">Logowanie</string>
+    <string name="register">Rejestracja</string>
     <string name="password">HASŁO</string>
-    <string name="forgotPassword">Zapomniałem hasła</string>
-    <string name="LogInBtn">Zaloguj się</string>
-    <string name="LogInGoogle">Kontynuuj przez Google</string>
-    <string name="continueWith">lub kontynuuj przez</string>
-    <string name="login_privacy_1">"Logując się, akceptujesz "</string>
-    <string name="login_privacy_2">regulamin</string>
-    <string name="login_privacy_3">" i "</string>
+    <string name="forgot_password">Zapomniałem hasła</string>
+    <string name="login_btn">Zaloguj się</string>
+    <string name="login_google">Kontynuuj przez Google</string>
+    <string name="continue_with">lub kontynuuj przez</string>
+    <string name="login_privacy_1">"Logując się, akceptujesz"</string>
+    <string name="login_privacy_2">"regulamin"</string>
+    <string name="login_privacy_3">"i"</string>
     <string name="login_privacy_4">politykę prywatności</string>
     <string name="register_name">IMIĘ I NAZWISKO</string>
-    <string name="passwordRule">minimum 8 znaków</string>
+    <string name="password_rule">minimum 8 znaków</string>
     <string name="create_account">Utwórz konto</string>
-    <string name="register_notice1">"Rejestrując się, akceptujesz "</string>
-    <string name="mailHint">twoj@email.com</string>
+    <string name="register_notice1">"Rejestrując się, akceptujesz"</string>
+    <string name="mail_hint">twoj@email.com</string>
+    <string name="mail_reset_prompt">Wysłano link do resetu hasła. Sprawdź skrzynkę odbiorczą</string>
+    <string name="captcha_message">Nie jestem robotem</string>
+    <string name="captcha_privacy">Prywatność • Warunki</string>
+
+    <!-- PROFILE CARD-->
+    <string name="profile_title">Profil</string>
+    <string name="profile_level">Poziom</string>
+    <string name="profile_habits">Nawyki</string>
+    <string name="profile_streak_days">Streak dni</string>
+    <string name="profile_coins">Monety</string>
+    <string name="profile_battles_won">Battle wygrane</string>
+    <string name="profile_effectiveness">Skuteczność</string>
+    <string name="profile_friends">Znajomi</string>
+    <string name="profile_settings_header">USTAWIENIA</string>
+    <string name="profile_edit">Edytuj profil</string>
+    <string name="profile_settings">Ustawienia</string>
+    <string name="profile_logout">Wyloguj się</string>
+    <string name="profile_badges_header">ODZNAKI</string>
+    <string name="badge_week">Tydzień</string>
+    <string name="badge_streak_21">Streak 21</string>
+    <string name="badge_10k_steps">10k kroków</string>
+    <string name="badge_battle_5">Battle x5</string>
+    <string name="badge_streak_100">Streak 100</string>
 </resources>

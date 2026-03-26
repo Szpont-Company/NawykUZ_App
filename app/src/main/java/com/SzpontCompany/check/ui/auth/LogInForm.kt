@@ -2,7 +2,6 @@ package com.SzpontCompany.check.ui.auth
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -62,7 +61,7 @@ fun LogInForm(
     OutlinedTextField(
         value = email,
         onValueChange = {onEmailChange(it)},
-        placeholder = {Text(stringResource(R.string.mailHint))},
+        placeholder = {Text(stringResource(R.string.mail_hint))},
         shape = RoundedCornerShape(12.dp),
         colors = OutlinedTextFieldDefaults.colors(
             unfocusedContainerColor = MaterialTheme.colorScheme.secondary,
@@ -107,11 +106,13 @@ fun LogInForm(
     )
     Spacer(modifier = Modifier.height(32.dp))
     Text(
-        text = stringResource(R.string.forgotPassword),
+        text = stringResource(R.string.forgot_password),
         style = MaterialTheme.typography.labelLarge,
         color = MaterialTheme.colorScheme.primary,
         textAlign = TextAlign.End,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onForgotPasswordClick() }
     )
     Spacer(modifier = Modifier.height(24.dp))
     Button(
@@ -127,7 +128,7 @@ fun LogInForm(
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurfaceVariant)
     ) {
         Text(
-            text = stringResource(R.string.LogInBtn),
+            text = stringResource(R.string.login_btn),
             style = MaterialTheme.typography.bodyLarge
         )
     }
@@ -138,7 +139,7 @@ fun LogInForm(
     ) {
         HorizontalDivider(modifier = Modifier.weight(1f))
         Text(
-            text = stringResource(R.string.continueWith),
+            text = stringResource(R.string.continue_with),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(horizontal = 8.dp)
@@ -166,38 +167,16 @@ fun LogInForm(
         )
         Spacer(modifier = Modifier.width(12.dp))
         Text(
-            text = stringResource(R.string.LogInGoogle),
+            text = stringResource(R.string.login_google),
             style = MaterialTheme.typography.bodyLarge
         )
     }
     Spacer(modifier = Modifier.height(16.dp))
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Text(
-            text = stringResource(R.string.login_privacy_1),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Text(
-            text = stringResource(R.string.login_privacy_2),
-            color = MaterialTheme.colorScheme.primary,
-            style = MaterialTheme.typography.labelMedium,
-            modifier = Modifier.clickable { }
-        )
-        Text(
-            text = stringResource(R.string.login_privacy_3),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Text(
-            text = stringResource(R.string.login_privacy_4),
-            color = MaterialTheme.colorScheme.primary,
-            style = MaterialTheme.typography.labelMedium,
-            modifier = Modifier.clickable { }
-        )
-    }
+
+    TermsText(
+        onTosClick = { /*TODO*/ },
+        onPrivacyClick = { /*TODO*/ },
+        type = TermsType.LOGIN,
+    )
 }
 
