@@ -9,12 +9,13 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import com.SzpontCompany.check.ui.auth.LoginScreen
 import com.SzpontCompany.check.ui.theme.CheckTheme
 import com.SzpontCompany.check.ui.auth.AnimatedSplashScreen
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
-import com.SzpontCompany.check.ui.theme.Crimson
+import com.SzpontCompany.check.ui.main.MainScreen
+import com.SzpontCompany.check.ui.theme.Amber
+import com.SzpontCompany.check.ui.theme.Rose
 
 
 class MainActivity : ComponentActivity() {
@@ -35,7 +36,7 @@ class MainActivity : ComponentActivity() {
 
             var showSplash by remember { mutableStateOf(true) }
 
-            CheckTheme(darkTheme = darkTheme, accent = Crimson) {
+            CheckTheme(darkTheme = darkTheme, accent = Amber) {
                 if (showSplash) {
                     AnimatedSplashScreen(
                         onSplashFinished = {
@@ -43,7 +44,8 @@ class MainActivity : ComponentActivity() {
                         }
                     )
                 } else {
-                    LoginScreen()
+                    //LoginScreen()
+                    MainScreen();
                 }
             }
         }

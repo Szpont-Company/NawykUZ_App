@@ -1,11 +1,15 @@
-// Ścieżka: src/main/java/com/SzpontCompany/check/ui/dashboard/DashboardScreen.kt
+// Ścieżka: src/main/java/com/SzpontCompany/check/ui/dashboard/TodayScreen.kt
 package com.SzpontCompany.check.ui.dashboard
 
-import androidx.compose.foundation.Canvas
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -15,13 +19,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
+import kotlinx.coroutines.launch
 import kotlin.random.Random
 
 data class HabitMock(
@@ -36,7 +38,7 @@ data class HabitMock(
 )
 
 @Composable
-fun DashboardScreen() {
+fun TodayScreen() {
     val habitsList = remember {
         mutableStateListOf(
             HabitMock(1, "Spacer", "8 000 kroków • codziennie", "63%", "5 040", "kroków", "14 dni", "streak", "82%", "tydzień"),
@@ -44,54 +46,43 @@ fun DashboardScreen() {
         )
     }
 
-    Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
-        bottomBar = {
-            BottomNavigationBar(onAddClick = { /* TODO: Dodaj nawyk */ })
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 24.dp),
+        contentPadding = PaddingValues(top = 24.dp, bottom = 120.dp)
+    ) {
+        item {
+            TopSection()
+            Spacer(modifier = Modifier.height(24.dp))
+            HeroCard()
+            Spacer(modifier = Modifier.height(32.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("Nawyki dziś (${habitsList.size})", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onBackground)
+                Text("Zobacz wszystkie", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+            }
+            Spacer(modifier = Modifier.height(16.dp))
         }
-    ) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(horizontal = 24.dp),
-            contentPadding = PaddingValues(bottom = 24.dp)
-        ) {
-            item {
-                Spacer(modifier = Modifier.height(32.dp))
-                TopSection()
-                Spacer(modifier = Modifier.height(24.dp))
-                HeroCard()
-                Spacer(modifier = Modifier.height(32.dp))
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text("Nawyki dziś (${habitsList.size})", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onBackground)
-                    Text("Zobacz wszystkie", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-
-            items(habitsList) { habit ->
-                HabitCard(
-                    habit = habit,
-                    onDoneClick = {
-                        // Prosta logika przełączania stanu do testów UI
-                        val index = habitsList.indexOf(habit)
-                        if (index != -1) {
-                            habitsList[index] = habit.copy(isDoneToday = !habit.isDoneToday)
-                        }
+        items(habitsList) { habit ->
+            HabitCard(
+                habit = habit,
+                onDoneClick = {
+                    val index = habitsList.indexOf(habit)
+                    if (index != -1) {
+                        habitsList[index] = habit.copy(isDoneToday = !habit.isDoneToday)
                     }
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-            }
+                }
+            )
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
-
 
 @Composable
 fun TopSection() {
@@ -115,12 +106,12 @@ fun TopSection() {
 @Composable
 fun HeroCard() {
     Card(
-        modifier = Modifier.fillMaxWidth().height(120.dp),
+        modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary)
     ) {
         Row(
-            modifier = Modifier.fillMaxSize().padding(24.dp),
+            modifier = Modifier.fillMaxWidth().padding(24.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -138,7 +129,7 @@ fun HeroCard() {
 @Composable
 fun MiniBarChart(color: Color) {
     val heights = listOf(0.4f, 0.6f, 0.8f, 0.5f, 0.9f, 1.0f, 0.3f)
-    Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.Bottom, modifier = Modifier.height(40.dp)) {
+    Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.Bottom, modifier = Modifier.height(48.dp)) {
         heights.forEach { fraction ->
             Box(modifier = Modifier.width(6.dp).fillMaxHeight(fraction).clip(RoundedCornerShape(3.dp)).background(color))
         }
@@ -147,61 +138,112 @@ fun MiniBarChart(color: Color) {
 
 @Composable
 fun HabitCard(habit: HabitMock, onDoneClick: () -> Unit) {
+    var expanded by remember { mutableStateOf(false) }
+
+    val bringIntoViewRequester = remember { BringIntoViewRequester() }
+    val coroutineScope = rememberCoroutineScope()
+
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .bringIntoViewRequester(bringIntoViewRequester)
+            .animateContentSize(
+                finishedListener = { _, _ ->
+                    if (expanded) {
+                        coroutineScope.launch {
+                            bringIntoViewRequester.bringIntoView()
+                        }
+                    }
+                }
+            ),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant) // Ciemnoszary z Twojego Theme
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { expanded = !expanded }, // Zwykła zmiana stanu, reszta dzieje się w finishedListener
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Box(modifier = Modifier.size(40.dp).clip(RoundedCornerShape(10.dp)).background(MaterialTheme.colorScheme.background), contentAlignment = Alignment.Center) {
                     Icon(if (habit.id == 1) Icons.Default.DirectionsWalk else Icons.Default.MenuBook, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                 }
                 Spacer(modifier = Modifier.width(12.dp))
+
                 Column(modifier = Modifier.weight(1f)) {
                     Text(habit.title, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onBackground)
                     Text(habit.subtitle, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
-                Text(habit.progress, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
-            }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                StatBox(modifier = Modifier.weight(1f), value = habit.stat1Value, label = habit.stat1Label)
-                StatBox(modifier = Modifier.weight(1f), value = habit.stat2Value, label = habit.stat2Label)
-                StatBox(modifier = Modifier.weight(1f), value = habit.stat3Value, label = habit.stat3Label)
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            HeatmapMock()
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Button(
-                    onClick = onDoneClick,
-                    modifier = Modifier.weight(1f).height(48.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (habit.isDoneToday) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.background,
-                        contentColor = if (habit.isDoneToday) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onBackground
-                    ),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(18.dp))
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(if (habit.isDoneToday) "Zrobione" else "Zaznacz", fontWeight = FontWeight.Bold)
+                IconButton(onClick = onDoneClick, modifier = Modifier.size(32.dp)) {
+                    if (habit.isDoneToday) {
+                        Icon(Icons.Default.CheckCircle, contentDescription = "Zrobione", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(26.dp))
+                    } else {
+                        Box(modifier = Modifier.size(22.dp).border(2.dp, MaterialTheme.colorScheme.onSurfaceVariant, CircleShape))
+                    }
                 }
 
-                OutlinedButton(
-                    onClick = { /* TODO */ },
-                    modifier = Modifier.weight(0.5f).height(48.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onBackground),
-                    shape = RoundedCornerShape(12.dp),
-                    border = null
+                Spacer(modifier = Modifier.width(4.dp))
+
+                Text(habit.progress, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+
+                IconButton(onClick = { expanded = !expanded }, modifier = Modifier.size(32.dp)) {
+                    Icon(
+                        imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                        contentDescription = "Rozwiń/Zwiń",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            if (expanded) {
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    StatBox(modifier = Modifier.weight(1f), value = habit.stat1Value, label = habit.stat1Label)
+                    StatBox(modifier = Modifier.weight(1f), value = habit.stat2Value, label = habit.stat2Label)
+                    StatBox(modifier = Modifier.weight(1f), value = habit.stat3Value, label = habit.stat3Label)
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                HeatmapMock()
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text("Notatka")
+                    Button(
+                        onClick = onDoneClick,
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (habit.isDoneToday) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.background,
+                            contentColor = if (habit.isDoneToday) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onBackground
+                        ),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(if (habit.isDoneToday) "Zrobione" else "Zaznacz", fontWeight = FontWeight.Bold)
+                    }
+
+                    OutlinedButton(
+                        onClick = { /* TODO */ },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onBackground),
+                        shape = RoundedCornerShape(12.dp),
+                        border = null
+                    ) {
+                        Text("Notatka")
+                    }
                 }
             }
         }
@@ -221,7 +263,6 @@ fun StatBox(modifier: Modifier = Modifier, value: String, label: String) {
     }
 }
 
-//  FUNKCJA HEATMAPY
 @Composable
 fun HeatmapMock() {
     val primaryColor = MaterialTheme.colorScheme.primary
@@ -247,7 +288,7 @@ fun HeatmapMock() {
 
                 Row(
                     modifier = Modifier.weight(1f),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     for (week in 0 until 8) {
                         val intensity = Random.nextFloat()
@@ -255,58 +296,14 @@ fun HeatmapMock() {
 
                         Box(
                             modifier = Modifier
-                                .size(32.dp)
+                                .weight(1f)
+                                .aspectRatio(1f)
                                 .clip(RoundedCornerShape(3.dp))
                                 .background(boxColor)
                         )
                     }
                 }
             }
-        }
-    }
-}
-
-// ZINTEGROWANY PASEK DOLNY I FAB
-@Composable
-fun BottomNavigationBar(onAddClick: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Color.Transparent),
-        contentAlignment = Alignment.BottomCenter
-    ) {
-        NavigationBar(
-            containerColor = MaterialTheme.colorScheme.surface,
-            contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-            tonalElevation = 0.dp,
-            modifier = Modifier
-                .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
-        ) {
-            NavigationBarItem(selected = true, onClick = {}, icon = { Icon(Icons.Default.Home, contentDescription = null) }, label = { Text("Dziś") })
-            NavigationBarItem(selected = false, onClick = {}, icon = { Icon(Icons.Default.BarChart, contentDescription = null) }, label = { Text("Staty") })
-
-            Spacer(modifier = Modifier.weight(1f))
-
-            NavigationBarItem(selected = false, onClick = {}, icon = { Icon(Icons.Default.Map, contentDescription = null) }, label = { Text("Mapa") })
-            NavigationBarItem(selected = false, onClick = {}, icon = { Icon(Icons.Default.People, contentDescription = null) }, label = { Text("Ludzie") })
-        }
-
-        FloatingActionButton(
-            onClick = onAddClick,
-            containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary,
-            shape = CircleShape,
-            modifier = Modifier
-                .size(64.dp)
-                .offset(y = (-45).dp)
-
-                .zIndex(1f)
-        ) {
-            Icon(
-                imageVector = Icons.Default.Add,
-                contentDescription = "Dodaj",
-                modifier = Modifier.size(32.dp)
-            )
         }
     }
 }
