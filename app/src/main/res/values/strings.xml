@@ -20,4 +20,24 @@
     <string name="mail_reset_prompt">Wysłano link do resetu hasła. Sprawdź skrzynkę odbiorczą</string>
     <string name="captcha_message">Nie jestem robotem</string>
     <string name="captcha_privacy">Prywatność • Warunki</string>
+
+    <!-- PROFILE CARD-->
+    <string name="profile_title">Profil</string>
+    <string name="profile_level">Poziom</string>
+    <string name="profile_habits">Nawyki</string>
+    <string name="profile_streak_days">Streak dni</string>
+    <string name="profile_coins">Monety</string>
+    <string name="profile_battles_won">Battle wygrane</string>
+    <string name="profile_effectiveness">Skuteczność</string>
+    <string name="profile_friends">Znajomi</string>
+    <string name="profile_settings_header">USTAWIENIA</string>
+    <string name="profile_edit">Edytuj profil</string>
+    <string name="profile_settings">Ustawienia</string>
+    <string name="profile_logout">Wyloguj się</string>
+    <string name="profile_badges_header">ODZNAKI</string>
+    <string name="badge_week">Tydzień</string>
+    <string name="badge_streak_21">Streak 21</string>
+    <string name="badge_10k_steps">10k kroków</string>
+    <string name="badge_battle_5">Battle x5</string>
+    <string name="badge_streak_100">Streak 100</string>
 </resources>
