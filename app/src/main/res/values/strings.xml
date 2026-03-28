@@ -79,6 +79,8 @@
     <string name="notifications_sound_desc">Domyślny systemowy</string>
     <string name="notifications_vibration_title">Wibracje</string>
     <string name="notifications_save_button">Zapisz ustawienia</string>
+    <string name="action_save">Zapisz</string>
+    <string name="action_cancel">Anuluj</string>
 
     <string name="privacy_title">Prywatność</string>
     <string name="privacy_back_content_desc">Wróć</string>

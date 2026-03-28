@@ -23,6 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.SzpontCompany.check.R
+import com.SzpontCompany.check.ui.components.WheelTimePicker
 import com.SzpontCompany.check.ui.theme.CheckTheme
 import com.SzpontCompany.check.ui.theme.Mint
 
@@ -39,6 +40,11 @@ fun NotificationsScreen(onBackClick: () -> Unit = {}) {
     var vibrations by remember { mutableStateOf(true) }
 
     var selectedFrequency by remember { mutableStateOf(NotificationFrequency.EVERYDAY) }
+
+    var savedHour by remember { mutableStateOf(8) }
+    var savedMinute by remember { mutableStateOf(0) }
+    var showTimePicker by remember { mutableStateOf(false) }
+
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -99,8 +105,8 @@ fun NotificationsScreen(onBackClick: () -> Unit = {}) {
 
                 TimeSelectionOption(
                     title = stringResource(R.string.notifications_time_title),
-                    time = "08:00",
-                    onClick = { /* TODO: Otwórz picker czasu */ }
+                    time = String.format(java.util.Locale.getDefault(), "%02d:%02d", savedHour, savedMinute),
+                    onClick = { showTimePicker = true }
                 )
             }
 
@@ -182,6 +188,54 @@ fun NotificationsScreen(onBackClick: () -> Unit = {}) {
             }
 
             Spacer(modifier = Modifier.height(24.dp))
+        }
+
+        if (showTimePicker) {
+            var tempHour by remember { mutableIntStateOf(savedHour) }
+            var tempMinute by remember { mutableIntStateOf(savedMinute) }
+
+            AlertDialog(
+                onDismissRequest = { showTimePicker = false },
+                modifier = Modifier.clip(RoundedCornerShape(24.dp)),
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                title = null,
+                text = {
+                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+
+                        WheelTimePicker(
+                            initialHour = savedHour,
+                            initialMinute = savedMinute,
+                            onTimeSelected = { hour, minute ->
+                                tempHour = hour
+                                tempMinute = minute
+                            }
+                        )
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        savedHour = tempHour
+                        savedMinute = tempMinute
+                        showTimePicker = false
+                    }) {
+                        Text(
+                            text = stringResource(R.string.action_save),
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp
+                        )
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showTimePicker = false }) {
+                        Text(
+                            text = stringResource(R.string.action_cancel),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontSize = 16.sp
+                        )
+                    }
+                }
+            )
         }
     }
 }

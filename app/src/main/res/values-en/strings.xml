@@ -80,6 +80,8 @@
     <string name="notifications_sound_desc">System default</string>
     <string name="notifications_vibration_title">Vibrations</string>
     <string name="notifications_save_button">Save settings</string>
+    <string name="action_save">Save</string>
+    <string name="action_cancel">Cancel</string>
 
     <string name="privacy_title">Privacy</string>
     <string name="privacy_back_content_desc">Back</string>
