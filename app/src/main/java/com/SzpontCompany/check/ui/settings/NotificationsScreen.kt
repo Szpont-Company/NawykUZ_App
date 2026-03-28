@@ -17,12 +17,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.SzpontCompany.check.R
 import com.SzpontCompany.check.ui.theme.CheckTheme
 import com.SzpontCompany.check.ui.theme.Mint
+
+enum class NotificationFrequency {
+    EVERYDAY, WORKDAYS, CUSTOM
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,7 +38,7 @@ fun NotificationsScreen(onBackClick: () -> Unit = {}) {
     var notificationSound by remember { mutableStateOf(true) }
     var vibrations by remember { mutableStateOf(true) }
 
-    var selectedFrequency by remember { mutableStateOf("Codziennie") }
+    var selectedFrequency by remember { mutableStateOf(NotificationFrequency.EVERYDAY) }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -41,7 +47,7 @@ fun NotificationsScreen(onBackClick: () -> Unit = {}) {
             TopAppBar(
                 title = {
                     Text(
-                        text = "Powiadomienia push",
+                        text = stringResource(R.string.settings_push_notifications),
                         fontSize = 22.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onBackground,
@@ -81,18 +87,18 @@ fun NotificationsScreen(onBackClick: () -> Unit = {}) {
         ) {
             Spacer(modifier = Modifier.height(16.dp))
 
-            NotificationSectionTitle("GŁÓWNE PRZYPOMNIENIE")
+            NotificationSectionTitle(stringResource(R.string.notifications_section_main))
 
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 NotificationToggleOption(
-                    title = "Włącz przypomnienia",
-                    description = "Codzienne powiadomienie o nawykach",
+                    title = stringResource(R.string.notifications_enable_title),
+                    description = stringResource(R.string.notifications_enable_desc),
                     isToggled = mainReminders,
                     onToggle = { mainReminders = it }
                 )
 
                 TimeSelectionOption(
-                    title = "Godzina\nprzypomnienia",
+                    title = stringResource(R.string.notifications_time_title),
                     time = "08:00",
                     onClick = { /* TODO: Otwórz picker czasu */ }
                 )
@@ -100,53 +106,53 @@ fun NotificationsScreen(onBackClick: () -> Unit = {}) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            NotificationSectionTitle("CZĘSTOTLIWOŚĆ")
+            NotificationSectionTitle(stringResource(R.string.notifications_section_frequency))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 FrequencyChip(
-                    title = "Codziennie",
-                    isSelected = selectedFrequency == "Codziennie",
+                    title = stringResource(R.string.notifications_freq_everyday),
+                    isSelected = selectedFrequency == NotificationFrequency.EVERYDAY,
                     modifier = Modifier.weight(1f),
-                    onClick = { selectedFrequency = "Codziennie" }
+                    onClick = { selectedFrequency = NotificationFrequency.EVERYDAY }
                 )
                 FrequencyChip(
-                    title = "Dni rob.",
-                    isSelected = selectedFrequency == "Dni rob.",
+                    title = stringResource(R.string.notifications_freq_workdays),
+                    isSelected = selectedFrequency == NotificationFrequency.WORKDAYS,
                     modifier = Modifier.weight(1f),
-                    onClick = { selectedFrequency = "Dni rob." }
+                    onClick = { selectedFrequency = NotificationFrequency.WORKDAYS }
                 )
                 FrequencyChip(
-                    title = "Własne",
-                    isSelected = selectedFrequency == "Własne",
+                    title = stringResource(R.string.notifications_freq_custom),
+                    isSelected = selectedFrequency == NotificationFrequency.CUSTOM,
                     modifier = Modifier.weight(1f),
-                    onClick = { selectedFrequency = "Własne" }
+                    onClick = { selectedFrequency = NotificationFrequency.CUSTOM }
                 )
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            NotificationSectionTitle("DODATKOWE")
+            NotificationSectionTitle(stringResource(R.string.notifications_section_additional))
 
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 NotificationToggleOption(
-                    title = "Przypomnienie wieczorne",
-                    description = "Jeśli nawyk nieukończony do 20:00",
+                    title = stringResource(R.string.notifications_evening_title),
+                    description = stringResource(R.string.notifications_evening_desc),
                     isToggled = eveningReminders,
                     onToggle = { eveningReminders = it }
                 )
 
                 NotificationToggleOption(
-                    title = "Dźwięk powiadomień",
-                    description = "Domyślny systemowy",
+                    title = stringResource(R.string.notifications_sound_title),
+                    description = stringResource(R.string.notifications_sound_desc),
                     isToggled = notificationSound,
                     onToggle = { notificationSound = it }
                 )
 
                 NotificationToggleOption(
-                    title = "Wibracje",
+                    title = stringResource(R.string.notifications_vibration_title),
                     description = null,
                     isToggled = vibrations,
                     onToggle = { vibrations = it }
@@ -168,7 +174,7 @@ fun NotificationsScreen(onBackClick: () -> Unit = {}) {
                 )
             ) {
                 Text(
-                    text = "Zapisz ustawienia",
+                    text = stringResource(R.string.notifications_save_button),
                     color = MaterialTheme.colorScheme.onBackground,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 18.sp

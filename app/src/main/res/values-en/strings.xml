@@ -63,4 +63,77 @@
     <string name="settings_about_app">About app</string>
     <string name="settings_delete_account">Delete account</string>
     <string name="settings_delete_account_warning">Irreversible action</string>
+
+    <!-- NOTIFICATIONS CARD -->
+    <string name="notifications_section_main">MAIN REMINDER</string>
+    <string name="notifications_enable_title">Enable reminders</string>
+    <string name="notifications_enable_desc">Daily habit notification</string>
+    <string name="notifications_time_title">Reminder\ntime</string>
+    <string name="notifications_section_frequency">FREQUENCY</string>
+    <string name="notifications_freq_everyday">Every day</string>
+    <string name="notifications_freq_workdays">Workdays</string>
+    <string name="notifications_freq_custom">Custom</string>
+    <string name="notifications_section_additional">ADDITIONAL</string>
+    <string name="notifications_evening_title">Evening reminder</string>
+    <string name="notifications_evening_desc">If habit not completed by 20:00</string>
+    <string name="notifications_sound_title">Notification sound</string>
+    <string name="notifications_sound_desc">System default</string>
+    <string name="notifications_vibration_title">Vibrations</string>
+    <string name="notifications_save_button">Save settings</string>
+
+    <string name="privacy_title">Privacy</string>
+    <string name="privacy_back_content_desc">Back</string>
+
+    <string name="privacy_section_visibility">PROFILE VISIBILITY</string>
+    <string name="privacy_visibility_public">Public</string>
+    <string name="privacy_visibility_public_desc">Anyone can see your profile</string>
+    <string name="privacy_visibility_friends">Friends only</string>
+    <string name="privacy_visibility_friends_desc">Profile visible to your friends</string>
+    <string name="privacy_visibility_private">Private</string>
+    <string name="privacy_visibility_private_desc">Profile completely hidden</string>
+
+    <string name="privacy_section_location">LOCATION</string>
+    <string name="privacy_location_show">Show location to friends</string>
+    <string name="privacy_location_show_desc">Only during an active workout</string>
+    <string name="privacy_location_history">Route history</string>
+    <string name="privacy_location_history_desc">Share with friends</string>
+
+    <string name="privacy_section_data">DATA</string>
+    <string name="privacy_data_export">Export data</string>
+    <string name="privacy_data_export_desc">Download all your data</string>
+
+    <string name="privacy_save_button">Save settings</string>
+
+    <string name="step_goal_title">Step goal</string>
+    <string name="step_goal_back_content_desc">Back</string>
+    <string name="step_goal_section_daily">DAILY GOAL</string>
+    <string name="step_goal_steps_suffix">steps</string>
+
+    <string name="step_goal_section_popular">POPULAR GOALS</string>
+    <string name="step_goal_popular_active">Active lifestyle</string>
+    <string name="step_goal_popular_who">WHO recommended</string>
+    <string name="step_goal_popular_classic">Classic goal</string>
+    <string name="step_goal_popular_sport">Sports and running</string>
+
+    <string name="step_goal_save_button">Save goal</string>
+
+    <string name="settings_back_content_desc">Back</string>
+    <string name="settings_state_on">On</string>
+    <string name="settings_state_off">Off</string>
+
+    <string name="settings_mock_notifications">Every day · 08:00</string>
+    <string name="settings_mock_step_goal">8,000 steps</string>
+    <string name="settings_mock_privacy">Public</string>
+    <string name="settings_mock_version">Check. v1.0.0</string>
+
+    <string name="auth_email_label">E-MAIL</string>
+    <string name="auth_captcha_toast">Please verify the captcha before continuing</string>
+
+    <string name="profile_filter_content_desc">Filter</string>
+    <string name="profile_content_desc">Profile</string>
+
+    <string name="profile_mock_name">John Doe</string>
+    <string name="profile_mock_streak">🔥 %1$d-day streak</string>
+    <string name="profile_mock_xp">%1$d / %2$d XP</string>
+    <string name="profile_mock_level">Lvl %1$d</string>
 </resources>

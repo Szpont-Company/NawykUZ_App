@@ -62,4 +62,77 @@
     <string name="settings_about_app">O aplikacji</string>
     <string name="settings_delete_account">Usuń konto</string>
     <string name="settings_delete_account_warning">Nieodwracalne działanie</string>
+
+    <!-- NOTIFICATIONS CARD -->
+    <string name="notifications_section_main">GŁÓWNE PRZYPOMNIENIE</string>
+    <string name="notifications_enable_title">Włącz przypomnienia</string>
+    <string name="notifications_enable_desc">Codzienne powiadomienie o nawykach</string>
+    <string name="notifications_time_title">Godzina\nprzypomnienia</string>
+    <string name="notifications_section_frequency">CZĘSTOTLIWOŚĆ</string>
+    <string name="notifications_freq_everyday">Codziennie</string>
+    <string name="notifications_freq_workdays">Dni rob.</string>
+    <string name="notifications_freq_custom">Własne</string>
+    <string name="notifications_section_additional">DODATKOWE</string>
+    <string name="notifications_evening_title">Przypomnienie wieczorne</string>
+    <string name="notifications_evening_desc">Jeśli nawyk nieukończony do 20:00</string>
+    <string name="notifications_sound_title">Dźwięk powiadomień</string>
+    <string name="notifications_sound_desc">Domyślny systemowy</string>
+    <string name="notifications_vibration_title">Wibracje</string>
+    <string name="notifications_save_button">Zapisz ustawienia</string>
+
+    <string name="privacy_title">Prywatność</string>
+    <string name="privacy_back_content_desc">Wróć</string>
+
+    <string name="privacy_section_visibility">WIDOCZNOŚĆ PROFILU</string>
+    <string name="privacy_visibility_public">Publiczny</string>
+    <string name="privacy_visibility_public_desc">Każdy może zobaczyć Twój profil</string>
+    <string name="privacy_visibility_friends">Tylko znajomi</string>
+    <string name="privacy_visibility_friends_desc">Profil widoczny dla znajomych</string>
+    <string name="privacy_visibility_private">Prywatny</string>
+    <string name="privacy_visibility_private_desc">Profil całkowicie ukryty</string>
+
+    <string name="privacy_section_location">LOKALIZACJA</string>
+    <string name="privacy_location_show">Pokaż lokalizację znajomym</string>
+    <string name="privacy_location_show_desc">Tylko podczas aktywnego treningu</string>
+    <string name="privacy_location_history">Historia tras</string>
+    <string name="privacy_location_history_desc">Udostępniaj znajomym</string>
+
+    <string name="privacy_section_data">DANE</string>
+    <string name="privacy_data_export">Eksportuj dane</string>
+    <string name="privacy_data_export_desc">Pobierz wszystkie swoje dane</string>
+
+    <string name="privacy_save_button">Zapisz ustawienia</string>
+
+    <string name="step_goal_title">Cel kroków</string>
+    <string name="step_goal_back_content_desc">Wróć</string>
+    <string name="step_goal_section_daily">DZIENNY CEL</string>
+    <string name="step_goal_steps_suffix">kroków</string>
+
+    <string name="step_goal_section_popular">POPULARNE CELE</string>
+    <string name="step_goal_popular_active">Aktywny tryb życia</string>
+    <string name="step_goal_popular_who">Zalecane WHO</string>
+    <string name="step_goal_popular_classic">Klasyczny cel</string>
+    <string name="step_goal_popular_sport">Sport i bieganie</string>
+
+    <string name="step_goal_save_button">Zapisz cel</string>
+
+    <string name="settings_back_content_desc">Cofnij</string>
+    <string name="settings_state_on">Włączone</string>
+    <string name="settings_state_off">Wyłączone</string>
+
+    <string name="settings_mock_notifications">Codziennie · 08:00</string>
+    <string name="settings_mock_step_goal">8 000 kroków</string>
+    <string name="settings_mock_privacy">Publiczny</string>
+    <string name="settings_mock_version">Check. v1.0.0</string>
+
+    <string name="auth_email_label">E-MAIL</string>
+    <string name="auth_captcha_toast">Zweryfikuj kod captcha przed kontynuacją</string>
+
+    <string name="profile_filter_content_desc">Filtruj</string>
+    <string name="profile_content_desc">Profil</string>
+
+    <string name="profile_mock_name">Marek Kowalski</string>
+    <string name="profile_mock_streak">🔥 %1$d-dniowy streak</string>
+    <string name="profile_mock_xp">%1$d / %2$d XP</string>
+    <string name="profile_mock_level">Lvl %1$d</string>
 </resources>
