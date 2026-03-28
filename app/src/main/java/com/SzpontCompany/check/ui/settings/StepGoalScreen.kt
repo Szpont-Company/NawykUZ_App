@@ -1,7 +1,6 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package com.SzpontCompany.check.ui.settings
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -23,7 +22,6 @@ import com.SzpontCompany.check.ui.theme.CheckTheme
 import com.SzpontCompany.check.ui.theme.Mint
 import kotlin.math.roundToInt
 
-// Pomocnicza funkcja formatująca liczbę z odstępem (np. 8 000)
 fun formatGoalNumber(goal: Int): String {
     return String.format("%,d", goal).replace(',', ' ')
 }
@@ -33,64 +31,50 @@ data class PopularGoal(
     val label: String
 )
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StepGoalScreen() {
-    // Stan dla suwaka (Float jest wymagany przez Slider)
     var sliderPosition by remember { mutableFloatStateOf(8000f) }
-
-    // Zaokrąglamy pozycję suwaka do pełnych setek, żeby nie było dziwnych liczb np. 8123
     val currentGoal = (sliderPosition / 100).roundToInt() * 100
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = MaterialTheme.colorScheme.background,
-        // --- GÓRNY PASEK ---
         topBar = {
-            CenterAlignedTopAppBar(
+            TopAppBar(
                 title = {
                     Text(
                         text = "Cel kroków",
-                        style = MaterialTheme.typography.titleMedium,
+                        fontSize = 22.sp,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onBackground
+                        color = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier.padding(start = 8.dp)
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = { /* TODO: Wróć */ }) {
+                    Box(
+                        modifier = Modifier
+                            .padding(start = 16.dp)
+                            .size(48.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                            .clickable { },
+                        contentAlignment = Alignment.Center
+                    ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Wróć",
-                            tint = MaterialTheme.colorScheme.onBackground
+                            tint = MaterialTheme.colorScheme.onBackground,
+                            modifier = Modifier.size(24.dp)
                         )
                     }
                 },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background
                 )
             )
-        },
-        // --- PRZYCISK NA DOLE ---
-        bottomBar = {
-            Button(
-                onClick = { /* TODO: Zapisz currentGoal */ },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp)
-                    .padding(bottom = 20.dp)
-                    .height(48.dp)
-                    .clip(RoundedCornerShape(12.dp)),
-                colors = ButtonDefaults.buttonColors(containerColor = Mint)
-            ) {
-                Text(
-                    text = "Zapisz cel",
-                    color = Color.White,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 15.sp
-                )
-            }
         }
     ) { innerPadding ->
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -98,12 +82,11 @@ fun StepGoalScreen() {
                 .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-            // --- SEKCJA DZIENNY CEL ---
             Text(
                 text = "DZIENNY CEL",
-                fontSize = 12.sp,
+                fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier
@@ -111,30 +94,27 @@ fun StepGoalScreen() {
                     .padding(bottom = 12.dp)
             )
 
-            // --- BOX Z GŁÓWNĄ WARTOŚCIĄ I SUWAKIEM ---
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(20.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                    .padding(24.dp),
-                contentAlignment = Alignment.TopCenter
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                    .padding(horizontal = 24.dp, vertical = 32.dp),
+                contentAlignment = Alignment.Center
             ) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    // --- GŁÓWNA WARTOŚĆ Z PRZYCISKAMI +/- ---
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center,
+                        horizontalArrangement = Arrangement.SpaceBetween,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        // Przycisk MINUS
                         Box(
                             modifier = Modifier
-                                .size(48.dp)
-                                .clip(RoundedCornerShape(12.dp))
+                                .size(56.dp)
+                                .clip(RoundedCornerShape(16.dp))
                                 .background(MaterialTheme.colorScheme.surface)
                                 .clickable {
                                     val newValue = (sliderPosition - 500).coerceAtLeast(1000f)
@@ -145,20 +125,17 @@ fun StepGoalScreen() {
                             Text(
                                 text = "−",
                                 fontSize = 28.sp,
-                                fontWeight = FontWeight.Light,
+                                fontWeight = FontWeight.Medium,
                                 color = MaterialTheme.colorScheme.onBackground
                             )
                         }
 
-                        Spacer(modifier = Modifier.width(32.dp))
-
-                        // GŁÓWNA WARTOŚĆ
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
                                 text = formatGoalNumber(currentGoal),
-                                fontSize = 56.sp,
+                                fontSize = 48.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onBackground
                             )
@@ -171,13 +148,10 @@ fun StepGoalScreen() {
                             )
                         }
 
-                        Spacer(modifier = Modifier.width(32.dp))
-
-                        // Przycisk PLUS
                         Box(
                             modifier = Modifier
-                                .size(48.dp)
-                                .clip(RoundedCornerShape(12.dp))
+                                .size(56.dp)
+                                .clip(RoundedCornerShape(16.dp))
                                 .background(MaterialTheme.colorScheme.surface)
                                 .clickable {
                                     val newValue = (sliderPosition + 500).coerceAtMost(20000f)
@@ -188,15 +162,14 @@ fun StepGoalScreen() {
                             Text(
                                 text = "+",
                                 fontSize = 28.sp,
-                                fontWeight = FontWeight.Light,
+                                fontWeight = FontWeight.Medium,
                                 color = MaterialTheme.colorScheme.onBackground
                             )
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(32.dp))
 
-                    // --- SUWAK (SLIDER) ---
                     Slider(
                         value = sliderPosition,
                         onValueChange = { sliderPosition = it },
@@ -204,36 +177,18 @@ fun StepGoalScreen() {
                         colors = SliderDefaults.colors(
                             thumbColor = Mint,
                             activeTrackColor = Mint,
-                            inactiveTrackColor = MaterialTheme.colorScheme.surfaceVariant
+                            inactiveTrackColor = MaterialTheme.colorScheme.surface
                         ),
                         modifier = Modifier.fillMaxWidth()
                     )
-
-                    // Wartości minimalna i maksymalna pod suwakiem
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = "1 000",
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Text(
-                            text = "20 000",
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
                 }
             }
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // --- POPULARNE CELE ---
             Text(
                 text = "POPULARNE CELE",
-                fontSize = 12.sp,
+                fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.align(Alignment.Start)
@@ -241,7 +196,6 @@ fun StepGoalScreen() {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // 4 opcje ułożone w 2 rzędach po 2
             val popularGoals = listOf(
                 PopularGoal(5000, "Aktywny tryb życia"),
                 PopularGoal(8000, "Zalecane WHO"),
@@ -280,6 +234,28 @@ fun StepGoalScreen() {
                 }
             }
 
+            Spacer(modifier = Modifier.weight(1f))
+
+            OutlinedButton(
+                onClick = { },
+                modifier = Modifier
+                    .fillMaxWidth(0.95f)
+                    .height(64.dp)
+                    .padding(bottom = 8.dp),
+                shape = RoundedCornerShape(16.dp),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    containerColor = Color.Transparent
+                )
+            ) {
+                Text(
+                    text = "Zapisz cel",
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 18.sp
+                )
+            }
+
             Spacer(modifier = Modifier.height(24.dp))
         }
     }
@@ -292,17 +268,17 @@ fun PopularGoalItem(
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
-    val backgroundColor = if (isSelected) Mint.copy(alpha = 0.15f) else MaterialTheme.colorScheme.surface
+    val backgroundColor = if (isSelected) Mint.copy(alpha = 0.1f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
     val borderColor = if (isSelected) Mint else Color.Transparent
-    val textColor = if (isSelected) Mint else MaterialTheme.colorScheme.onSurfaceVariant
-    val labelColor = if (isSelected) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onSurfaceVariant
+    val textColor = if (isSelected) Mint else MaterialTheme.colorScheme.onBackground
+    val labelColor = if (isSelected) Mint.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant
 
     Box(
         modifier = modifier
-            .height(96.dp)
+            .height(88.dp)
             .clip(RoundedCornerShape(16.dp))
             .background(backgroundColor)
-            .border(2.dp, borderColor, RoundedCornerShape(16.dp))
+            .border(1.dp, borderColor, RoundedCornerShape(16.dp))
             .clickable { onClick() },
         contentAlignment = Alignment.Center
     ) {
@@ -322,7 +298,7 @@ fun PopularGoalItem(
                 color = labelColor,
                 fontWeight = FontWeight.Normal,
                 fontSize = 13.sp,
-                modifier = Modifier.padding(top = 6.dp)
+                modifier = Modifier.padding(top = 4.dp)
             )
         }
     }

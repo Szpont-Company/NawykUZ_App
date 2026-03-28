@@ -46,7 +46,7 @@ class MainActivity : ComponentActivity() {
                         }
                     )
                 } else {
-                    gitLoginScreen()
+                    LoginScreen()
                 }
             }
         }
