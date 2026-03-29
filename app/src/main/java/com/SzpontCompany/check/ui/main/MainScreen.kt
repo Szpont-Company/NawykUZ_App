@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
+import com.SzpontCompany.check.ui.addhabit.AddHabitHost
 import com.SzpontCompany.check.ui.dashboard.TodayScreen
 import com.SzpontCompany.check.ui.dashboard.StatsScreen
 import com.SzpontCompany.check.ui.dashboard.MapScreen
@@ -27,6 +27,7 @@ enum class BottomTab {
 @Composable
 fun MainScreen() {
     var currentTab by remember { mutableStateOf(BottomTab.TODAY) }
+    var showAddHabit by remember { mutableStateOf(false) }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -34,7 +35,7 @@ fun MainScreen() {
             CheckBottomNavigationBar(
                 currentTab = currentTab,
                 onTabSelected = { newTab -> currentTab = newTab },
-                onAddClick = { /* TODO: Otwórz okno dodawania nawyku */ }
+                onAddClick = {  showAddHabit = true}
             )
         }
     ) { paddingValues ->
@@ -50,6 +51,12 @@ fun MainScreen() {
                 BottomTab.COMMUNITY -> CommunityScreen()
             }
         }
+    }
+
+    if (showAddHabit) {
+        AddHabitHost(
+            onClose = { showAddHabit = false}
+        )
     }
 }
 
