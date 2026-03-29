@@ -137,4 +137,5 @@
     <string name="profile_mock_streak">🔥 %1$d-dniowy streak</string>
     <string name="profile_mock_xp">%1$d / %2$d XP</string>
     <string name="profile_mock_level">Lvl %1$d</string>
+    <string name="days_initials">P,W,Ś,C,P,S,N</string>
 </resources>

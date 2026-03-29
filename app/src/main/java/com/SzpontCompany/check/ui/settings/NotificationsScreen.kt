@@ -1,11 +1,18 @@
 package com.SzpontCompany.check.ui.settings
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -24,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.SzpontCompany.check.R
 import com.SzpontCompany.check.ui.components.WheelTimePicker
+import com.SzpontCompany.check.ui.theme.Amber
 import com.SzpontCompany.check.ui.theme.CheckTheme
 import com.SzpontCompany.check.ui.theme.Mint
 
@@ -44,6 +52,8 @@ fun NotificationsScreen(onBackClick: () -> Unit = {}) {
     var savedHour by remember { mutableStateOf(8) }
     var savedMinute by remember { mutableStateOf(0) }
     var showTimePicker by remember { mutableStateOf(false) }
+
+    var selectedDays by remember { mutableStateOf(setOf(0, 1, 2, 3, 4)) }
 
 
     Scaffold(
@@ -136,6 +146,49 @@ fun NotificationsScreen(onBackClick: () -> Unit = {}) {
                     modifier = Modifier.weight(1f),
                     onClick = { selectedFrequency = NotificationFrequency.CUSTOM }
                 )
+            }
+
+            AnimatedVisibility(
+                visible = selectedFrequency == NotificationFrequency.CUSTOM,
+                enter = expandVertically() + fadeIn(),
+                exit = shrinkVertically() + fadeOut()
+            ) {
+                Column {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Row (
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        val days = stringResource(R.string.days_initials).split(",")
+                        days.forEachIndexed { index, day ->
+                            val isSelected = selectedDays.contains(index)
+                            Box(
+                                modifier = Modifier
+                                    .size(38.dp)
+                                    .clip(CircleShape)
+                                    .background(
+                                        if (isSelected) MaterialTheme.colorScheme.primary
+                                        else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                                    )
+                                    .clickable {
+                                        selectedDays = if (isSelected) {
+                                            selectedDays - index
+                                        } else {
+                                            selectedDays + index
+                                        }
+                                    },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = day,
+                                    color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 14.sp
+                                )
+                            }
+                        }
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -390,7 +443,7 @@ private fun FrequencyChip(
 @Preview(showBackground = true)
 @Composable
 fun NotificationsScreenPreview() {
-    CheckTheme(darkTheme = true, accent = Mint) {
+    CheckTheme(darkTheme = true, accent = Amber) {
         NotificationsScreen()
     }
 }
