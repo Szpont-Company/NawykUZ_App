@@ -30,9 +30,12 @@ import com.SzpontCompany.check.R
 import com.SzpontCompany.check.ui.theme.CheckTheme
 import com.SzpontCompany.check.ui.theme.Mint
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.text.style.TextAlign
+import com.SzpontCompany.check.data.BadgeProvider
 
 @Composable
 fun ProfileScreen(
@@ -353,15 +356,20 @@ fun BadgesSection() {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(bottom = 12.dp)
         )
+
+        val sortedBadges = BadgeProvider.allBadges.sortedByDescending { it.isUnlocked }
+
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             contentPadding = PaddingValues(horizontal = 2.dp)
         ) {
-            item { BadgeItem(emoji = "🏆", label = stringResource(R.string.badge_week), isActive = true) }
-            item { BadgeItem(emoji = "🔥", label = stringResource(R.string.badge_streak_21), isActive = true) }
-            item { BadgeItem(emoji = "🚶", label = stringResource(R.string.badge_10k_steps), isActive = true) }
-            item { BadgeItem(emoji = "⚔️", label = stringResource(R.string.badge_battle_5), isActive = true) }
-            item { BadgeItem(emoji = "💎", label = stringResource(R.string.badge_streak_100), isActive = false) }
+            items(sortedBadges) { badge ->
+                BadgeItem(
+                    emoji = badge.emoji,
+                    label = badge.name,
+                    isActive = badge.isUnlocked
+                )
+            }
         }
     }
 }
@@ -370,28 +378,43 @@ fun BadgesSection() {
 fun BadgeItem(emoji: String, label: String, isActive: Boolean) {
     // aktywna -> obramowanie w kolorze primary,  nie -> przezroczyste
     val borderColor = if (isActive) MaterialTheme.colorScheme.primary else Color.Transparent
+
+    // wypełnienie (15% akcentu dla aktywnych, szare dla nieaktywnych)
+    val bgColor = if (isActive) {
+        MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+    } else {
+        MaterialTheme.colorScheme.surfaceVariant
+    }
+
     // nieaktywna -> lekko przezroczysta cala odznaka
     val alpha = if (isActive) 1f else 0.4f
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.alpha(alpha)
+        modifier = Modifier
+            .width(76.dp)
+            .alpha(alpha)
     ) {
         Box(
             modifier = Modifier
                 .size(68.dp)
-                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(16.dp))
+                .background(bgColor, RoundedCornerShape(16.dp))
                 .border(2.dp, borderColor, RoundedCornerShape(16.dp)),
             contentAlignment = Alignment.Center
         ) {
             //narazie emoji , potem ewentualnie jakies image/icon
             Text(text = emoji, fontSize = 28.sp)
         }
+
         Spacer(modifier = Modifier.height(8.dp))
+
         Text(
             text = label,
             fontSize = 12.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            maxLines = 2,
+            lineHeight = 14.sp
         )
     }
 }

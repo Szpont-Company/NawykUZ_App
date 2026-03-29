@@ -12,6 +12,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -21,6 +22,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.SzpontCompany.check.ui.theme.CheckTheme
 import com.SzpontCompany.check.ui.theme.Mint
+import com.SzpontCompany.check.data.BadgeProvider
+
 
 val PremiumGold = Color(0xFFC78C18)
 val DarkGoldBackground = Color(0x33C78C18)
@@ -126,14 +129,28 @@ fun SectionTitle(title: String) {
 
 @Composable
 fun BadgesGrid() {
+    val sortedBadges = BadgeProvider.allBadges.sortedByDescending { it.isUnlocked }
+
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            BadgeCard(Modifier.weight(1f), "🏆", "Pierwszy tydzień", true)
-            BadgeCard(Modifier.weight(1f), "🔥", "Streak 21 dni", true)
-        }
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            BadgeCard(Modifier.weight(1f), "⚔️", "Battle Winner", false, "Wygraj 5 bitew")
-            BadgeCard(Modifier.weight(1f), "💎", "Diamentowy", false, "Streak 100 dni")
+        sortedBadges.chunked(2).forEach { pair ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                pair.forEach { badge ->
+                    BadgeCard(
+                        modifier = Modifier.weight(1f),
+                        emoji = badge.emoji,
+                        title = badge.name,
+                        isUnlocked = badge.isUnlocked,
+                        requirement = badge.requirement
+                    )
+                }
+
+                if (pair.size == 1) {
+                    Spacer(modifier = Modifier.weight(1f))
+                }
+            }
         }
     }
 }
@@ -154,8 +171,12 @@ fun BadgeCard(
 
     val borderColor = if (isUnlocked) MaterialTheme.colorScheme.primary else Color.Transparent
 
+
+    val alpha = if (isUnlocked) 1f else 0.4f
+
     Column(
         modifier = modifier
+            .alpha(alpha)
             .clip(RoundedCornerShape(16.dp))
             .background(bgColor)
             .border(1.5.dp, borderColor, RoundedCornerShape(16.dp))
@@ -170,13 +191,22 @@ fun BadgeCard(
             color = if (isUnlocked) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = 14.sp,
             fontWeight = FontWeight.Medium,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            maxLines = 2,
+            lineHeight = 16.sp
         )
         Spacer(modifier = Modifier.height(4.dp))
         if (isUnlocked) {
             Text(text = "Odblokowana!", color = MaterialTheme.colorScheme.primary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
         } else {
-            Text(text = requirement, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 11.sp)
+            Text(
+                text = requirement,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = 11.sp,
+                textAlign = TextAlign.Center,
+                maxLines = 2,
+                lineHeight = 14.sp
+            )
         }
     }
 }
