@@ -39,7 +39,10 @@ import androidx.compose.ui.draw.scale
 
 @Composable
 fun SettingsScreen(
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    onStepGoalClick: () -> Unit,
+    onPrivacyClick: () -> Unit,
+    onNotificationsClick: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -72,7 +75,7 @@ fun SettingsScreen(
                 subtitle = "Codziennie · 08:00",
                 icon = Icons.Rounded.Notifications,
                 baseColor = Mint,
-                onClick = { /* TODO */ }
+                onClick = onNotificationsClick
             )
             HorizontalDivider(color = MaterialTheme.colorScheme.background, thickness = 2.dp)
             SettingsRowSwitch(
@@ -109,7 +112,7 @@ fun SettingsScreen(
                 subtitle = "8 000 kroków",
                 icon = Icons.Rounded.Adjust,
                 baseColor = Cactus,
-                onClick = { /* TODO */ }
+                onClick = onStepGoalClick
             )
             HorizontalDivider(color = MaterialTheme.colorScheme.background, thickness = 2.dp)
             SettingsRowSwitch(
@@ -129,7 +132,7 @@ fun SettingsScreen(
                 subtitle = "Publiczny",
                 icon = Icons.Rounded.Lock,
                 baseColor = Indigo,
-                onClick = { /* TODO */ }
+                onClick = onPrivacyClick
             )
             HorizontalDivider(color = MaterialTheme.colorScheme.background, thickness = 2.dp)
             SettingsRowChevron(
@@ -694,6 +697,11 @@ fun LanguageButton(
 @Composable
 fun SettingsScreenPreview() {
     CheckTheme(darkTheme = true, accent = Mint) {
-        SettingsScreen{}
+        SettingsScreen(
+            onBackClick = {},
+            onStepGoalClick = {},
+            onPrivacyClick = {},
+            onNotificationsClick = {}
+        )
     }
 }

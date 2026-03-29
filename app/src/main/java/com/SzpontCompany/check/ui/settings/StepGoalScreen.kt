@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.rounded.ArrowBackIosNew
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -33,7 +34,7 @@ data class PopularGoal(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun StepGoalScreen() {
+fun StepGoalScreen(onBackClick: () -> Unit = {}) {
     var sliderPosition by remember { mutableFloatStateOf(8000f) }
     val currentGoal = (sliderPosition / 100).roundToInt() * 100
 
@@ -58,11 +59,11 @@ fun StepGoalScreen() {
                             .size(48.dp)
                             .clip(RoundedCornerShape(12.dp))
                             .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-                            .clickable { },
+                            .clickable { onBackClick() },
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            imageVector = Icons.Rounded.ArrowBackIosNew,
                             contentDescription = "Wróć",
                             tint = MaterialTheme.colorScheme.onBackground,
                             modifier = Modifier.size(24.dp)
@@ -308,6 +309,6 @@ fun PopularGoalItem(
 @Composable
 fun StepGoalScreenPreview() {
     CheckTheme(darkTheme = true, accent = Mint) {
-        StepGoalScreen()
+        StepGoalScreen(onBackClick = {})
     }
 }
