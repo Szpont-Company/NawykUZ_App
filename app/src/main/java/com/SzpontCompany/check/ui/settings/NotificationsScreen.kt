@@ -155,21 +155,33 @@ fun NotificationsScreen(onBackClick: () -> Unit = {}) {
             ) {
                 Column {
                     Spacer(modifier = Modifier.height(16.dp))
-                    Row (
+                    Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         val days = stringResource(R.string.days_initials).split(",")
                         days.forEachIndexed { index, day ->
                             val isSelected = selectedDays.contains(index)
+
                             Box(
                                 modifier = Modifier
-                                    .size(38.dp)
-                                    .clip(CircleShape)
+                                    .size(46.dp)
+                                    .clip(RoundedCornerShape(12.dp))
                                     .background(
-                                        if (isSelected) MaterialTheme.colorScheme.primary
+                                        if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
                                         else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
                                     )
+                                    .let { modifier ->
+                                        if (isSelected) {
+                                            modifier.border(
+                                                width = 1.5.dp,
+                                                color = MaterialTheme.colorScheme.primary,
+                                                shape = RoundedCornerShape(12.dp)
+                                            )
+                                        } else {
+                                            modifier
+                                        }
+                                    }
                                     .clickable {
                                         selectedDays = if (isSelected) {
                                             selectedDays - index
@@ -181,9 +193,9 @@ fun NotificationsScreen(onBackClick: () -> Unit = {}) {
                             ) {
                                 Text(
                                     text = day,
-                                    color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 14.sp
+                                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    fontWeight = FontWeight.Medium,
+                                    fontSize = 15.sp
                                 )
                             }
                         }
