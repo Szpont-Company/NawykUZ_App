@@ -21,6 +21,16 @@
     <string name="captcha_message">Nie jestem robotem</string>
     <string name="captcha_privacy">Prywatność • Warunki</string>
 
+    <!-- COLORS -->
+    <string name="color_mint">Mięta</string>
+    <string name="color_indigo">Indygo</string>
+    <string name="color_coral">Koral</string>
+    <string name="color_sky">Niebo</string>
+    <string name="color_rose">Róż</string>
+    <string name="color_cactus">Kaktus</string>
+    <string name="color_amber">Bursztyn</string>
+    <string name="color_crimson">Karmazyn</string>
+
     <!-- PROFILE CARD-->
     <string name="profile_title">Profil</string>
     <string name="profile_level">Poziom</string>

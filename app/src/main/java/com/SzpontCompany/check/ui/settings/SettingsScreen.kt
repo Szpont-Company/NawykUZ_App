@@ -1,10 +1,15 @@
 package com.SzpontCompany.check.ui.settings
 
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -14,15 +19,23 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.SzpontCompany.check.R
 import com.SzpontCompany.check.ui.theme.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.ui.draw.scale
+
 
 @Composable
 fun SettingsScreen(
@@ -456,7 +469,11 @@ fun AutoThemePreview() {
 
 @Composable
 fun FakeUIElements(isLight: Boolean = false, isAuto: Boolean = false) {
-    val elementColor = if (isLight) Color(0xFFD0D0CC) else Color(0xFF42424A)
+    val elementColor = when {
+        isAuto -> Color(0xFF8A8A8E)
+        isLight -> Color(0xFFD0D0CC)
+        else -> Color(0xFF42424A)
+    }
 
     Column(
         modifier = Modifier
@@ -478,61 +495,121 @@ fun FakeUIElements(isLight: Boolean = false, isAuto: Boolean = false) {
                     .width(28.dp)
                     .height(6.dp)
                     .clip(RoundedCornerShape(3.dp))
-                    .background(if (isAuto) Color.Transparent else elementColor)
+                    .background(elementColor)
             )
             Box(
                 modifier = Modifier
                     .width(20.dp)
                     .height(6.dp)
                     .clip(RoundedCornerShape(3.dp))
-                    .background(if (isAuto) Color.Transparent else elementColor)
+                    .background(elementColor)
             )
         }
     }
 }
+data class AccentColorItem(
+    val color: Color,
+    val nameResId: Int
+)
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun AccentColorSelector() {
-    val colors = listOf(Mint, Indigo, Coral, Sky, Rose, Cactus, Amber, Crimson)
+    val colors = listOf(
+        AccentColorItem(Mint, R.string.color_mint),
+        AccentColorItem(Indigo, R.string.color_indigo),
+        AccentColorItem(Coral, R.string.color_coral),
+        AccentColorItem(Sky, R.string.color_sky),
+        AccentColorItem(Rose, R.string.color_rose),
+        AccentColorItem(Cactus, R.string.color_cactus),
+        AccentColorItem(Amber, R.string.color_amber),
+        AccentColorItem(Crimson, R.string.color_crimson)
+    )
 
     var selectedColor by remember { mutableStateOf(Mint) }
 
-    FlowRow(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.surface)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-        colors.forEach { color ->
-            val isSelected = color == selectedColor
-
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(androidx.compose.foundation.shape.CircleShape)
-                    .clickable { selectedColor = color },
-                contentAlignment = Alignment.Center
+        colors.chunked(4).forEach { rowColors ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                if (isSelected) {
-                    Box(
+                rowColors.forEach { item ->
+                    val isSelected = item.color == selectedColor
+
+                    val alpha by animateFloatAsState(
+                        targetValue = if (isSelected) 1f else 0.5f,
+                        label = "alpha_anim"
+                    )
+
+                    val size by animateDpAsState(
+                        targetValue = if (isSelected) 64.dp else 44.dp,
+                        label = "size_anim"
+                    )
+
+                    val logoAlpha by animateFloatAsState(
+                        targetValue = if (isSelected) 1f else 0f,
+                        label = "logo_alpha_anim"
+                    )
+
+                    val logoScale by animateFloatAsState(
+                        targetValue = if (isSelected) 1f else 0.5f,
+                        label = "logo_scale_anim"
+                    )
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier
-                            .fillMaxSize()
-                            .border(2.dp, Color.White, androidx.compose.foundation.shape.CircleShape)
-                            .padding(6.dp)
+                            .weight(1f)
+                            .alpha(alpha)
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null
+                            ) { selectedColor = item.color }
                     ) {
                         Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .clip(androidx.compose.foundation.shape.CircleShape)
-                                .background(color)
+                            modifier = Modifier.height(64.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(size)
+                                    .clip(CircleShape)
+                                    .background(item.color),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                if (logoAlpha > 0f) {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.ic_check_logo),
+                                        contentDescription = null,
+                                        tint = Color.White,
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .padding(7.dp)
+                                            .alpha(logoAlpha)
+                                            .scale(logoScale)
+                                    )
+                                }
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = stringResource(item.nameResId),
+                            fontSize = 11.sp,
+                            color = if (isSelected) MaterialTheme.colorScheme.onBackground else MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
-                } else {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(color)
-                    )
                 }
             }
         }

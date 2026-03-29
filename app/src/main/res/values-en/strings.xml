@@ -22,6 +22,16 @@
     <string name="captcha_message">I\'m not a robot</string>
     <string name="captcha_privacy">Privacy • Terms</string>
 
+    <!-- COLORS -->
+    <string name="color_mint">Mint</string>
+    <string name="color_indigo">Indigo</string>
+    <string name="color_coral">Coral</string>
+    <string name="color_sky">Sky</string>
+    <string name="color_rose">Rose</string>
+    <string name="color_cactus">Cactus</string>
+    <string name="color_amber">Amber</string>
+    <string name="color_crimson">Crimson</string>
+
     <!-- Profile Card -->
     <string name="profile_title">Profile</string>
     <string name="profile_level">Level</string>
