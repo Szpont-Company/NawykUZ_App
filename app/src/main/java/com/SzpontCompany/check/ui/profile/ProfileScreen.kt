@@ -30,12 +30,14 @@ import com.SzpontCompany.check.R
 import com.SzpontCompany.check.ui.theme.CheckTheme
 import com.SzpontCompany.check.ui.theme.Mint
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 
 @Composable
 fun ProfileScreen(
-    onSettingsClick: () -> Unit = {}
+    onSettingsClick: () -> Unit = {},
+    onRewardsClick: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -68,7 +70,10 @@ fun ProfileScreen(
             modifier = Modifier.padding(bottom = 12.dp)
         )
 
-        SettingsSection(onSettingsClick = onSettingsClick)
+        SettingsSection(
+            onSettingsClick = onSettingsClick,
+            onRewardsClick = onRewardsClick
+        )
 
         Spacer(modifier = Modifier.height(100.dp))
     }
@@ -254,7 +259,8 @@ fun StatCard(modifier: Modifier = Modifier, value: String, label: String, valueC
 
 @Composable
 fun SettingsSection(
-    onSettingsClick: () -> Unit
+    onSettingsClick: () -> Unit,
+    onRewardsClick: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -267,7 +273,18 @@ fun SettingsSection(
             title = stringResource(R.string.profile_edit),
             onClick = { /* TODO */ }
         )
+
         HorizontalDivider(color = MaterialTheme.colorScheme.background, thickness = 2.dp)
+
+        SettingsItem(
+            icon = Icons.Default.EmojiEvents,
+            iconTint = Color(0xFFBA7517),
+            title = stringResource(R.string.profile_rewards),
+            onClick = onRewardsClick
+        )
+
+        HorizontalDivider(color = MaterialTheme.colorScheme.background, thickness = 2.dp)
+
         SettingsItem(
             icon = Icons.Default.Settings,
             iconTint = MaterialTheme.colorScheme.onSurfaceVariant,
