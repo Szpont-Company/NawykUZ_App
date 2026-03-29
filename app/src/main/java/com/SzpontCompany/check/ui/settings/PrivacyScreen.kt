@@ -18,12 +18,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.SzpontCompany.check.ui.theme.CheckTheme
 import com.SzpontCompany.check.ui.theme.Mint
+import com.SzpontCompany.check.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -39,7 +41,7 @@ fun PrivacyScreen(onBackClick: () -> Unit = {}) {
             TopAppBar(
                 title = {
                     Text(
-                        text = "Prywatność",
+                        text = stringResource(R.string.privacy_title),
                         fontSize = 22.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onBackground,
@@ -79,26 +81,26 @@ fun PrivacyScreen(onBackClick: () -> Unit = {}) {
         ) {
             Spacer(modifier = Modifier.height(16.dp))
 
-            SectionTitle("WIDOCZNOŚĆ PROFILU")
+            SectionTitle(stringResource(R.string.privacy_section_visibility))
 
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 PrivacyOption(
-                    title = "Publiczny",
-                    description = "Każdy może zobaczyć Twój profil",
+                    title = stringResource(R.string.privacy_visibility_public),
+                    description = stringResource(R.string.privacy_visibility_public_desc),
                     isSelected = selectedPrivacy == "public",
                     onClick = { selectedPrivacy = "public" }
                 )
 
                 PrivacyOption(
-                    title = "Tylko znajomi",
-                    description = "Profil widoczny dla znajomych",
+                    title = stringResource(R.string.privacy_visibility_friends),
+                    description = stringResource(R.string.privacy_visibility_friends_desc),
                     isSelected = selectedPrivacy == "friends",
                     onClick = { selectedPrivacy = "friends" }
                 )
 
                 PrivacyOption(
-                    title = "Prywatny",
-                    description = "Profil całkowicie ukryty",
+                    title = stringResource(R.string.privacy_visibility_private),
+                    description = stringResource(R.string.privacy_visibility_private_desc),
                     isSelected = selectedPrivacy == "private",
                     onClick = { selectedPrivacy = "private" }
                 )
@@ -106,19 +108,19 @@ fun PrivacyScreen(onBackClick: () -> Unit = {}) {
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            SectionTitle("LOKALIZACJA")
+            SectionTitle(stringResource(R.string.privacy_section_location))
 
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 ToggleOption(
-                    title = "Pokaż lokalizację znajomym",
-                    description = "Tylko podczas aktywnego treningu",
+                    title = stringResource(R.string.privacy_location_show),
+                    description = stringResource(R.string.privacy_location_show_desc),
                     isToggled = locationToggle,
                     onToggle = { locationToggle = it }
                 )
 
                 ToggleOption(
-                    title = "Historia tras",
-                    description = "Udostępniaj znajomym",
+                    title = stringResource(R.string.privacy_location_history),
+                    description = stringResource(R.string.privacy_location_history_desc),
                     isToggled = historyToggle,
                     onToggle = { historyToggle = it }
                 )
@@ -126,11 +128,11 @@ fun PrivacyScreen(onBackClick: () -> Unit = {}) {
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            SectionTitle("DANE")
+            SectionTitle(stringResource(R.string.privacy_section_data))
 
             DataOption(
-                title = "Eksportuj dane",
-                description = "Pobierz wszystkie swoje dane"
+                title = stringResource(R.string.privacy_data_export),
+                description = stringResource(R.string.privacy_data_export_desc)
             )
 
             Spacer(modifier = Modifier.height(48.dp))
@@ -148,7 +150,7 @@ fun PrivacyScreen(onBackClick: () -> Unit = {}) {
                 )
             ) {
                 Text(
-                    text = "Zapisz ustawienia",
+                    text = stringResource(R.string.notifications_save_button),
                     color = MaterialTheme.colorScheme.onBackground,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 18.sp

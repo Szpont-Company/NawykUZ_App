@@ -2,8 +2,8 @@ package com.SzpontCompany.check.data
 
 data class Badge(
     val id: String,
-    val name: String,
+    val nameResId: Int,
     val emoji: String,
-    val requirement: String,
+    val requirementResId: Int,
     val isUnlocked: Boolean
 )

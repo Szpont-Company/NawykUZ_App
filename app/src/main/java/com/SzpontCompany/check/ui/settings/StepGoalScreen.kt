@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -22,6 +23,8 @@ import androidx.compose.ui.unit.sp
 import com.SzpontCompany.check.ui.theme.CheckTheme
 import com.SzpontCompany.check.ui.theme.Mint
 import kotlin.math.roundToInt
+import com.SzpontCompany.check.R
+
 
 fun formatGoalNumber(goal: Int): String {
     return String.format("%,d", goal).replace(',', ' ')
@@ -45,7 +48,7 @@ fun StepGoalScreen(onBackClick: () -> Unit = {}) {
             TopAppBar(
                 title = {
                     Text(
-                        text = "Cel kroków",
+                        text = stringResource(R.string.step_goal_title),
                         fontSize = 22.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onBackground,
@@ -86,7 +89,7 @@ fun StepGoalScreen(onBackClick: () -> Unit = {}) {
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
-                text = "DZIENNY CEL",
+                text = stringResource(R.string.step_goal_section_daily),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -142,7 +145,7 @@ fun StepGoalScreen(onBackClick: () -> Unit = {}) {
                             )
 
                             Text(
-                                text = "kroków",
+                                text = stringResource(R.string.step_goal_steps_suffix),
                                 fontSize = 14.sp,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.padding(top = 4.dp)
@@ -188,7 +191,7 @@ fun StepGoalScreen(onBackClick: () -> Unit = {}) {
             Spacer(modifier = Modifier.height(32.dp))
 
             Text(
-                text = "POPULARNE CELE",
+                text = stringResource(R.string.step_goal_section_popular),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -198,10 +201,10 @@ fun StepGoalScreen(onBackClick: () -> Unit = {}) {
             Spacer(modifier = Modifier.height(16.dp))
 
             val popularGoals = listOf(
-                PopularGoal(5000, "Aktywny tryb życia"),
-                PopularGoal(8000, "Zalecane WHO"),
-                PopularGoal(10000, "Klasyczny cel"),
-                PopularGoal(15000, "Sport i bieganie")
+                PopularGoal(5000, stringResource(R.string.step_goal_popular_active)),
+                PopularGoal(8000, stringResource(R.string.step_goal_popular_who)),
+                PopularGoal(10000, stringResource(R.string.step_goal_popular_classic)),
+                PopularGoal(15000, stringResource(R.string.step_goal_popular_sport))
             )
 
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -250,7 +253,7 @@ fun StepGoalScreen(onBackClick: () -> Unit = {}) {
                 )
             ) {
                 Text(
-                    text = "Zapisz cel",
+                    text = stringResource(R.string.step_goal_save_button),
                     color = MaterialTheme.colorScheme.onBackground,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 18.sp

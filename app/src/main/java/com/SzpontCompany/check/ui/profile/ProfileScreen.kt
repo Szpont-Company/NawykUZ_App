@@ -156,7 +156,7 @@ fun UserHeaderSection() {
                         .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(12.dp))
                         .padding(horizontal = 10.dp, vertical = 4.dp)
                 ) {
-                    Text("🔥 21-dniowy streak", color = MaterialTheme.colorScheme.primary, fontSize = 11.sp, fontWeight = FontWeight.Medium)
+                    Text(text = stringResource(R.string.profile_streak_format, 21), color = MaterialTheme.colorScheme.primary, fontSize = 11.sp, fontWeight = FontWeight.Medium)
                 }
                 Box(
                     modifier = Modifier
@@ -193,14 +193,14 @@ fun LevelAndXpBar() {
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
-                    text = "1 240 / 1 600 XP",
+                    text = stringResource(R.string.profile_xp_format, 1240, 1600),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium
                 )
             }
             Text(
-                text = "→ ${stringResource(R.string.profile_level)} 9",
+                text = stringResource(R.string.profile_next_level, 9),
                 color = Color(0xFFBA7517),
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold
@@ -233,14 +233,40 @@ fun LevelAndXpBar() {
 fun StatsGridSection() {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            StatCard(modifier = Modifier.weight(1f), value = "34", label = stringResource(R.string.profile_habits))
-            StatCard(modifier = Modifier.weight(1f), value = "21", label = stringResource(R.string.profile_streak_days), valueColor = MaterialTheme.colorScheme.primary)
-            StatCard(modifier = Modifier.weight(1f), value = "850", label = stringResource(R.string.profile_coins), valueColor = Color(0xFFBA7517))
+            StatCard(
+                modifier = Modifier.weight(1f),
+                value = "34",
+                label = stringResource(R.string.profile_habits)
+            )
+            StatCard(
+                modifier = Modifier.weight(1f),
+                value = "21",
+                label = stringResource(R.string.profile_streak_days),
+                valueColor = MaterialTheme.colorScheme.primary
+            )
+            StatCard(
+                modifier = Modifier.weight(1f),
+                value = "850",
+                label = stringResource(R.string.profile_coins),
+                valueColor = Color(0xFFBA7517)
+            )
         }
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            StatCard(modifier = Modifier.weight(1f), value = "7", label = stringResource(R.string.profile_battles_won))
-            StatCard(modifier = Modifier.weight(1f), value = "78%", label = stringResource(R.string.profile_effectiveness))
-            StatCard(modifier = Modifier.weight(1f), value = "12", label = stringResource(R.string.profile_friends))
+            StatCard(
+                modifier = Modifier.weight(1f),
+                value = "7",
+                label = stringResource(R.string.profile_battles_won)
+            )
+            StatCard(
+                modifier = Modifier.weight(1f),
+                value = "78%",
+                label = stringResource(R.string.profile_effectiveness)
+            )
+            StatCard(
+                modifier = Modifier.weight(1f),
+                value = "12",
+                label = stringResource(R.string.profile_friends)
+            )
         }
     }
 }
@@ -366,7 +392,7 @@ fun BadgesSection() {
             items(sortedBadges) { badge ->
                 BadgeItem(
                     emoji = badge.emoji,
-                    label = badge.name,
+                    label = stringResource(id = badge.nameResId),
                     isActive = badge.isUnlocked
                 )
             }

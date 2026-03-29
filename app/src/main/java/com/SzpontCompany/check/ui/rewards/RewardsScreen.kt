@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -23,6 +24,7 @@ import androidx.compose.ui.unit.sp
 import com.SzpontCompany.check.ui.theme.CheckTheme
 import com.SzpontCompany.check.ui.theme.Mint
 import com.SzpontCompany.check.data.BadgeProvider
+import com.SzpontCompany.check.R
 
 
 val PremiumGold = Color(0xFFC78C18)
@@ -36,7 +38,7 @@ fun RewardsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Nagrody", fontWeight = FontWeight.Bold) },
+                title = { Text(text = stringResource(R.string.rewards_title), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(
@@ -64,22 +66,22 @@ fun RewardsScreen(
             CoinsCard(currentCoins = 850, totalCoins = 3240)
 
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                SectionTitle("ODZNAKI")
+                SectionTitle(stringResource(R.string.rewards_section_badges))
                 BadgesGrid()
             }
 
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                SectionTitle("SKLEP Z NAGRODAMI")
+                SectionTitle(stringResource(R.string.rewards_section_store))
                 StoreItem(
                     emoji = "🎨",
-                    title = "Kolor akcentu — Złoty",
-                    subtitle = "Motyw premium dla profilu",
+                    title = stringResource(R.string.store_item_accent_title),
+                    subtitle = stringResource(R.string.store_item_accent_desc),
                     price = "200 C"
                 )
                 StoreItem(
                     emoji = "🛡️",
-                    title = "Tarcza HP — ochrona x1",
-                    subtitle = "Chroni przed karą w Battle",
+                    title = stringResource(R.string.store_item_shield_title),
+                    subtitle = stringResource(R.string.store_item_shield_desc),
                     price = "150 C"
                 )
             }
@@ -105,11 +107,11 @@ fun CoinsCard(currentCoins: Int, totalCoins: Int) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column {
-                Text(text = "Twoje monety", color = PremiumGold, fontSize = 14.sp)
+                Text(text = stringResource(R.string.rewards_your_coins), color = PremiumGold, fontSize = 14.sp)
                 Text(text = currentCoins.toString(), color = PremiumGold, fontSize = 36.sp, fontWeight = FontWeight.Bold)
             }
             Column(horizontalAlignment = Alignment.End) {
-                Text(text = "Łącznie zdobyte", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
+                Text(text = stringResource(R.string.rewards_total_earned), color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
                 Text(text = totalCoins.toString(), color = PremiumGold, fontSize = 16.sp, fontWeight = FontWeight.Medium)
             }
         }
@@ -141,9 +143,9 @@ fun BadgesGrid() {
                     BadgeCard(
                         modifier = Modifier.weight(1f),
                         emoji = badge.emoji,
-                        title = badge.name,
+                        title = stringResource(badge.nameResId),
                         isUnlocked = badge.isUnlocked,
-                        requirement = badge.requirement
+                        requirement = stringResource(badge.requirementResId)
                     )
                 }
 
@@ -197,7 +199,7 @@ fun BadgeCard(
         )
         Spacer(modifier = Modifier.height(4.dp))
         if (isUnlocked) {
-            Text(text = "Odblokowana!", color = MaterialTheme.colorScheme.primary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+            Text(text = stringResource(R.string.rewards_unlocked), color = MaterialTheme.colorScheme.primary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
         } else {
             Text(
                 text = requirement,

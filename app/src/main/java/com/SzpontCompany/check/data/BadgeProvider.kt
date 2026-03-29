@@ -1,40 +1,42 @@
 package com.SzpontCompany.check.data
 
+import com.SzpontCompany.check.R
+
 object BadgeProvider {
     val allBadges = listOf(
         Badge(
             id = "week_1",
-            name = "Pierwszy tydzień",
+            nameResId = R.string.badge_week_name,
             emoji = "🏆",
-            requirement = "Używaj apki przez 7 dni",
+            requirementResId = R.string.badge_week_desc,
             isUnlocked = true
         ),
         Badge(
             id = "streak_21",
-            name = "Streak 21 dni",
+            nameResId = R.string.badge_streak21_name,
             emoji = "🔥",
-            requirement = "Utrzymaj passę 21 dni",
+            requirementResId = R.string.badge_streak21_desc,
             isUnlocked = true
         ),
         Badge(
             id = "steps_10k",
-            name = "10k steps",
+            nameResId = R.string.badge_steps_name,
             emoji = "🚶",
-            requirement = "Zrób 10 000 kroków w jeden dzień",
+            requirementResId = R.string.badge_steps_desc,
             isUnlocked = true
         ),
         Badge(
             id = "battle_5",
-            name = "Battle Winner",
+            nameResId = R.string.badge_battle_name,
             emoji = "⚔️",
-            requirement = "Wygraj 5 bitew",
+            requirementResId = R.string.badge_battle_desc,
             isUnlocked = true
         ),
         Badge(
             id = "streak_100",
-            name = "Diamentowy",
+            nameResId = R.string.badge_diamond_name,
             emoji = "💎",
-            requirement = "Streak 100 dni",
+            requirementResId = R.string.badge_diamond_desc,
             isUnlocked = false
         )
     )

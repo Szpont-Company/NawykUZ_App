@@ -14,6 +14,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -22,6 +23,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.SzpontCompany.check.data.Badge
 import com.SzpontCompany.check.ui.components.ConfettiEffect
+import com.SzpontCompany.check.R
 
 val AwardGold = Color(0xFFFFC107)
 
@@ -86,7 +88,7 @@ fun BadgeUnlockDialog(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "NOWA ODZNAKA!",
+                    text = stringResource(R.string.dialog_badge_header),
                     color = Color.Gray,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
@@ -96,7 +98,7 @@ fun BadgeUnlockDialog(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = badge.name,
+                    text = stringResource(id = badge.nameResId),
                     color = Color.White,
                     fontSize = 28.sp,
                     fontWeight = FontWeight.ExtraBold,
@@ -122,7 +124,7 @@ fun BadgeUnlockDialog(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = badge.requirement,
+                    text = stringResource(id = badge.requirementResId),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 14.sp,
                     textAlign = TextAlign.Center
@@ -140,7 +142,7 @@ fun BadgeUnlockDialog(
                         Text(text = "💰", fontSize = 16.sp)
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "+50 monet",
+                            text = stringResource(R.string.dialog_coins_earned, 50),
                             color = AwardGold,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Bold
@@ -161,7 +163,7 @@ fun BadgeUnlockDialog(
                     ),
                     shape = RoundedCornerShape(16.dp)
                 ) {
-                    Text(text = "ODBIERZ NAGRODĘ!", fontSize = 16.sp, fontWeight = FontWeight.ExtraBold)
+                    Text(text = stringResource(R.string.dialog_claim_btn), fontSize = 16.sp, fontWeight = FontWeight.ExtraBold)
                 }
             }
         }
