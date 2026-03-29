@@ -34,17 +34,14 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun AnimatedSplashScreen(onSplashFinished: () -> Unit) {
-    // Stany animacji
-    val logoScale = remember { Animatable(0.4f) } // Zaczynamy od pomniejszonego logo
-    val logoAlpha = remember { Animatable(0f) }   // Zaczynamy od niewidocznego
+    val logoScale = remember { Animatable(0.4f) }
+    val logoAlpha = remember { Animatable(0f) }
     val textAlpha = remember { Animatable(0f) }
 
-    // Uruchomienie sekwencji animacji
+
     LaunchedEffect(key1 = true) {
-        // 1. Krótka pauza na start (płynne przejęcie od systemu)
         delay(200)
 
-        // 2. Wskok logo (animujemy skalę i przezroczystość jednocześnie)
         launch {
             logoAlpha.animateTo(1f, animationSpec = tween(durationMillis = 400))
         }
@@ -52,20 +49,19 @@ fun AnimatedSplashScreen(onSplashFinished: () -> Unit) {
             logoScale.animateTo(
                 targetValue = 1f,
                 animationSpec = spring(
-                    dampingRatio = Spring.DampingRatioMediumBouncy, // Efekt delikatnej sprężyny
+                    dampingRatio = Spring.DampingRatioMediumBouncy,
                     stiffness = Spring.StiffnessLow
                 )
             )
         }
 
-        // 3. Płynne pojawienie się napisów
         delay(300)
         textAlpha.animateTo(
             targetValue = 1f,
             animationSpec = tween(durationMillis = 500)
         )
 
-        // 4. Chwila przerwy i przejście do ekranu logowania
+
         delay(800)
         onSplashFinished()
     }
@@ -79,12 +75,12 @@ fun AnimatedSplashScreen(onSplashFinished: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        // Kafel z Waszym IDEALNYM logo (używa tej samej funkcji co ekran logowania)
+
         Box(
             modifier = Modifier
                 .size(100.dp)
-                .scale(logoScale.value) // Podpięta animacja powiększania
-                .alpha(logoAlpha.value) // Podpięta animacja przezroczystości
+                .scale(logoScale.value)
+                .alpha(logoAlpha.value)
                 .clip(RoundedCornerShape(28.dp))
                 .background(accent),
             contentAlignment = Alignment.Center
@@ -99,7 +95,7 @@ fun AnimatedSplashScreen(onSplashFinished: () -> Unit) {
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Pojawiający się tekst (dokładnie taki sam kształt i kolor jak poprzednio)
+
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,
