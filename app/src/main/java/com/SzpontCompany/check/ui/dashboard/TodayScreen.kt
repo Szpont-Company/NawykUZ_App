@@ -1,4 +1,3 @@
-// Ścieżka: src/main/java/com/SzpontCompany/check/ui/dashboard/TodayScreen.kt
 package com.SzpontCompany.check.ui.dashboard
 
 import androidx.compose.animation.animateContentSize
@@ -50,7 +49,7 @@ fun TodayScreen(onProfileClick: () -> Unit = {}) {
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 24.dp),
-        contentPadding = PaddingValues(top = 24.dp, bottom = 120.dp)
+        contentPadding = PaddingValues(top = 24.dp, bottom = 24.dp)
     ) {
         item {
             TopSection(onProfileClick = onProfileClick)

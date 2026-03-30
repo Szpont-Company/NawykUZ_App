@@ -52,7 +52,7 @@ fun ProfileScreen(
             .padding(horizontal = 24.dp)
             .verticalScroll(rememberScrollState())
     ) {
-        Spacer(modifier = Modifier.height(48.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
         ProfileTopBar(onBackClick = onBackClick)
         Spacer(modifier = Modifier.height(24.dp))
@@ -81,7 +81,7 @@ fun ProfileScreen(
             onRewardsClick = onRewardsClick
         )
 
-        Spacer(modifier = Modifier.height(100.dp))
+        Spacer(modifier = Modifier.height(24.dp))
     }
 }
 

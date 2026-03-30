@@ -9,9 +9,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.rounded.ArrowBackIosNew
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -28,126 +26,110 @@ import com.SzpontCompany.check.ui.theme.Mint
 import com.SzpontCompany.check.R
 import com.SzpontCompany.check.ui.components.CheckBackButton
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PrivacyScreen(onBackClick: () -> Unit = {}) {
     var selectedPrivacy by remember { mutableStateOf("public") }
     var locationToggle by remember { mutableStateOf(true) }
     var historyToggle by remember { mutableStateOf(true) }
 
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        containerColor = MaterialTheme.colorScheme.background,
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = stringResource(R.string.privacy_title),
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onBackground,
-                        modifier = Modifier.padding(start = 8.dp)
-                    )
-                },
-                navigationIcon = {
-                    CheckBackButton(
-                        onClick = onBackClick,
-                        modifier = Modifier.padding(start = 8.dp)
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background
-                )
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .padding(horizontal = 24.dp)
+            .verticalScroll(rememberScrollState())
+    ) {
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            CheckBackButton(onClick = onBackClick)
+            Spacer(modifier = Modifier.width(16.dp))
+            Text(
+                text = stringResource(R.string.privacy_title),
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
             )
         }
-    ) { innerPadding ->
-        Column(
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        SectionTitle(stringResource(R.string.privacy_section_visibility))
+
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            PrivacyOption(
+                title = stringResource(R.string.privacy_visibility_public),
+                description = stringResource(R.string.privacy_visibility_public_desc),
+                isSelected = selectedPrivacy == "public",
+                onClick = { selectedPrivacy = "public" }
+            )
+
+            PrivacyOption(
+                title = stringResource(R.string.privacy_visibility_friends),
+                description = stringResource(R.string.privacy_visibility_friends_desc),
+                isSelected = selectedPrivacy == "friends",
+                onClick = { selectedPrivacy = "friends" }
+            )
+
+            PrivacyOption(
+                title = stringResource(R.string.privacy_visibility_private),
+                description = stringResource(R.string.privacy_visibility_private_desc),
+                isSelected = selectedPrivacy == "private",
+                onClick = { selectedPrivacy = "private" }
+            )
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        SectionTitle(stringResource(R.string.privacy_section_location))
+
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            ToggleOption(
+                title = stringResource(R.string.privacy_location_show),
+                description = stringResource(R.string.privacy_location_show_desc),
+                isToggled = locationToggle,
+                onToggle = { locationToggle = it }
+            )
+
+            ToggleOption(
+                title = stringResource(R.string.privacy_location_history),
+                description = stringResource(R.string.privacy_location_history_desc),
+                isToggled = historyToggle,
+                onToggle = { historyToggle = it }
+            )
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        SectionTitle(stringResource(R.string.privacy_section_data))
+
+        DataOption(
+            title = stringResource(R.string.privacy_data_export),
+            description = stringResource(R.string.privacy_data_export_desc)
+        )
+
+        Spacer(modifier = Modifier.height(48.dp))
+
+        OutlinedButton(
+            onClick = { },
             modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(horizontal = 24.dp)
-                .verticalScroll(rememberScrollState())
-        ) {
-            Spacer(modifier = Modifier.height(16.dp))
-
-            SectionTitle(stringResource(R.string.privacy_section_visibility))
-
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                PrivacyOption(
-                    title = stringResource(R.string.privacy_visibility_public),
-                    description = stringResource(R.string.privacy_visibility_public_desc),
-                    isSelected = selectedPrivacy == "public",
-                    onClick = { selectedPrivacy = "public" }
-                )
-
-                PrivacyOption(
-                    title = stringResource(R.string.privacy_visibility_friends),
-                    description = stringResource(R.string.privacy_visibility_friends_desc),
-                    isSelected = selectedPrivacy == "friends",
-                    onClick = { selectedPrivacy = "friends" }
-                )
-
-                PrivacyOption(
-                    title = stringResource(R.string.privacy_visibility_private),
-                    description = stringResource(R.string.privacy_visibility_private_desc),
-                    isSelected = selectedPrivacy == "private",
-                    onClick = { selectedPrivacy = "private" }
-                )
-            }
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            SectionTitle(stringResource(R.string.privacy_section_location))
-
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                ToggleOption(
-                    title = stringResource(R.string.privacy_location_show),
-                    description = stringResource(R.string.privacy_location_show_desc),
-                    isToggled = locationToggle,
-                    onToggle = { locationToggle = it }
-                )
-
-                ToggleOption(
-                    title = stringResource(R.string.privacy_location_history),
-                    description = stringResource(R.string.privacy_location_history_desc),
-                    isToggled = historyToggle,
-                    onToggle = { historyToggle = it }
-                )
-            }
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            SectionTitle(stringResource(R.string.privacy_section_data))
-
-            DataOption(
-                title = stringResource(R.string.privacy_data_export),
-                description = stringResource(R.string.privacy_data_export_desc)
+                .fillMaxWidth()
+                .height(64.dp),
+            shape = RoundedCornerShape(16.dp),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)),
+            colors = ButtonDefaults.outlinedButtonColors(
+                containerColor = Color.Transparent
             )
-
-            Spacer(modifier = Modifier.height(48.dp))
-
-            OutlinedButton(
-                onClick = { },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(64.dp)
-                    .padding(bottom = 8.dp),
-                shape = RoundedCornerShape(16.dp),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)),
-                colors = ButtonDefaults.outlinedButtonColors(
-                    containerColor = Color.Transparent
-                )
-            ) {
-                Text(
-                    text = stringResource(R.string.notifications_save_button),
-                    color = MaterialTheme.colorScheme.onBackground,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 18.sp
-                )
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
+        ) {
+            Text(
+                text = stringResource(R.string.notifications_save_button),
+                color = MaterialTheme.colorScheme.onBackground,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 18.sp
+            )
         }
+
+        Spacer(modifier = Modifier.height(24.dp))
     }
 }
 
