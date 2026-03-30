@@ -22,6 +22,16 @@
     <string name="captcha_message">I\'m not a robot</string>
     <string name="captcha_privacy">Privacy • Terms</string>
 
+    <!-- COLORS -->
+    <string name="color_mint">Mint</string>
+    <string name="color_indigo">Indigo</string>
+    <string name="color_coral">Coral</string>
+    <string name="color_sky">Sky</string>
+    <string name="color_rose">Rose</string>
+    <string name="color_cactus">Cactus</string>
+    <string name="color_amber">Amber</string>
+    <string name="color_crimson">Crimson</string>
+
     <!-- Profile Card -->
     <string name="profile_title">Profile</string>
     <string name="profile_level">Level</string>
@@ -33,6 +43,7 @@
     <string name="profile_friends">Friends</string>
     <string name="profile_settings_header">SETTINGS</string>
     <string name="profile_edit">Edit profile</string>
+    <string name="profile_rewards">Rewards</string>
     <string name="profile_settings">Settings</string>
     <string name="profile_logout">Log out</string>
     <string name="profile_badges_header">BADGES</string>
@@ -43,4 +54,135 @@
     <string name="badge_streak_100">Streak 100</string>
     <string name="confirm_mail_prompt">Account created succesfully! Check your email to verify.</string>
     <string name="login_unverified_email_prompt">Unable to log in. Verify your email first</string>
+
+    <!-- SETTINGS CARD -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_section_appearance">APPEARANCE</string>
+    <string name="settings_theme_dark">Dark</string>
+    <string name="settings_theme_light">Light</string>
+    <string name="settings_theme_auto">Auto</string>
+    <string name="settings_section_accent">ACCENT COLOR</string>
+    <string name="settings_section_language">LANGUAGE</string>
+    <string name="settings_section_notifications">NOTIFICATIONS</string>
+    <string name="settings_push_notifications">Push notifications</string>
+    <string name="settings_battle_notifications">Battle notifications</string>
+    <string name="settings_events_challenges">Events and challenges</string>
+    <string name="settings_section_activity">ACTIVITY</string>
+    <string name="settings_step_counter">Step counter</string>
+    <string name="settings_daily_step_goal">Daily step goal</string>
+    <string name="settings_friends_location">Friends location</string>
+    <string name="settings_section_privacy_account">PRIVACY AND ACCOUNT</string>
+    <string name="settings_profile_privacy">Profile privacy</string>
+    <string name="settings_about_app">About app</string>
+    <string name="settings_delete_account">Delete account</string>
+    <string name="settings_delete_account_warning">Irreversible action</string>
+
+    <!-- NOTIFICATIONS CARD -->
+    <string name="notifications_section_main">MAIN REMINDER</string>
+    <string name="notifications_enable_title">Enable reminders</string>
+    <string name="notifications_enable_desc">Daily habit notification</string>
+    <string name="notifications_time_title">Reminder\ntime</string>
+    <string name="notifications_section_frequency">FREQUENCY</string>
+    <string name="notifications_freq_everyday">Every day</string>
+    <string name="notifications_freq_workdays">Workdays</string>
+    <string name="notifications_freq_custom">Custom</string>
+    <string name="notifications_section_additional">ADDITIONAL</string>
+    <string name="notifications_evening_title">Evening reminder</string>
+    <string name="notifications_evening_desc">If habit not completed by 20:00</string>
+    <string name="notifications_sound_title">Notification sound</string>
+    <string name="notifications_sound_desc">System default</string>
+    <string name="notifications_vibration_title">Vibrations</string>
+    <string name="notifications_save_button">Save settings</string>
+    <string name="action_save">Save</string>
+    <string name="action_cancel">Cancel</string>
+
+    <string name="privacy_title">Privacy</string>
+    <string name="privacy_back_content_desc">Back</string>
+
+    <string name="privacy_section_visibility">PROFILE VISIBILITY</string>
+    <string name="privacy_visibility_public">Public</string>
+    <string name="privacy_visibility_public_desc">Anyone can see your profile</string>
+    <string name="privacy_visibility_friends">Friends only</string>
+    <string name="privacy_visibility_friends_desc">Profile visible to your friends</string>
+    <string name="privacy_visibility_private">Private</string>
+    <string name="privacy_visibility_private_desc">Profile completely hidden</string>
+
+    <string name="privacy_section_location">LOCATION</string>
+    <string name="privacy_location_show">Show location to friends</string>
+    <string name="privacy_location_show_desc">Only during an active workout</string>
+    <string name="privacy_location_history">Route history</string>
+    <string name="privacy_location_history_desc">Share with friends</string>
+
+    <string name="privacy_section_data">DATA</string>
+    <string name="privacy_data_export">Export data</string>
+    <string name="privacy_data_export_desc">Download all your data</string>
+
+    <string name="privacy_save_button">Save settings</string>
+
+    <string name="step_goal_title">Step goal</string>
+    <string name="step_goal_back_content_desc">Back</string>
+    <string name="step_goal_section_daily">DAILY GOAL</string>
+    <string name="step_goal_steps_suffix">steps</string>
+
+    <string name="step_goal_section_popular">POPULAR GOALS</string>
+    <string name="step_goal_popular_active">Active lifestyle</string>
+    <string name="step_goal_popular_who">WHO recommended</string>
+    <string name="step_goal_popular_classic">Classic goal</string>
+    <string name="step_goal_popular_sport">Sports and running</string>
+
+    <string name="step_goal_save_button">Save goal</string>
+
+    <string name="settings_back_content_desc">Back</string>
+    <string name="settings_state_on">On</string>
+    <string name="settings_state_off">Off</string>
+
+    <string name="settings_mock_notifications">Every day · 08:00</string>
+    <string name="settings_mock_step_goal">8,000 steps</string>
+    <string name="settings_mock_privacy">Public</string>
+    <string name="settings_mock_version">Check. v1.0.0</string>
+
+    <string name="auth_email_label">E-MAIL</string>
+    <string name="auth_captcha_toast">Please verify the captcha before continuing</string>
+
+    <string name="profile_filter_content_desc">Filter</string>
+    <string name="profile_content_desc">Profile</string>
+
+    <string name="profile_mock_name">John Doe</string>
+    <string name="profile_mock_streak">🔥 %1$d-day streak</string>
+    <string name="profile_mock_xp">%1$d / %2$d XP</string>
+    <string name="profile_mock_level">Lvl %1$d</string>
+    <string name="days_initials">Mo,Tu,We,Th,Fr,Sa,Su</string>
+
+    <string name="rewards_title">Nagrody</string>
+    <string name="rewards_your_coins">Twoje monety</string>
+    <string name="rewards_total_earned">Łącznie zdobyte</string>
+    <string name="rewards_section_badges">ODZNAKI</string>
+    <string name="rewards_section_store">SKLEP Z NAGRODAMI</string>
+    <string name="rewards_unlocked">Odblokowana!</string>
+
+    <string name="store_item_accent_title">Kolor akcentu — Złoty</string>
+    <string name="store_item_accent_desc">Motyw premium dla profilu</string>
+    <string name="store_item_shield_title">Tarcza HP — ochrona x1</string>
+    <string name="store_item_shield_desc">Chroni przed karą w Battle</string>
+
+    <string name="dialog_badge_header">NOWA ODZNAKA!</string>
+    <string name="dialog_coins_earned">+%1$d monet</string> <string name="dialog_claim_btn">ODBIERZ NAGRODĘ!</string>
+
+    <string name="badge_week_name">Pierwszy tydzień</string>
+    <string name="badge_week_desc">Używaj apki przez 7 dni</string>
+
+    <string name="badge_streak21_name">Streak 21 dni</string>
+    <string name="badge_streak21_desc">Utrzymaj passę 21 dni</string>
+
+    <string name="badge_steps_name">10k steps</string>
+    <string name="badge_steps_desc">Zrób 10 000 kroków w jeden dzień</string>
+
+    <string name="badge_battle_name">Battle Winner</string>
+    <string name="badge_battle_desc">Wygraj 5 bitew</string>
+
+    <string name="badge_diamond_name">Diamentowy</string>
+    <string name="badge_diamond_desc">Streak 100 dni</string>
+
+    <string name="profile_xp_format">%1$d / %2$d XP</string> <string name="profile_next_level">→ Poziom %1$d</string> <string name="profile_streak_format">🔥 %1$d-dniowy streak</string>
+    <string name="profile_top_rank">Top %1$d</string>
 </resources>

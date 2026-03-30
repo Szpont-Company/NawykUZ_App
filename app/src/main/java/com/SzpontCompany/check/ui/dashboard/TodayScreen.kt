@@ -27,7 +27,7 @@ import kotlinx.coroutines.launch
 import kotlin.random.Random
 
 data class HabitMock(
-    val id: Int,
+    val emoji: String,
     val title: String,
     val subtitle: String,
     val progress: String,
@@ -41,8 +41,8 @@ data class HabitMock(
 fun TodayScreen() {
     val habitsList = remember {
         mutableStateListOf(
-            HabitMock(1, "Spacer", "8 000 kroków • codziennie", "63%", "5 040", "kroków", "14 dni", "streak", "82%", "tydzień"),
-            HabitMock(2, "Czytanie", "30 min • 5×tydzień", "40%", "12 min", "dziś", "7 dni", "streak", "60%", "tydzień")
+            HabitMock("🚶", "Spacer", "8 000 kroków • codziennie", "63%", "5 040", "kroków", "14 dni", "streak", "82%", "tydzień"),
+            HabitMock("📖", "Czytanie", "30 min • 5×tydzień", "40%", "12 min", "dziś", "7 dni", "streak", "60%", "tydzień")
         )
     }
 
@@ -164,11 +164,20 @@ fun HabitCard(habit: HabitMock, onDoneClick: () -> Unit) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { expanded = !expanded }, // Zwykła zmiana stanu, reszta dzieje się w finishedListener
+                    .clickable { expanded = !expanded },
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Box(modifier = Modifier.size(40.dp).clip(RoundedCornerShape(10.dp)).background(MaterialTheme.colorScheme.background), contentAlignment = Alignment.Center) {
-                    Icon(if (habit.id == 1) Icons.Default.DirectionsWalk else Icons.Default.MenuBook, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(MaterialTheme.colorScheme.primary),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = habit.emoji,
+                        fontSize = 20.sp
+                    )
                 }
                 Spacer(modifier = Modifier.width(12.dp))
 

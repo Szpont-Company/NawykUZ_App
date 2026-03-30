@@ -17,8 +17,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.SzpontCompany.check.ui.auth.AuthViewModel
 import com.SzpontCompany.check.ui.auth.LoginScreen
 import com.SzpontCompany.check.ui.main.MainScreen
-import com.SzpontCompany.check.ui.theme.Amber
-import com.SzpontCompany.check.ui.theme.Rose
+import com.SzpontCompany.check.ui.profile.ProfileScreen
+import com.SzpontCompany.check.ui.settings.SettingsScreen
+import com.SzpontCompany.check.ui.theme.Crimson
+import com.SzpontCompany.check.ui.theme.Mint
 
 
 class MainActivity : ComponentActivity() {
@@ -42,6 +44,7 @@ class MainActivity : ComponentActivity() {
             var showSplash by remember { mutableStateOf(true) }
             var isLoggedIn by remember { mutableStateOf(authViewModel.isLoggedIn) }
 
+            CheckTheme(darkTheme = darkTheme, accent = Mint) {
             CheckTheme(darkTheme = darkTheme, accent = Rose) {
                 if (showSplash) {
                     AnimatedSplashScreen(
