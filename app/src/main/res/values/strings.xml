@@ -40,4 +40,6 @@
     <string name="badge_10k_steps">10k kroków</string>
     <string name="badge_battle_5">Battle x5</string>
     <string name="badge_streak_100">Streak 100</string>
+    <string name="confirm_mail_prompt">Rejestracja udana! Sprawdź email w celu weryfikacji.</string>
+    <string name="login_unverified_email_prompt">Zweryfikuj swój adres email, aby się zalogować</string>
 </resources>

@@ -13,6 +13,9 @@ import com.SzpontCompany.check.ui.theme.CheckTheme
 import com.SzpontCompany.check.ui.auth.AnimatedSplashScreen
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.SzpontCompany.check.ui.auth.AuthViewModel
+import com.SzpontCompany.check.ui.auth.LoginScreen
 import com.SzpontCompany.check.ui.main.MainScreen
 import com.SzpontCompany.check.ui.theme.Amber
 import com.SzpontCompany.check.ui.theme.Rose
@@ -24,6 +27,8 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val darkTheme = true
+            val authViewModel: AuthViewModel = viewModel()
+
             SideEffect {
                 enableEdgeToEdge(
                     statusBarStyle = if (darkTheme) {
@@ -35,17 +40,25 @@ class MainActivity : ComponentActivity() {
             }
 
             var showSplash by remember { mutableStateOf(true) }
+            var isLoggedIn by remember { mutableStateOf(authViewModel.isLoggedIn) }
 
-            CheckTheme(darkTheme = darkTheme, accent = Amber) {
+            CheckTheme(darkTheme = darkTheme, accent = Rose) {
                 if (showSplash) {
                     AnimatedSplashScreen(
                         onSplashFinished = {
                             showSplash = false
                         }
                     )
+                } else if (isLoggedIn) {
+                    MainScreen(
+
+                    )
                 } else {
-                    //LoginScreen()
-                    MainScreen();
+                    LoginScreen(
+                        onLoginSuccess = {
+                            isLoggedIn = true
+                        }
+                    )
                 }
             }
         }

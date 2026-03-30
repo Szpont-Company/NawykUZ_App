@@ -1,6 +1,7 @@
 package com.SzpontCompany.check.ui.auth
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.fadeIn
@@ -77,7 +78,11 @@ fun getLogoForAccent(accent: Color): Int {
 }
 
 @Composable
-fun LoginScreen(viewModel: AuthViewModel = viewModel()) {
+fun LoginScreen(
+    viewModel: AuthViewModel = viewModel(),
+    onLoginSuccess: () -> Unit
+    ) {
+
     val context = LocalContext.current
     var selectedTab by remember { mutableStateOf(0) }
     var name by remember { mutableStateOf("") }
@@ -87,7 +92,7 @@ fun LoginScreen(viewModel: AuthViewModel = viewModel()) {
     val scope = rememberCoroutineScope()
     val accent = MaterialTheme.colorScheme.primary
 
-    val recaptchaToken by viewModel.recaptchaToken.collectAsStateWithLifecycle()
+    val recaptchaToken by viewModel.recaptcha.token.collectAsStateWithLifecycle()
     val captchaVerified = recaptchaToken != null
 
 
@@ -96,6 +101,7 @@ fun LoginScreen(viewModel: AuthViewModel = viewModel()) {
             val res = viewModel.signInWithGoogle(context)
             res.onSuccess { user ->
                 Log.d("Auth", "Zalogowano: ${user?.displayName}")
+                onLoginSuccess()
             }.onFailure { error ->
                 Log.e("Auth", "Błąd: ${error.message}")
             }
@@ -238,6 +244,13 @@ fun LoginScreen(viewModel: AuthViewModel = viewModel()) {
                         onPasswordChange = { password = it },
                         onLogInClick = { scope.launch {
                             val res = viewModel.signInWithEmail(email.trim(), password)
+                            res.onSuccess { onLoginSuccess() }
+                            res.onFailure { error ->
+                                if(error.message == "Email_not_verified") {
+                                    Toast.makeText(context,
+                                        context.getString(R.string.login_unverified_email_prompt), Toast.LENGTH_LONG).show()
+                                }
+                            }
                         }},
                         onForgotPasswordClick = { scope.launch { viewModel.resetPassword(email) } },
                         onGoogleLogInClick = {
@@ -253,13 +266,18 @@ fun LoginScreen(viewModel: AuthViewModel = viewModel()) {
                         onPasswordChange = { password = it },
                         onRegisterClick = { scope.launch {
                             val res = viewModel.signUpWithEmail(name, email.trim(), password)
+                            res.onSuccess { 
+                                Log.d("Auth", "Zarejestrowano: ${it.displayName}")
+                                Toast.makeText(context,
+                                    context.getString(R.string.confirm_mail_prompt), Toast.LENGTH_LONG).show()
+                            }
                         }},
                         onGoogleRegisterClick = {
                             onGoogleClick()
                         },
                         captchaVerified = captchaVerified,
                         onCaptchaClick = {
-                            viewModel.executeCaptcha()
+                            viewModel.recaptcha.execute()
                         })
                 }
             }
