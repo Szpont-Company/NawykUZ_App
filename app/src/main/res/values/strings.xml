@@ -188,4 +188,9 @@
     <string name="profile_next_level">→ Poziom %1$d</string>
     <string name="profile_streak_format">🔥 %1$d-dniowy streak</string>
     <string name="profile_top_rank">Top %1$d</string>
+
+
+    <string name="dialog_logout_message">Czy na pewno chcesz się wylogować?</string>
+    <string name="dialog_logout_confirm">Wyloguj</string>
+    <string name="dialog_logout_cancel">Anuluj</string>
 </resources>

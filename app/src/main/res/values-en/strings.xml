@@ -189,4 +189,9 @@
     <string name="profile_streak_format">🔥 %1$d-day streak</string>
     <string name="profile_top_rank">Top %1$d</string>
 
+
+    <string name="dialog_logout_message">Are you sure you want to log out?</string>
+    <string name="dialog_logout_confirm">Log out</string>
+    <string name="dialog_logout_cancel">Cancel</string>
+
 </resources>

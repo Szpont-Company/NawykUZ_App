@@ -40,6 +40,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.window.DialogProperties
 import com.SzpontCompany.check.data.BadgeProvider
 import com.SzpontCompany.check.ui.components.CheckBackButton
 
@@ -483,42 +484,57 @@ fun LogoutConfirmationDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        shape = RoundedCornerShape(22.dp),
+        properties = DialogProperties(
+            dismissOnClickOutside = false,
+            usePlatformDefaultWidth = false
+        ),
+        modifier = Modifier.fillMaxWidth(0.92f),
+        shape = RoundedCornerShape(26.dp),
         containerColor = MaterialTheme.colorScheme.surface,
         title = {
             Text(
                 text = stringResource(R.string.profile_logout),
-                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.onBackground
+                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.padding(top = 8.dp)
             )
         },
         text = {
             Text(
-                text = "Czy na pewno chcesz się wylogować?",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                text = stringResource(R.string.dialog_logout_message),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(vertical = 12.dp)
             )
         },
         confirmButton = {
             Button(
                 onClick = onConfirm,
+                modifier = Modifier.padding(bottom = 8.dp, end = 4.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFFE24B4A)
                 ),
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(14.dp)
             ) {
-                Text("Wyloguj", color = Color.White, fontWeight = FontWeight.Medium)
+                Text(
+                    text = stringResource(R.string.dialog_logout_confirm),
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                )
             }
         },
         dismissButton = {
             TextButton(
                 onClick = onDismiss,
-                shape = RoundedCornerShape(12.dp)
+                modifier = Modifier.padding(bottom = 8.dp),
+                shape = RoundedCornerShape(14.dp)
             ) {
                 Text(
-                    text = "Anuluj",
+                    text = stringResource(R.string.dialog_logout_cancel),
                     color = MaterialTheme.colorScheme.onBackground,
-                    fontWeight = FontWeight.Medium
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                 )
             }
         }
