@@ -16,8 +16,19 @@ fun AddHabitHost(
     when (currentStep){
         1 -> {
             AddHabitStep1(
-                onNextClick = { _, _, _ -> },
+                onNextClick = { name, icon, color ->
+                    finalHabitName = name
+                    finalHabitIcon = icon
+                    finalHabitColor = color
+                    currentStep = 2
+                },
                 onBackClick = { onClose() }
+            )
+        }
+        2 -> {
+            AddHabitStep2(
+                onNextClick = { _, _, _, _, -> },
+                onBackClick = { currentStep = 1 }
             )
         }
     }
