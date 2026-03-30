@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -18,6 +19,11 @@ import com.SzpontCompany.check.ui.profile.ProfileScreen
 import com.SzpontCompany.check.ui.settings.SettingsScreen
 import com.SzpontCompany.check.ui.theme.Crimson
 import com.SzpontCompany.check.ui.theme.Mint
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.SzpontCompany.check.ui.settings.SettingsNavHost
+import com.SzpontCompany.check.ui.rewards.RewardsScreen
 
 
 class MainActivity : ComponentActivity() {
@@ -47,9 +53,42 @@ class MainActivity : ComponentActivity() {
                     )
                 } else {
                     //LoginScreen()
-                    MainScreen();
+                    RootNavigationGraph()
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun RootNavigationGraph() {
+    val navController = rememberNavController()
+
+    NavHost(navController = navController, startDestination = "main") {
+
+        composable("main") {
+            MainScreen(
+                onProfileClick = { navController.navigate("profile") }
+            )
+        }
+
+        composable("profile") {
+            ProfileScreen(
+                onSettingsClick = { navController.navigate("settings") },
+                onRewardsClick = { navController.navigate("rewards") }
+            )
+        }
+
+        composable("rewards") {
+            RewardsScreen(
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        composable("settings") {
+            SettingsNavHost(
+                onExitSettings = { navController.popBackStack() }
+            )
         }
     }
 }

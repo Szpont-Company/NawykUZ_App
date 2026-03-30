@@ -24,7 +24,7 @@ enum class BottomTab {
 }
 
 @Composable
-fun MainScreen() {
+fun MainScreen(onProfileClick: () -> Unit = {}) {
     var currentTab by remember { mutableStateOf(BottomTab.TODAY) }
 
     Scaffold(
@@ -43,7 +43,7 @@ fun MainScreen() {
                 .padding(paddingValues)
         ) {
             when (currentTab) {
-                BottomTab.TODAY -> TodayScreen()
+                BottomTab.TODAY -> TodayScreen(onProfileClick = onProfileClick)
                 BottomTab.STATS -> StatsScreen()
                 BottomTab.MAP -> MapScreen()
                 BottomTab.COMMUNITY -> CommunityScreen()
