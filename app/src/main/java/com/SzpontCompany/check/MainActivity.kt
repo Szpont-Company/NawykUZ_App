@@ -13,9 +13,10 @@ import com.SzpontCompany.check.ui.theme.CheckTheme
 import com.SzpontCompany.check.ui.auth.AnimatedSplashScreen
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
-import com.SzpontCompany.check.ui.main.MainScreen
-import com.SzpontCompany.check.ui.theme.Amber
-import com.SzpontCompany.check.ui.theme.Rose
+import com.SzpontCompany.check.ui.profile.ProfileScreen
+import com.SzpontCompany.check.ui.settings.SettingsScreen
+import com.SzpontCompany.check.ui.theme.Crimson
+import com.SzpontCompany.check.ui.theme.Mint
 
 
 class MainActivity : ComponentActivity() {
@@ -36,7 +37,7 @@ class MainActivity : ComponentActivity() {
 
             var showSplash by remember { mutableStateOf(true) }
 
-            CheckTheme(darkTheme = darkTheme, accent = Amber) {
+            CheckTheme(darkTheme = darkTheme, accent = Mint) {
                 if (showSplash) {
                     AnimatedSplashScreen(
                         onSplashFinished = {
