@@ -1,5 +1,6 @@
 package com.SzpontCompany.check
 
+import android.R.attr.label
 import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -79,25 +80,27 @@ class MainActivity : ComponentActivity() {
                             AppScreen.SPLASH ->
                                 fadeIn() togetherWith fadeOut()
                         }
-                    )
-                } else {
-                    //LoginScreen()
-                    RootNavigationGraph()
                     },
                     label = "app_screen_transition"
-                ) { screen ->
-                    when (screen) {
-                        AppScreen.SPLASH -> AnimatedSplashScreen(
-                            onSplashFinished = {
-                                currentScreen = if (authViewModel.isLoggedIn) AppScreen.DASHBOARD else AppScreen.LOGIN
-                            }
-                        )
+                ) { targetScreen ->
+                    when (targetScreen) {
+                        AppScreen.SPLASH -> {
+                            AnimatedSplashScreen(
+                                onSplashFinished = {
+                                    currentScreen = if (authViewModel.isLoggedIn) AppScreen.DASHBOARD else AppScreen.LOGIN
+                                }
+                            )
+                        }
 
-                        AppScreen.LOGIN -> LoginScreen(
-                            onLoginSuccess = { currentScreen = AppScreen.DASHBOARD }
-                        )
+                        AppScreen.LOGIN -> {
+                            LoginScreen(
+                                onLoginSuccess = { currentScreen = AppScreen.DASHBOARD }
+                            )
+                        }
 
-                        AppScreen.DASHBOARD -> MainScreen()
+                        AppScreen.DASHBOARD -> {
+                            RootNavigationGraph()
+                        }
                     }
                 }
             }
