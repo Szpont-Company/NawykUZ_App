@@ -29,6 +29,14 @@ android {
                 "proguard-rules.pro"
             )
         }
+        debug {
+            signingConfig = signingConfigs.create("sharedDebug").apply {
+                storeFile = file("../shared-debug.keystore")
+                storePassword = "android"
+                keyAlias = "androiddebugkey"
+                keyPassword = "android"
+            }
+        }
     }
     compileOptions {
         isCoreLibraryDesugaringEnabled = true

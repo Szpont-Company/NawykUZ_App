@@ -49,12 +49,7 @@ class MainActivity : ComponentActivity() {
                 )
             }
 
-            var showSplash by remember { mutableStateOf(true) }
-            var isLoggedIn by remember { mutableStateOf(authViewModel.isLoggedIn) }
-
-            var currentScreen by remember {
-                mutableStateOf(AppScreen.SPLASH)
-            }
+            var currentScreen by remember { mutableStateOf(AppScreen.SPLASH) }
 
             CheckTheme(darkTheme = darkTheme, accent = Mint) {
                 AnimatedContent(
@@ -76,7 +71,9 @@ class MainActivity : ComponentActivity() {
                 ) { screen ->
                     when (screen) {
                         AppScreen.SPLASH -> AnimatedSplashScreen(
-                            onSplashFinished = { currentScreen = AppScreen.LOGIN }
+                            onSplashFinished = {
+                                currentScreen = if (authViewModel.isLoggedIn) AppScreen.DASHBOARD else AppScreen.LOGIN
+                            }
                         )
 
                         AppScreen.LOGIN -> LoginScreen(
