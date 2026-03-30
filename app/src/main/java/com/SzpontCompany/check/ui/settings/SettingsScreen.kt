@@ -35,6 +35,7 @@ import com.SzpontCompany.check.ui.theme.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.ui.draw.scale
+import com.SzpontCompany.check.ui.components.CheckBackButton
 
 
 @Composable
@@ -51,7 +52,7 @@ fun SettingsScreen(
             .padding(horizontal = 24.dp)
             .verticalScroll(rememberScrollState())
     ) {
-        Spacer(modifier = Modifier.height(48.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
         SettingsTopBar(onBackClick = onBackClick)
         Spacer(modifier = Modifier.height(32.dp))
@@ -188,7 +189,7 @@ fun SettingsScreen(
             }
         }
 
-        Spacer(modifier = Modifier.height(100.dp))
+        Spacer(modifier = Modifier.height(24.dp))
     }
 }
 
@@ -198,19 +199,9 @@ fun SettingsTopBar(onBackClick: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.fillMaxWidth()
     ) {
-        IconButton(
-            onClick = onBackClick,
-            modifier = Modifier
-                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(12.dp))
-                .size(40.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Rounded.ArrowBackIosNew,
-                contentDescription = "Cofnij",
-                tint = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.size(20.dp)
-            )
-        }
+
+        CheckBackButton(onClick = onBackClick)
+
         Spacer(modifier = Modifier.width(16.dp))
         Text(
             text = stringResource(R.string.settings_title),
