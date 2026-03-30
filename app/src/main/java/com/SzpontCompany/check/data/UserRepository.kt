@@ -1,4 +1,4 @@
-package com.SzpontCompany.check.ui.user
+package com.SzpontCompany.check.data
 
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions

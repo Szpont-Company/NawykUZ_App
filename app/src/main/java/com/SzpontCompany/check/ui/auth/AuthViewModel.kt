@@ -8,7 +8,7 @@ import androidx.credentials.GetCredentialRequest
 import androidx.credentials.exceptions.NoCredentialException
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.SzpontCompany.check.ui.user.UserRepository
+import com.SzpontCompany.check.data.UserRepository
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
@@ -41,7 +41,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                 // Defaultowe logowanie Googlem - wymaga blokady ekranu do działania
                 val googleIdOption = GetGoogleIdOption.Builder()
                     .setServerClientId(WEB_CLIENT_ID)
-                    .setFilterByAuthorizedAccounts(true)
+                    .setFilterByAuthorizedAccounts(false)
                     .setAutoSelectEnabled(false)
                     .build()
 

@@ -6,6 +6,13 @@ import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -22,6 +29,7 @@ import com.SzpontCompany.check.ui.settings.SettingsScreen
 import com.SzpontCompany.check.ui.theme.Crimson
 import com.SzpontCompany.check.ui.theme.Mint
 
+enum class AppScreen { SPLASH, LOGIN, DASHBOARD }
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,24 +52,39 @@ class MainActivity : ComponentActivity() {
             var showSplash by remember { mutableStateOf(true) }
             var isLoggedIn by remember { mutableStateOf(authViewModel.isLoggedIn) }
 
-            CheckTheme(darkTheme = darkTheme, accent = Mint) {
-            CheckTheme(darkTheme = darkTheme, accent = Rose) {
-                if (showSplash) {
-                    AnimatedSplashScreen(
-                        onSplashFinished = {
-                            showSplash = false
-                        }
-                    )
-                } else if (isLoggedIn) {
-                    MainScreen(
+            var currentScreen by remember {
+                mutableStateOf(AppScreen.SPLASH)
+            }
 
-                    )
-                } else {
-                    LoginScreen(
-                        onLoginSuccess = {
-                            isLoggedIn = true
+            CheckTheme(darkTheme = darkTheme, accent = Mint) {
+                AnimatedContent(
+                    targetState = currentScreen,
+                    transitionSpec = {
+                        when (targetState) {
+                            AppScreen.DASHBOARD ->
+                                (slideInHorizontally { it } + fadeIn(tween(400))) togetherWith
+                                        (slideOutHorizontally { -it } + fadeOut(tween(300)))
+
+                            AppScreen.LOGIN ->
+                                fadeIn(tween(500)) togetherWith fadeOut(tween(300))
+
+                            AppScreen.SPLASH ->
+                                fadeIn() togetherWith fadeOut()
                         }
-                    )
+                    },
+                    label = "app_screen_transition"
+                ) { screen ->
+                    when (screen) {
+                        AppScreen.SPLASH -> AnimatedSplashScreen(
+                            onSplashFinished = { currentScreen = AppScreen.LOGIN }
+                        )
+
+                        AppScreen.LOGIN -> LoginScreen(
+                            onLoginSuccess = { currentScreen = AppScreen.DASHBOARD }
+                        )
+
+                        AppScreen.DASHBOARD -> MainScreen()
+                    }
                 }
             }
         }
