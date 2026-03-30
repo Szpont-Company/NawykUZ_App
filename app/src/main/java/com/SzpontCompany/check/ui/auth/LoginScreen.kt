@@ -1,5 +1,6 @@
 package com.SzpontCompany.check.ui.auth
 
+import android.annotation.SuppressLint
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.AnimatedContent
@@ -77,6 +78,7 @@ fun getLogoForAccent(accent: Color): Int {
     }
 }
 
+@SuppressLint("LocalContextGetResourceValueCall")
 @Composable
 fun LoginScreen(
     viewModel: AuthViewModel = viewModel(),
