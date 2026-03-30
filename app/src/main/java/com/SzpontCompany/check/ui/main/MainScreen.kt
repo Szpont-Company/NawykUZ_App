@@ -1,4 +1,3 @@
-// Ścieżka: src/main/java/com/SzpontCompany/check/ui/main/MainScreen.kt
 package com.SzpontCompany.check.ui.main
 
 import androidx.compose.foundation.background
@@ -24,37 +23,23 @@ enum class BottomTab {
 }
 
 @Composable
-fun MainScreen(onProfileClick: () -> Unit = {}) {
-    var currentTab by remember { mutableStateOf(BottomTab.TODAY) }
-
-    Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
-        bottomBar = {
-            CheckBottomNavigationBar(
-                currentTab = currentTab,
-                onTabSelected = { newTab -> currentTab = newTab },
-                onAddClick = { /* TODO: Otwórz okno dodawania nawyku */ }
-            )
-        }
-    ) { paddingValues ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            when (currentTab) {
-                BottomTab.TODAY -> TodayScreen(onProfileClick = onProfileClick)
-                BottomTab.STATS -> StatsScreen()
-                BottomTab.MAP -> MapScreen()
-                BottomTab.COMMUNITY -> CommunityScreen()
-            }
+fun MainScreen(
+    currentTab: BottomTab,
+    onProfileClick: () -> Unit = {}
+) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        when (currentTab) {
+            BottomTab.TODAY -> TodayScreen(onProfileClick = onProfileClick)
+            BottomTab.STATS -> StatsScreen()
+            BottomTab.MAP -> MapScreen()
+            BottomTab.COMMUNITY -> CommunityScreen()
         }
     }
 }
 
 @Composable
 fun CheckBottomNavigationBar(
-    currentTab: BottomTab,
+    currentTab: BottomTab?,
     onTabSelected: (BottomTab) -> Unit,
     onAddClick: () -> Unit
 ) {
