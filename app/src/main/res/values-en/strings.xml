@@ -52,6 +52,8 @@
     <string name="badge_10k_steps">10k steps</string>
     <string name="badge_battle_5">Battle x5</string>
     <string name="badge_streak_100">Streak 100</string>
+    <string name="confirm_mail_prompt">Account created succesfully! Check your email to verify.</string>
+    <string name="login_unverified_email_prompt">Unable to log in. Verify your email first</string>
 
     <!-- SETTINGS CARD -->
     <string name="settings_title">Settings</string>

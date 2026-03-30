@@ -185,4 +185,6 @@
     <string name="profile_next_level">→ Level %1$d</string>
     <string name="profile_streak_format">🔥 %1$d-day streak</string>
     <string name="profile_top_rank">Top %1$d</string>
+    <string name="confirm_mail_prompt">Rejestracja udana! Sprawdź email w celu weryfikacji.</string>
+    <string name="login_unverified_email_prompt">Zweryfikuj swój adres email, aby się zalogować</string>
 </resources>
