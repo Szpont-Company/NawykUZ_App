@@ -14,11 +14,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
 import com.SzpontCompany.check.ui.dashboard.TodayScreen
-import com.SzpontCompany.check.ui.dashboard.StatsScreen
-import com.SzpontCompany.check.ui.dashboard.MapScreen
-import com.SzpontCompany.check.ui.dashboard.CommunityScreen
+import com.SzpontCompany.check.ui.stats.StatsScreen
+import com.SzpontCompany.check.ui.map.MapScreen
+import com.SzpontCompany.check.ui.community.CommunityScreen
 
 enum class BottomTab {
     TODAY, STATS, MAP, COMMUNITY
