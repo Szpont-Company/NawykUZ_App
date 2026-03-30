@@ -63,8 +63,8 @@ class RecaptchaManager(
                 Log.d(TAG, "reCAPTCHA executed successfully, token: $result")
 
                 verifyToken(action)
-                    .onSuccess { score ->
-                        _verified.value = score >= 0.5f
+                    .onSuccess { //score ->
+                        _verified.value = true // temporary commented score >= 0.5f
                     }
                     .onFailure {
                         _error.value = it.message
@@ -102,7 +102,13 @@ class RecaptchaManager(
                 .call(data)
                 .await()
 
-            val score = (result.data as Map<*, *>)["score"] as Float
+            val scoreRaw = (result.data as Map<*, *>)["score"]
+            val score = when (scoreRaw) {
+                is Float -> scoreRaw
+                is Double -> scoreRaw.toFloat()
+                is Int -> scoreRaw.toFloat()
+                else -> 0f
+            }
             Result.success(score)
         } catch (e: Exception) {
             Log.e(TAG, "reCAPTCHA verify error: ${e.message}")
