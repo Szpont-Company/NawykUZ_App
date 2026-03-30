@@ -30,11 +30,18 @@ import com.SzpontCompany.check.R
 import com.SzpontCompany.check.ui.theme.CheckTheme
 import com.SzpontCompany.check.ui.theme.Mint
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.text.style.TextAlign
+import com.SzpontCompany.check.data.BadgeProvider
 
 @Composable
-fun ProfileScreen() {
+fun ProfileScreen(
+    onSettingsClick: () -> Unit = {},
+    onRewardsClick: () -> Unit = {}
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -65,7 +72,11 @@ fun ProfileScreen() {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(bottom = 12.dp)
         )
-        SettingsSection()
+
+        SettingsSection(
+            onSettingsClick = onSettingsClick,
+            onRewardsClick = onRewardsClick
+        )
 
         Spacer(modifier = Modifier.height(100.dp))
     }
@@ -145,7 +156,7 @@ fun UserHeaderSection() {
                         .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(12.dp))
                         .padding(horizontal = 10.dp, vertical = 4.dp)
                 ) {
-                    Text("🔥 21-dniowy streak", color = MaterialTheme.colorScheme.primary, fontSize = 11.sp, fontWeight = FontWeight.Medium)
+                    Text(text = stringResource(R.string.profile_streak_format, 21), color = MaterialTheme.colorScheme.primary, fontSize = 11.sp, fontWeight = FontWeight.Medium)
                 }
                 Box(
                     modifier = Modifier
@@ -182,14 +193,14 @@ fun LevelAndXpBar() {
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
-                    text = "1 240 / 1 600 XP",
+                    text = stringResource(R.string.profile_xp_format, 1240, 1600),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium
                 )
             }
             Text(
-                text = "→ ${stringResource(R.string.profile_level)} 9",
+                text = stringResource(R.string.profile_next_level, 9),
                 color = Color(0xFFBA7517),
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold
@@ -222,14 +233,40 @@ fun LevelAndXpBar() {
 fun StatsGridSection() {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            StatCard(modifier = Modifier.weight(1f), value = "34", label = stringResource(R.string.profile_habits))
-            StatCard(modifier = Modifier.weight(1f), value = "21", label = stringResource(R.string.profile_streak_days), valueColor = MaterialTheme.colorScheme.primary)
-            StatCard(modifier = Modifier.weight(1f), value = "850", label = stringResource(R.string.profile_coins), valueColor = Color(0xFFBA7517))
+            StatCard(
+                modifier = Modifier.weight(1f),
+                value = "34",
+                label = stringResource(R.string.profile_habits)
+            )
+            StatCard(
+                modifier = Modifier.weight(1f),
+                value = "21",
+                label = stringResource(R.string.profile_streak_days),
+                valueColor = MaterialTheme.colorScheme.primary
+            )
+            StatCard(
+                modifier = Modifier.weight(1f),
+                value = "850",
+                label = stringResource(R.string.profile_coins),
+                valueColor = Color(0xFFBA7517)
+            )
         }
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            StatCard(modifier = Modifier.weight(1f), value = "7", label = stringResource(R.string.profile_battles_won))
-            StatCard(modifier = Modifier.weight(1f), value = "78%", label = stringResource(R.string.profile_effectiveness))
-            StatCard(modifier = Modifier.weight(1f), value = "12", label = stringResource(R.string.profile_friends))
+            StatCard(
+                modifier = Modifier.weight(1f),
+                value = "7",
+                label = stringResource(R.string.profile_battles_won)
+            )
+            StatCard(
+                modifier = Modifier.weight(1f),
+                value = "78%",
+                label = stringResource(R.string.profile_effectiveness)
+            )
+            StatCard(
+                modifier = Modifier.weight(1f),
+                value = "12",
+                label = stringResource(R.string.profile_friends)
+            )
         }
     }
 }
@@ -250,7 +287,10 @@ fun StatCard(modifier: Modifier = Modifier, value: String, label: String, valueC
 }
 
 @Composable
-fun SettingsSection() {
+fun SettingsSection(
+    onSettingsClick: () -> Unit,
+    onRewardsClick: () -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -262,12 +302,23 @@ fun SettingsSection() {
             title = stringResource(R.string.profile_edit),
             onClick = { /* TODO */ }
         )
+
         HorizontalDivider(color = MaterialTheme.colorScheme.background, thickness = 2.dp)
+
+        SettingsItem(
+            icon = Icons.Default.EmojiEvents,
+            iconTint = Color(0xFFBA7517),
+            title = stringResource(R.string.profile_rewards),
+            onClick = onRewardsClick
+        )
+
+        HorizontalDivider(color = MaterialTheme.colorScheme.background, thickness = 2.dp)
+
         SettingsItem(
             icon = Icons.Default.Settings,
             iconTint = MaterialTheme.colorScheme.onSurfaceVariant,
             title = stringResource(R.string.profile_settings),
-            onClick = { /* TODO */ }
+            onClick = onSettingsClick
         )
     }
 
@@ -331,15 +382,20 @@ fun BadgesSection() {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(bottom = 12.dp)
         )
+
+        val sortedBadges = BadgeProvider.allBadges.sortedByDescending { it.isUnlocked }
+
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             contentPadding = PaddingValues(horizontal = 2.dp)
         ) {
-            item { BadgeItem(emoji = "🏆", label = stringResource(R.string.badge_week), isActive = true) }
-            item { BadgeItem(emoji = "🔥", label = stringResource(R.string.badge_streak_21), isActive = true) }
-            item { BadgeItem(emoji = "🚶", label = stringResource(R.string.badge_10k_steps), isActive = true) }
-            item { BadgeItem(emoji = "⚔️", label = stringResource(R.string.badge_battle_5), isActive = true) }
-            item { BadgeItem(emoji = "💎", label = stringResource(R.string.badge_streak_100), isActive = false) }
+            items(sortedBadges) { badge ->
+                BadgeItem(
+                    emoji = badge.emoji,
+                    label = stringResource(id = badge.nameResId),
+                    isActive = badge.isUnlocked
+                )
+            }
         }
     }
 }
@@ -348,28 +404,43 @@ fun BadgesSection() {
 fun BadgeItem(emoji: String, label: String, isActive: Boolean) {
     // aktywna -> obramowanie w kolorze primary,  nie -> przezroczyste
     val borderColor = if (isActive) MaterialTheme.colorScheme.primary else Color.Transparent
+
+    // wypełnienie (15% akcentu dla aktywnych, szare dla nieaktywnych)
+    val bgColor = if (isActive) {
+        MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+    } else {
+        MaterialTheme.colorScheme.surfaceVariant
+    }
+
     // nieaktywna -> lekko przezroczysta cala odznaka
     val alpha = if (isActive) 1f else 0.4f
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.alpha(alpha)
+        modifier = Modifier
+            .width(76.dp)
+            .alpha(alpha)
     ) {
         Box(
             modifier = Modifier
                 .size(68.dp)
-                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(16.dp))
+                .background(bgColor, RoundedCornerShape(16.dp))
                 .border(2.dp, borderColor, RoundedCornerShape(16.dp)),
             contentAlignment = Alignment.Center
         ) {
             //narazie emoji , potem ewentualnie jakies image/icon
             Text(text = emoji, fontSize = 28.sp)
         }
+
         Spacer(modifier = Modifier.height(8.dp))
+
         Text(
             text = label,
             fontSize = 12.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            maxLines = 2,
+            lineHeight = 14.sp
         )
     }
 }

@@ -1,5 +1,5 @@
 // Ścieżka: src/main/java/com/SzpontCompany/check/ui/dashboard/StatsScreen.kt
-package com.SzpontCompany.check.ui.dashboard
+package com.SzpontCompany.check.ui.stats
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -8,9 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -35,7 +33,7 @@ fun StatsScreen() {
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 24.dp),
-        contentPadding = PaddingValues(top = 24.dp, bottom = 120.dp), // Margines na dolny pasek
+        contentPadding = PaddingValues(top = 24.dp, bottom = 120.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         item { StatsTopSection() }
@@ -214,7 +212,7 @@ fun WeeklyActivityChart() {
         Spacer(modifier = Modifier.height(16.dp))
 
         val days = listOf("Pn", "Wt", "Śr", "Cz", "Pt", "So", "Nd")
-        val values = listOf(0.4f, 0.6f, 0.5f, 0.7f, 0.6f, 0.5f, 1.0f) // Mock data
+        val values = listOf(0.4f, 0.6f, 0.5f, 0.7f, 0.6f, 0.5f, 1.0f)
 
         Row(
             modifier = Modifier
@@ -225,14 +223,27 @@ fun WeeklyActivityChart() {
         ) {
             days.forEachIndexed { index, day ->
                 val isToday = day == "Nd"
-                Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f)) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                ) {
                     Box(
                         modifier = Modifier
-                            .fillMaxWidth(0.7f)
-                            .fillMaxHeight(values[index])
-                            .clip(RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp))
-                            .background(if (isToday) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary.copy(alpha = 0.6f))
-                    )
+                            .weight(1f)
+                            .fillMaxWidth(0.7f),
+                        contentAlignment = Alignment.BottomCenter
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .fillMaxHeight(values[index])
+                                .clip(RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp))
+                                .background(if (isToday) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary.copy(alpha = 0.6f))
+                        )
+                    }
+
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(text = day, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
@@ -240,7 +251,6 @@ fun WeeklyActivityChart() {
         }
     }
 }
-
 
 @Composable
 fun HeatmapSection() {
@@ -253,7 +263,7 @@ fun HeatmapSection() {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically // Wyrównanie do środka w pionie
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = "Mapa nawyków (10 tyg.)",
@@ -343,24 +353,46 @@ fun HeatmapSection() {
 @Composable
 fun HabitDetailsSection() {
     Column(modifier = Modifier.fillMaxWidth()) {
-        Text(text = "Nawyki — szczegóły", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground, modifier = Modifier.padding(bottom = 12.dp))
+        Text(
+            text = "Nawyki — szczegóły",
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onBackground,
+            modifier = Modifier.padding(bottom = 12.dp)
+        )
 
         Column(
-            modifier = Modifier.background(MaterialTheme.colorScheme.surface, RoundedCornerShape(16.dp)).padding(16.dp),
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(16.dp))
+                .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            HabitDetailItem(icon = Icons.Default.DirectionsWalk, name = "Spacer", percent = "80%", streak = "14 dni streak", progress = 0.8f, color = MaterialTheme.colorScheme.primary)
-            HabitDetailItem(icon = Icons.Default.Book, name = "Czytanie", percent = "60%", streak = "7 dni streak", progress = 0.6f, color = Color(0xFF7F77DD)) // Indigo
-            HabitDetailItem(icon = Icons.Default.WaterDrop, name = "Woda", percent = "91%", streak = "21 dni streak", progress = 0.91f, color = Color(0xFF378ADD)) // Sky
+            HabitDetailItem(emoji = "🚶", name = "Spacer", percent = "80%", streak = "14 dni streak", progress = 0.8f, color = MaterialTheme.colorScheme.primary)
+            HabitDetailItem(emoji = "📖", name = "Czytanie", percent = "60%", streak = "7 dni streak", progress = 0.6f, color = Color(0xFF7F77DD)) // Indigo
+            HabitDetailItem(emoji = "💧", name = "Woda", percent = "91%", streak = "21 dni streak", progress = 0.91f, color = Color(0xFF378ADD)) // Sky
         }
     }
 }
 
 @Composable
-fun HabitDetailItem(icon: ImageVector, name: String, percent: String, streak: String, progress: Float, color: Color) {
+fun HabitDetailItem(emoji: String, name: String, percent: String, streak: String, progress: Float, color: Color) {
     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-        Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(20.dp))
+
+        Box(
+            modifier = Modifier
+                .size(36.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .background(color),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = emoji,
+                fontSize = 18.sp
+            )
+        }
+
         Spacer(modifier = Modifier.width(12.dp))
+
         Column(modifier = Modifier.weight(1f)) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text(text = name, fontSize = 13.sp, color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Medium)
