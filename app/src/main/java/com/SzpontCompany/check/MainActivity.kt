@@ -74,6 +74,7 @@ fun RootNavigationGraph() {
 
         composable("profile") {
             ProfileScreen(
+                onBackClick = { navController.popBackStack() },
                 onSettingsClick = { navController.navigate("settings") },
                 onRewardsClick = { navController.navigate("rewards") }
             )

@@ -32,13 +32,16 @@ import com.SzpontCompany.check.ui.theme.Mint
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.rounded.ArrowBackIosNew
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.style.TextAlign
 import com.SzpontCompany.check.data.BadgeProvider
+import com.SzpontCompany.check.ui.components.CheckBackButton
 
 @Composable
 fun ProfileScreen(
+    onBackClick: () -> Unit = {},
     onSettingsClick: () -> Unit = {},
     onRewardsClick: () -> Unit = {}
 ) {
@@ -51,7 +54,7 @@ fun ProfileScreen(
     ) {
         Spacer(modifier = Modifier.height(48.dp))
 
-        ProfileTopBar()
+        ProfileTopBar(onBackClick = onBackClick)
         Spacer(modifier = Modifier.height(24.dp))
 
         UserHeaderSection()
@@ -83,16 +86,22 @@ fun ProfileScreen(
 }
 
 @Composable
-fun ProfileTopBar() {
+fun ProfileTopBar(onBackClick: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
+
+        CheckBackButton(onClick = onBackClick)
+
+        Spacer(modifier = Modifier.width(16.dp))
+
         Text(
             text = stringResource(R.string.profile_title),
             style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
-            color = MaterialTheme.colorScheme.onBackground
+            color = MaterialTheme.colorScheme.onBackground,
+            modifier = Modifier.weight(1f)
         )
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             IconButton(

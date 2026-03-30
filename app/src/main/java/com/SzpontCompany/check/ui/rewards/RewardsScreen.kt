@@ -25,6 +25,7 @@ import com.SzpontCompany.check.ui.theme.CheckTheme
 import com.SzpontCompany.check.ui.theme.Mint
 import com.SzpontCompany.check.data.BadgeProvider
 import com.SzpontCompany.check.R
+import com.SzpontCompany.check.ui.components.CheckBackButton
 
 
 val PremiumGold = Color(0xFFC78C18)
@@ -40,11 +41,10 @@ fun RewardsScreen(
             TopAppBar(
                 title = { Text(text = stringResource(R.string.rewards_title), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(
-                            imageVector = Icons.Rounded.ArrowBackIosNew,
-                            contentDescription = "Wróć")
-                    }
+                    CheckBackButton(
+                        onClick = onBackClick,
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background

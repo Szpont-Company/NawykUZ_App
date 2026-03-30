@@ -31,6 +31,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.SzpontCompany.check.R
+import com.SzpontCompany.check.ui.components.CheckBackButton
 import com.SzpontCompany.check.ui.components.WheelTimePicker
 import com.SzpontCompany.check.ui.theme.Amber
 import com.SzpontCompany.check.ui.theme.CheckTheme
@@ -71,23 +72,12 @@ fun NotificationsScreen(onBackClick: () -> Unit = {}) {
                         modifier = Modifier.padding(start = 8.dp)
                     )
                 },
+
                 navigationIcon = {
-                    Box(
-                        modifier = Modifier
-                            .padding(start = 16.dp)
-                            .size(48.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-                            .clickable { onBackClick() },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Rounded.ArrowBackIosNew,
-                            contentDescription = "Wróć",
-                            tint = MaterialTheme.colorScheme.onBackground,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
+                    CheckBackButton(
+                        onClick = onBackClick,
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background

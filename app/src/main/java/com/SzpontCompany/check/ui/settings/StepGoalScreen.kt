@@ -24,6 +24,7 @@ import com.SzpontCompany.check.ui.theme.CheckTheme
 import com.SzpontCompany.check.ui.theme.Mint
 import kotlin.math.roundToInt
 import com.SzpontCompany.check.R
+import com.SzpontCompany.check.ui.components.CheckBackButton
 
 
 fun formatGoalNumber(goal: Int): String {
@@ -56,22 +57,10 @@ fun StepGoalScreen(onBackClick: () -> Unit = {}) {
                     )
                 },
                 navigationIcon = {
-                    Box(
-                        modifier = Modifier
-                            .padding(start = 16.dp)
-                            .size(48.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-                            .clickable { onBackClick() },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Rounded.ArrowBackIosNew,
-                            contentDescription = "Wróć",
-                            tint = MaterialTheme.colorScheme.onBackground,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
+                    CheckBackButton(
+                        onClick = onBackClick,
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background
