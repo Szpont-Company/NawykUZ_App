@@ -13,6 +13,7 @@ import com.SzpontCompany.check.ui.theme.CheckTheme
 import com.SzpontCompany.check.ui.auth.AnimatedSplashScreen
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import com.SzpontCompany.check.ui.main.MainScreen
 import com.SzpontCompany.check.ui.profile.ProfileScreen
 import com.SzpontCompany.check.ui.settings.SettingsScreen
 import com.SzpontCompany.check.ui.theme.Crimson
