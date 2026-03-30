@@ -33,6 +33,10 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.rounded.ArrowBackIosNew
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.style.TextAlign
@@ -43,8 +47,12 @@ import com.SzpontCompany.check.ui.components.CheckBackButton
 fun ProfileScreen(
     onBackClick: () -> Unit = {},
     onSettingsClick: () -> Unit = {},
-    onRewardsClick: () -> Unit = {}
+    onRewardsClick: () -> Unit = {},
+    onLogoutClick: () -> Unit = {}
 ) {
+
+    var showLogoutDialog by remember { mutableStateOf(false) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -78,10 +86,23 @@ fun ProfileScreen(
 
         SettingsSection(
             onSettingsClick = onSettingsClick,
-            onRewardsClick = onRewardsClick
+            onRewardsClick = onRewardsClick,
+            onLogoutClick = { showLogoutDialog = true }
         )
 
         Spacer(modifier = Modifier.height(24.dp))
+
+        if (showLogoutDialog) {
+            LogoutConfirmationDialog(
+                onConfirm = {
+                    showLogoutDialog = false
+                    onLogoutClick()
+                },
+                onDismiss = {
+                    showLogoutDialog = false
+                }
+            )
+        }
     }
 }
 
@@ -298,7 +319,8 @@ fun StatCard(modifier: Modifier = Modifier, value: String, label: String, valueC
 @Composable
 fun SettingsSection(
     onSettingsClick: () -> Unit,
-    onRewardsClick: () -> Unit
+    onRewardsClick: () -> Unit,
+    onLogoutClick: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -337,7 +359,7 @@ fun SettingsSection(
         modifier = Modifier
             .fillMaxWidth()
             .border(1.dp, MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(22.dp))
-            .clickable { /* TODO: Wyloguj */ }
+            .clickable { onLogoutClick() }
             .padding(vertical = 16.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -454,7 +476,54 @@ fun BadgeItem(emoji: String, label: String, isActive: Boolean) {
     }
 }
 
-
+@Composable
+fun LogoutConfirmationDialog(
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        shape = RoundedCornerShape(22.dp),
+        containerColor = MaterialTheme.colorScheme.surface,
+        title = {
+            Text(
+                text = stringResource(R.string.profile_logout),
+                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onBackground
+            )
+        },
+        text = {
+            Text(
+                text = "Czy na pewno chcesz się wylogować?",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        },
+        confirmButton = {
+            Button(
+                onClick = onConfirm,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFE24B4A)
+                ),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text("Wyloguj", color = Color.White, fontWeight = FontWeight.Medium)
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = onDismiss,
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text(
+                    text = "Anuluj",
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+        }
+    )
+}
 
 @Preview(showBackground = true)
 @Composable

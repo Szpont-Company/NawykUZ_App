@@ -99,7 +99,9 @@ class MainActivity : ComponentActivity() {
                         }
 
                         AppScreen.DASHBOARD -> {
-                            RootNavigationGraph()
+                            RootNavigationGraph(
+                                onLogout = { currentScreen = AppScreen.LOGIN }
+                            )
                         }
                     }
                 }
@@ -109,8 +111,9 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun RootNavigationGraph() {
+fun RootNavigationGraph(onLogout: () -> Unit) {
     val navController = rememberNavController()
+    val authViewModel: AuthViewModel = viewModel()
 
     var currentTab by remember { mutableStateOf<BottomTab?>(BottomTab.TODAY) }
 
@@ -155,7 +158,11 @@ fun RootNavigationGraph() {
                 ProfileScreen(
                     onBackClick = { navController.popBackStack() },
                     onSettingsClick = { navController.navigate("settings") },
-                    onRewardsClick = { navController.navigate("rewards") }
+                    onRewardsClick = { navController.navigate("rewards") },
+                    onLogoutClick = {
+                        authViewModel.signOut()
+                        onLogout()
+                    }
                 )
             }
 

@@ -132,6 +132,10 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
             initialValue = auth.currentUser
         )
 
+    fun signOut() {
+        auth.signOut()
+    }
+
     private companion object {
         const val TAG = "AuthViewModel"
         const val WEB_CLIENT_ID =
