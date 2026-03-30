@@ -150,41 +150,42 @@
     <string name="profile_mock_level">Lvl %1$d</string>
     <string name="days_initials">Pn,Wt,Śr,Cz,Pt,So,Nd</string>
 
-    <string name="rewards_title">Rewards</string>
-    <string name="rewards_your_coins">Your coins</string>
-    <string name="rewards_total_earned">Total earned</string>
-    <string name="rewards_section_badges">BADGES</string>
-    <string name="rewards_section_store">REWARD STORE</string>
-    <string name="rewards_unlocked">Unlocked!</string>
 
-    <string name="store_item_accent_title">Accent color — Gold</string>
-    <string name="store_item_accent_desc">Premium profile theme</string>
-    <string name="store_item_shield_title">HP Shield — x1 protection</string>
-    <string name="store_item_shield_desc">Prevents penalty in Battle</string>
-
-    <string name="dialog_badge_header">NEW BADGE!</string>
-    <string name="dialog_coins_earned">+%1$d coins</string>
-    <string name="dialog_claim_btn">CLAIM REWARD!</string>
-
-    <string name="badge_week_name">First week</string>
-    <string name="badge_week_desc">Use the app for 7 days</string>
-
-    <string name="badge_streak21_name">21 Days Streak</string>
-    <string name="badge_streak21_desc">Maintain a 21-day streak</string>
-
-    <string name="badge_steps_name">10k steps</string>
-    <string name="badge_steps_desc">Walk 10,000 steps in one day</string>
-
-    <string name="badge_battle_name">Battle Winner</string>
-    <string name="badge_battle_desc">Win 5 battles</string>
-
-    <string name="badge_diamond_name">Diamond</string>
-    <string name="badge_diamond_desc">100-day streak</string>
-
-    <string name="profile_xp_format">%1$d / %2$d XP</string>
-    <string name="profile_next_level">→ Level %1$d</string>
-    <string name="profile_streak_format">🔥 %1$d-day streak</string>
-    <string name="profile_top_rank">Top %1$d</string>
     <string name="confirm_mail_prompt">Rejestracja udana! Sprawdź email w celu weryfikacji.</string>
     <string name="login_unverified_email_prompt">Zweryfikuj swój adres email, aby się zalogować</string>
+
+    <string name="rewards_title">Nagrody</string>
+    <string name="rewards_your_coins">Twoje monety</string>
+    <string name="rewards_total_earned">Łącznie zdobyte</string>
+    <string name="rewards_section_badges">ODZNAKI</string>
+    <string name="rewards_section_store">SKLEP Z NAGRODAMI</string>
+    <string name="rewards_unlocked">Odblokowana!</string>
+
+    <string name="store_item_accent_title">Kolor akcentu — Złoty</string>
+    <string name="store_item_accent_desc">Motyw premium dla profilu</string>
+    <string name="store_item_shield_title">Tarcza HP — ochrona x1</string>
+    <string name="store_item_shield_desc">Chroni przed karą w Battle</string>
+
+    <string name="dialog_badge_header">NOWA ODZNAKA!</string>
+    <string name="dialog_coins_earned">+%1$d monet</string> <string name="dialog_claim_btn">ODBIERZ NAGRODĘ!</string>
+
+    <string name="badge_week_name">Pierwszy tydzień</string>
+    <string name="badge_week_desc">Używaj apki przez 7 dni</string>
+
+    <string name="badge_streak21_name">Streak 21 dni</string>
+    <string name="badge_streak21_desc">Utrzymaj passę 21 dni</string>
+
+    <string name="badge_steps_name">10k steps</string>
+    <string name="badge_steps_desc">Zrób 10 000 kroków w jeden dzień</string>
+
+    <string name="badge_battle_name">Battle Winner</string>
+    <string name="badge_battle_desc">Wygraj 5 bitew</string>
+
+    <string name="badge_diamond_name">Diamentowy</string>
+    <string name="badge_diamond_desc">Streak 100 dni</string>
+
+    <string name="profile_xp_format">%1$d / %2$d XP</string>
+    <string name="profile_next_level">→ Poziom %1$d</string>
+    <string name="profile_streak_format">🔥 %1$d-dniowy streak</string>
+    <string name="profile_top_rank">Top %1$d</string>
 </resources>
