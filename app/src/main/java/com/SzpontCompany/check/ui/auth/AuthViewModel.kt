@@ -8,39 +8,31 @@ import androidx.credentials.GetCredentialRequest
 import androidx.credentials.exceptions.NoCredentialException
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.SzpontCompany.check.data.UserRepository
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
-import com.google.android.recaptcha.Recaptcha
-import com.google.android.recaptcha.RecaptchaAction
-import com.google.android.recaptcha.RecaptchaClient
-import com.google.android.recaptcha.RecaptchaException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
 class AuthViewModel(application: Application) : AndroidViewModel(application) {
    private val auth by lazy { FirebaseAuth.getInstance() }
-    private lateinit var recaptchaClient: RecaptchaClient
-    private val recaptchaScope = CoroutineScope(Dispatchers.IO)
+   val recaptcha = RecaptchaManager(application, viewModelScope)
+   private val userRepository = UserRepository()
 
-    init {
-        initializeRecaptcha()
-    }
+   val isLoggedIn: Boolean
+        get() = auth.currentUser != null
+
 
     suspend fun signInWithGoogle(context: Context): Result<FirebaseUser?> {
         return try {
@@ -48,8 +40,8 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
             val credential = try {
                 // Defaultowe logowanie Googlem - wymaga blokady ekranu do działania
                 val googleIdOption = GetGoogleIdOption.Builder()
-                    .setServerClientId("919945083217-onoqped8qp5v39cp18eth082qd6supbt.apps.googleusercontent.com")
-                    .setFilterByAuthorizedAccounts(true)
+                    .setServerClientId(WEB_CLIENT_ID)
+                    .setFilterByAuthorizedAccounts(false)
                     .setAutoSelectEnabled(false)
                     .build()
 
@@ -61,7 +53,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
             } catch (e: NoCredentialException) {
                 Log.e("GoogleSignIn", "No credential found: ${e.message}")
                 // Fallback logowania
-                val sigInOption = GetSignInWithGoogleOption.Builder("919945083217-onoqped8qp5v39cp18eth082qd6supbt.apps.googleusercontent.com")
+                val sigInOption = GetSignInWithGoogleOption.Builder(WEB_CLIENT_ID)
                     .build()
                 val request = GetCredentialRequest.Builder()
                     .addCredentialOption(sigInOption)
@@ -87,7 +79,8 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
             if(authResult.user?.isEmailVerified == true) {
                 Result.success(authResult.user!!)
             } else {
-                Result.failure(Exception("Email not verified"))
+                auth.signOut()
+                Result.failure(Exception("Email_not_verified"))
             }
         } catch (e: Exception) {
             Log.e("EmailSignIn", "Error: ${e::class.simpleName} - ${e.message}")
@@ -102,16 +95,8 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
             val user = authResult.user ?: throw Exception("User creation failed")
             user.sendEmailVerification().await()
 
-            val userData = mapOf(
-                "uid" to user.uid,
-                "name" to name,
-                "email" to email
-            )
-            FirebaseFirestore.getInstance()
-                .collection("users")
-                .document(user.uid)
-                .set(userData, SetOptions.merge())
-                .await()
+            userRepository.saveUserData(user.uid, name, email)
+            auth.signOut()
 
             Result.success(user)
         } catch (e: Exception) {
@@ -147,33 +132,9 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
             initialValue = auth.currentUser
         )
 
-    private fun initializeRecaptcha() {
-        recaptchaScope.launch {
-            try {
-                recaptchaClient = Recaptcha.fetchClient(
-                    getApplication(),"6LdJmpYsAAAAABW4_tXEZl0T6by3ov_P2d8jd5wK"
-                )
-
-            } catch(e: RecaptchaException) {
-                Log.e("Recaptcha", "Error fetching client: ${e.message}")
-            }
-        }
-    }
-    private val _recaptchaToken = MutableStateFlow<String?>(null)
-    val recaptchaToken: StateFlow<String?> = _recaptchaToken.asStateFlow()
-
-    private val _recaptchaError = MutableStateFlow<String?>(null)
-    val recaptchaError: StateFlow<String?> = _recaptchaError.asStateFlow()
-
-    fun executeCaptcha() {
-        recaptchaScope.launch {
-            try {
-                val token = recaptchaClient.execute(RecaptchaAction.SIGNUP).getOrThrow()
-                _recaptchaToken.value = token
-            } catch (e: RecaptchaException) {
-                _recaptchaError.value = e.message
-                Log.e("Recaptcha", "Error executing: ${e.message}")
-            }
-        }
+    private companion object {
+        const val TAG = "AuthViewModel"
+        const val WEB_CLIENT_ID =
+            "919945083217-onoqped8qp5v39cp18eth082qd6supbt.apps.googleusercontent.com"
     }
 }
