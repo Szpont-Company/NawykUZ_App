@@ -1,6 +1,5 @@
 package com.SzpontCompany.check
 
-import android.R.attr.label
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
@@ -41,6 +40,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.SzpontCompany.check.ui.main.BottomTab
 import com.SzpontCompany.check.ui.main.CheckBottomNavigationBar
+import com.SzpontCompany.check.ui.profile.ProfileScreen
 import com.SzpontCompany.check.ui.settings.SettingsNavHost
 import com.SzpontCompany.check.ui.rewards.RewardsScreen
 
@@ -70,12 +70,12 @@ class MainActivity : ComponentActivity() {
                 AnimatedContent(
                     targetState = currentScreen,
                     transitionSpec = {
-                        when {
-                            targetState == AppScreen.DASHBOARD ->
+                        when (targetState) {
+                            AppScreen.DASHBOARD ->
                                 (slideInHorizontally { it } + fadeIn(tween(400))) togetherWith
                                         (slideOutHorizontally { -it } + fadeOut(tween(300)))
 
-                            targetState == AppScreen.LOGIN -> {
+                            AppScreen.LOGIN -> {
                                 if (initialState == AppScreen.REGISTER_SUCCESS || initialState == AppScreen.RESET_PASSWORD) {
                                     (slideInHorizontally { -it } + fadeIn(tween(400))) togetherWith
                                             (slideOutHorizontally { it } + fadeOut(tween(300)))
@@ -84,10 +84,10 @@ class MainActivity : ComponentActivity() {
                                 }
                             }
 
-                            targetState == AppScreen.SPLASH ->
+                            AppScreen.SPLASH ->
                                 fadeIn() togetherWith fadeOut()
 
-                            targetState == AppScreen.REGISTER_SUCCESS || targetState == AppScreen.RESET_PASSWORD ->
+                            AppScreen.REGISTER_SUCCESS, AppScreen.RESET_PASSWORD ->
                                 (slideInHorizontally { it } + fadeIn(tween(400))) togetherWith
                                         (slideOutHorizontally { -it } + fadeOut(tween(300)))
 
@@ -105,11 +105,6 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
-                        AppScreen.LOGIN -> {
-                            LoginScreen(
-                                onLoginSuccess = { currentScreen = AppScreen.DASHBOARD }
-                            )
-                        }
                         AppScreen.LOGIN -> LoginScreen(
                             onLoginSuccess = { currentScreen = AppScreen.DASHBOARD },
                             onRegisterSuccess = { currentScreen = AppScreen.REGISTER_SUCCESS },
@@ -121,6 +116,26 @@ class MainActivity : ComponentActivity() {
                                 onLogout = { currentScreen = AppScreen.LOGIN }
                             )
                         }
+
+                        AppScreen.REGISTER_SUCCESS -> RegisterSuccessScreen(
+                            onBack = { currentScreen = AppScreen.LOGIN },
+                            onSuccess = { currentScreen = AppScreen.LOGIN },
+                            accent = MaterialTheme.colorScheme.primary
+                        )
+
+                        AppScreen.RESET_PASSWORD -> ResetPasswordScreen(
+                            onBack = { currentScreen = AppScreen.LOGIN },
+                            accent = MaterialTheme.colorScheme.primary,
+                            onPasswordReset = { authViewModel.resetPassword { result ->
+                                if (result.isSuccess) {
+                                    currentScreen = AppScreen.LOGIN
+                                } else {
+                                    Log.e("ResetPassword", "Error resetting password: ${result.exceptionOrNull()?.message}")
+                                }
+                            } },
+                            email = authViewModel.email,
+                            onEmailChange = { authViewModel.onEmailChange(it)}
+                        )
                     }
                 }
             }
@@ -194,29 +209,7 @@ fun RootNavigationGraph(onLogout: () -> Unit) {
                 SettingsNavHost(
                     onExitSettings = { navController.popBackStack() }
                 )
-                        AppScreen.DASHBOARD -> MainScreen()
 
-                        AppScreen.REGISTER_SUCCESS -> RegisterSuccessScreen(
-                            onBack = { currentScreen = AppScreen.LOGIN },
-                            onSuccess = { currentScreen = AppScreen.LOGIN },
-                            accent = MaterialTheme.colorScheme.primary
-                        )
-
-                        AppScreen.RESET_PASSWORD -> ResetPasswordScreen(
-                            onBack = { currentScreen = AppScreen.LOGIN },
-                            accent = MaterialTheme.colorScheme.primary,
-                            onPasswordReset = { authViewModel.resetPassword { result ->
-                                if (result.isSuccess) {
-                                    currentScreen = AppScreen.LOGIN
-                                } else {
-                                    Log.e("ResetPassword", "Error resetting password: ${result.exceptionOrNull()?.message}")
-                                }
-                            } },
-                            email = authViewModel.email,
-                            onEmailChange = { authViewModel.onEmailChange(it)}
-                        )
-                    }
-                }
             }
         }
     }
