@@ -259,13 +259,21 @@ fun LevelAndXpBar() {
 
     var animationPlayed by remember { mutableStateOf(false) }
 
-   //Docelowa wartosc postepu (pozniej zrobimy wartosc z bazy danych. np 0.77f)
-    val targetProgress = 0.77f
+    val currentLevel = 8
+    val targetXp = 1240
+    val maxXp = 1600
+    val targetProgress = targetXp.toFloat() / maxXp.toFloat()
 
     val animatedProgress by animateFloatAsState(
         targetValue = if (animationPlayed) targetProgress else 0f,
         animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
         label = "xp_progress_animation"
+    )
+
+    val animatedXp by animateIntAsState(
+        targetValue = if (animationPlayed) targetXp else 0,
+        animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
+        label = "xp_count_animation"
     )
 
     LaunchedEffect(Unit) {
@@ -292,7 +300,7 @@ fun LevelAndXpBar() {
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
-                    text = stringResource(R.string.profile_xp_format, 1240, 1600),
+                    text = stringResource(R.string.profile_xp_format, animatedXp, maxXp),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium
