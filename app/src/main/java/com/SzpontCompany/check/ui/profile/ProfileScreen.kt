@@ -495,6 +495,9 @@ fun SettingsItem(icon: ImageVector, iconTint: Color, title: String, onClick: () 
 
 @Composable
 fun BadgesSection() {
+
+    var selectedBadge by remember { mutableStateOf<com.SzpontCompany.check.data.Badge?>(null) }
+
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = stringResource(R.string.profile_badges_header),
@@ -513,15 +516,22 @@ fun BadgesSection() {
                 BadgeItem(
                     emoji = badge.emoji,
                     label = stringResource(id = badge.nameResId),
-                    isActive = badge.isUnlocked
+                    isActive = badge.isUnlocked,
+                    onClick = { selectedBadge = badge }
                 )
             }
         }
     }
+    selectedBadge?.let { badge ->
+        BadgeDetailsDialog(
+            badge = badge,
+            onDismiss = { selectedBadge = null }
+        )
+    }
 }
 
 @Composable
-fun BadgeItem(emoji: String, label: String, isActive: Boolean) {
+fun BadgeItem(emoji: String, label: String, isActive: Boolean, onClick: () -> Unit) {
     // aktywna -> obramowanie w kolorze primary,  nie -> przezroczyste
     val borderColor = if (isActive) MaterialTheme.colorScheme.primary else Color.Transparent
 
@@ -540,6 +550,8 @@ fun BadgeItem(emoji: String, label: String, isActive: Boolean) {
         modifier = Modifier
             .width(76.dp)
             .alpha(alpha)
+            .clip(RoundedCornerShape(16.dp))
+            .clickable { onClick() }
     ) {
         Box(
             modifier = Modifier
@@ -740,6 +752,98 @@ fun ShareStatItem(value: String, label: String, valueColor: Color = MaterialThem
         Text(text = value, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = valueColor)
         Text(text = label, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
+}
+
+
+@Composable
+fun BadgeDetailsDialog(
+    badge: com.SzpontCompany.check.data.Badge,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        modifier = Modifier.fillMaxWidth(0.85f),
+        shape = RoundedCornerShape(26.dp),
+        containerColor = MaterialTheme.colorScheme.surface,
+        title = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(100.dp)
+                        .background(
+                            if (badge.isUnlocked) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+                            else MaterialTheme.colorScheme.surfaceVariant,
+                            RoundedCornerShape(24.dp)
+                        )
+                        .border(
+                            2.dp,
+                            if (badge.isUnlocked) MaterialTheme.colorScheme.primary else Color.Transparent,
+                            RoundedCornerShape(24.dp)
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = badge.emoji,
+                        fontSize = 48.sp,
+                        modifier = Modifier.alpha(if (badge.isUnlocked) 1f else 0.4f)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = stringResource(id = badge.nameResId),
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.onBackground,
+                    textAlign = TextAlign.Center
+                )
+            }
+        },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                if (badge.isUnlocked) {
+                    Text(
+                        text = "🏆 Odblokowana!",
+                        color = Color(0xFFBA7517),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp
+                    )
+                } else {
+                    Text(
+                        text = "🔒 Jeszcze nieodblokowana",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                 Text(
+                     text = stringResource(id = badge.requirementResId),
+                     style = MaterialTheme.typography.bodyMedium,
+                     color = MaterialTheme.colorScheme.onSurfaceVariant,
+                     textAlign = TextAlign.Center
+                 )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = onDismiss,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                shape = RoundedCornerShape(14.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+            ) {
+                Text("Super!", fontWeight = FontWeight.Bold, color = Color.White)
+            }
+        }
+    )
 }
 
 @Preview(showBackground = true)
