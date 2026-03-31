@@ -29,10 +29,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.SzpontCompany.check.R
-import com.SzpontCompany.check.ui.theme.Mint
 
 @Composable
 fun RegisterSuccessScreen(
@@ -108,7 +106,7 @@ fun RegisterSuccessScreen(
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurfaceVariant)
         ) {
             Text(
-                text = "Przejdź do logowania",
+                text = stringResource(R.string.success_login_redirect),
                 style = MaterialTheme.typography.bodyLarge
             )
         }

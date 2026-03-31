@@ -155,7 +155,7 @@ fun RegisterForm(
     OutlinedTextField(
         value = email,
         onValueChange = {onEmailChange(it)},
-        placeholder = {Text("twoj@email.com")},
+        placeholder = {Text(stringResource(R.string.mail_hint))},
         shape = RoundedCornerShape(12.dp),
         colors = OutlinedTextFieldDefaults.colors(
             unfocusedContainerColor = MaterialTheme.colorScheme.secondary,

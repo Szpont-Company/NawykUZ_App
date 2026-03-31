@@ -15,7 +15,6 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.Spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -27,10 +26,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -44,13 +41,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.SzpontCompany.check.R
 import com.SzpontCompany.check.ui.theme.Mint
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.SzpontCompany.check.ui.theme.Amber
@@ -83,14 +78,15 @@ fun getLogoForAccent(accent: Color): Int {
 fun LoginScreen(
     viewModel: AuthViewModel = viewModel(),
     onLoginSuccess: () -> Unit,
-    onRegisterSuccess: () -> Unit
+    onRegisterSuccess: () -> Unit,
+    onForgotPasswordClick: () -> Unit,
 ) {
 
     val context = LocalContext.current
     var selectedTab by remember { mutableStateOf(0) }
-    var name by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+    val name = viewModel.name
+    val email = viewModel.email
+    val password = viewModel.password
 
     val scope = rememberCoroutineScope()
     val accent = MaterialTheme.colorScheme.primary
@@ -205,20 +201,24 @@ fun LoginScreen(
                     0 -> LogInForm(
                         email,
                         password,
-                        onEmailChange = { email = it },
-                        onPasswordChange = { password = it },
+                        onEmailChange = { viewModel.onEmailChange(it) },
+                        onPasswordChange = { viewModel.onPasswordChange(it) },
                         onLogInClick = { scope.launch {
                             val res = viewModel.signInWithEmail(email.trim(), password)
                             res.onSuccess { onLoginSuccess() }
                             res.onFailure { error ->
-                                if(error.message == "Email_not_verified") {
-                                    Toast.makeText(context,
-                                        context.getString(R.string.login_unverified_email_prompt), Toast.LENGTH_LONG).show()
+                                val message = when (error.message) {
+                                    "Email_not_verified" -> context.getString(R.string.email_not_verified)
+                                    "Invalid_credentials" -> context.getString(R.string.invalid_credentials)
+                                    "Account_not_found" -> context.getString(R.string.account_not_found)
+                                    else -> context.getString(R.string.login_failed)
                                 }
+                                Toast.makeText(context, message, Toast.LENGTH_LONG).show()
                             }
                         }},
                         onForgotPasswordClick = {
-                            scope.launch { viewModel.resetPassword(email) } },
+                            onForgotPasswordClick()
+                        },
                         onGoogleLogInClick = {
                             onGoogleClick()
                         })
@@ -227,11 +227,11 @@ fun LoginScreen(
                         name,
                         email,
                         password,
-                        onNameChange = { name = it },
-                        onEmailChange = { email = it },
-                        onPasswordChange = { password = it },
+                        onNameChange = { viewModel.onNameChange(it) },
+                        onEmailChange = { viewModel.onEmailChange(it) },
+                        onPasswordChange = { viewModel.onPasswordChange(it) },
                         onRegisterClick = { scope.launch {
-                            val res = viewModel.signUpWithEmail(name, email.trim(), password)
+                            val res = viewModel.signUpWithEmail(name, email, password)
                             res.onSuccess { 
                                 Log.d("Auth", "Zarejestrowano: ${it.displayName}")
                                 onRegisterSuccess()

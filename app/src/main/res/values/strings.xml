@@ -185,9 +185,20 @@
     <string name="profile_next_level">→ Level %1$d</string>
     <string name="profile_streak_format">🔥 %1$d-day streak</string>
     <string name="profile_top_rank">Top %1$d</string>
+
+    <!-- AUTHENTICATION -->
     <string name="confirm_mail_prompt">Rejestracja udana! Sprawdź email w celu weryfikacji.</string>
     <string name="login_unverified_email_prompt">Zweryfikuj swój adres email, aby się zalogować</string>
     <string name="register_success">Konto utworzone!</string>
     <string name="success_hint">Sprawdż e-mail, żeby potwierdzić swoje konto.</string>
     <string name="spam_hint">Nie otrzymałeś wiadomości? Sprawdź SPAM lub skontaktuj się z nami.</string>
+    <string name="success_login_redirect">Przejdź do logowania</string>
+    <string name="password_reset">Reset hasła</string>
+    <string name="password_reset_hint">Wyślemy link do zresetowania hasła na Twój adres e-mail.</string>
+    <string name="reset_pwd_send">Wyślij link</string>
+    <string name="reset_pwd_return">Wróć do logowania</string>
+    <string name="email_not_verified">Email nie został zweryfikowany</string>
+    <string name="invalid_credentials">Nieprawidłowy mail lub hasło</string>
+    <string name="account_not_found">Konto o podanych danych nie istnieje</string>
+    <string name="login_failed">Nieznany błąd logowania</string>
 </resources>

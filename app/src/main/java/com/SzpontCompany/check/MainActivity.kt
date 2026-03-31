@@ -2,6 +2,7 @@ package com.SzpontCompany.check
 
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
@@ -25,13 +26,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.SzpontCompany.check.ui.auth.AuthViewModel
 import com.SzpontCompany.check.ui.auth.LoginScreen
 import com.SzpontCompany.check.ui.auth.RegisterSuccessScreen
+import com.SzpontCompany.check.ui.auth.ResetPasswordScreen
 import com.SzpontCompany.check.ui.main.MainScreen
-import com.SzpontCompany.check.ui.profile.ProfileScreen
-import com.SzpontCompany.check.ui.settings.SettingsScreen
-import com.SzpontCompany.check.ui.theme.Crimson
 import com.SzpontCompany.check.ui.theme.Mint
 
-enum class AppScreen { SPLASH, LOGIN, DASHBOARD, REGISTER_SUCCESS }
+enum class AppScreen { SPLASH, LOGIN, DASHBOARD, REGISTER_SUCCESS, RESET_PASSWORD }
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,20 +56,28 @@ class MainActivity : ComponentActivity() {
                 AnimatedContent(
                     targetState = currentScreen,
                     transitionSpec = {
-                        when (targetState) {
-                            AppScreen.DASHBOARD ->
+                        when {
+                            targetState == AppScreen.DASHBOARD ->
                                 (slideInHorizontally { it } + fadeIn(tween(400))) togetherWith
                                         (slideOutHorizontally { -it } + fadeOut(tween(300)))
 
-                            AppScreen.LOGIN ->
-                                fadeIn(tween(500)) togetherWith fadeOut(tween(300))
+                            targetState == AppScreen.LOGIN -> {
+                                if (initialState == AppScreen.REGISTER_SUCCESS || initialState == AppScreen.RESET_PASSWORD) {
+                                    (slideInHorizontally { -it } + fadeIn(tween(400))) togetherWith
+                                            (slideOutHorizontally { it } + fadeOut(tween(300)))
+                                } else {
+                                    fadeIn(tween(500)) togetherWith fadeOut(tween(300))
+                                }
+                            }
 
-                            AppScreen.SPLASH ->
+                            targetState == AppScreen.SPLASH ->
                                 fadeIn() togetherWith fadeOut()
 
-                            AppScreen.REGISTER_SUCCESS ->
+                            targetState == AppScreen.REGISTER_SUCCESS || targetState == AppScreen.RESET_PASSWORD ->
                                 (slideInHorizontally { it } + fadeIn(tween(400))) togetherWith
                                         (slideOutHorizontally { -it } + fadeOut(tween(300)))
+
+                            else -> fadeIn() togetherWith fadeOut()
                         }
                     },
                     label = "app_screen_transition"
@@ -84,7 +91,8 @@ class MainActivity : ComponentActivity() {
 
                         AppScreen.LOGIN -> LoginScreen(
                             onLoginSuccess = { currentScreen = AppScreen.DASHBOARD },
-                            onRegisterSuccess = { currentScreen = AppScreen.REGISTER_SUCCESS }
+                            onRegisterSuccess = { currentScreen = AppScreen.REGISTER_SUCCESS },
+                            onForgotPasswordClick = { currentScreen = AppScreen.RESET_PASSWORD },
                         )
 
                         AppScreen.DASHBOARD -> MainScreen()
@@ -93,6 +101,20 @@ class MainActivity : ComponentActivity() {
                             onBack = { currentScreen = AppScreen.LOGIN },
                             onSuccess = { currentScreen = AppScreen.LOGIN },
                             accent = MaterialTheme.colorScheme.primary
+                        )
+
+                        AppScreen.RESET_PASSWORD -> ResetPasswordScreen(
+                            onBack = { currentScreen = AppScreen.LOGIN },
+                            accent = MaterialTheme.colorScheme.primary,
+                            onPasswordReset = { authViewModel.resetPassword { result ->
+                                if (result.isSuccess) {
+                                    currentScreen = AppScreen.LOGIN
+                                } else {
+                                    Log.e("ResetPassword", "Error resetting password: ${result.exceptionOrNull()?.message}")
+                                }
+                            } },
+                            email = authViewModel.email,
+                            onEmailChange = { authViewModel.onEmailChange(it)}
                         )
                     }
                 }

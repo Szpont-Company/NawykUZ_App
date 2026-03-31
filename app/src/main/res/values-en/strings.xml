@@ -186,4 +186,15 @@
     <string name="profile_xp_format">%1$d / %2$d XP</string> <string name="profile_next_level">→ Poziom %1$d</string> <string name="profile_streak_format">🔥 %1$d-dniowy streak</string>
     <string name="profile_top_rank">Top %1$d</string>
     <string name="register_success">Account created!</string>
+    <string name="success_hint">Check e-mail to confirm your account.</string>
+    <string name="spam_hint">No activation message? Check SPAM or contact us.</string>
+    <string name="success_login_redirect">Go to Log in</string>
+    <string name="password_reset">Password reset</string>
+    <string name="password_reset_hint">We\'ll send a pasword reset link to your e-mail.</string>
+    <string name="reset_pwd_send">Send link</string>
+    <string name="reset_pwd_return">Back to log in</string>
+    <string name="email_not_verified">Email not verified</string>
+    <string name="invalid_credentials">Invalid email or password</string>
+    <string name="account_not_found">Account not found</string>
+    <string name="login_failed">Unknown login error</string>
 </resources>
