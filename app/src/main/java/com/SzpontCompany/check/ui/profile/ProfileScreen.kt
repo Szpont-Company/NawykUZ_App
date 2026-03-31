@@ -2,6 +2,9 @@ package com.SzpontCompany.check.ui.profile
 
 import android.R.attr.type
 import android.content.Intent
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -40,6 +43,7 @@ import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.outlined.PersonAdd
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.rounded.ArrowBackIosNew
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -251,6 +255,22 @@ fun UserHeaderSection() {
 
 @Composable
 fun LevelAndXpBar() {
+
+    var animationPlayed by remember { mutableStateOf(false) }
+
+   //Docelowa wartosc postepu (pozniej zrobimy wartosc z bazy danych. np 0.77f)
+    val targetProgress = 0.77f
+
+    val animatedProgress by animateFloatAsState(
+        targetValue = if (animationPlayed) targetProgress else 0f,
+        animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
+        label = "xp_progress_animation"
+    )
+
+    LaunchedEffect(Unit) {
+        animationPlayed = true
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -294,7 +314,7 @@ fun LevelAndXpBar() {
         ) {
             Box(
                 modifier = Modifier
-                    .fillMaxWidth(0.77f)
+                    .fillMaxWidth(animatedProgress)
                     .fillMaxHeight()
                     .background(
                         brush = Brush.horizontalGradient(
