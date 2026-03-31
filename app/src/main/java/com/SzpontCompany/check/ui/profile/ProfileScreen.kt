@@ -1,5 +1,7 @@
 package com.SzpontCompany.check.ui.profile
 
+import android.R.attr.type
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -44,6 +46,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.window.DialogProperties
 import com.SzpontCompany.check.data.BadgeProvider
@@ -58,6 +61,8 @@ fun ProfileScreen(
 ) {
 
     var showLogoutDialog by remember { mutableStateOf(false) }
+    var showShareDialog by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier
@@ -68,7 +73,10 @@ fun ProfileScreen(
     ) {
         Spacer(modifier = Modifier.height(24.dp))
 
-        ProfileTopBar(onBackClick = onBackClick)
+        ProfileTopBar(
+            onBackClick = onBackClick,
+            onShareClick = { showShareDialog = true }
+        )
         Spacer(modifier = Modifier.height(24.dp))
 
         UserHeaderSection()
@@ -109,11 +117,28 @@ fun ProfileScreen(
                 }
             )
         }
+
+        if (showShareDialog) {
+            ShareProfileDialog(
+                onDismiss = { showShareDialog = false },
+                onShareConfirm = {
+                    showShareDialog = false
+
+
+                    val sendIntent = Intent(Intent.ACTION_SEND).apply {
+                        type = "text/plain"
+                        putExtra(Intent.EXTRA_TEXT, "Hej! Mam 8 poziom i 21-dniowy streak w Check. 🔥 Dołącz do mnie!")
+                    }
+                    context.startActivity(Intent.createChooser(sendIntent, "Udostępnij przez"))
+                }
+            )
+        }
+
     }
 }
 
 @Composable
-fun ProfileTopBar(onBackClick: () -> Unit) {
+fun ProfileTopBar(onBackClick: () -> Unit, onShareClick: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -136,7 +161,7 @@ fun ProfileTopBar(onBackClick: () -> Unit) {
                     .size(44.dp)
                     .clip(RoundedCornerShape(12.dp))
                     .background(MaterialTheme.colorScheme.surface)
-                    .clickable { /* TODO: Otworz systemowe udostepnianie */ },
+                    .clickable { onShareClick() },
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -561,6 +586,119 @@ fun LogoutConfirmationDialog(
             }
         }
     )
+}
+
+
+@Composable
+fun ShareProfileDialog(
+    onDismiss: () -> Unit,
+    onShareConfirm: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+        modifier = Modifier.fillMaxWidth(0.9f),
+        containerColor = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(26.dp),
+        title = {
+            Text(
+                text = "Udostępnij profil",
+                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onBackground,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+        },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(
+                                    MaterialTheme.colorScheme.surfaceVariant,
+                                    MaterialTheme.colorScheme.background
+                                )
+                            ),
+                            shape = RoundedCornerShape(20.dp)
+                        )
+                        .border(2.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f), RoundedCornerShape(20.dp))
+                        .padding(24.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Box(
+                            modifier = Modifier
+                                .size(80.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.primary),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("MK", color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.Bold)
+                        }
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        Text(
+                            text = "Marek Kowalski",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                        Text(text = "@marekk", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp)
+
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ) {
+                            ShareStatItem(value = "Lvl 8", label = "Poziom")
+                            ShareStatItem(value = "🔥 21", label = "Streak", valueColor = MaterialTheme.colorScheme.primary)
+                            ShareStatItem(value = "🏆 7", label = "Wygrane", valueColor = Color(0xFFBA7517))
+                        }
+
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        Text(
+                            text = "Check. • Wygrywaj każdy dzień",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = onShareConfirm,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                    .height(50.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+            ) {
+                Icon(Icons.Outlined.Share, contentDescription = null, modifier = Modifier.size(20.dp))
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Udostępnij", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            }
+        },
+        dismissButton = null
+    )
+}
+
+@Composable
+fun ShareStatItem(value: String, label: String, valueColor: Color = MaterialTheme.colorScheme.onBackground) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(text = value, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = valueColor)
+        Text(text = label, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
 }
 
 @Preview(showBackground = true)
