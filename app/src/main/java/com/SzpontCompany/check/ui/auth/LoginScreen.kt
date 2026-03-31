@@ -82,8 +82,9 @@ fun getLogoForAccent(accent: Color): Int {
 @Composable
 fun LoginScreen(
     viewModel: AuthViewModel = viewModel(),
-    onLoginSuccess: () -> Unit
-    ) {
+    onLoginSuccess: () -> Unit,
+    onRegisterSuccess: () -> Unit
+) {
 
     val context = LocalContext.current
     var selectedTab by remember { mutableStateOf(0) }
@@ -119,47 +120,9 @@ fun LoginScreen(
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Spacer(modifier = Modifier.height(72.dp))
-        Box(
-            modifier = Modifier
-                .size(72.dp)
-                .clip(RoundedCornerShape(20.dp))
-                .background(MaterialTheme.colorScheme.primary),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                painter = painterResource(id = getLogoForAccent(accent)),
-                contentDescription = null,
-                modifier = Modifier.size(72.dp),
-                tint = Color.Unspecified
-            )
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(
-                text = "Check",
-                style = MaterialTheme.typography.headlineLarge,
-                color = MaterialTheme.colorScheme.onBackground,
-                textAlign = TextAlign.Center,
-            )
-            Text(
-                text = ".",
-                style = MaterialTheme.typography.headlineLarge,
-                color = MaterialTheme.colorScheme.primary,
-            )
-        }
-
-        Text(
-            text = stringResource(R.string.welcome_sentence),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(top = 8.dp, bottom = 24.dp),
-            textAlign = TextAlign.Center,
+        //s
+        LogInHeader(
+            accent = accent
         )
 
         val tabTitles = listOf(stringResource(R.string.login), stringResource((R.string.register)))
@@ -254,7 +217,8 @@ fun LoginScreen(
                                 }
                             }
                         }},
-                        onForgotPasswordClick = { scope.launch { viewModel.resetPassword(email) } },
+                        onForgotPasswordClick = {
+                            scope.launch { viewModel.resetPassword(email) } },
                         onGoogleLogInClick = {
                             onGoogleClick()
                         })
@@ -270,8 +234,7 @@ fun LoginScreen(
                             val res = viewModel.signUpWithEmail(name, email.trim(), password)
                             res.onSuccess { 
                                 Log.d("Auth", "Zarejestrowano: ${it.displayName}")
-                                Toast.makeText(context,
-                                    context.getString(R.string.confirm_mail_prompt), Toast.LENGTH_LONG).show()
+                                onRegisterSuccess()
                             }
                         }},
                         onGoogleRegisterClick = {

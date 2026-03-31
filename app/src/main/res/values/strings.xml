@@ -187,4 +187,7 @@
     <string name="profile_top_rank">Top %1$d</string>
     <string name="confirm_mail_prompt">Rejestracja udana! Sprawdź email w celu weryfikacji.</string>
     <string name="login_unverified_email_prompt">Zweryfikuj swój adres email, aby się zalogować</string>
+    <string name="register_success">Konto utworzone!</string>
+    <string name="success_hint">Sprawdż e-mail, żeby potwierdzić swoje konto.</string>
+    <string name="spam_hint">Nie otrzymałeś wiadomości? Sprawdź SPAM lub skontaktuj się z nami.</string>
 </resources>

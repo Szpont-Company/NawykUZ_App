@@ -13,6 +13,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -23,13 +24,14 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.SzpontCompany.check.ui.auth.AuthViewModel
 import com.SzpontCompany.check.ui.auth.LoginScreen
+import com.SzpontCompany.check.ui.auth.RegisterSuccessScreen
 import com.SzpontCompany.check.ui.main.MainScreen
 import com.SzpontCompany.check.ui.profile.ProfileScreen
 import com.SzpontCompany.check.ui.settings.SettingsScreen
 import com.SzpontCompany.check.ui.theme.Crimson
 import com.SzpontCompany.check.ui.theme.Mint
 
-enum class AppScreen { SPLASH, LOGIN, DASHBOARD }
+enum class AppScreen { SPLASH, LOGIN, DASHBOARD, REGISTER_SUCCESS }
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -65,6 +67,10 @@ class MainActivity : ComponentActivity() {
 
                             AppScreen.SPLASH ->
                                 fadeIn() togetherWith fadeOut()
+
+                            AppScreen.REGISTER_SUCCESS ->
+                                (slideInHorizontally { it } + fadeIn(tween(400))) togetherWith
+                                        (slideOutHorizontally { -it } + fadeOut(tween(300)))
                         }
                     },
                     label = "app_screen_transition"
@@ -77,10 +83,17 @@ class MainActivity : ComponentActivity() {
                         )
 
                         AppScreen.LOGIN -> LoginScreen(
-                            onLoginSuccess = { currentScreen = AppScreen.DASHBOARD }
+                            onLoginSuccess = { currentScreen = AppScreen.DASHBOARD },
+                            onRegisterSuccess = { currentScreen = AppScreen.REGISTER_SUCCESS }
                         )
 
                         AppScreen.DASHBOARD -> MainScreen()
+
+                        AppScreen.REGISTER_SUCCESS -> RegisterSuccessScreen(
+                            onBack = { currentScreen = AppScreen.LOGIN },
+                            onSuccess = { currentScreen = AppScreen.LOGIN },
+                            accent = MaterialTheme.colorScheme.primary
+                        )
                     }
                 }
             }

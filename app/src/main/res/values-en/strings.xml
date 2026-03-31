@@ -185,4 +185,5 @@
 
     <string name="profile_xp_format">%1$d / %2$d XP</string> <string name="profile_next_level">→ Poziom %1$d</string> <string name="profile_streak_format">🔥 %1$d-dniowy streak</string>
     <string name="profile_top_rank">Top %1$d</string>
+    <string name="register_success">Account created!</string>
 </resources>
