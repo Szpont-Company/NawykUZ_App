@@ -15,11 +15,13 @@ import com.SzpontCompany.check.data.UserRepository
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -94,34 +96,34 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     suspend fun signInWithGoogle(context: Context): Result<FirebaseUser?> {
         return try {
             val credentialManager = CredentialManager.create(context)
-            val credential = try {
-                // Defaultowe logowanie Googlem - wymaga blokady ekranu do działania
-                val googleIdOption = GetGoogleIdOption.Builder()
-                    .setServerClientId(WEB_CLIENT_ID)
-                    .setFilterByAuthorizedAccounts(false)
-                    .setAutoSelectEnabled(false)
-                    .build()
 
-                val request = GetCredentialRequest.Builder()
-                    .addCredentialOption(googleIdOption)
-                    .build()
+            val googleIdOption = GetGoogleIdOption.Builder()
+                .setServerClientId(WEB_CLIENT_ID)
+                .setFilterByAuthorizedAccounts(false)
+                .setAutoSelectEnabled(false)
+                .build()
 
-                credentialManager.getCredential(context, request).credential
-            } catch (e: NoCredentialException) {
-                Log.e("GoogleSignIn", "No credential found: ${e.message}")
-                // Fallback logowania
-                val sigInOption = GetSignInWithGoogleOption.Builder(WEB_CLIENT_ID)
-                    .build()
-                val request = GetCredentialRequest.Builder()
-                    .addCredentialOption(sigInOption)
-                    .build()
-                credentialManager.getCredential(context, request).credential
-            }
+            val request = GetCredentialRequest.Builder()
+                .addCredentialOption(googleIdOption)
+                .build()
+
+            val credential = credentialManager.getCredential(context, request).credential
 
             val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
             val firebaseCredential = GoogleAuthProvider.getCredential(googleIdTokenCredential.idToken, null)
 
             val authResult = auth.signInWithCredential(firebaseCredential).await()
+
+            val googleUser = authResult.user
+            val name = googleUser?.displayName ?: ""
+            val email = googleUser?.email ?: ""
+            val uid = googleUser?.uid ?: ""
+
+            val docRef = Firebase.firestore.collection("users").document(uid)
+            val snapshot = docRef.get().await()
+
+            if(!snapshot.exists()) userRepository.saveUserData(uid, name, email)
+
 
             Result.success(authResult.user)
         } catch (e: Exception) {
