@@ -15,6 +15,7 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
@@ -75,7 +76,8 @@ class MainActivity : ComponentActivity() {
                                         (slideOutHorizontally { -it } + fadeOut(tween(300)))
 
                             AppScreen.LOGIN ->
-                                fadeIn(tween(500)) togetherWith fadeOut(tween(300))
+                                fadeIn(tween(800)) togetherWith
+                                        (fadeOut(tween(700)) + scaleOut(targetScale = 0.85f, animationSpec = tween(700)))
 
                             AppScreen.SPLASH ->
                                 fadeIn() togetherWith fadeOut()
