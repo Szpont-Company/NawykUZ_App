@@ -194,6 +194,9 @@
     <string name="dialog_logout_confirm">Wyloguj</string>
     <string name="dialog_logout_cancel">Anuluj</string>
 
+    <string name="greeting_morning">Dzień dobry,</string>
+    <string name="greeting_afternoon">Miłego popołudnia,</string>
+    <string name="greeting_evening">Dobry wieczór,</string>
     <!-- AUTHENTICATION -->
     <string name="register_success">Konto utworzone!</string>
     <string name="success_hint">Sprawdż e-mail, żeby potwierdzić swoje konto.</string>

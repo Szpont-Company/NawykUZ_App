@@ -15,6 +15,7 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
@@ -183,15 +184,29 @@ fun RootNavigationGraph(onLogout: () -> Unit) {
             composable("main") {
                 MainScreen(
                     currentTab = currentTab ?: BottomTab.TODAY,
-                    onProfileClick = { navController.navigate("profile") }
+                    onProfileClick = {
+                        navController.navigate("profile"){
+                            launchSingleTop = true
+                        }
+                    }
                 )
             }
 
             composable("profile") {
                 ProfileScreen(
-                    onBackClick = { navController.popBackStack() },
-                    onSettingsClick = { navController.navigate("settings") },
-                    onRewardsClick = { navController.navigate("rewards") },
+                    onBackClick = {
+                        navController.popBackStack("main", inclusive = false)
+                    },
+                    onSettingsClick = {
+                        if (navController.currentDestination?.route == "profile") {
+                            navController.navigate("settings")
+                        }
+                    },
+                    onRewardsClick = {
+                        if (navController.currentDestination?.route == "profile") {
+                            navController.navigate("rewards")
+                        }
+                    },
                     onLogoutClick = {
                         authViewModel.signOut()
                         onLogout()

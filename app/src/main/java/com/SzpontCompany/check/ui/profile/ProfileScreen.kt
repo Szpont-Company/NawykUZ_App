@@ -1,5 +1,11 @@
 package com.SzpontCompany.check.ui.profile
 
+import android.R.attr.type
+import android.content.Intent
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.animateIntAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -31,14 +37,21 @@ import com.SzpontCompany.check.ui.theme.CheckTheme
 import com.SzpontCompany.check.ui.theme.Mint
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.automirrored.outlined.ScreenShare
+import androidx.compose.material.icons.automirrored.outlined.Send
+import androidx.compose.material.icons.automirrored.outlined.Shortcut
 import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.outlined.PersonAdd
+import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.rounded.ArrowBackIosNew
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.window.DialogProperties
 import com.SzpontCompany.check.data.BadgeProvider
@@ -53,6 +66,8 @@ fun ProfileScreen(
 ) {
 
     var showLogoutDialog by remember { mutableStateOf(false) }
+    var showShareDialog by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier
@@ -63,7 +78,10 @@ fun ProfileScreen(
     ) {
         Spacer(modifier = Modifier.height(24.dp))
 
-        ProfileTopBar(onBackClick = onBackClick)
+        ProfileTopBar(
+            onBackClick = onBackClick,
+            onShareClick = { showShareDialog = true }
+        )
         Spacer(modifier = Modifier.height(24.dp))
 
         UserHeaderSection()
@@ -104,11 +122,28 @@ fun ProfileScreen(
                 }
             )
         }
+
+        if (showShareDialog) {
+            ShareProfileDialog(
+                onDismiss = { showShareDialog = false },
+                onShareConfirm = {
+                    showShareDialog = false
+
+
+                    val sendIntent = Intent(Intent.ACTION_SEND).apply {
+                        type = "text/plain"
+                        putExtra(Intent.EXTRA_TEXT, "Hej! Mam 8 poziom i 21-dniowy streak w Check. 🔥 Dołącz do mnie!")
+                    }
+                    context.startActivity(Intent.createChooser(sendIntent, "Udostępnij przez"))
+                }
+            )
+        }
+
     }
 }
 
 @Composable
-fun ProfileTopBar(onBackClick: () -> Unit) {
+fun ProfileTopBar(onBackClick: () -> Unit, onShareClick: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -126,17 +161,34 @@ fun ProfileTopBar(onBackClick: () -> Unit) {
             modifier = Modifier.weight(1f)
         )
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            IconButton(
-                onClick = { /* TODO */ },
-                modifier = Modifier.background(MaterialTheme.colorScheme.surface, RoundedCornerShape(12.dp))
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.surface)
+                    .clickable { onShareClick() },
+                contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Outlined.FilterAlt, contentDescription = "Filtruj", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                Icon(
+                    imageVector = Icons.Outlined.Share,
+                    contentDescription = "Udostępnij profil",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
-            IconButton(
-                onClick = { /* TODO */ },
-                modifier = Modifier.background(MaterialTheme.colorScheme.surface, RoundedCornerShape(12.dp))
+
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.surface)
+                    .clickable { /* TODO: Otworz modal z dodawaniem znajomego / skanerem QR */ },
+                contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Outlined.PersonOutline, contentDescription = "Profil", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                Icon(
+                    imageVector = Icons.Outlined.PersonAdd,
+                    contentDescription = "Dodaj znajomego",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
     }
@@ -204,6 +256,30 @@ fun UserHeaderSection() {
 
 @Composable
 fun LevelAndXpBar() {
+
+    var animationPlayed by remember { mutableStateOf(false) }
+
+    val currentLevel = 8
+    val targetXp = 1240
+    val maxXp = 1600
+    val targetProgress = targetXp.toFloat() / maxXp.toFloat()
+
+    val animatedProgress by animateFloatAsState(
+        targetValue = if (animationPlayed) targetProgress else 0f,
+        animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
+        label = "xp_progress_animation"
+    )
+
+    val animatedXp by animateIntAsState(
+        targetValue = if (animationPlayed) targetXp else 0,
+        animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
+        label = "xp_count_animation"
+    )
+
+    LaunchedEffect(Unit) {
+        animationPlayed = true
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -224,7 +300,7 @@ fun LevelAndXpBar() {
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
-                    text = stringResource(R.string.profile_xp_format, 1240, 1600),
+                    text = stringResource(R.string.profile_xp_format, animatedXp, maxXp),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium
@@ -247,7 +323,7 @@ fun LevelAndXpBar() {
         ) {
             Box(
                 modifier = Modifier
-                    .fillMaxWidth(0.77f)
+                    .fillMaxWidth(animatedProgress)
                     .fillMaxHeight()
                     .background(
                         brush = Brush.horizontalGradient(
@@ -266,18 +342,18 @@ fun StatsGridSection() {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             StatCard(
                 modifier = Modifier.weight(1f),
-                value = "34",
+                targetValue = 34,
                 label = stringResource(R.string.profile_habits)
             )
             StatCard(
                 modifier = Modifier.weight(1f),
-                value = "21",
+                targetValue = 21,
                 label = stringResource(R.string.profile_streak_days),
                 valueColor = MaterialTheme.colorScheme.primary
             )
             StatCard(
                 modifier = Modifier.weight(1f),
-                value = "850",
+                targetValue = 850,
                 label = stringResource(R.string.profile_coins),
                 valueColor = Color(0xFFBA7517)
             )
@@ -285,17 +361,18 @@ fun StatsGridSection() {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             StatCard(
                 modifier = Modifier.weight(1f),
-                value = "7",
+                targetValue = 7,
                 label = stringResource(R.string.profile_battles_won)
             )
             StatCard(
                 modifier = Modifier.weight(1f),
-                value = "78%",
+                targetValue = 78,
+                suffix = "%",
                 label = stringResource(R.string.profile_effectiveness)
             )
             StatCard(
                 modifier = Modifier.weight(1f),
-                value = "12",
+                targetValue = 12,
                 label = stringResource(R.string.profile_friends)
             )
         }
@@ -303,7 +380,26 @@ fun StatsGridSection() {
 }
 
 @Composable
-fun StatCard(modifier: Modifier = Modifier, value: String, label: String, valueColor: Color = MaterialTheme.colorScheme.onBackground) {
+fun StatCard(
+    modifier: Modifier = Modifier,
+    targetValue: Int,
+    suffix: String = "",
+    label: String,
+    valueColor: Color = MaterialTheme.colorScheme.onBackground
+) {
+
+    var animationPlayed by remember { mutableStateOf(false) }
+
+    val animatedValue by animateIntAsState(
+        targetValue = if (animationPlayed) targetValue else 0,
+        animationSpec = tween(durationMillis = 1200, easing = FastOutSlowInEasing),
+        label = "stat_count_animation"
+    )
+
+    LaunchedEffect(Unit) {
+        animationPlayed = true
+    }
+
     Column(
         modifier = modifier
             .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(16.dp))
@@ -311,7 +407,7 @@ fun StatCard(modifier: Modifier = Modifier, value: String, label: String, valueC
             .padding(vertical = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = value, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = valueColor)
+        Text(text = "$animatedValue$suffix", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = valueColor)
         Spacer(modifier = Modifier.height(4.dp))
         Text(text = label, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Medium)
     }
@@ -407,6 +503,9 @@ fun SettingsItem(icon: ImageVector, iconTint: Color, title: String, onClick: () 
 
 @Composable
 fun BadgesSection() {
+
+    var selectedBadge by remember { mutableStateOf<com.SzpontCompany.check.data.Badge?>(null) }
+
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = stringResource(R.string.profile_badges_header),
@@ -425,15 +524,22 @@ fun BadgesSection() {
                 BadgeItem(
                     emoji = badge.emoji,
                     label = stringResource(id = badge.nameResId),
-                    isActive = badge.isUnlocked
+                    isActive = badge.isUnlocked,
+                    onClick = { selectedBadge = badge }
                 )
             }
         }
     }
+    selectedBadge?.let { badge ->
+        BadgeDetailsDialog(
+            badge = badge,
+            onDismiss = { selectedBadge = null }
+        )
+    }
 }
 
 @Composable
-fun BadgeItem(emoji: String, label: String, isActive: Boolean) {
+fun BadgeItem(emoji: String, label: String, isActive: Boolean, onClick: () -> Unit) {
     // aktywna -> obramowanie w kolorze primary,  nie -> przezroczyste
     val borderColor = if (isActive) MaterialTheme.colorScheme.primary else Color.Transparent
 
@@ -452,6 +558,8 @@ fun BadgeItem(emoji: String, label: String, isActive: Boolean) {
         modifier = Modifier
             .width(76.dp)
             .alpha(alpha)
+            .clip(RoundedCornerShape(16.dp))
+            .clickable { onClick() }
     ) {
         Box(
             modifier = Modifier
@@ -536,6 +644,211 @@ fun LogoutConfirmationDialog(
                     fontWeight = FontWeight.Medium,
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                 )
+            }
+        }
+    )
+}
+
+
+@Composable
+fun ShareProfileDialog(
+    onDismiss: () -> Unit,
+    onShareConfirm: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+        modifier = Modifier.fillMaxWidth(0.9f),
+        containerColor = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(26.dp),
+        title = {
+            Text(
+                text = "Udostępnij profil",
+                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onBackground,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+        },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(
+                                    MaterialTheme.colorScheme.surfaceVariant,
+                                    MaterialTheme.colorScheme.background
+                                )
+                            ),
+                            shape = RoundedCornerShape(20.dp)
+                        )
+                        .border(2.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f), RoundedCornerShape(20.dp))
+                        .padding(24.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Box(
+                            modifier = Modifier
+                                .size(80.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.primary),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("MK", color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.Bold)
+                        }
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        Text(
+                            text = "Marek Kowalski",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                        Text(text = "@marekk", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp)
+
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ) {
+                            ShareStatItem(value = "Lvl 8", label = "Poziom")
+                            ShareStatItem(value = "🔥 21", label = "Streak", valueColor = MaterialTheme.colorScheme.primary)
+                            ShareStatItem(value = "🏆 7", label = "Wygrane", valueColor = Color(0xFFBA7517))
+                        }
+
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        Text(
+                            text = "Check. • Wygrywaj każdy dzień",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = onShareConfirm,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                    .height(50.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+            ) {
+                Icon(Icons.Outlined.Share, contentDescription = null, modifier = Modifier.size(20.dp))
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Udostępnij", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            }
+        },
+        dismissButton = null
+    )
+}
+
+@Composable
+fun ShareStatItem(value: String, label: String, valueColor: Color = MaterialTheme.colorScheme.onBackground) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(text = value, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = valueColor)
+        Text(text = label, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+}
+
+
+@Composable
+fun BadgeDetailsDialog(
+    badge: com.SzpontCompany.check.data.Badge,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        modifier = Modifier.fillMaxWidth(0.85f),
+        shape = RoundedCornerShape(26.dp),
+        containerColor = MaterialTheme.colorScheme.surface,
+        title = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(100.dp)
+                        .background(
+                            if (badge.isUnlocked) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+                            else MaterialTheme.colorScheme.surfaceVariant,
+                            RoundedCornerShape(24.dp)
+                        )
+                        .border(
+                            2.dp,
+                            if (badge.isUnlocked) MaterialTheme.colorScheme.primary else Color.Transparent,
+                            RoundedCornerShape(24.dp)
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = badge.emoji,
+                        fontSize = 48.sp,
+                        modifier = Modifier.alpha(if (badge.isUnlocked) 1f else 0.4f)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = stringResource(id = badge.nameResId),
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.onBackground,
+                    textAlign = TextAlign.Center
+                )
+            }
+        },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                if (badge.isUnlocked) {
+                    Text(
+                        text = "🏆 Odblokowana!",
+                        color = Color(0xFFBA7517),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp
+                    )
+                } else {
+                    Text(
+                        text = "🔒 Jeszcze nieodblokowana",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                 Text(
+                     text = stringResource(id = badge.requirementResId),
+                     style = MaterialTheme.typography.bodyMedium,
+                     color = MaterialTheme.colorScheme.onSurfaceVariant,
+                     textAlign = TextAlign.Center
+                 )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = onDismiss,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                shape = RoundedCornerShape(14.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+            ) {
+                Text("Super!", fontWeight = FontWeight.Bold, color = Color.White)
             }
         }
     )
