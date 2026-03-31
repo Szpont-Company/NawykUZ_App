@@ -193,4 +193,8 @@
     <string name="dialog_logout_message">Czy na pewno chcesz się wylogować?</string>
     <string name="dialog_logout_confirm">Wyloguj</string>
     <string name="dialog_logout_cancel">Anuluj</string>
+
+    <string name="greeting_morning">Dzień dobry,</string>
+    <string name="greeting_afternoon">Miłego popołudnia,</string>
+    <string name="greeting_evening">Dobry wieczór,</string>
 </resources>
