@@ -31,7 +31,12 @@ import com.SzpontCompany.check.ui.theme.CheckTheme
 import com.SzpontCompany.check.ui.theme.Mint
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.automirrored.outlined.ScreenShare
+import androidx.compose.material.icons.automirrored.outlined.Send
+import androidx.compose.material.icons.automirrored.outlined.Shortcut
 import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.outlined.PersonAdd
+import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.rounded.ArrowBackIosNew
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -126,17 +131,34 @@ fun ProfileTopBar(onBackClick: () -> Unit) {
             modifier = Modifier.weight(1f)
         )
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            IconButton(
-                onClick = { /* TODO */ },
-                modifier = Modifier.background(MaterialTheme.colorScheme.surface, RoundedCornerShape(12.dp))
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.surface)
+                    .clickable { /* TODO: Otworz systemowe udostepnianie */ },
+                contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Outlined.FilterAlt, contentDescription = "Filtruj", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                Icon(
+                    imageVector = Icons.Outlined.Share,
+                    contentDescription = "Udostępnij profil",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
-            IconButton(
-                onClick = { /* TODO */ },
-                modifier = Modifier.background(MaterialTheme.colorScheme.surface, RoundedCornerShape(12.dp))
+
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.surface)
+                    .clickable { /* TODO: Otworz modal z dodawaniem znajomego / skanerem QR */ },
+                contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Outlined.PersonOutline, contentDescription = "Profil", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                Icon(
+                    imageVector = Icons.Outlined.PersonAdd,
+                    contentDescription = "Dodaj znajomego",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
     }
