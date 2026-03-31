@@ -4,6 +4,7 @@ import android.R.attr.type
 import android.content.Intent
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -333,18 +334,18 @@ fun StatsGridSection() {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             StatCard(
                 modifier = Modifier.weight(1f),
-                value = "34",
+                targetValue = 34,
                 label = stringResource(R.string.profile_habits)
             )
             StatCard(
                 modifier = Modifier.weight(1f),
-                value = "21",
+                targetValue = 21,
                 label = stringResource(R.string.profile_streak_days),
                 valueColor = MaterialTheme.colorScheme.primary
             )
             StatCard(
                 modifier = Modifier.weight(1f),
-                value = "850",
+                targetValue = 850,
                 label = stringResource(R.string.profile_coins),
                 valueColor = Color(0xFFBA7517)
             )
@@ -352,17 +353,18 @@ fun StatsGridSection() {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             StatCard(
                 modifier = Modifier.weight(1f),
-                value = "7",
+                targetValue = 7,
                 label = stringResource(R.string.profile_battles_won)
             )
             StatCard(
                 modifier = Modifier.weight(1f),
-                value = "78%",
+                targetValue = 78,
+                suffix = "%",
                 label = stringResource(R.string.profile_effectiveness)
             )
             StatCard(
                 modifier = Modifier.weight(1f),
-                value = "12",
+                targetValue = 12,
                 label = stringResource(R.string.profile_friends)
             )
         }
@@ -370,7 +372,26 @@ fun StatsGridSection() {
 }
 
 @Composable
-fun StatCard(modifier: Modifier = Modifier, value: String, label: String, valueColor: Color = MaterialTheme.colorScheme.onBackground) {
+fun StatCard(
+    modifier: Modifier = Modifier,
+    targetValue: Int,
+    suffix: String = "",
+    label: String,
+    valueColor: Color = MaterialTheme.colorScheme.onBackground
+) {
+
+    var animationPlayed by remember { mutableStateOf(false) }
+
+    val animatedValue by animateIntAsState(
+        targetValue = if (animationPlayed) targetValue else 0,
+        animationSpec = tween(durationMillis = 1200, easing = FastOutSlowInEasing),
+        label = "stat_count_animation"
+    )
+
+    LaunchedEffect(Unit) {
+        animationPlayed = true
+    }
+
     Column(
         modifier = modifier
             .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(16.dp))
@@ -378,7 +399,7 @@ fun StatCard(modifier: Modifier = Modifier, value: String, label: String, valueC
             .padding(vertical = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = value, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = valueColor)
+        Text(text = "$animatedValue$suffix", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = valueColor)
         Spacer(modifier = Modifier.height(4.dp))
         Text(text = label, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Medium)
     }
