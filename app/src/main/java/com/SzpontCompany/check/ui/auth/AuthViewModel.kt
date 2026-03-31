@@ -44,27 +44,47 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
     fun onEmailChange(newEmail: String) {
         email = newEmail.trim()
+        emailError = null
     }
-
     fun onPasswordChange(newPassword: String) {
         password = newPassword
+        passwordError = null
     }
-
     fun onNameChange(newName: String) {
         name = newName
     }
-
     fun resetPassword(onResult: (Result<Unit>) -> Unit) {
         viewModelScope.launch {
             val result = resetPassword(email)
             onResult(result)
         }
     }
-
     private fun cleanCredentials() {
         email = ""
         password = ""
         name = ""
+        emailError = null
+        passwordError = null
+    }
+
+    var emailError by mutableStateOf<String?>(null)
+        private set
+    var passwordError by mutableStateOf<String?>(null)
+        private set
+
+    fun validateCredentials(): Boolean {
+        var valid = true
+
+        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            emailError = "Invalid email format"
+            valid = false
+        }
+        if (password.length < 8) {
+            passwordError = "Password must be at least 8 characters"
+            valid = false
+        }
+
+        return valid
     }
 
    val isLoggedIn: Boolean

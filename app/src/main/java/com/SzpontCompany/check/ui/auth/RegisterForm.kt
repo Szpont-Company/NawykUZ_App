@@ -116,11 +116,15 @@ fun RegisterForm(
     onRegisterClick: () -> Unit,
     onGoogleRegisterClick: () -> Unit,
     captchaVerified: Boolean,
-    onCaptchaClick: () -> Unit
+    onCaptchaClick: () -> Unit,
+    validateCredentials: () -> Boolean
 ) {
     var visible by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
+    var isNameError by remember { mutableStateOf(false) }
+    var isEmailError by remember { mutableStateOf(false) }
+    var isPasswordError by remember { mutableStateOf(false) }
 
     Text(
         text = stringResource(R.string.register_name),
@@ -131,14 +135,17 @@ fun RegisterForm(
     Spacer(modifier = Modifier.height(4.dp))
     OutlinedTextField(
         value = name,
-        onValueChange = {onNameChange(it)},
+        onValueChange = {onNameChange(it)
+            if(it.isNotBlank()) isNameError = false},
         placeholder = {Text("John Black")},
         shape = RoundedCornerShape(12.dp),
         colors = OutlinedTextFieldDefaults.colors(
             unfocusedContainerColor = MaterialTheme.colorScheme.secondary,
             focusedContainerColor = MaterialTheme.colorScheme.secondary,
             focusedTextColor = MaterialTheme.colorScheme.onBackground,
-            unfocusedPlaceholderColor = MaterialTheme.colorScheme.onBackground
+            unfocusedPlaceholderColor = MaterialTheme.colorScheme.onBackground,
+            focusedBorderColor = if (isNameError) Color.Red else MaterialTheme.colorScheme.primary,
+            unfocusedBorderColor = if (isNameError) Color.Red else Color.Transparent
         ),
         singleLine = true,
         modifier = Modifier
@@ -154,14 +161,18 @@ fun RegisterForm(
     Spacer(modifier = Modifier.height(4.dp))
     OutlinedTextField(
         value = email,
-        onValueChange = {onEmailChange(it)},
+        onValueChange = {
+            onEmailChange(it)
+            if(it.isNotBlank()) isEmailError = false},
         placeholder = {Text(stringResource(R.string.mail_hint))},
         shape = RoundedCornerShape(12.dp),
         colors = OutlinedTextFieldDefaults.colors(
             unfocusedContainerColor = MaterialTheme.colorScheme.secondary,
             focusedContainerColor = MaterialTheme.colorScheme.secondary,
             focusedTextColor = MaterialTheme.colorScheme.onBackground,
-            unfocusedPlaceholderColor = MaterialTheme.colorScheme.onBackground
+            unfocusedPlaceholderColor = MaterialTheme.colorScheme.onBackground,
+            focusedBorderColor = if (isEmailError) Color.Red else MaterialTheme.colorScheme.primary,
+            unfocusedBorderColor = if (isEmailError) Color.Red else Color.Transparent
         ),
         singleLine = true,
         modifier = Modifier
@@ -177,14 +188,19 @@ fun RegisterForm(
     Spacer(modifier = Modifier.height(4.dp))
     OutlinedTextField(
         value = password,
-        onValueChange = {onPasswordChange(it)},
+        onValueChange = {
+            onPasswordChange(it)
+            if(it.isNotBlank()) isPasswordError = false
+                        },
         placeholder = {Text(stringResource(R.string.password_rule))},
         shape = RoundedCornerShape(12.dp),
         colors = OutlinedTextFieldDefaults.colors(
             unfocusedContainerColor = MaterialTheme.colorScheme.secondary,
             focusedContainerColor = MaterialTheme.colorScheme.secondary,
             focusedTextColor = MaterialTheme.colorScheme.onBackground,
-            unfocusedPlaceholderColor = MaterialTheme.colorScheme.onBackground
+            unfocusedPlaceholderColor = MaterialTheme.colorScheme.onBackground,
+            focusedBorderColor = if (isPasswordError) Color.Red else MaterialTheme.colorScheme.primary,
+            unfocusedBorderColor = if (isPasswordError) Color.Red else Color.Transparent
         ),
         visualTransformation = if (visible) VisualTransformation.None else PasswordVisualTransformation(),
         trailingIcon = {
@@ -212,10 +228,13 @@ fun RegisterForm(
     )
     Button(
         onClick = {
-            if(captchaVerified) {
+            if(name.isBlank()) isNameError = true
+            if(email.isBlank()) isEmailError = true
+            if(password.isBlank()) isPasswordError = true
+            if(captchaVerified && validateCredentials()) {
                 onRegisterClick()
             } else {
-                Toast.makeText(context, "Please verify the captcha", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Please verify your input", Toast.LENGTH_SHORT).show()
             }
         },
         modifier = Modifier

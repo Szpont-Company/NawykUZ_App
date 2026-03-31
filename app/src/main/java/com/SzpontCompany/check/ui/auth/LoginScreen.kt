@@ -80,6 +80,7 @@ fun LoginScreen(
     onLoginSuccess: () -> Unit,
     onRegisterSuccess: () -> Unit,
     onForgotPasswordClick: () -> Unit,
+
 ) {
 
     val context = LocalContext.current
@@ -221,7 +222,9 @@ fun LoginScreen(
                         },
                         onGoogleLogInClick = {
                             onGoogleClick()
-                        })
+                        },
+                        validateCredentials = {viewModel.validateCredentials()}
+                    )
 
                     1 -> RegisterForm(
                         name,
@@ -243,7 +246,9 @@ fun LoginScreen(
                         captchaVerified = captchaVerified,
                         onCaptchaClick = {
                             viewModel.recaptcha.execute()
-                        })
+                        },
+                        validateCredentials = {viewModel.validateCredentials()}
+                    )
                 }
             }
         }

@@ -20,6 +20,10 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -36,6 +40,8 @@ fun ResetPasswordScreen(
     email: String,
     onEmailChange: (String) -> Unit,
 ) {
+    var isEmailError by remember { mutableStateOf(false) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -75,14 +81,18 @@ fun ResetPasswordScreen(
         Spacer(modifier = Modifier.height(4.dp))
         OutlinedTextField(
             value = email,
-            onValueChange = {onEmailChange(it)},
+            onValueChange = {
+                onEmailChange(it)
+                if(email.isNotBlank()) isEmailError = false},
             placeholder = {Text(stringResource(R.string.mail_hint))},
             shape = RoundedCornerShape(12.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 unfocusedContainerColor = MaterialTheme.colorScheme.secondary,
                 focusedContainerColor = MaterialTheme.colorScheme.secondary,
                 focusedTextColor = MaterialTheme.colorScheme.onBackground,
-                unfocusedPlaceholderColor = MaterialTheme.colorScheme.onBackground
+                unfocusedPlaceholderColor = MaterialTheme.colorScheme.onBackground,
+                focusedBorderColor = if (isEmailError) Color.Red else MaterialTheme.colorScheme.primary,
+                unfocusedBorderColor = if (isEmailError) Color.Red else Color.Transparent
             ),
             singleLine = true,
             modifier = Modifier
@@ -90,7 +100,8 @@ fun ResetPasswordScreen(
         )
         Spacer(modifier = Modifier.height(16.dp))
         Button(
-            onClick = { onPasswordReset() },
+            onClick = {
+                if(!isEmailError) onPasswordReset() },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 8.dp),
