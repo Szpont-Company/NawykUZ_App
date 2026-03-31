@@ -152,15 +152,29 @@ fun RootNavigationGraph(onLogout: () -> Unit) {
             composable("main") {
                 MainScreen(
                     currentTab = currentTab ?: BottomTab.TODAY,
-                    onProfileClick = { navController.navigate("profile") }
+                    onProfileClick = {
+                        navController.navigate("profile"){
+                            launchSingleTop = true
+                        }
+                    }
                 )
             }
 
             composable("profile") {
                 ProfileScreen(
-                    onBackClick = { navController.popBackStack() },
-                    onSettingsClick = { navController.navigate("settings") },
-                    onRewardsClick = { navController.navigate("rewards") },
+                    onBackClick = {
+                        navController.popBackStack("main", inclusive = false)
+                    },
+                    onSettingsClick = {
+                        if (navController.currentDestination?.route == "profile") {
+                            navController.navigate("settings")
+                        }
+                    },
+                    onRewardsClick = {
+                        if (navController.currentDestination?.route == "profile") {
+                            navController.navigate("rewards")
+                        }
+                    },
                     onLogoutClick = {
                         authViewModel.signOut()
                         onLogout()
