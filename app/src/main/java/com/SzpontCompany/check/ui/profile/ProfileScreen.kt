@@ -32,16 +32,28 @@ import com.SzpontCompany.check.ui.theme.Mint
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.rounded.ArrowBackIosNew
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.window.DialogProperties
 import com.SzpontCompany.check.data.BadgeProvider
+import com.SzpontCompany.check.ui.components.CheckBackButton
 
 @Composable
 fun ProfileScreen(
+    onBackClick: () -> Unit = {},
     onSettingsClick: () -> Unit = {},
-    onRewardsClick: () -> Unit = {}
+    onRewardsClick: () -> Unit = {},
+    onLogoutClick: () -> Unit = {}
 ) {
+
+    var showLogoutDialog by remember { mutableStateOf(false) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -49,9 +61,9 @@ fun ProfileScreen(
             .padding(horizontal = 24.dp)
             .verticalScroll(rememberScrollState())
     ) {
-        Spacer(modifier = Modifier.height(48.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
-        ProfileTopBar()
+        ProfileTopBar(onBackClick = onBackClick)
         Spacer(modifier = Modifier.height(24.dp))
 
         UserHeaderSection()
@@ -75,24 +87,43 @@ fun ProfileScreen(
 
         SettingsSection(
             onSettingsClick = onSettingsClick,
-            onRewardsClick = onRewardsClick
+            onRewardsClick = onRewardsClick,
+            onLogoutClick = { showLogoutDialog = true }
         )
 
-        Spacer(modifier = Modifier.height(100.dp))
+        Spacer(modifier = Modifier.height(24.dp))
+
+        if (showLogoutDialog) {
+            LogoutConfirmationDialog(
+                onConfirm = {
+                    showLogoutDialog = false
+                    onLogoutClick()
+                },
+                onDismiss = {
+                    showLogoutDialog = false
+                }
+            )
+        }
     }
 }
 
 @Composable
-fun ProfileTopBar() {
+fun ProfileTopBar(onBackClick: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
+
+        CheckBackButton(onClick = onBackClick)
+
+        Spacer(modifier = Modifier.width(16.dp))
+
         Text(
             text = stringResource(R.string.profile_title),
             style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
-            color = MaterialTheme.colorScheme.onBackground
+            color = MaterialTheme.colorScheme.onBackground,
+            modifier = Modifier.weight(1f)
         )
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             IconButton(
@@ -289,7 +320,8 @@ fun StatCard(modifier: Modifier = Modifier, value: String, label: String, valueC
 @Composable
 fun SettingsSection(
     onSettingsClick: () -> Unit,
-    onRewardsClick: () -> Unit
+    onRewardsClick: () -> Unit,
+    onLogoutClick: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -328,7 +360,7 @@ fun SettingsSection(
         modifier = Modifier
             .fillMaxWidth()
             .border(1.dp, MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(22.dp))
-            .clickable { /* TODO: Wyloguj */ }
+            .clickable { onLogoutClick() }
             .padding(vertical = 16.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -445,7 +477,69 @@ fun BadgeItem(emoji: String, label: String, isActive: Boolean) {
     }
 }
 
-
+@Composable
+fun LogoutConfirmationDialog(
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(
+            dismissOnClickOutside = false,
+            usePlatformDefaultWidth = false
+        ),
+        modifier = Modifier.fillMaxWidth(0.92f),
+        shape = RoundedCornerShape(26.dp),
+        containerColor = MaterialTheme.colorScheme.surface,
+        title = {
+            Text(
+                text = stringResource(R.string.profile_logout),
+                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.padding(top = 8.dp)
+            )
+        },
+        text = {
+            Text(
+                text = stringResource(R.string.dialog_logout_message),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(vertical = 12.dp)
+            )
+        },
+        confirmButton = {
+            Button(
+                onClick = onConfirm,
+                modifier = Modifier.padding(bottom = 8.dp, end = 4.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFE24B4A)
+                ),
+                shape = RoundedCornerShape(14.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.dialog_logout_confirm),
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = onDismiss,
+                modifier = Modifier.padding(bottom = 8.dp),
+                shape = RoundedCornerShape(14.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.dialog_logout_cancel),
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                )
+            }
+        }
+    )
+}
 
 @Preview(showBackground = true)
 @Composable

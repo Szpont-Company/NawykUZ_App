@@ -1,4 +1,3 @@
-// Ścieżka: src/main/java/com/SzpontCompany/check/ui/dashboard/TodayScreen.kt
 package com.SzpontCompany.check.ui.dashboard
 
 import androidx.compose.animation.animateContentSize
@@ -38,7 +37,7 @@ data class HabitMock(
 )
 
 @Composable
-fun TodayScreen() {
+fun TodayScreen(onProfileClick: () -> Unit = {}) {
     val habitsList = remember {
         mutableStateListOf(
             HabitMock("🚶", "Spacer", "8 000 kroków • codziennie", "63%", "5 040", "kroków", "14 dni", "streak", "82%", "tydzień"),
@@ -50,10 +49,10 @@ fun TodayScreen() {
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 24.dp),
-        contentPadding = PaddingValues(top = 24.dp, bottom = 120.dp)
+        contentPadding = PaddingValues(top = 24.dp, bottom = 24.dp)
     ) {
         item {
-            TopSection()
+            TopSection(onProfileClick = onProfileClick)
             Spacer(modifier = Modifier.height(24.dp))
             HeroCard()
             Spacer(modifier = Modifier.height(32.dp))
@@ -85,10 +84,14 @@ fun TodayScreen() {
 }
 
 @Composable
-fun TopSection() {
+fun TopSection(onProfileClick: () -> Unit) {
     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Box(
-            modifier = Modifier.size(48.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary),
+            modifier = Modifier
+                .size(48.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primary)
+                .clickable {onProfileClick() },
             contentAlignment = Alignment.Center
         ) {
             Text("MK", color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Bold)
@@ -98,7 +101,7 @@ fun TopSection() {
             Text("Dzień dobry,", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Text("Marek K.", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Bold)
         }
-        IconButton(onClick = { }) { Icon(Icons.Default.Person, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant) }
+        IconButton(onClick = onProfileClick) { Icon(Icons.Default.Person, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant) }
         IconButton(onClick = { }) { Icon(Icons.Default.LightMode, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant) }
     }
 }
