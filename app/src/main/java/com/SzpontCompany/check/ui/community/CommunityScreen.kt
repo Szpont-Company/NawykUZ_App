@@ -15,8 +15,10 @@ import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import com.SzpontCompany.check.ui.community.components.BattleCard
 import com.SzpontCompany.check.ui.community.components.ChallengeInviteCard
+import com.SzpontCompany.check.ui.community.components.EventCard
 import com.SzpontCompany.check.data.Battle
 import com.SzpontCompany.check.data.ChallengeInvite
+import com.SzpontCompany.check.data.Event
 import com.SzpontCompany.check.ui.theme.CheckTheme
 import com.SzpontCompany.check.ui.theme.Mint
 
@@ -50,6 +52,39 @@ fun CommunityScreen() {
             durationMinutes = 30,
             days = 30,
             betAmount = 200
+        )
+    )
+
+    val events = listOf(
+        Event(
+            title = "Globalny Marsz Marca",
+            subtitle = "Łącznie 1 000 000 kroków",
+            badgeText = "Global",
+            themeColor = Color(0xFF00BFA5), // Mint Green
+            progress = 0.67f,
+            progressText = "672 450 / 1 000 000 kroków",
+            timeText = "12 dni",
+            participantsCount = "8 431 uczestników",
+            buttonText = "Dołącz"
+        ),
+        Event(
+            title = "Tydzień Czytania",
+            subtitle = "7 dni z rzędu min. 20 min",
+            badgeText = "Społeczność",
+            themeColor = Color(0xFF8C9EFF), // Lighter Deep Purple
+            progress = 0.43f,
+            progressText = "3 / 7 dni ukończono",
+            timeText = "4 dni",
+            rewardHighlight = "Odznaka \"Bookworm\" + 300 monet"
+        ),
+        Event(
+            title = "Wiosenny Sprint",
+            subtitle = "Rusza za 3 dni!",
+            isSubtitleColored = true,
+            badgeText = "Wkrótce",
+            themeColor = Color(0xFFF57C00), // Orange
+            description = "30-dniowe wyzwanie aktywności fizycznej.\nNagroda: ekskluzywna odznaka + 500 monet.",
+            buttonText = "Przypomnij mi"
         )
     )
 
@@ -161,6 +196,25 @@ fun CommunityScreen() {
                             onReject = {}
                         )
                     }
+                }
+            }
+        } else if (selectedTab == 1) { // Zakładka Eventy
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                contentPadding = PaddingValues(bottom = 24.dp)
+            ) {
+                item {
+                    Text(
+                        "AKTYWNE EVENTY",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
+                    )
+                }
+
+                items(events.size) { i ->
+                    EventCard(event = events[i])
                 }
             }
         }

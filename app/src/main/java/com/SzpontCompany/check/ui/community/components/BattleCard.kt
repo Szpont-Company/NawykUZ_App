@@ -29,7 +29,6 @@ fun BattleCard(
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
 
-            // Header
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
@@ -71,7 +70,7 @@ fun BattleCard(
 
             Spacer(Modifier.height(12.dp))
 
-            // Zakład
+            // Zaklad
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("🪙", fontSize = 14.sp)
                 Spacer(Modifier.width(4.dp))
