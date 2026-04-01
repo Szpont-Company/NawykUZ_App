@@ -43,6 +43,7 @@ import com.SzpontCompany.check.ui.main.CheckBottomNavigationBar
 import com.SzpontCompany.check.ui.profile.ProfileScreen
 import com.SzpontCompany.check.ui.settings.SettingsNavHost
 import com.SzpontCompany.check.ui.rewards.RewardsScreen
+import com.SzpontCompany.check.ui.theme.Rose
 
 enum class AppScreen { SPLASH, LOGIN, DASHBOARD, REGISTER_SUCCESS, RESET_PASSWORD }
 
@@ -66,7 +67,7 @@ class MainActivity : ComponentActivity() {
 
             var currentScreen by remember { mutableStateOf(AppScreen.SPLASH) }
 
-            CheckTheme(darkTheme = darkTheme, accent = Mint) {
+            CheckTheme(darkTheme = darkTheme, accent = Rose) {
                 AnimatedContent(
                     targetState = currentScreen,
                     transitionSpec = {

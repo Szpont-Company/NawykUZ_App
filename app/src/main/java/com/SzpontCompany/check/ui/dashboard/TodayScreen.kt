@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 
@@ -84,22 +85,47 @@ fun TodayScreen(onProfileClick: () -> Unit = {}) {
 }
 
 @Composable
-fun TopSection(onProfileClick: () -> Unit) {
+fun TopSection(onProfileClick: () -> Unit, viewModel: TodayViewModel = viewModel()) {
+    val user_name by viewModel.userData.collectAsState()
+
+    val isLoading = user_name == null
+
+    val initials = user_name
+        ?.trim()
+        ?.split("\\s+".toRegex())
+        ?.mapNotNull { it.firstOrNull()?.uppercase() }
+        ?.take(2)
+        ?.joinToString("")
+        ?: ""
+
     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Box(
             modifier = Modifier
                 .size(48.dp)
                 .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary)
-                .clickable {onProfileClick() },
+                .then(
+                    if(isLoading) Modifier.shimmerEffect()
+                    else Modifier.background(MaterialTheme.colorScheme.primary)
+                )
+                .clickable(enabled = !isLoading) {onProfileClick() },
             contentAlignment = Alignment.Center
         ) {
-            Text("MK", color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Bold)
+            Text(initials, color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Bold)
         }
         Spacer(modifier = Modifier.width(16.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text("Dzień dobry,", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Text("Marek K.", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Bold)
+            if(isLoading) {
+                Box(modifier = Modifier
+                    .padding(top = 4.dp)
+                    .fillMaxWidth(0.6f)
+                    .height(28.dp)
+                    .clip(RoundedCornerShape(4.dp))
+                    .shimmerEffect()
+                )
+            } else {
+                Text(user_name ?: "", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Bold)
+            }
         }
         IconButton(onClick = onProfileClick) { Icon(Icons.Default.Person, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant) }
         IconButton(onClick = { }) { Icon(Icons.Default.LightMode, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant) }
