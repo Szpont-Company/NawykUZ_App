@@ -86,17 +86,7 @@ fun TodayScreen(onProfileClick: () -> Unit = {}) {
 
 @Composable
 fun TopSection(onProfileClick: () -> Unit, viewModel: TodayViewModel = viewModel()) {
-    val user_name by viewModel.userData.collectAsState()
-
-    val isLoading = user_name == null
-
-    val initials = user_name
-        ?.trim()
-        ?.split("\\s+".toRegex())
-        ?.mapNotNull { it.firstOrNull()?.uppercase() }
-        ?.take(2)
-        ?.joinToString("")
-        ?: ""
+    val state by viewModel.uiState.collectAsState()
 
     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Box(
@@ -104,18 +94,18 @@ fun TopSection(onProfileClick: () -> Unit, viewModel: TodayViewModel = viewModel
                 .size(48.dp)
                 .clip(CircleShape)
                 .then(
-                    if(isLoading) Modifier.shimmerEffect()
+                    if(state.isLoading) Modifier.shimmerEffect()
                     else Modifier.background(MaterialTheme.colorScheme.primary)
                 )
-                .clickable(enabled = !isLoading) {onProfileClick() },
+                .clickable(enabled = !state.isLoading) {onProfileClick() },
             contentAlignment = Alignment.Center
         ) {
-            Text(initials, color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Bold)
+            Text(state.user?.initials ?: "", color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Bold)
         }
         Spacer(modifier = Modifier.width(16.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text("Dzień dobry,", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            if(isLoading) {
+            if(state.isLoading) {
                 Box(modifier = Modifier
                     .padding(top = 4.dp)
                     .fillMaxWidth(0.6f)
@@ -124,7 +114,7 @@ fun TopSection(onProfileClick: () -> Unit, viewModel: TodayViewModel = viewModel
                     .shimmerEffect()
                 )
             } else {
-                Text(user_name ?: "", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Bold)
+                Text(state.user?.name ?: "", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Bold)
             }
         }
         IconButton(onClick = onProfileClick) { Icon(Icons.Default.Person, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant) }
