@@ -13,23 +13,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
-import com.SzpontCompany.check.ui.community.components.BattleCard
 import com.SzpontCompany.check.ui.community.components.ChallengeInviteCard
-import com.SzpontCompany.check.ui.community.components.EventCard
 import com.SzpontCompany.check.ui.community.components.YourPositionCard
-import com.SzpontCompany.check.ui.community.components.RankingListCard
 import com.SzpontCompany.check.data.Battle
 import com.SzpontCompany.check.data.ChallengeInvite
 import com.SzpontCompany.check.data.Event
 import com.SzpontCompany.check.data.RankingEntry
 import com.SzpontCompany.check.ui.theme.CheckTheme
 import com.SzpontCompany.check.ui.theme.Mint
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.border
 
 @Composable
 fun CommunityScreen() {
@@ -71,7 +66,7 @@ fun CommunityScreen() {
             title = "Globalny Marsz Marca",
             subtitle = "Łącznie 1 000 000 kroków",
             badgeText = "Global",
-            themeColor = Color(0xFF00BFA5), // Mint Green
+            themeColor = Color(0xFF00BFA5),
             progress = 0.67f,
             progressText = "672 450 / 1 000 000 kroków",
             timeText = "12 dni",
@@ -82,7 +77,7 @@ fun CommunityScreen() {
             title = "Tydzień Czytania",
             subtitle = "7 dni z rzędu min. 20 min",
             badgeText = "Społeczność",
-            themeColor = Color(0xFF8C9EFF), // Lighter Deep Purple
+            themeColor = Color(0xFF8C9EFF),
             progress = 0.43f,
             progressText = "3 / 7 dni ukończono",
             timeText = "4 dni",
@@ -93,7 +88,7 @@ fun CommunityScreen() {
             subtitle = "Rusza za 3 dni!",
             isSubtitleColored = true,
             badgeText = "Wkrótce",
-            themeColor = Color(0xFFF57C00), // Orange
+            themeColor = Color(0xFFF57C00),
             description = "30-dniowe wyzwanie aktywności fizycznej.\nNagroda: ekskluzywna odznaka + 500 monet.",
             buttonText = "Przypomnij mi"
         )
@@ -285,6 +280,8 @@ fun CommunityScreen() {
                     RankingListCard(entries = rankingEntries)
                 }
             }
+        } else if (selectedTab == 3) {
+            FriendsCard(modifier = Modifier.fillMaxSize())
         }
     }
 }
@@ -292,7 +289,7 @@ fun CommunityScreen() {
 @Preview(showBackground = true)
 @Composable
 fun CommunityScreenPreview() {
-    CheckTheme(darkTheme = true, accent = Mint) { // nazwa Twojego Theme z Theme.kt
+    CheckTheme(darkTheme = true, accent = Mint) {
         CommunityScreen()
     }
 }

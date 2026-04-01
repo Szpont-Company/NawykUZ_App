@@ -1,4 +1,4 @@
-package com.SzpontCompany.check.ui.community.components
+package com.SzpontCompany.check.ui.community
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -12,6 +12,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.SzpontCompany.check.data.Battle
+import com.SzpontCompany.check.ui.community.components.PlayerVsRow
 
 @Composable
 fun BattleCard(

@@ -1,4 +1,4 @@
-package com.SzpontCompany.check.ui.community.components
+package com.SzpontCompany.check.ui.community
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
