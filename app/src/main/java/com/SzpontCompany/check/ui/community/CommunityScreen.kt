@@ -16,16 +16,27 @@ import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import com.SzpontCompany.check.ui.community.components.BattleCard
 import com.SzpontCompany.check.ui.community.components.ChallengeInviteCard
 import com.SzpontCompany.check.ui.community.components.EventCard
+import com.SzpontCompany.check.ui.community.components.YourPositionCard
+import com.SzpontCompany.check.ui.community.components.RankingListCard
 import com.SzpontCompany.check.data.Battle
 import com.SzpontCompany.check.data.ChallengeInvite
 import com.SzpontCompany.check.data.Event
+import com.SzpontCompany.check.data.RankingEntry
 import com.SzpontCompany.check.ui.theme.CheckTheme
 import com.SzpontCompany.check.ui.theme.Mint
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.border
 
 @Composable
 fun CommunityScreen() {
     val tabs = listOf("Battle", "Eventy", "Ranking", "Znajomi")
     var selectedTab by remember { mutableStateOf(0) }
+    var selectedSubTab by remember { mutableStateOf(0) }
+    val subTabs = listOf("Globalny", "Znajomi", "Tygodniowy")
 
     // --- Przykładowe dane ---
     val battles = listOf(
@@ -86,6 +97,13 @@ fun CommunityScreen() {
             description = "30-dniowe wyzwanie aktywności fizycznej.\nNagroda: ekskluzywna odznaka + 500 monet.",
             buttonText = "Przypomnij mi"
         )
+    )
+
+    val rankingEntries = listOf(
+        RankingEntry(rank = 1, name = "Piotr K.", initials = "PK", xp = 4200, avatarColor = Color(0xFFD8912A)),
+        RankingEntry(rank = 2, name = "Ania S.", initials = "AS", xp = 3800, avatarColor = Color(0xFF5E35B1)),
+        RankingEntry(rank = 3, name = "Marek J.", initials = "MJ", xp = 3100, avatarColor = Color(0xFFE24B4A)),
+        RankingEntry(rank = 14, name = "Ty", initials = "TY", xp = 1240, avatarColor = MaterialTheme.colorScheme.primary, isMe = true)
     )
 
     Column(
@@ -215,6 +233,56 @@ fun CommunityScreen() {
 
                 items(events.size) { i ->
                     EventCard(event = events[i])
+                }
+            }
+        } else if (selectedTab == 2) { // Zakładka Ranking
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(24.dp),
+                contentPadding = PaddingValues(bottom = 24.dp)
+            ) {
+                item {
+                    // Pod-menu kafelkowe (Sub-tabs)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(16.dp))
+                            .padding(4.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        subTabs.forEachIndexed { index, title ->
+                            val isSelected = selectedSubTab == index
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(if (isSelected) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent)
+                                    .clickable { selectedSubTab = index }
+                                    .padding(vertical = 12.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = title,
+                                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                    fontSize = 13.sp
+                                )
+                            }
+                        }
+                    }
+                }
+
+                item {
+                    YourPositionCard(
+                        rank = 14,
+                        xp = 1240,
+                        level = 8,
+                        trendText = "+3 od zeszłego tyg."
+                    )
+                }
+
+                item {
+                    RankingListCard(entries = rankingEntries)
                 }
             }
         }
