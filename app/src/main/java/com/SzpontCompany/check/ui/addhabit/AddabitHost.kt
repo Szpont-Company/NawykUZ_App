@@ -78,6 +78,20 @@ fun AddHabitHost(
                 reminderTime = finalReminderTime,
                 difficulty = finalDifficulty,
                 onBackClick = { currentStep = 3 },
+                onConfirmClick = {
+                    //TODO - dodaj nawyk do bazy danych
+
+                    currentStep = 5
+                }
+            )
+        }
+        5 -> {
+            AddHabitSuccess(
+                name = finalHabitName,
+                icon = finalHabitIcon,
+                color = finalHabitColor,
+                dailyReminder = finalDailyReminder,
+                reminderTime = finalReminderTime,
                 onFinishClick = { onClose() }
             )
         }
