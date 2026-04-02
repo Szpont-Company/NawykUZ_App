@@ -41,6 +41,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.SzpontCompany.check.ui.main.BottomTab
 import com.SzpontCompany.check.ui.main.CheckBottomNavigationBar
+import com.SzpontCompany.check.ui.profile.EditProfileScreen
 import com.SzpontCompany.check.ui.profile.ProfileScreen
 import com.SzpontCompany.check.ui.settings.SettingsNavHost
 import com.SzpontCompany.check.ui.rewards.RewardsScreen
@@ -202,6 +203,11 @@ fun RootNavigationGraph(onLogout: () -> Unit) {
                             navController.navigate("settings")
                         }
                     },
+                    onEditProfileClick = {
+                        if (navController.currentDestination?.route == "profile") {
+                            navController.navigate("edit_profile")
+                        }
+                    },
                     onRewardsClick = {
                         if (navController.currentDestination?.route == "profile") {
                             navController.navigate("rewards")
@@ -211,6 +217,12 @@ fun RootNavigationGraph(onLogout: () -> Unit) {
                         authViewModel.signOut()
                         onLogout()
                     }
+                )
+            }
+
+            composable("edit_profile") {
+                EditProfileScreen(
+                    onBackClick = { navController.popBackStack() }
                 )
             }
 

@@ -62,6 +62,7 @@ fun ProfileScreen(
     onBackClick: () -> Unit = {},
     onSettingsClick: () -> Unit = {},
     onRewardsClick: () -> Unit = {},
+    onEditProfileClick: () -> Unit = {},
     onLogoutClick: () -> Unit = {}
 ) {
 
@@ -106,6 +107,7 @@ fun ProfileScreen(
         SettingsSection(
             onSettingsClick = onSettingsClick,
             onRewardsClick = onRewardsClick,
+            onEditClick = onEditProfileClick,
             onLogoutClick = { showLogoutDialog = true }
         )
 
@@ -417,6 +419,7 @@ fun StatCard(
 fun SettingsSection(
     onSettingsClick: () -> Unit,
     onRewardsClick: () -> Unit,
+    onEditClick: () -> Unit,
     onLogoutClick: () -> Unit
 ) {
     Column(
@@ -428,7 +431,7 @@ fun SettingsSection(
             icon = Icons.Default.Person,
             iconTint = MaterialTheme.colorScheme.primary,
             title = stringResource(R.string.profile_edit),
-            onClick = { /* TODO */ }
+            onClick = onEditClick
         )
 
         HorizontalDivider(color = MaterialTheme.colorScheme.background, thickness = 2.dp)
