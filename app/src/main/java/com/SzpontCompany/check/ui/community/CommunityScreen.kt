@@ -25,9 +25,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Notifications
 
 @Composable
-fun CommunityScreen() {
+fun CommunityScreen(
+    onProfileClick: () -> Unit = {}
+) {
     val tabs = listOf("Battle", "Eventy", "Ranking", "Znajomi")
     var selectedTab by remember { mutableStateOf(0) }
     var selectedSubTab by remember { mutableStateOf(0) }
@@ -109,13 +114,59 @@ fun CommunityScreen() {
     ) {
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Tytuł
-        Text(
-            text = "Społeczność",
-            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
-            color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
+        // Tytuł i header profilowy
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Społeczność",
+                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onBackground
+            )
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.surface)
+                        .clickable { /* TODO: Otwórz powiadomienia */ },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Notifications,
+                        contentDescription = "Powiadomienia",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    // Czerwona kropka jeśli są zaproszenia
+                    if (invites.isNotEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .offset(x = (-8).dp, y = 8.dp)
+                                .size(8.dp)
+                                .background(MaterialTheme.colorScheme.primary, CircleShape)
+                        )
+                    }
+                }
+
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primary)
+                        .clickable { onProfileClick() },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("MK", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                }
+            }
+        }
 
         // Zakładki
         TabRow(
@@ -157,20 +208,38 @@ fun CommunityScreen() {
                 // Przyciski górne
                 item {
                     Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                        OutlinedButton(
+                        Button(
                             onClick = {},
-                            modifier = Modifier.weight(1f).height(48.dp),
-                            colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onBackground),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.surfaceVariant),
-                            shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp)
-                        ) { Text("+ Rzuć wyzwanie", fontWeight = FontWeight.SemiBold) }
-                        OutlinedButton(
+                            modifier = Modifier.weight(1f).height(54.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                            shape = RoundedCornerShape(16.dp)
+                        ) { Text("+ Wyzwanie", fontWeight = FontWeight.Bold, fontSize = 15.sp) }
+
+                        Button(
                             onClick = {},
-                            modifier = Modifier.weight(1f).height(48.dp),
-                            colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onBackground),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.surfaceVariant),
-                            shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp)
-                        ) { Text("Znajdź graczy", fontWeight = FontWeight.SemiBold) }
+                            modifier = Modifier.weight(1f).height(54.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                            shape = RoundedCornerShape(16.dp)
+                        ) { Text("Znajdź graczy", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground, fontSize = 15.sp) }
+                    }
+                }
+
+                // Sekcja zaproszeń WYNIESIONA NA POCZĄTEK
+                if (invites.isNotEmpty()) {
+                    item {
+                        Text(
+                            "OCZEKUJĄCE ZAPROSZENIA (${invites.size})",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
+                        )
+                    }
+                    items(invites.size) { i ->
+                        ChallengeInviteCard(
+                            invite = invites[i],
+                            onAccept = {},
+                            onReject = {}
+                        )
                     }
                 }
 
@@ -190,25 +259,6 @@ fun CommunityScreen() {
                         onDoneClick = {},
                         onDetailsOrSurrenderClick = {}
                     )
-                }
-
-                // Sekcja zaproszeń
-                if (invites.isNotEmpty()) {
-                    item {
-                        Text(
-                            "OCZEKUJĄCE ZAPROSZENIA (${invites.size})",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
-                        )
-                    }
-                    items(invites.size) { i ->
-                        ChallengeInviteCard(
-                            invite = invites[i],
-                            onAccept = {},
-                            onReject = {}
-                        )
-                    }
                 }
             }
         } else if (selectedTab == 1) { // Zakładka Eventy
