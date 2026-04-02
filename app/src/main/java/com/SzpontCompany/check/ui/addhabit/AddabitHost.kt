@@ -9,11 +9,25 @@ fun AddHabitHost(
 ) {
     var currentStep by remember { mutableStateOf(1) }
 
+    // --- DANE Z KROKU 1 ---
     var finalHabitName by remember { mutableStateOf("") }
     var finalHabitIcon by remember { mutableStateOf("🎯") }
     var finalHabitColor by remember { mutableStateOf(Mint) }
 
-    when (currentStep){
+    // --- DANE Z KROKU 2 ---
+    var finalFrequency by remember { mutableStateOf("") }
+    var finalSelectedDays by remember { mutableStateOf<Set<String>>(emptySet()) }
+    var finalTimesPerWeek by remember { mutableStateOf(0) }
+    var finalDailyGoal by remember { mutableStateOf(0) }
+    var finalSelectedUnit by remember { mutableStateOf("") }
+
+    // --- DANE Z KROKU 3 ---
+    var finalDailyReminder by remember { mutableStateOf(false) }
+    var finalReminderTime by remember { mutableStateOf("08:00") }
+    var finalPasserReminder by remember { mutableStateOf(false) }
+    var finalDifficulty by remember { mutableStateOf("Średni") }
+
+    when (currentStep) {
         1 -> {
             AddHabitStep1(
                 onNextClick = { name, icon, color ->
@@ -27,8 +41,44 @@ fun AddHabitHost(
         }
         2 -> {
             AddHabitStep2(
-                onNextClick = { _, _, _, _, -> },
+                onNextClick = { frequency, days, timesPerWeek, goal, unit ->
+                    finalFrequency = frequency
+                    finalSelectedDays = days
+                    finalTimesPerWeek = timesPerWeek
+                    finalDailyGoal = goal
+                    finalSelectedUnit = unit
+                    currentStep = 3
+                },
                 onBackClick = { currentStep = 1 }
+            )
+        }
+        3 -> {
+            AddHabitStep3(
+                habitColor = finalHabitColor,
+                onNextClick = { dailyReminder, reminderTime, passerReminder, difficulty ->
+                    finalDailyReminder = dailyReminder
+                    finalReminderTime = reminderTime
+                    finalPasserReminder = passerReminder
+                    finalDifficulty = difficulty
+
+                    currentStep = 4
+                },
+                onBackClick = { currentStep = 2 }
+            )
+        }
+        4 -> {
+            AddHabitStep4(
+                name = finalHabitName,
+                icon = finalHabitIcon,
+                color = finalHabitColor,
+                frequency = finalFrequency,
+                dailyGoal = finalDailyGoal,
+                unit = finalSelectedUnit,
+                dailyReminder = finalDailyReminder,
+                reminderTime = finalReminderTime,
+                difficulty = finalDifficulty,
+                onBackClick = { currentStep = 3 },
+                onFinishClick = { onClose() }
             )
         }
     }

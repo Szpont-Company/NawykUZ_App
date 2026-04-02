@@ -28,7 +28,7 @@ import com.SzpontCompany.check.ui.theme.Mint
 
 @Composable
 fun AddHabitStep2(
-    onNextClick: (frequency: String, days: Set<String>, goal: Int, unit: String) -> Unit,
+    onNextClick: (frequency: String, days: Set<String>, timesPerWeek: Int, goal: Int, unit: String) -> Unit,
     onBackClick: () -> Unit
 ) {
     // Stan formularza
@@ -200,7 +200,7 @@ fun AddHabitStep2(
         // --- PRZYCISKI DOLNE ---
         Spacer(modifier = Modifier.height(16.dp))
         Button(
-            onClick = { onNextClick(frequency, selectedDays, dailyGoal, selectedUnit) },
+            onClick = { onNextClick(frequency, selectedDays, timesPerWeek, dailyGoal, selectedUnit) },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
@@ -211,7 +211,7 @@ fun AddHabitStep2(
             ),
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f))
         ) {
-            Text(text = "Dalej →", fontSize = 16.sp, fontWeight = FontWeight.Medium)
+            Text(text = "Dalej", fontSize = 16.sp, fontWeight = FontWeight.Medium)
         }
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -341,7 +341,7 @@ fun AddHabitStep2DarkPreview() {
         accent = Mint
     ) {
         AddHabitStep2(
-            onNextClick = { _, _, _, _ -> },
+            onNextClick = { _, _, _, _ ,_ -> },
             onBackClick = { }
         )
     }

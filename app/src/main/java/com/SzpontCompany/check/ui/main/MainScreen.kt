@@ -1,6 +1,12 @@
 // Ścieżka: src/main/java/com/SzpontCompany/check/ui/main/MainScreen.kt
 package com.SzpontCompany.check.ui.main
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -53,9 +59,20 @@ fun MainScreen() {
         }
     }
 
-    if (showAddHabit) {
+    AnimatedVisibility(
+        visible = showAddHabit,
+        enter = slideInVertically(
+            initialOffsetY = { fullHeight -> fullHeight },
+            animationSpec = tween(durationMillis = 400)
+        ) + fadeIn(animationSpec = tween(durationMillis = 400)),
+
+        exit = slideOutVertically(
+            targetOffsetY = { fullHeight -> fullHeight },
+            animationSpec = tween(durationMillis = 300)
+        ) + fadeOut(animationSpec = tween(durationMillis = 300))
+    ) {
         AddHabitHost(
-            onClose = { showAddHabit = false}
+            onClose = { showAddHabit = false }
         )
     }
 }
