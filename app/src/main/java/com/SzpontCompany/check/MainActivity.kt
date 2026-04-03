@@ -156,18 +156,11 @@ fun RootNavigationGraph(onLogout: () -> Unit) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    LaunchedEffect(currentRoute) {
-        if (currentRoute != "main") {
-            currentTab = null
-        } else if (currentTab == null) {
-            currentTab = BottomTab.TODAY
-        }
-    }
 
     Scaffold(
         bottomBar = {
             CheckBottomNavigationBar(
-                currentTab = currentTab,
+                currentTab = if (currentRoute == "main") currentTab else null,
                 onTabSelected = { newTab ->
                     currentTab = newTab
                     navController.popBackStack("main", inclusive = false)

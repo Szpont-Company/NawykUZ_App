@@ -32,7 +32,7 @@ fun MainScreen(
             BottomTab.TODAY -> TodayScreen(onProfileClick = onProfileClick)
             BottomTab.STATS -> StatsScreen()
             BottomTab.MAP -> MapScreen()
-            BottomTab.COMMUNITY -> CommunityScreen()
+            BottomTab.COMMUNITY -> CommunityScreen(onProfileClick = onProfileClick)
         }
     }
 }
