@@ -2,15 +2,24 @@ package com.SzpontCompany.check.ui.community.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -65,22 +74,61 @@ fun FriendListItem(friend: Friend, isSuggested: Boolean = false, onAction: () ->
             }
 
             if (!isSuggested) {
-                IconButton(
-                    onClick = { /* Battle */ },
+                Box(
                     modifier = Modifier
                         .size(40.dp)
-                        .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .clickable { /* Battle */ },
+                    contentAlignment = Alignment.Center
                 ) {
                     Text("⚔️")
                 }
-                Spacer(Modifier.width(8.dp))
-                IconButton(
-                    onClick = { /* More */ },
-                    modifier = Modifier
-                        .size(40.dp)
-                        .border(1.dp, MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
-                ) {
-                    Icon(Icons.Default.MoreVert, contentDescription = "Opcje", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+
+                Spacer(Modifier.width(12.dp))
+
+                var expanded by remember { mutableStateOf(false) }
+                Box {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .border(1.dp, MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(8.dp))
+                            .clickable { expanded = true },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(Icons.Default.MoreVert, contentDescription = "Opcje", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+
+                    DropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false },
+                        modifier = Modifier
+                            .background(MaterialTheme.colorScheme.surface)
+                            .border(1.dp, MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(12.dp))
+                            .clip(RoundedCornerShape(12.dp)),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Pokaż profil", fontWeight = FontWeight.Medium, fontSize = 14.sp) },
+                            leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
+                            onClick = { expanded = false }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Wyślij wiadomość", fontWeight = FontWeight.Medium, fontSize = 14.sp) },
+                            leadingIcon = { Icon(Icons.Default.Email, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
+                            onClick = { expanded = false }
+                        )
+                        HorizontalDivider(
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                            color = MaterialTheme.colorScheme.surfaceVariant
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Usuń ze znajomych", fontWeight = FontWeight.Medium, fontSize = 14.sp, color = Color(0xFFFF5252)) },
+                            leadingIcon = { Icon(Icons.Default.Delete, contentDescription = null, tint = Color(0xFFFF5252)) },
+                            onClick = { expanded = false }
+                        )
+                    }
                 }
             } else {
                 if (friend.status.isNotEmpty()) {
@@ -102,4 +150,3 @@ fun FriendListItem(friend: Friend, isSuggested: Boolean = false, onAction: () ->
         }
     }
 }
-
