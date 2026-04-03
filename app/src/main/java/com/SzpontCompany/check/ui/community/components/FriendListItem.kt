@@ -26,10 +26,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.SzpontCompany.check.data.Friend
 import java.util.Locale
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 
 @Composable
 fun FriendListItem(friend: Friend, isSuggested: Boolean = false, onAction: () -> Unit = {}) {
     val formattedXp = if (friend.xp > 0) String.format(Locale.US, "%,d", friend.xp).replace(',', ' ') else ""
+    val haptic = LocalHapticFeedback.current
 
     Card(
         modifier = Modifier
@@ -126,7 +129,10 @@ fun FriendListItem(friend: Friend, isSuggested: Boolean = false, onAction: () ->
                         DropdownMenuItem(
                             text = { Text("Usuń ze znajomych", fontWeight = FontWeight.Medium, fontSize = 14.sp, color = Color(0xFFFF5252)) },
                             leadingIcon = { Icon(Icons.Default.Delete, contentDescription = null, tint = Color(0xFFFF5252)) },
-                            onClick = { expanded = false }
+                            onClick = { 
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                expanded = false 
+                            }
                         )
                     }
                 }
@@ -140,7 +146,10 @@ fun FriendListItem(friend: Friend, isSuggested: Boolean = false, onAction: () ->
                     ) { Text(friend.status, fontSize = 12.sp) }
                 } else {
                     Button(
-                        onClick = { onAction() },
+                        onClick = { 
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            onAction() 
+                        },
                         shape = RoundedCornerShape(8.dp),
                         modifier = Modifier.height(36.dp),
                         contentPadding = PaddingValues(horizontal = 16.dp)

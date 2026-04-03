@@ -29,6 +29,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 
 @Composable
 fun CommunityScreen(
@@ -39,6 +45,7 @@ fun CommunityScreen(
     var selectedSubTab by remember { mutableStateOf(0) }
     var showNotifications by remember { mutableStateOf(false) }
     val subTabs = listOf("Globalny", "Znajomi", "Tygodniowy")
+    val haptic = LocalHapticFeedback.current
 
     // --- Przykładowe dane ---
     val battles = listOf(
@@ -186,7 +193,10 @@ fun CommunityScreen(
             tabs.forEachIndexed { index, title ->
                 Tab(
                     selected = selectedTab == index,
-                    onClick = { selectedTab = index },
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        selectedTab = index
+                    },
                     text = {
                         Text(
                             title,
@@ -200,140 +210,154 @@ fun CommunityScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Zawartość zakładki Battle
-        if (selectedTab == 0) {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                contentPadding = PaddingValues(bottom = 24.dp)
-            ) {
-                // Przyciski górne
-                item {
-                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                        Button(
-                            onClick = {},
-                            modifier = Modifier.weight(1f).height(54.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                            shape = RoundedCornerShape(16.dp)
-                        ) { Text("+ Wyzwanie", fontWeight = FontWeight.Bold, fontSize = 15.sp) }
-
-                        Button(
-                            onClick = {},
-                            modifier = Modifier.weight(1f).height(54.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                            shape = RoundedCornerShape(16.dp)
-                        ) { Text("Znajdź graczy", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground, fontSize = 15.sp) }
-                    }
-                }
-
-                // Sekcja zaproszeń WYNIESIONA NA POCZĄTEK
-                if (invites.isNotEmpty()) {
-                    item {
-                        Text(
-                            "OCZEKUJĄCE ZAPROSZENIA (${invites.size})",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
-                        )
-                    }
-                    items(invites.size) { i ->
-                        ChallengeInviteCard(
-                            invite = invites[i],
-                            onAccept = {},
-                            onReject = {}
-                        )
-                    }
-                }
-
-                // Sekcja aktywnych bitew
-                item {
-                    Text(
-                        "AKTYWNE BITWY (${battles.size})",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
-                    )
-                }
-
-                items(battles.size) { i ->
-                    BattleCard(
-                        battle = battles[i],
-                        onDoneClick = {},
-                        onDetailsOrSurrenderClick = {}
-                    )
-                }
-            }
-        } else if (selectedTab == 1) { // Zakładka Eventy
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                contentPadding = PaddingValues(bottom = 24.dp)
-            ) {
-                item {
-                    Text(
-                        "AKTYWNE EVENTY",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
-                    )
-                }
-
-                items(events.size) { i ->
-                    EventCard(event = events[i])
-                }
-            }
-        } else if (selectedTab == 2) { // Zakładka Ranking
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(24.dp),
-                contentPadding = PaddingValues(bottom = 24.dp)
-            ) {
-                item {
-                    // Pod-menu kafelkowe (Sub-tabs)
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(16.dp))
-                            .padding(4.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween
+        // Zawartość zakładki
+        AnimatedContent(
+            targetState = selectedTab,
+            transitionSpec = { fadeIn() togetherWith fadeOut() },
+            label = "community_tab_transition"
+        ) { tab ->
+            when (tab) {
+                0 -> { // Zakładka Battle
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        contentPadding = PaddingValues(bottom = 24.dp)
                     ) {
-                        subTabs.forEachIndexed { index, title ->
-                            val isSelected = selectedSubTab == index
-                            Box(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(if (isSelected) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent)
-                                    .clickable { selectedSubTab = index }
-                                    .padding(vertical = 12.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
+                        // Przyciski górne
+                        item {
+                            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                                Button(
+                                    onClick = { haptic.performHapticFeedback(HapticFeedbackType.LongPress) },
+                                    modifier = Modifier.weight(1f).height(54.dp),
+                                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                                    shape = RoundedCornerShape(16.dp)
+                                ) { Text("+ Wyzwanie", fontWeight = FontWeight.Bold, fontSize = 15.sp) }
+
+                                Button(
+                                    onClick = { haptic.performHapticFeedback(HapticFeedbackType.LongPress) },
+                                    modifier = Modifier.weight(1f).height(54.dp),
+                                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                                    shape = RoundedCornerShape(16.dp)
+                                ) { Text("Znajdź graczy", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground, fontSize = 15.sp) }
+                            }
+                        }
+
+                        // Sekcja zaproszeń WYNIESIONA NA POCZĄTEK
+                        if (invites.isNotEmpty()) {
+                            item {
                                 Text(
-                                    text = title,
-                                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                    fontSize = 13.sp
+                                    "OCZEKUJĄCE ZAPROSZENIA (${invites.size})",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
+                                )
+                            }
+                            items(invites.size) { i ->
+                                ChallengeInviteCard(
+                                    invite = invites[i],
+                                    onAccept = {},
+                                    onReject = {}
                                 )
                             }
                         }
+
+                        // Sekcja aktywnych bitew
+                        item {
+                            Text(
+                                "AKTYWNE BITWY (${battles.size})",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
+                            )
+                        }
+
+                        items(battles.size) { i ->
+                            BattleCard(
+                                battle = battles[i],
+                                onDoneClick = {},
+                                onDetailsOrSurrenderClick = {}
+                            )
+                        }
                     }
                 }
+                1 -> { // Zakładka Eventy
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        contentPadding = PaddingValues(bottom = 24.dp)
+                    ) {
+                        item {
+                            Text(
+                                "AKTYWNE EVENTY",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
+                            )
+                        }
 
-                item {
-                    YourPositionCard(
-                        rank = 14,
-                        xp = 1240,
-                        level = 8,
-                        trendText = "+3 od zeszłego tyg."
-                    )
+                        items(events.size) { i ->
+                            EventCard(event = events[i])
+                        }
+                    }
                 }
+                2 -> { // Zakładka Ranking
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(24.dp),
+                        contentPadding = PaddingValues(bottom = 24.dp)
+                    ) {
+                        item {
+                            // Pod-menu kafelkowe (Sub-tabs)
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(16.dp))
+                                    .padding(4.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                subTabs.forEachIndexed { index, title ->
+                                    val isSelected = selectedSubTab == index
+                                    Box(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .clip(RoundedCornerShape(12.dp))
+                                            .background(if (isSelected) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent)
+                                            .clickable {
+                                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                                selectedSubTab = index
+                                            }
+                                            .padding(vertical = 12.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = title,
+                                            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                            fontSize = 13.sp
+                                        )
+                                    }
+                                }
+                            }
+                        }
 
-                item {
-                    RankingListCard(entries = rankingEntries)
+                        item {
+                            YourPositionCard(
+                                rank = 14,
+                                xp = 1240,
+                                level = 8,
+                                trendText = "+3 od zeszłego tyg."
+                            )
+                        }
+
+                        item {
+                            RankingListCard(entries = rankingEntries)
+                        }
+                    }
+                }
+                3 -> { // Zakładka Znajomi
+                    FriendsCard(modifier = Modifier.fillMaxSize())
                 }
             }
-        } else if (selectedTab == 3) {
-            FriendsCard(modifier = Modifier.fillMaxSize())
         }
     }
 

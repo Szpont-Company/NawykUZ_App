@@ -21,12 +21,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.SzpontCompany.check.data.Friend
 import com.SzpontCompany.check.ui.community.components.FriendListItem
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FriendsCard(modifier: Modifier = Modifier) {
     var selectedSubTab by remember { mutableStateOf(0) }
     val subTabs = listOf("Znajomi (3)", "Zaproszenia", "Szukaj")
+    val haptic = LocalHapticFeedback.current
 
     val activeFriends = listOf(
         Friend("Kacper Malinowski", "KM", 4200, online = true),
@@ -57,7 +60,10 @@ fun FriendsCard(modifier: Modifier = Modifier) {
                         .weight(1f)
                         .clip(RoundedCornerShape(12.dp))
                         .background(if (isSelected) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent)
-                        .clickable { selectedSubTab = index }
+                        .clickable {
+                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            selectedSubTab = index
+                        }
                         .padding(vertical = 12.dp),
                     contentAlignment = Alignment.Center
                 ) {
@@ -85,6 +91,7 @@ fun FriendsCard(modifier: Modifier = Modifier) {
 @Composable
 fun FriendsListSection(activeFriends: List<Friend>, offlineFriends: List<Friend>) {
     var searchQuery by remember { mutableStateOf("") }
+    val haptic = LocalHapticFeedback.current
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -113,8 +120,10 @@ fun FriendsListSection(activeFriends: List<Friend>, offlineFriends: List<Friend>
             Text("AKTYWNI TERAZ", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
 
-        items(activeFriends.size) { i ->
-            FriendListItem(activeFriends[i])
+        items(activeFriends.size, key = { "active_${activeFriends[it].name}" }) { i ->
+            Box(Modifier.animateItem()) {
+                FriendListItem(activeFriends[i])
+            }
         }
 
         item {
@@ -122,8 +131,10 @@ fun FriendsListSection(activeFriends: List<Friend>, offlineFriends: List<Friend>
             Text("OSTATNIO AKTYWNI", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
 
-        items(offlineFriends.size) { i ->
-            FriendListItem(offlineFriends[i])
+        items(offlineFriends.size, key = { "offline_${offlineFriends[it].name}" }) { i ->
+            Box(Modifier.animateItem()) {
+                FriendListItem(offlineFriends[i])
+            }
         }
 
         item {
@@ -152,7 +163,7 @@ fun FriendsListSection(activeFriends: List<Friend>, offlineFriends: List<Friend>
                             Text("check.app/invite/marekk", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                         Button(
-                            onClick = { /* Kopiuj */ },
+                            onClick = { haptic.performHapticFeedback(HapticFeedbackType.LongPress) /* Kopiuj */ },
                             shape = RoundedCornerShape(8.dp),
                             modifier = Modifier.height(40.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
@@ -227,10 +238,12 @@ fun FriendsSearchSection(suggestedFriends: List<Friend>) {
 
         if (!searched) {
             item {
-                Text("SUGEROWANE — MOŻESZ ZNAĆ", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text("SUGEROWANE — MOŻESz ZNAĆ", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            items(suggestedFriends.size) { i ->
-                FriendListItem(suggestedFriends[i], isSuggested = true)
+            items(suggestedFriends.size, key = { "suggested_${suggestedFriends[it].name}" }) { i ->
+                Box(Modifier.animateItem()) {
+                    FriendListItem(suggestedFriends[i], isSuggested = true)
+                }
             }
         } else {
             item {
@@ -251,4 +264,3 @@ fun FriendsSearchSection(suggestedFriends: List<Friend>) {
         }
     }
 }
-

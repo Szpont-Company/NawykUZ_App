@@ -1,5 +1,6 @@
 package com.SzpontCompany.check.ui.community
 
+import androidx.compose.animation.animateColor
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -13,6 +14,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.SzpontCompany.check.data.Battle
 import com.SzpontCompany.check.ui.community.components.PlayerVsRow
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 
 @Composable
 fun BattleCard(
@@ -21,6 +32,8 @@ fun BattleCard(
     onDetailsOrSurrenderClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val haptic = LocalHapticFeedback.current
+
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -82,7 +95,32 @@ fun BattleCard(
                 )
                 Spacer(Modifier.weight(1f))
                 if (battle.isLosingWarning) {
-                    Text("Przegrywasz!", color = Color(0xFFE24B4A), style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold))
+                    val infiniteTransition = rememberInfiniteTransition(label = "pulse")
+                    val pulseScale by infiniteTransition.animateFloat(
+                        initialValue = 1f,
+                        targetValue = 1.15f,
+                        animationSpec = infiniteRepeatable(
+                            animation = tween(600, easing = FastOutSlowInEasing),
+                            repeatMode = RepeatMode.Reverse
+                        ),
+                        label = "pulse_scale"
+                    )
+                    val pulseColor by infiniteTransition.animateColor(
+                        initialValue = Color(0xFFE24B4A),
+                        targetValue = Color(0xFFFF8A80),
+                        animationSpec = infiniteRepeatable(
+                            animation = tween(600, easing = FastOutSlowInEasing),
+                            repeatMode = RepeatMode.Reverse
+                        ),
+                        label = "pulse_color"
+                    )
+
+                    Text(
+                        "Przegrywasz!",
+                        color = pulseColor,
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                        modifier = Modifier.scale(pulseScale)
+                    )
                 } else if (battle.endDate != null) {
                     Text("kończy się ${battle.endDate}", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
                 }
@@ -93,7 +131,10 @@ fun BattleCard(
             // Przyciski
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Button(
-                    onClick = onDoneClick,
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        onDoneClick()
+                    },
                     modifier = Modifier.weight(1f).height(40.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = if (battle.isDoneToday) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.primary
@@ -108,7 +149,10 @@ fun BattleCard(
                     )
                 }
                 Button(
-                    onClick = onDetailsOrSurrenderClick,
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        onDetailsOrSurrenderClick()
+                    },
                     modifier = Modifier.weight(1f).height(40.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
                     shape = RoundedCornerShape(8.dp)
