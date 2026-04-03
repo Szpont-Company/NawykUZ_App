@@ -15,6 +15,7 @@ import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import com.SzpontCompany.check.ui.community.components.ChallengeInviteCard
 import com.SzpontCompany.check.ui.community.components.YourPositionCard
+import com.SzpontCompany.check.ui.community.components.NotificationsSheet
 import com.SzpontCompany.check.data.Battle
 import com.SzpontCompany.check.data.ChallengeInvite
 import com.SzpontCompany.check.data.Event
@@ -36,6 +37,7 @@ fun CommunityScreen(
     val tabs = listOf("Battle", "Eventy", "Ranking", "Znajomi")
     var selectedTab by remember { mutableStateOf(0) }
     var selectedSubTab by remember { mutableStateOf(0) }
+    var showNotifications by remember { mutableStateOf(false) }
     val subTabs = listOf("Globalny", "Znajomi", "Tygodniowy")
 
     // --- Przykładowe dane ---
@@ -135,7 +137,7 @@ fun CommunityScreen(
                         .size(40.dp)
                         .clip(CircleShape)
                         .background(MaterialTheme.colorScheme.surface)
-                        .clickable { /* TODO: Otwórz powiadomienia */ },
+                        .clickable { showNotifications = true },
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
@@ -333,6 +335,12 @@ fun CommunityScreen(
         } else if (selectedTab == 3) {
             FriendsCard(modifier = Modifier.fillMaxSize())
         }
+    }
+
+    if (showNotifications) {
+        NotificationsSheet(
+            onDismiss = { showNotifications = false }
+        )
     }
 }
 
