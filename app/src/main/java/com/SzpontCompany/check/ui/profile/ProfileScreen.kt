@@ -1,6 +1,5 @@
 package com.SzpontCompany.check.ui.profile
 
-import android.R.attr.type
 import android.content.Intent
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
@@ -18,8 +17,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.outlined.FilterAlt
-import androidx.compose.material.icons.outlined.PersonOutline
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -37,13 +34,9 @@ import com.SzpontCompany.check.ui.theme.CheckTheme
 import com.SzpontCompany.check.ui.theme.Mint
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.automirrored.outlined.ScreenShare
-import androidx.compose.material.icons.automirrored.outlined.Send
-import androidx.compose.material.icons.automirrored.outlined.Shortcut
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.outlined.PersonAdd
 import androidx.compose.material.icons.outlined.Share
-import androidx.compose.material.icons.rounded.ArrowBackIosNew
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -56,6 +49,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.window.DialogProperties
 import com.SzpontCompany.check.data.BadgeProvider
 import com.SzpontCompany.check.ui.components.CheckBackButton
+import androidx.lifecycle.Lifecycle
+import androidx.compose.ui.platform.LocalLifecycleOwner
 
 @Composable
 fun ProfileScreen(
@@ -146,6 +141,9 @@ fun ProfileScreen(
 
 @Composable
 fun ProfileTopBar(onBackClick: () -> Unit, onShareClick: () -> Unit) {
+
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -168,7 +166,11 @@ fun ProfileTopBar(onBackClick: () -> Unit, onShareClick: () -> Unit) {
                     .size(44.dp)
                     .clip(RoundedCornerShape(12.dp))
                     .background(MaterialTheme.colorScheme.surface)
-                    .clickable { onShareClick() },
+                    .clickable {
+                        if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
+                            onShareClick()
+                        }
+                    },
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -183,7 +185,11 @@ fun ProfileTopBar(onBackClick: () -> Unit, onShareClick: () -> Unit) {
                     .size(44.dp)
                     .clip(RoundedCornerShape(12.dp))
                     .background(MaterialTheme.colorScheme.surface)
-                    .clickable { /* TODO: Otworz modal z dodawaniem znajomego / skanerem QR */ },
+                    .clickable {
+                        if (lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
+                            /* TODO: Otworz modal z dodawaniem znajomego */
+                        }
+                    },
                 contentAlignment = Alignment.Center
             ) {
                 Icon(

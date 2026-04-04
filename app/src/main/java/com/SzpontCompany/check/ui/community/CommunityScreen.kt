@@ -141,8 +141,8 @@ fun CommunityScreen(
             ) {
                 Box(
                     modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
+                        .size(44.dp)
+                        .clip(RoundedCornerShape(12.dp))
                         .background(MaterialTheme.colorScheme.surface)
                         .clickable { showNotifications = true },
                     contentAlignment = Alignment.Center
@@ -157,7 +157,7 @@ fun CommunityScreen(
                         Box(
                             modifier = Modifier
                                 .align(Alignment.TopEnd)
-                                .offset(x = (-8).dp, y = 8.dp)
+                                .offset(x = (-10).dp, y = 10.dp)
                                 .size(8.dp)
                                 .background(MaterialTheme.colorScheme.primary, CircleShape)
                         )
@@ -166,7 +166,7 @@ fun CommunityScreen(
 
                 Box(
                     modifier = Modifier
-                        .size(40.dp)
+                        .size(44.dp)
                         .clip(CircleShape)
                         .background(MaterialTheme.colorScheme.primary)
                         .clickable { onProfileClick() },
