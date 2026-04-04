@@ -14,6 +14,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -39,7 +41,11 @@ data class HabitMock(
 )
 
 @Composable
-fun TodayScreen(onProfileClick: () -> Unit = {}) {
+fun TodayScreen(
+    onProfileClick: () -> Unit = {},
+    onOptionsClick: () -> Unit = {},
+    onNotificationsClick: () -> Unit = {}
+) {
     val habitsList = remember {
         mutableStateListOf(
             HabitMock("🚶", "Spacer", "8 000 kroków • codziennie", "63%", "5 040", "kroków", "14 dni", "streak", "82%", "tydzień"),
@@ -54,7 +60,11 @@ fun TodayScreen(onProfileClick: () -> Unit = {}) {
         contentPadding = PaddingValues(top = 24.dp, bottom = 24.dp)
     ) {
         item {
-            TopSection(onProfileClick = onProfileClick)
+            TopSection(
+                onProfileClick = onProfileClick,
+                onOptionsClick = onOptionsClick,
+                onNotificationsClick = onNotificationsClick
+            )
             Spacer(modifier = Modifier.height(24.dp))
             HeroCard()
             Spacer(modifier = Modifier.height(32.dp))
@@ -86,7 +96,11 @@ fun TodayScreen(onProfileClick: () -> Unit = {}) {
 }
 
 @Composable
-fun TopSection(onProfileClick: () -> Unit) {
+fun TopSection(
+    onProfileClick: () -> Unit,
+    onOptionsClick: () -> Unit,
+    onNotificationsClick: () -> Unit
+) {
 
     val currentHour = remember { java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY) }
 
@@ -112,10 +126,50 @@ fun TopSection(onProfileClick: () -> Unit) {
             Text(stringResource(id = greeting), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Text("Marek K.", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Bold)
         }
-        IconButton(onClick = onProfileClick) { Icon(Icons.Default.Person, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant) }
-        IconButton(onClick = { }) { Icon(Icons.Default.LightMode, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant) }
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.surface)
+                    .clickable { onNotificationsClick() },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Notifications,
+                    contentDescription = "Powiadomienia",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                val hasUnreadNotifications = true
+                if (hasUnreadNotifications) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .offset(x = (-10).dp, y = 10.dp)
+                            .size(8.dp)
+                            .background(MaterialTheme.colorScheme.primary, CircleShape)
+                    )
+                }
+            }
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.surface)
+                    .clickable { onOptionsClick() },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Settings,
+                    contentDescription = "Ustawienia",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
     }
 }
+
 
 @Composable
 fun HeroCard() {

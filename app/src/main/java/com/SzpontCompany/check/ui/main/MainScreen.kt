@@ -17,6 +17,7 @@ import com.SzpontCompany.check.ui.dashboard.TodayScreen
 import com.SzpontCompany.check.ui.stats.StatsScreen
 import com.SzpontCompany.check.ui.map.MapScreen
 import com.SzpontCompany.check.ui.community.CommunityScreen
+import com.SzpontCompany.check.ui.community.components.NotificationsSheet
 
 enum class BottomTab {
     TODAY, STATS, MAP, COMMUNITY
@@ -25,14 +26,29 @@ enum class BottomTab {
 @Composable
 fun MainScreen(
     currentTab: BottomTab,
-    onProfileClick: () -> Unit = {}
+    onProfileClick: () -> Unit = {},
+    onOptionsClick: () -> Unit = {},
+    onNotificationsClick: () -> Unit = {}
 ) {
+
+    var showNotifications by remember { mutableStateOf(false) }
+
     Box(modifier = Modifier.fillMaxSize()) {
         when (currentTab) {
-            BottomTab.TODAY -> TodayScreen(onProfileClick = onProfileClick)
+            BottomTab.TODAY -> TodayScreen(
+                onProfileClick = onProfileClick,
+                onOptionsClick = onOptionsClick,
+                onNotificationsClick = { showNotifications = true }
+            )
             BottomTab.STATS -> StatsScreen()
             BottomTab.MAP -> MapScreen()
             BottomTab.COMMUNITY -> CommunityScreen(onProfileClick = onProfileClick)
+        }
+
+        if (showNotifications) {
+            NotificationsSheet(
+                onDismiss = { showNotifications = false }
+            )
         }
     }
 }

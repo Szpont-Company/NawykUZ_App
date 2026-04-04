@@ -182,7 +182,12 @@ fun RootNavigationGraph(onLogout: () -> Unit) {
                         navController.navigate("profile"){
                             launchSingleTop = true
                         }
-                    }
+                    },
+                    onOptionsClick = {
+                        navController.navigate("settings"){
+                            launchSingleTop = true
+                        }
+                    },
                 )
             }
 
