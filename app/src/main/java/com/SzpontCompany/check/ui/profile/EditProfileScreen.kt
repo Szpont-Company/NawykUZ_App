@@ -13,9 +13,10 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Mail
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -26,13 +27,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.SzpontCompany.check.ui.components.CheckBackButton
 import com.SzpontCompany.check.ui.theme.*
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditProfileScreen(
     onBackClick: () -> Unit = {}
@@ -44,6 +48,10 @@ fun EditProfileScreen(
     var selectedAvatar by remember { mutableStateOf("") }
     var selectedBgColor by remember { mutableStateOf(Amber) }
     var hasChanges by remember { mutableStateOf(false) }
+
+    var showEmailSheet by remember { mutableStateOf(false) }
+    var showPasswordSheet by remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     val nameParts = fullName.trim().split("\\s+".toRegex())
     val isFullNameValid = fullName.isNotBlank() && nameParts.size >= 2
@@ -109,8 +117,8 @@ fun EditProfileScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         SecuritySection(
-            onChangeEmail = { /* TODO: Open email change modal */ },
-            onChangePassword = { /* TODO: Open pw change modal */ }
+            onChangeEmail = { showEmailSheet = true },
+            onChangePassword = { showPasswordSheet = true }
         )
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -121,6 +129,28 @@ fun EditProfileScreen(
         )
 
         Spacer(modifier = Modifier.height(32.dp))
+    }
+
+    if (showEmailSheet) {
+        ChangeEmailSheet(
+            sheetState = sheetState,
+            onDismiss = { showEmailSheet = false },
+            onSave = { newEmail ->
+                /* TODO: Handle email change */
+                showEmailSheet = false
+            }
+        )
+    }
+
+    if (showPasswordSheet) {
+        ChangePasswordSheet(
+            sheetState = sheetState,
+            onDismiss = { showPasswordSheet = false },
+            onSave = { current, newPwd ->
+                /* TODO: Handle password change */
+                showPasswordSheet = false
+            }
+        )
     }
 }
 
@@ -475,6 +505,243 @@ fun CustomTextField(
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(start = 16.dp, top = 4.dp)
             )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ChangeEmailSheet(
+    sheetState: SheetState,
+    onDismiss: () -> Unit,
+    onSave: (String) -> Unit
+) {
+    var newEmail by remember { mutableStateOf("") }
+    var currentPassword by remember { mutableStateOf("") }
+    var isPasswordVisible by remember { mutableStateOf(false) }
+
+    val isEmailValid = newEmail.contains("@") && newEmail.contains(".")
+    val canSave = isEmailValid && currentPassword.isNotBlank()
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = MaterialTheme.colorScheme.background,
+        dragHandle = { BottomSheetDefaults.DragHandle() }
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp, vertical = 16.dp)
+                .navigationBarsPadding(),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text(
+                "Zmiana e-maila",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+
+            Text(
+                "Twój obecny adres to marek.kowalski@gmail.com. Podaj nowy adres oraz hasło do konta, aby potwierdzić zmianę.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            OutlinedTextField(
+                value = newEmail,
+                onValueChange = { newEmail = it },
+                label = { Text("Nowy adres e-mail") },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
+                singleLine = true
+            )
+
+            OutlinedTextField(
+                value = currentPassword,
+                onValueChange = { currentPassword = it },
+                label = { Text("Hasło do konta") },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
+                trailingIcon = {
+                    IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
+                        Icon(imageVector = if (isPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff, contentDescription = null)
+                    }
+                },
+                singleLine = true
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Button(
+                onClick = { onSave(newEmail) },
+                enabled = canSave,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(54.dp),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Text("Zaktualizuj e-mail", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ChangePasswordSheet(
+    sheetState: SheetState,
+    onDismiss: () -> Unit,
+    onSave: (String, String) -> Unit
+) {
+    var oldPassword by remember { mutableStateOf("") }
+    var newPassword by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
+
+    var isOldVisible by remember { mutableStateOf(false) }
+    var isNewVisible by remember { mutableStateOf(false) }
+    var isConfirmVisible by remember { mutableStateOf(false) }
+
+    val hasMinLength = newPassword.length >= 8
+    val hasUpperChar = newPassword.any { it.isUpperCase() }
+    val hasDigit = newPassword.any { it.isDigit() }
+    val hasSpecialChar = newPassword.any { !it.isLetterOrDigit() }
+
+    val passwordsMatch = newPassword == confirmPassword && newPassword.isNotBlank()
+    val isStrong = hasMinLength && hasUpperChar && hasDigit && hasSpecialChar
+
+    val canSave = oldPassword.isNotBlank() && passwordsMatch && isStrong
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = MaterialTheme.colorScheme.background,
+        dragHandle = { BottomSheetDefaults.DragHandle() }
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+                .padding(bottom = 24.dp)
+                .verticalScroll(rememberScrollState())
+                .navigationBarsPadding(),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text(
+                "Zmiana hasła",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+
+            OutlinedTextField(
+                value = oldPassword,
+                onValueChange = { oldPassword = it },
+                label = { Text("Aktualne hasło") },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                visualTransformation = if (isOldVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Next),
+                trailingIcon = {
+                    IconButton(onClick = { isOldVisible = !isOldVisible }) {
+                        Icon(imageVector = if (isOldVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff, contentDescription = null)
+                    }
+                },
+                singleLine = true
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            OutlinedTextField(
+                value = newPassword,
+                onValueChange = { newPassword = it },
+                label = { Text("Nowe hasło") },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                visualTransformation = if (isNewVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Next),
+                trailingIcon = {
+                    IconButton(onClick = { isNewVisible = !isNewVisible }) {
+                        Icon(imageVector = if (isNewVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff, contentDescription = null)
+                    }
+                },
+                singleLine = true
+            )
+
+            if (newPassword.isNotEmpty()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    val strengthParts = listOf(hasMinLength, hasUpperChar, hasDigit, hasSpecialChar)
+                    val activeCount = strengthParts.count { it }
+                    val barColor = when (activeCount) {
+                        1 -> Color.Red
+                        2 -> Color(0xFFFF9800)
+                        3 -> Color(0xFFFFC107)
+                        4 -> Color(0xFF4CAF50)
+                        else -> MaterialTheme.colorScheme.surfaceVariant
+                    }
+
+                    for (i in 0 until 4) {
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(4.dp)
+                                .clip(RoundedCornerShape(2.dp))
+                                .background(if (i < activeCount) barColor else MaterialTheme.colorScheme.surfaceVariant)
+                        )
+                    }
+                }
+                Text(
+                    text = "Hasło musi mieć co najmniej 8 znaków, w tym dużą literę, cyfrę i znak specjalny.",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = if (isStrong) Color(0xFF4CAF50) else MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            OutlinedTextField(
+                value = confirmPassword,
+                onValueChange = { confirmPassword = it },
+                label = { Text("Powtórz nowe hasło") },
+                isError = confirmPassword.isNotBlank() && !passwordsMatch,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                visualTransformation = if (isConfirmVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
+                trailingIcon = {
+                    IconButton(onClick = { isConfirmVisible = !isConfirmVisible }) {
+                        Icon(imageVector = if (isConfirmVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff, contentDescription = null)
+                    }
+                },
+                supportingText = {
+                    if (confirmPassword.isNotEmpty() && !passwordsMatch) {
+                        Text("Hasła nie są identyczne", color = MaterialTheme.colorScheme.error)
+                    }
+                },
+                singleLine = true
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = { onSave(oldPassword, newPassword) },
+                enabled = canSave,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(54.dp),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Text("Zmień hasło", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
         }
     }
 }
