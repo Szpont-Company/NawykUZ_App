@@ -26,6 +26,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import com.SzpontCompany.check.ui.components.ConfettiEffect
+import com.SzpontCompany.check.ui.components.EmojiExplosionEffect
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 
@@ -40,6 +48,8 @@ data class HabitMock(
     val isDoneToday: Boolean = false
 )
 
+data class ExplosionData(val id: Long, val emoji: String)
+
 @Composable
 fun TodayScreen(
     onProfileClick: () -> Unit = {},
@@ -53,44 +63,70 @@ fun TodayScreen(
         )
     }
 
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 24.dp),
-        contentPadding = PaddingValues(top = 24.dp, bottom = 24.dp)
-    ) {
-        item {
-            TopSection(
-                onProfileClick = onProfileClick,
-                onOptionsClick = onOptionsClick,
-                onNotificationsClick = onNotificationsClick
-            )
-            Spacer(modifier = Modifier.height(24.dp))
-            HeroCard()
-            Spacer(modifier = Modifier.height(32.dp))
+    val explosions = remember { mutableStateListOf<ExplosionData>() }
+    val haptic = LocalHapticFeedback.current
+    val coroutineScope = rememberCoroutineScope()
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text("Nawyki dziś (${habitsList.size})", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onBackground)
-                Text("Zobacz wszystkie", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+    Box(modifier = Modifier.fillMaxSize()) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 24.dp),
+            contentPadding = PaddingValues(top = 24.dp, bottom = 24.dp)
+        ) {
+            item {
+                TopSection(
+                    onProfileClick = onProfileClick,
+                    onOptionsClick = onOptionsClick,
+                    onNotificationsClick = onNotificationsClick
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+                HeroCard()
+                Spacer(modifier = Modifier.height(32.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("Nawyki dziś (${habitsList.size})", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onBackground)
+                    Text("Zobacz wszystkie", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+                }
+                Spacer(modifier = Modifier.height(16.dp))
             }
-            Spacer(modifier = Modifier.height(16.dp))
+
+            items(habitsList) { habit ->
+                HabitCard(
+                    habit = habit,
+                    onDoneClick = {
+                        val index = habitsList.indexOf(habit)
+                        if (index != -1) {
+                            val wasDone = habit.isDoneToday
+                            habitsList[index] = habit.copy(isDoneToday = !wasDone)
+
+                            if (!wasDone) {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                val currentId = System.currentTimeMillis()
+                                val newExplosion = ExplosionData(currentId, habit.emoji)
+                                explosions.add(newExplosion)
+                                coroutineScope.launch {
+                                    delay(2000)
+                                    explosions.remove(newExplosion)
+                                }
+                            }
+                        }
+                    }
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+            }
         }
 
-        items(habitsList) { habit ->
-            HabitCard(
-                habit = habit,
-                onDoneClick = {
-                    val index = habitsList.indexOf(habit)
-                    if (index != -1) {
-                        habitsList[index] = habit.copy(isDoneToday = !habit.isDoneToday)
-                    }
-                }
+        explosions.forEach { explosion ->
+            EmojiExplosionEffect(
+                modifier = Modifier.fillMaxSize(),
+                emoji = explosion.emoji,
+                triggerId = explosion.id
             )
-            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
@@ -197,9 +233,20 @@ fun HeroCard() {
 @Composable
 fun MiniBarChart(color: Color) {
     val heights = listOf(0.4f, 0.6f, 0.8f, 0.5f, 0.9f, 1.0f, 0.3f)
+    var animationPlayed by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        animationPlayed = true
+    }
+
     Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.Bottom, modifier = Modifier.height(48.dp)) {
-        heights.forEach { fraction ->
-            Box(modifier = Modifier.width(6.dp).fillMaxHeight(fraction).clip(RoundedCornerShape(3.dp)).background(color))
+        heights.forEachIndexed { index, fraction ->
+            val animatedFraction by animateFloatAsState(
+                targetValue = if (animationPlayed) fraction else 0.01f,
+                animationSpec = tween(durationMillis = 800, delayMillis = index * 100, easing = FastOutSlowInEasing),
+                label = "bar_anim_$index"
+            )
+            Box(modifier = Modifier.width(6.dp).fillMaxHeight(animatedFraction).clip(RoundedCornerShape(3.dp)).background(color))
         }
     }
 }
