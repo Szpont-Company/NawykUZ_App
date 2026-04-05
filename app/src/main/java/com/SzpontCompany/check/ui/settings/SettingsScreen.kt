@@ -36,6 +36,8 @@ import androidx.compose.ui.draw.scale
 import com.SzpontCompany.check.ui.components.CheckBackButton
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
 
 
 @Composable
@@ -82,7 +84,11 @@ fun SettingsScreen(
         SectionHeader(text = stringResource(R.string.settings_section_language))
         LanguageSelector(
             selectedLanguage = currentLanguage,
-            onLanguageSelected = { viewModel.updateLanguage(it) }
+            onLanguageSelected = { selectedLang ->
+                viewModel.updateLanguage(selectedLang)
+                val localeCode = if (selectedLang == "Polski") "pl" else "en"
+                AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(localeCode))
+            }
         )
         Spacer(modifier = Modifier.height(24.dp))
 
