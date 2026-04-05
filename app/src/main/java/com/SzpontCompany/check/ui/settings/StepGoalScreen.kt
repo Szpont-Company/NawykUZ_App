@@ -114,7 +114,11 @@ fun StepGoalScreen(onBackClick: () -> Unit = {}) {
                     value = sliderPosition,
                     onValueChange = { sliderPosition = it },
                     valueRange = 1000f..20000f,
-                    colors = SliderDefaults.colors(thumbColor = Mint, activeTrackColor = Mint, inactiveTrackColor = MaterialTheme.colorScheme.surface),
+                    colors = SliderDefaults.colors(
+                        thumbColor = MaterialTheme.colorScheme.primary,
+                        activeTrackColor = MaterialTheme.colorScheme.primary,
+                        inactiveTrackColor = MaterialTheme.colorScheme.surface
+                    ),
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -173,10 +177,12 @@ fun StepGoalScreen(onBackClick: () -> Unit = {}) {
 
 @Composable
 fun PopularGoalItem(goal: PopularGoal, isSelected: Boolean, modifier: Modifier = Modifier, onClick: () -> Unit) {
-    val backgroundColor = if (isSelected) Mint.copy(alpha = 0.1f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
-    val borderColor = if (isSelected) Mint else Color.Transparent
-    val textColor = if (isSelected) Mint else MaterialTheme.colorScheme.onBackground
-    val labelColor = if (isSelected) Mint.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant
+    val primaryColor = MaterialTheme.colorScheme.primary
+
+    val backgroundColor = if (isSelected) primaryColor.copy(alpha = 0.1f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+    val borderColor = if (isSelected) primaryColor else Color.Transparent
+    val textColor = if (isSelected) primaryColor else MaterialTheme.colorScheme.onBackground
+    val labelColor = if (isSelected) primaryColor.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant
 
     Box(
         modifier = modifier
