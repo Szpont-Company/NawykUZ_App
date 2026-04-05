@@ -1,27 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- ================= APP GENERAL & COLORS ================= -->
     <string name="app_name">Check.</string>
     <string name="welcome_sentence">Buduj nawyki. Wygrywaj każdy dzień.</string>
-    <string name="login">Logowanie</string>
-    <string name="register">Rejestracja</string>
-    <string name="password">HASŁO</string>
-    <string name="forgot_password">Zapomniałem hasła</string>
-    <string name="login_btn">Zaloguj się</string>
-    <string name="login_google">Kontynuuj przez Google</string>
-    <string name="continue_with">lub kontynuuj przez</string>
-    <string name="login_privacy_1">"Logując się, akceptujesz"</string>
-    <string name="login_privacy_2">"regulamin"</string>
-    <string name="login_privacy_3">"i"</string>
-    <string name="login_privacy_4">politykę prywatności</string>
-    <string name="register_name">IMIĘ I NAZWISKO</string>
-    <string name="password_rule">minimum 8 znaków</string>
-    <string name="create_account">Utwórz konto</string>
-    <string name="register_notice1">"Rejestrując się, akceptujesz"</string>
-    <string name="mail_hint">twoj@email.com</string>
-    <string name="mail_reset_prompt">Wysłano link do resetu hasła. Sprawdź skrzynkę odbiorczą</string>
     <string name="captcha_message">Nie jestem robotem</string>
     <string name="captcha_privacy">Prywatność • Warunki</string>
 
-    <!-- COLORS -->
     <string name="color_mint">Mięta</string>
     <string name="color_indigo">Indygo</string>
     <string name="color_coral">Koral</string>
@@ -31,7 +15,51 @@
     <string name="color_amber">Bursztyn</string>
     <string name="color_crimson">Karmazyn</string>
 
-    <!-- PROFILE CARD-->
+    <string name="action_save">Zapisz</string>
+    <string name="action_cancel">Anuluj</string>
+    <string name="days_initials">Pn,Wt,Śr,Cz,Pt,So,Nd</string>
+
+    <!-- ================= AUTHENTICATION ================= -->
+    <string name="login">Logowanie</string>
+    <string name="register">Rejestracja</string>
+    <string name="password">HASŁO</string>
+    <string name="forgot_password">Zapomniałem hasła</string>
+    <string name="login_btn">Zaloguj się</string>
+    <string name="login_google">Kontynuuj przez Google</string>
+    <string name="continue_with">lub kontynuuj przez</string>
+    <string name="login_privacy_1">Logując się, akceptujesz</string>
+    <string name="login_privacy_2">regulamin</string>
+    <string name="login_privacy_3">i</string>
+    <string name="login_privacy_4">politykę prywatności</string>
+    <string name="register_name">IMIĘ I NAZWISKO</string>
+    <string name="password_rule">minimum 8 znaków</string>
+    <string name="create_account">Utwórz konto</string>
+    <string name="register_notice1">Rejestrując się, akceptujesz</string>
+    <string name="mail_hint">twoj@email.com</string>
+    <string name="mail_reset_prompt">Wysłano link do resetu hasła. Sprawdź skrzynkę odbiorczą</string>
+    <string name="register_success">Konto utworzone!</string>
+    <string name="success_hint">Sprawdź e-mail, żeby potwierdzić swoje konto.</string>
+    <string name="spam_hint">Nie otrzymałeś wiadomości? Sprawdź SPAM lub skontaktuj się z nami.</string>
+    <string name="success_login_redirect">Przejdź do logowania</string>
+    <string name="password_reset">Reset hasła</string>
+    <string name="password_reset_hint">Wyślemy link do zresetowania hasła na Twój adres e-mail.</string>
+    <string name="reset_pwd_send">Wyślij link</string>
+    <string name="reset_pwd_return">Wróć do logowania</string>
+    <string name="email_not_verified">Email nie został zweryfikowany</string>
+    <string name="invalid_credentials">Nieprawidłowy mail lub hasło</string>
+    <string name="account_not_found">Konto o podanych danych nie istnieje</string>
+    <string name="login_failed">Nieznany błąd logowania</string>
+    <string name="auth_email_label">E-MAIL</string>
+    <string name="auth_captcha_toast">Zweryfikuj kod captcha przed kontynuacją</string>
+    <string name="confirm_mail_prompt">Rejestracja udana! Sprawdź email w celu weryfikacji.</string>
+    <string name="login_unverified_email_prompt">Zweryfikuj swój adres email, aby się zalogować</string>
+
+    <!-- ================= DASHBOARD & HOME ================= -->
+    <string name="greeting_morning">Dzień dobry,</string>
+    <string name="greeting_afternoon">Miłego popołudnia,</string>
+    <string name="greeting_evening">Dobry wieczór,</string>
+
+    <!-- ================= PROFILE & SETTINGS ================= -->
     <string name="profile_title">Profil</string>
     <string name="profile_level">Poziom</string>
     <string name="profile_habits">Nawyki</string>
@@ -46,13 +74,17 @@
     <string name="profile_settings">Ustawienia</string>
     <string name="profile_logout">Wyloguj się</string>
     <string name="profile_badges_header">ODZNAKI</string>
-    <string name="badge_week">Tydzień</string>
-    <string name="badge_streak_21">Streak 21</string>
-    <string name="badge_10k_steps">10k kroków</string>
-    <string name="badge_battle_5">Battle x5</string>
-    <string name="badge_streak_100">Streak 100</string>
+    <string name="profile_filter_content_desc">Filtruj</string>
+    <string name="profile_content_desc">Profil</string>
+    <string name="profile_mock_name">Marek Kowalski</string>
+    <string name="profile_mock_streak">🔥 %1$d-dniowy streak</string>
+    <string name="profile_mock_xp">%1$d / %2$d XP</string>
+    <string name="profile_mock_level">Lvl %1$d</string>
+    <string name="profile_xp_format">%1$d / %2$d XP</string>
+    <string name="profile_next_level">→ Poziom %1$d</string>
+    <string name="profile_streak_format">🔥 %1$d-dniowy streak</string>
+    <string name="profile_top_rank">Top %1$d</string>
 
-    <!--SETTINGS CARD  -->
     <string name="settings_title">Ustawienia</string>
     <string name="settings_section_appearance">WYGLĄD</string>
     <string name="settings_theme_dark">Ciemny</string>
@@ -73,8 +105,49 @@
     <string name="settings_about_app">O aplikacji</string>
     <string name="settings_delete_account">Usuń konto</string>
     <string name="settings_delete_account_warning">Nieodwracalne działanie</string>
+    <string name="settings_back_content_desc">Cofnij</string>
+    <string name="settings_state_on">Włączone</string>
+    <string name="settings_state_off">Wyłączone</string>
 
-    <!-- NOTIFICATIONS CARD -->
+    <string name="settings_mock_notifications">Codziennie · 08:00</string>
+    <string name="settings_mock_step_goal">8 000 kroków</string>
+    <string name="settings_mock_privacy">Publiczny</string>
+    <string name="settings_mock_version">Check. v1.0.0</string>
+
+    <string name="dialog_logout_message">Czy na pewno chcesz się wylogować?</string>
+    <string name="dialog_logout_confirm">Wyloguj</string>
+    <string name="dialog_logout_cancel">Anuluj</string>
+
+    <string name="privacy_title">Prywatność</string>
+    <string name="privacy_back_content_desc">Wróć</string>
+    <string name="privacy_section_visibility">WIDOCZNOŚĆ PROFILU</string>
+    <string name="privacy_visibility_public">Publiczny</string>
+    <string name="privacy_visibility_public_desc">Każdy może zobaczyć Twój profil</string>
+    <string name="privacy_visibility_friends">Tylko znajomi</string>
+    <string name="privacy_visibility_friends_desc">Profil widoczny dla znajomych</string>
+    <string name="privacy_visibility_private">Prywatny</string>
+    <string name="privacy_visibility_private_desc">Profil całkowicie ukryty</string>
+    <string name="privacy_section_location">LOKALIZACJA</string>
+    <string name="privacy_location_show">Pokaż lokalizację znajomym</string>
+    <string name="privacy_location_show_desc">Tylko podczas aktywnego treningu</string>
+    <string name="privacy_location_history">Historia tras</string>
+    <string name="privacy_location_history_desc">Udostępniaj znajomym</string>
+    <string name="privacy_section_data">DANE</string>
+    <string name="privacy_data_export">Eksportuj dane</string>
+    <string name="privacy_data_export_desc">Pobierz wszystkie swoje dane</string>
+    <string name="privacy_save_button">Zapisz ustawienia</string>
+
+    <string name="step_goal_title">Cel kroków</string>
+    <string name="step_goal_back_content_desc">Wróć</string>
+    <string name="step_goal_section_daily">DZIENNY CEL</string>
+    <string name="step_goal_steps_suffix">kroków</string>
+    <string name="step_goal_section_popular">POPULARNE CELE</string>
+    <string name="step_goal_popular_active">Aktywny tryb życia</string>
+    <string name="step_goal_popular_who">Zalecane WHO</string>
+    <string name="step_goal_popular_classic">Klasyczny cel</string>
+    <string name="step_goal_popular_sport">Sport i bieganie</string>
+    <string name="step_goal_save_button">Zapisz cel</string>
+
     <string name="notifications_section_main">GŁÓWNE PRZYPOMNIENIE</string>
     <string name="notifications_enable_title">Włącz przypomnienia</string>
     <string name="notifications_enable_desc">Codzienne powiadomienie o nawykach</string>
@@ -90,70 +163,20 @@
     <string name="notifications_sound_desc">Domyślny systemowy</string>
     <string name="notifications_vibration_title">Wibracje</string>
     <string name="notifications_save_button">Zapisz ustawienia</string>
-    <string name="action_save">Zapisz</string>
-    <string name="action_cancel">Anuluj</string>
 
-    <string name="privacy_title">Prywatność</string>
-    <string name="privacy_back_content_desc">Wróć</string>
+    <!-- ================= PROFILE: EDIT & SECURITY ================= -->
+    <string name="edit_profile_change_email">Zmień e-mail</string>
+    <string name="edit_profile_change_password">Zmiana hasła</string>
+    <string name="edit_profile_current_password">Aktualne hasło</string>
+    <string name="edit_profile_new_password">Nowe hasło</string>
+    <string name="edit_profile_repeat_password">Powtórz nowe hasło</string>
+    <string name="edit_profile_new_email">Nowy adres e-mail</string>
+    <string name="edit_profile_update_email_btn">Zaktualizuj e-mail</string>
+    <string name="edit_profile_password_error_not_match">Hasła nie są identyczne</string>
+    <string name="edit_profile_password_rule_desc">Hasło musi mieć co najmniej 8 znaków, w tym dużą literę, cyfrę i znak specjalny.</string>
+    <string name="edit_profile_email_desc">Podaj nowy adres oraz hasło do konta, aby potwierdzić zmianę.</string>
 
-    <string name="privacy_section_visibility">WIDOCZNOŚĆ PROFILU</string>
-    <string name="privacy_visibility_public">Publiczny</string>
-    <string name="privacy_visibility_public_desc">Każdy może zobaczyć Twój profil</string>
-    <string name="privacy_visibility_friends">Tylko znajomi</string>
-    <string name="privacy_visibility_friends_desc">Profil widoczny dla znajomych</string>
-    <string name="privacy_visibility_private">Prywatny</string>
-    <string name="privacy_visibility_private_desc">Profil całkowicie ukryty</string>
-
-    <string name="privacy_section_location">LOKALIZACJA</string>
-    <string name="privacy_location_show">Pokaż lokalizację znajomym</string>
-    <string name="privacy_location_show_desc">Tylko podczas aktywnego treningu</string>
-    <string name="privacy_location_history">Historia tras</string>
-    <string name="privacy_location_history_desc">Udostępniaj znajomym</string>
-
-    <string name="privacy_section_data">DANE</string>
-    <string name="privacy_data_export">Eksportuj dane</string>
-    <string name="privacy_data_export_desc">Pobierz wszystkie swoje dane</string>
-
-    <string name="privacy_save_button">Zapisz ustawienia</string>
-
-    <string name="step_goal_title">Cel kroków</string>
-    <string name="step_goal_back_content_desc">Wróć</string>
-    <string name="step_goal_section_daily">DZIENNY CEL</string>
-    <string name="step_goal_steps_suffix">kroków</string>
-
-    <string name="step_goal_section_popular">POPULARNE CELE</string>
-    <string name="step_goal_popular_active">Aktywny tryb życia</string>
-    <string name="step_goal_popular_who">Zalecane WHO</string>
-    <string name="step_goal_popular_classic">Klasyczny cel</string>
-    <string name="step_goal_popular_sport">Sport i bieganie</string>
-
-    <string name="step_goal_save_button">Zapisz cel</string>
-
-    <string name="settings_back_content_desc">Cofnij</string>
-    <string name="settings_state_on">Włączone</string>
-    <string name="settings_state_off">Wyłączone</string>
-
-    <string name="settings_mock_notifications">Codziennie · 08:00</string>
-    <string name="settings_mock_step_goal">8 000 kroków</string>
-    <string name="settings_mock_privacy">Publiczny</string>
-    <string name="settings_mock_version">Check. v1.0.0</string>
-
-    <string name="auth_email_label">E-MAIL</string>
-    <string name="auth_captcha_toast">Zweryfikuj kod captcha przed kontynuacją</string>
-
-    <string name="profile_filter_content_desc">Filtruj</string>
-    <string name="profile_content_desc">Profil</string>
-
-    <string name="profile_mock_name">Marek Kowalski</string>
-    <string name="profile_mock_streak">🔥 %1$d-dniowy streak</string>
-    <string name="profile_mock_xp">%1$d / %2$d XP</string>
-    <string name="profile_mock_level">Lvl %1$d</string>
-    <string name="days_initials">Pn,Wt,Śr,Cz,Pt,So,Nd</string>
-
-
-    <string name="confirm_mail_prompt">Rejestracja udana! Sprawdź email w celu weryfikacji.</string>
-    <string name="login_unverified_email_prompt">Zweryfikuj swój adres email, aby się zalogować</string>
-
+    <!-- ================= REWARDS & STORE ================= -->
     <string name="rewards_title">Nagrody</string>
     <string name="rewards_your_coins">Twoje monety</string>
     <string name="rewards_total_earned">Łącznie zdobyte</string>
@@ -167,47 +190,90 @@
     <string name="store_item_shield_desc">Chroni przed karą w Battle</string>
 
     <string name="dialog_badge_header">NOWA ODZNAKA!</string>
-    <string name="dialog_coins_earned">+%1$d monet</string> <string name="dialog_claim_btn">ODBIERZ NAGRODĘ!</string>
+    <string name="dialog_coins_earned">+%1$d monet</string>
+    <string name="dialog_claim_btn">ODBIERZ NAGRODĘ!</string>
+
+    <string name="badge_week">Tydzień</string>
+    <string name="badge_streak_21">Streak 21</string>
+    <string name="badge_10k_steps">10k kroków</string>
+    <string name="badge_battle_5">Battle x5</string>
+    <string name="badge_streak_100">Streak 100</string>
 
     <string name="badge_week_name">Pierwszy tydzień</string>
     <string name="badge_week_desc">Używaj apki przez 7 dni</string>
-
     <string name="badge_streak21_name">Streak 21 dni</string>
     <string name="badge_streak21_desc">Utrzymaj passę 21 dni</string>
-
     <string name="badge_steps_name">10k steps</string>
     <string name="badge_steps_desc">Zrób 10 000 kroków w jeden dzień</string>
-
     <string name="badge_battle_name">Battle Winner</string>
     <string name="badge_battle_desc">Wygraj 5 bitew</string>
-
     <string name="badge_diamond_name">Diamentowy</string>
     <string name="badge_diamond_desc">Streak 100 dni</string>
+    `
+    <!-- ================= COMMUNITY ================= -->
+    <string name="current_streak_message">"Twój obecny ciąg to %d dni. Oby tak dalej!"</string>
 
-    <string name="profile_xp_format">%1$d / %2$d XP</string>
-    <string name="profile_next_level">→ Poziom %1$d</string>
-    <string name="profile_streak_format">🔥 %1$d-dniowy streak</string>
-    <string name="profile_top_rank">Top %1$d</string>
+    <!-- Community Screen & Tabs -->
+    <string name="tab_friends">Znajomi</string>
+    <string name="tab_ranking">Ranking</string>
+    <string name="tab_events">Wydarzenia</string>
+    <string name="tab_challenges">Wyzwania</string>
 
+    <!-- FriendsCard -->
+    <string name="search_in_list">Szukaj na liście...</string>
+    <string name="active_now">AKTYWNI TERAZ</string>
+    <string name="recently_active">OSTATNIO AKTYWNI</string>
+    <string name="invite_friends_outside">Zaproś znajomych spoza aplikacji</string>
+    <string name="invite_friends_description">Wyślij link i zyskaj 50 monet za każdego dołączonego znajomego</string>
+    <string name="action_copy">Kopiuj</string>
+    <string name="no_invitations">Brak zaproszeń</string>
+    <string name="no_pending_invitations">Nie masz żadnych oczekujących zaproszeń</string>
+    <string name="search_by_name_or_nickname">Szukaj po nazwie lub @nicku...</string>
+    <string name="suggested_you_may_know">SUGEROWANE — MOŻESZ ZNAĆ</string>
+    <string name="no_results">Brak wyników</string>
+    <string name="user_not_found">Nie znaleziono użytkownika \"%1$s\"</string>
 
-    <string name="dialog_logout_message">Czy na pewno chcesz się wylogować?</string>
-    <string name="dialog_logout_confirm">Wyloguj</string>
-    <string name="dialog_logout_cancel">Anuluj</string>
+    <!-- NotificationsSheet -->
+    <string name="notifications_title">Powiadomienia</string>
+    <string name="mark_as_read">Oznacz przeczytane</string>
+    <string name="no_notifications">Brak powiadomień</string>
+    <string name="no_new_notifications">Nie masz żadnych nowych powiadomień.</string>
 
-    <string name="greeting_morning">Dzień dobry,</string>
-    <string name="greeting_afternoon">Miłego popołudnia,</string>
-    <string name="greeting_evening">Dobry wieczór,</string>
-    <!-- AUTHENTICATION -->
-    <string name="register_success">Konto utworzone!</string>
-    <string name="success_hint">Sprawdż e-mail, żeby potwierdzić swoje konto.</string>
-    <string name="spam_hint">Nie otrzymałeś wiadomości? Sprawdź SPAM lub skontaktuj się z nami.</string>
-    <string name="success_login_redirect">Przejdź do logowania</string>
-    <string name="password_reset">Reset hasła</string>
-    <string name="password_reset_hint">Wyślemy link do zresetowania hasła na Twój adres e-mail.</string>
-    <string name="reset_pwd_send">Wyślij link</string>
-    <string name="reset_pwd_return">Wróć do logowania</string>
-    <string name="email_not_verified">Email nie został zweryfikowany</string>
-    <string name="invalid_credentials">Nieprawidłowy mail lub hasło</string>
-    <string name="account_not_found">Konto o podanych danych nie istnieje</string>
-    <string name="login_failed">Nieznany błąd logowania</string>
+    <!-- PlayerVsRow / RankingListCard / YourPositionCard -->
+    <string name="you">Ty</string>
+    <string name="days_fraction">%1$d/%2$d dni</string>
+    <string name="points_short">pkt</string>
+    <string name="your_position_this_week">Twoja pozycja w tym tygodniu</string>
+    <string name="no_points">Brak punktów</string>
+    <string name="join_competition_to_rank">Dołącz do rywalizacji by się klasyfikować</string>
+    <string name="days_remaining">Pozostało: %1$d dni</string>
+
+    <!-- BattleCard & ChallengeInviteCard -->
+    <string name="battle_with_friend">Wyzwanie ze znajomym</string>
+    <string name="invite_to_compete">Zaproś do rywalizacji!</string>
+    <string name="no_active_challenges">Nie masz aktywnych wyzwań.</string>
+    <string name="choose_friend_to_start_battle">Wybierz znajomego i rozpocznij pojedynek!</string>
+    <string name="invite_action">Zaproś</string>
+    <string name="challenges_count">Wyzwania (%1$d)</string>
+    <string name="see_all">Zobacz wszystkie</string>
+    <string name="victory_reward_coins">Zwycięstwo: +%1$d monet</string>
+    <string name="your_turn">Twoja runda</string>
+    <string name="opponent_turn">Runda przeciwnika</string>
+    <string name="finished">Zakończone</string>
+    <string name="challenge_from">Wyzwanie od: %1$s</string>
+    <string name="duration_days">Czas: %1$d dni</string>
+    <string name="stake_coins">Stawka: %1$d monet</string>
+    <string name="decline">Odmów</string>
+    <string name="accept">Akceptuj</string>
+
+    <!-- EventCard -->
+    <string name="community_events_count">Wydarzenia Społecznościowe (%1$d)</string>
+    <string name="no_active_events">Brak aktywnych wydarzeń.</string>
+    <string name="join_event_for_rewards">Dołącz do wydarzenia, aby zdobywać nagrody!</string>
+    <string name="browse">Przeglądaj</string>
+    <string name="ongoing">Trwa</string>
+    <string name="ends_in_days">Koniec: %1$d dni</string>
+    <string name="details">Szczegóły</string>
+    <string name="participating">Uczestniczysz</string>
+    <string name="join">Dołącz</string>
 </resources>
