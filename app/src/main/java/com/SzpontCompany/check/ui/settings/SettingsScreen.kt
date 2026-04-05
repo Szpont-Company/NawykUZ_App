@@ -2,7 +2,6 @@ package com.SzpontCompany.check.ui.settings
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -22,7 +21,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -36,6 +34,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.ui.draw.scale
 import com.SzpontCompany.check.ui.components.CheckBackButton
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 
 @Composable
@@ -43,8 +43,16 @@ fun SettingsScreen(
     onBackClick: () -> Unit,
     onStepGoalClick: () -> Unit,
     onPrivacyClick: () -> Unit,
-    onNotificationsClick: () -> Unit
+    onNotificationsClick: () -> Unit,
+    viewModel: SettingsViewModel = viewModel(
+        factory = SettingsViewModelFactory(LocalContext.current.applicationContext)
+    )
 ) {
+
+    val currentTheme by viewModel.themeState.collectAsState()
+    val currentAccentColor by viewModel.accentColorState.collectAsState()
+    val currentLanguage by viewModel.languageState.collectAsState()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -58,15 +66,24 @@ fun SettingsScreen(
         Spacer(modifier = Modifier.height(32.dp))
 
         SectionHeader(text = stringResource(R.string.settings_section_appearance))
-        ThemeSelector()
+        ThemeSelector(
+            selectedTheme = currentTheme,
+            onThemeSelected = { viewModel.updateTheme(it) }
+        )
         Spacer(modifier = Modifier.height(24.dp))
 
         SectionHeader(text = stringResource(R.string.settings_section_accent))
-        AccentColorSelector()
+        AccentColorSelector(
+            selectedColorName = currentAccentColor,
+            onColorSelected = { viewModel.updateAccentColor(it) }
+        )
         Spacer(modifier = Modifier.height(24.dp))
 
         SectionHeader(text = stringResource(R.string.settings_section_language))
-        LanguageSelector()
+        LanguageSelector(
+            selectedLanguage = currentLanguage,
+            onLanguageSelected = { viewModel.updateLanguage(it) }
+        )
         Spacer(modifier = Modifier.height(24.dp))
 
         SectionHeader(text = stringResource(R.string.settings_section_notifications))
@@ -336,9 +353,7 @@ fun SettingsIcon(
 
 
 @Composable
-fun ThemeSelector() {
-    var selectedTheme by remember { mutableStateOf("Ciemny") }
-
+fun ThemeSelector(selectedTheme: String, onThemeSelected: (String) -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -346,7 +361,7 @@ fun ThemeSelector() {
         ThemeCard(
             title = stringResource(R.string.settings_theme_dark),
             isSelected = selectedTheme == "Ciemny",
-            onClick = { selectedTheme = "Ciemny" },
+            onClick = { onThemeSelected("Ciemny") },
             modifier = Modifier.weight(1f)
         ) {
             DarkThemePreview()
@@ -355,7 +370,7 @@ fun ThemeSelector() {
         ThemeCard(
             title = stringResource(R.string.settings_theme_light),
             isSelected = selectedTheme == "Jasny",
-            onClick = { selectedTheme = "Jasny" },
+            onClick = { onThemeSelected("Jasny") },
             modifier = Modifier.weight(1f)
         ) {
             LightThemePreview()
@@ -364,7 +379,7 @@ fun ThemeSelector() {
         ThemeCard(
             title = stringResource(R.string.settings_theme_auto),
             isSelected = selectedTheme == "Auto",
-            onClick = { selectedTheme = "Auto" },
+            onClick = { onThemeSelected("Auto") },
             modifier = Modifier.weight(1f)
         ) {
             AutoThemePreview()
@@ -503,23 +518,22 @@ fun FakeUIElements(isLight: Boolean = false, isAuto: Boolean = false) {
 }
 data class AccentColorItem(
     val color: Color,
-    val nameResId: Int
+    val nameResId: Int,
+    val name: String
 )
 
 @Composable
-fun AccentColorSelector() {
+fun AccentColorSelector(selectedColorName: String, onColorSelected: (String) -> Unit) {
     val colors = listOf(
-        AccentColorItem(Mint, R.string.color_mint),
-        AccentColorItem(Indigo, R.string.color_indigo),
-        AccentColorItem(Coral, R.string.color_coral),
-        AccentColorItem(Sky, R.string.color_sky),
-        AccentColorItem(Rose, R.string.color_rose),
-        AccentColorItem(Cactus, R.string.color_cactus),
-        AccentColorItem(Amber, R.string.color_amber),
-        AccentColorItem(Crimson, R.string.color_crimson)
+        AccentColorItem(Mint, R.string.color_mint, "Mint"),
+        AccentColorItem(Indigo, R.string.color_indigo, "Indigo"),
+        AccentColorItem(Coral, R.string.color_coral, "Coral"),
+        AccentColorItem(Sky, R.string.color_sky, "Sky"),
+        AccentColorItem(Rose, R.string.color_rose, "Rose"),
+        AccentColorItem(Cactus, R.string.color_cactus, "Cactus"),
+        AccentColorItem(Amber, R.string.color_amber, "Amber"),
+        AccentColorItem(Crimson, R.string.color_crimson, "Crimson")
     )
-
-    var selectedColor by remember { mutableStateOf(Mint) }
 
     Column(
         modifier = Modifier
@@ -535,7 +549,7 @@ fun AccentColorSelector() {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 rowColors.forEach { item ->
-                    val isSelected = item.color == selectedColor
+                    val isSelected = item.name == selectedColorName
 
                     val alpha by animateFloatAsState(
                         targetValue = if (isSelected) 1f else 0.5f,
@@ -565,7 +579,7 @@ fun AccentColorSelector() {
                             .clickable(
                                 interactionSource = remember { MutableInteractionSource() },
                                 indication = null
-                            ) { selectedColor = item.color }
+                            ) { onColorSelected(item.name)}
                     ) {
                         Box(
                             modifier = Modifier.height(64.dp),
@@ -611,8 +625,7 @@ fun AccentColorSelector() {
 }
 
 @Composable
-fun LanguageSelector() {
-    var selectedLanguage by remember { mutableStateOf("Polski") }
+fun LanguageSelector(selectedLanguage: String, onLanguageSelected: (String) -> Unit) {
 
     Row(
         modifier = Modifier
@@ -627,13 +640,13 @@ fun LanguageSelector() {
             text = "Polski",
             isSelected = selectedLanguage == "Polski",
             modifier = Modifier.weight(1f),
-            onClick = { selectedLanguage = "Polski" }
+            onClick = { onLanguageSelected("Polski") }
         )
         LanguageButton(
             text = "English",
             isSelected = selectedLanguage == "English",
             modifier = Modifier.weight(1f),
-            onClick = { selectedLanguage = "English" }
+            onClick = { onLanguageSelected("English") }
         )
     }
 }

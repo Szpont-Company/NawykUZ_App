@@ -83,6 +83,7 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.compose.foundation:foundation")
     implementation("androidx.navigation:navigation-compose:2.9.7")
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
 
     // captcha
     implementation("com.google.android.recaptcha:recaptcha:18.8.0")
