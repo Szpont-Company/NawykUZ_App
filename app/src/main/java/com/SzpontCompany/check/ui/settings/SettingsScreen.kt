@@ -179,8 +179,9 @@ fun SettingsScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(16.dp))
-                .background(Color(0xFF2A1515))
-                .border(1.dp, Color(0xFF592020), RoundedCornerShape(16.dp))
+                .background(Crimson.copy(alpha = 0.1f))
+               // .background(Color(0xFF2A1515))
+             //   .border(1.dp, Color(0xFF592020), RoundedCornerShape(16.dp))
                 .clickable { /* TODO */ }
                 .padding(16.dp),
         ) {
@@ -204,14 +205,15 @@ fun SettingsScreen(
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
                         text = stringResource(R.string.settings_delete_account_warning),
-                        color = Crimson.copy(alpha = 0.6f),
+                        color = Crimson.copy(alpha = 0.7f),
                         fontSize = 12.sp
                     )
                 }
                 Icon(
                     imageVector = Icons.Default.ChevronRight,
                     contentDescription = null,
-                    tint = Crimson
+                    tint = Crimson.copy(alpha = 0.5f)
+                  //  tint = Crimson
                 )
             }
         }
@@ -683,7 +685,7 @@ fun LanguageSelector(selectedLanguage: String, onLanguageSelected: (String) -> U
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .background(Color((0xFF151517)))
+            .background(MaterialTheme.colorScheme.surface)
             .padding(6.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp),
         verticalAlignment = Alignment.CenterVertically
