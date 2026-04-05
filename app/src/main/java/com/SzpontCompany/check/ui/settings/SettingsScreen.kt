@@ -38,6 +38,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 
 
 @Composable
@@ -360,6 +364,8 @@ fun SettingsIcon(
 
 @Composable
 fun ThemeSelector(selectedTheme: String, onThemeSelected: (String) -> Unit) {
+    val haptic = LocalHapticFeedback.current
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -367,7 +373,12 @@ fun ThemeSelector(selectedTheme: String, onThemeSelected: (String) -> Unit) {
         ThemeCard(
             title = stringResource(R.string.settings_theme_dark),
             isSelected = selectedTheme == "Ciemny",
-            onClick = { onThemeSelected("Ciemny") },
+            onClick = {
+                if (selectedTheme != "Ciemny") {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onThemeSelected("Ciemny")
+                }
+            },
             modifier = Modifier.weight(1f)
         ) {
             DarkThemePreview()
@@ -376,7 +387,12 @@ fun ThemeSelector(selectedTheme: String, onThemeSelected: (String) -> Unit) {
         ThemeCard(
             title = stringResource(R.string.settings_theme_light),
             isSelected = selectedTheme == "Jasny",
-            onClick = { onThemeSelected("Jasny") },
+            onClick = {
+                if (selectedTheme != "Jasny") {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onThemeSelected("Jasny")
+                }
+            },
             modifier = Modifier.weight(1f)
         ) {
             LightThemePreview()
@@ -385,7 +401,12 @@ fun ThemeSelector(selectedTheme: String, onThemeSelected: (String) -> Unit) {
         ThemeCard(
             title = stringResource(R.string.settings_theme_auto),
             isSelected = selectedTheme == "Auto",
-            onClick = { onThemeSelected("Auto") },
+            onClick = {
+                if (selectedTheme != "Auto") {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onThemeSelected("Auto")
+                }
+            },
             modifier = Modifier.weight(1f)
         ) {
             AutoThemePreview()
@@ -404,8 +425,18 @@ fun ThemeCard(
     val borderColor = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent
     val backgroundColor = MaterialTheme.colorScheme.surface
 
+    val scale by animateFloatAsState(
+        targetValue = if (isSelected) 1.05f else 1f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "theme_card_scale"
+    )
+
     Column(
         modifier = modifier
+            .scale(scale)
             .clip(RoundedCornerShape(16.dp))
             .background(backgroundColor)
             .border(2.dp, borderColor, RoundedCornerShape(16.dp))
@@ -541,6 +572,8 @@ fun AccentColorSelector(selectedColorName: String, onColorSelected: (String) -> 
         AccentColorItem(Crimson, R.string.color_crimson, "Crimson")
     )
 
+    val haptic = LocalHapticFeedback.current
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -564,6 +597,10 @@ fun AccentColorSelector(selectedColorName: String, onColorSelected: (String) -> 
 
                     val size by animateDpAsState(
                         targetValue = if (isSelected) 64.dp else 44.dp,
+                        animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                            stiffness = Spring.StiffnessLow
+                        ),
                         label = "size_anim"
                     )
 
@@ -574,6 +611,10 @@ fun AccentColorSelector(selectedColorName: String, onColorSelected: (String) -> 
 
                     val logoScale by animateFloatAsState(
                         targetValue = if (isSelected) 1f else 0.5f,
+                        animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                            stiffness = Spring.StiffnessLow
+                        ),
                         label = "logo_scale_anim"
                     )
 
@@ -585,7 +626,12 @@ fun AccentColorSelector(selectedColorName: String, onColorSelected: (String) -> 
                             .clickable(
                                 interactionSource = remember { MutableInteractionSource() },
                                 indication = null
-                            ) { onColorSelected(item.name)}
+                            ) {
+                                if (!isSelected) {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    onColorSelected(item.name)
+                                }
+                            }
                     ) {
                         Box(
                             modifier = Modifier.height(64.dp),
