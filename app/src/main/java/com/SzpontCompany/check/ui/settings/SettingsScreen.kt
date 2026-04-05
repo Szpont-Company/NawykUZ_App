@@ -2,7 +2,6 @@ package com.SzpontCompany.check.ui.settings
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -22,7 +21,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -36,6 +34,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.ui.draw.scale
 import com.SzpontCompany.check.ui.components.CheckBackButton
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 
 
 @Composable
@@ -43,8 +49,16 @@ fun SettingsScreen(
     onBackClick: () -> Unit,
     onStepGoalClick: () -> Unit,
     onPrivacyClick: () -> Unit,
-    onNotificationsClick: () -> Unit
+    onNotificationsClick: () -> Unit,
+    viewModel: SettingsViewModel = viewModel(
+        factory = SettingsViewModelFactory(LocalContext.current.applicationContext)
+    )
 ) {
+
+    val currentTheme by viewModel.themeState.collectAsState()
+    val currentAccentColor by viewModel.accentColorState.collectAsState()
+    val currentLanguage by viewModel.languageState.collectAsState()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -58,15 +72,28 @@ fun SettingsScreen(
         Spacer(modifier = Modifier.height(32.dp))
 
         SectionHeader(text = stringResource(R.string.settings_section_appearance))
-        ThemeSelector()
+        ThemeSelector(
+            selectedTheme = currentTheme,
+            onThemeSelected = { viewModel.updateTheme(it) }
+        )
         Spacer(modifier = Modifier.height(24.dp))
 
         SectionHeader(text = stringResource(R.string.settings_section_accent))
-        AccentColorSelector()
+        AccentColorSelector(
+            selectedColorName = currentAccentColor,
+            onColorSelected = { viewModel.updateAccentColor(it) }
+        )
         Spacer(modifier = Modifier.height(24.dp))
 
         SectionHeader(text = stringResource(R.string.settings_section_language))
-        LanguageSelector()
+        LanguageSelector(
+            selectedLanguage = currentLanguage,
+            onLanguageSelected = { selectedLang ->
+                viewModel.updateLanguage(selectedLang)
+                val localeCode = if (selectedLang == "Polski") "pl" else "en"
+                AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(localeCode))
+            }
+        )
         Spacer(modifier = Modifier.height(24.dp))
 
         SectionHeader(text = stringResource(R.string.settings_section_notifications))
@@ -152,8 +179,9 @@ fun SettingsScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(16.dp))
-                .background(Color(0xFF2A1515))
-                .border(1.dp, Color(0xFF592020), RoundedCornerShape(16.dp))
+                .background(Crimson.copy(alpha = 0.1f))
+               // .background(Color(0xFF2A1515))
+             //   .border(1.dp, Color(0xFF592020), RoundedCornerShape(16.dp))
                 .clickable { /* TODO */ }
                 .padding(16.dp),
         ) {
@@ -177,14 +205,15 @@ fun SettingsScreen(
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
                         text = stringResource(R.string.settings_delete_account_warning),
-                        color = Crimson.copy(alpha = 0.6f),
+                        color = Crimson.copy(alpha = 0.7f),
                         fontSize = 12.sp
                     )
                 }
                 Icon(
                     imageVector = Icons.Default.ChevronRight,
                     contentDescription = null,
-                    tint = Crimson
+                    tint = Crimson.copy(alpha = 0.5f)
+                  //  tint = Crimson
                 )
             }
         }
@@ -336,8 +365,8 @@ fun SettingsIcon(
 
 
 @Composable
-fun ThemeSelector() {
-    var selectedTheme by remember { mutableStateOf("Ciemny") }
+fun ThemeSelector(selectedTheme: String, onThemeSelected: (String) -> Unit) {
+    val haptic = LocalHapticFeedback.current
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -346,7 +375,12 @@ fun ThemeSelector() {
         ThemeCard(
             title = stringResource(R.string.settings_theme_dark),
             isSelected = selectedTheme == "Ciemny",
-            onClick = { selectedTheme = "Ciemny" },
+            onClick = {
+                if (selectedTheme != "Ciemny") {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onThemeSelected("Ciemny")
+                }
+            },
             modifier = Modifier.weight(1f)
         ) {
             DarkThemePreview()
@@ -355,7 +389,12 @@ fun ThemeSelector() {
         ThemeCard(
             title = stringResource(R.string.settings_theme_light),
             isSelected = selectedTheme == "Jasny",
-            onClick = { selectedTheme = "Jasny" },
+            onClick = {
+                if (selectedTheme != "Jasny") {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onThemeSelected("Jasny")
+                }
+            },
             modifier = Modifier.weight(1f)
         ) {
             LightThemePreview()
@@ -364,7 +403,12 @@ fun ThemeSelector() {
         ThemeCard(
             title = stringResource(R.string.settings_theme_auto),
             isSelected = selectedTheme == "Auto",
-            onClick = { selectedTheme = "Auto" },
+            onClick = {
+                if (selectedTheme != "Auto") {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onThemeSelected("Auto")
+                }
+            },
             modifier = Modifier.weight(1f)
         ) {
             AutoThemePreview()
@@ -383,8 +427,18 @@ fun ThemeCard(
     val borderColor = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent
     val backgroundColor = MaterialTheme.colorScheme.surface
 
+    val scale by animateFloatAsState(
+        targetValue = if (isSelected) 1.05f else 1f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "theme_card_scale"
+    )
+
     Column(
         modifier = modifier
+            .scale(scale)
             .clip(RoundedCornerShape(16.dp))
             .background(backgroundColor)
             .border(2.dp, borderColor, RoundedCornerShape(16.dp))
@@ -503,23 +557,24 @@ fun FakeUIElements(isLight: Boolean = false, isAuto: Boolean = false) {
 }
 data class AccentColorItem(
     val color: Color,
-    val nameResId: Int
+    val nameResId: Int,
+    val name: String
 )
 
 @Composable
-fun AccentColorSelector() {
+fun AccentColorSelector(selectedColorName: String, onColorSelected: (String) -> Unit) {
     val colors = listOf(
-        AccentColorItem(Mint, R.string.color_mint),
-        AccentColorItem(Indigo, R.string.color_indigo),
-        AccentColorItem(Coral, R.string.color_coral),
-        AccentColorItem(Sky, R.string.color_sky),
-        AccentColorItem(Rose, R.string.color_rose),
-        AccentColorItem(Cactus, R.string.color_cactus),
-        AccentColorItem(Amber, R.string.color_amber),
-        AccentColorItem(Crimson, R.string.color_crimson)
+        AccentColorItem(Mint, R.string.color_mint, "Mint"),
+        AccentColorItem(Indigo, R.string.color_indigo, "Indigo"),
+        AccentColorItem(Coral, R.string.color_coral, "Coral"),
+        AccentColorItem(Sky, R.string.color_sky, "Sky"),
+        AccentColorItem(Rose, R.string.color_rose, "Rose"),
+        AccentColorItem(Cactus, R.string.color_cactus, "Cactus"),
+        AccentColorItem(Amber, R.string.color_amber, "Amber"),
+        AccentColorItem(Crimson, R.string.color_crimson, "Crimson")
     )
 
-    var selectedColor by remember { mutableStateOf(Mint) }
+    val haptic = LocalHapticFeedback.current
 
     Column(
         modifier = Modifier
@@ -535,7 +590,7 @@ fun AccentColorSelector() {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 rowColors.forEach { item ->
-                    val isSelected = item.color == selectedColor
+                    val isSelected = item.name == selectedColorName
 
                     val alpha by animateFloatAsState(
                         targetValue = if (isSelected) 1f else 0.5f,
@@ -544,6 +599,10 @@ fun AccentColorSelector() {
 
                     val size by animateDpAsState(
                         targetValue = if (isSelected) 64.dp else 44.dp,
+                        animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                            stiffness = Spring.StiffnessLow
+                        ),
                         label = "size_anim"
                     )
 
@@ -554,6 +613,10 @@ fun AccentColorSelector() {
 
                     val logoScale by animateFloatAsState(
                         targetValue = if (isSelected) 1f else 0.5f,
+                        animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                            stiffness = Spring.StiffnessLow
+                        ),
                         label = "logo_scale_anim"
                     )
 
@@ -565,7 +628,12 @@ fun AccentColorSelector() {
                             .clickable(
                                 interactionSource = remember { MutableInteractionSource() },
                                 indication = null
-                            ) { selectedColor = item.color }
+                            ) {
+                                if (!isSelected) {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    onColorSelected(item.name)
+                                }
+                            }
                     ) {
                         Box(
                             modifier = Modifier.height(64.dp),
@@ -611,14 +679,13 @@ fun AccentColorSelector() {
 }
 
 @Composable
-fun LanguageSelector() {
-    var selectedLanguage by remember { mutableStateOf("Polski") }
+fun LanguageSelector(selectedLanguage: String, onLanguageSelected: (String) -> Unit) {
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .background(Color((0xFF151517)))
+            .background(MaterialTheme.colorScheme.surface)
             .padding(6.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -627,13 +694,13 @@ fun LanguageSelector() {
             text = "Polski",
             isSelected = selectedLanguage == "Polski",
             modifier = Modifier.weight(1f),
-            onClick = { selectedLanguage = "Polski" }
+            onClick = { onLanguageSelected("Polski") }
         )
         LanguageButton(
             text = "English",
             isSelected = selectedLanguage == "English",
             modifier = Modifier.weight(1f),
-            onClick = { selectedLanguage = "English" }
+            onClick = { onLanguageSelected("English") }
         )
     }
 }

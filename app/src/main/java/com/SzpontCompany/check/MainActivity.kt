@@ -3,7 +3,7 @@ package com.SzpontCompany.check
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
-import androidx.activity.ComponentActivity
+import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -19,8 +19,10 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import com.SzpontCompany.check.ui.theme.CheckTheme
@@ -28,6 +30,7 @@ import com.SzpontCompany.check.ui.auth.AnimatedSplashScreen
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.SzpontCompany.check.ui.auth.AuthViewModel
 import com.SzpontCompany.check.ui.auth.LoginScreen
@@ -45,16 +48,52 @@ import com.SzpontCompany.check.ui.profile.EditProfileScreen
 import com.SzpontCompany.check.ui.profile.ProfileScreen
 import com.SzpontCompany.check.ui.settings.SettingsNavHost
 import com.SzpontCompany.check.ui.rewards.RewardsScreen
+import com.SzpontCompany.check.ui.settings.SettingsViewModel
+import com.SzpontCompany.check.ui.settings.SettingsViewModelFactory
+import com.SzpontCompany.check.ui.theme.Amber
+import com.SzpontCompany.check.ui.theme.Cactus
+import com.SzpontCompany.check.ui.theme.Coral
+import com.SzpontCompany.check.ui.theme.Crimson
+import com.SzpontCompany.check.ui.theme.Indigo
+import com.SzpontCompany.check.ui.theme.Rose
+import com.SzpontCompany.check.ui.theme.Sky
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
 
 enum class AppScreen { SPLASH, LOGIN, DASHBOARD, REGISTER_SUCCESS, RESET_PASSWORD }
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent {
-            val darkTheme = true
             val authViewModel: AuthViewModel = viewModel()
+            val context = LocalContext.current
+
+            val settingsViewModel: SettingsViewModel = viewModel(
+                factory = SettingsViewModelFactory(context.applicationContext)
+            )
+
+            val themeState by settingsViewModel.themeState.collectAsState()
+            val accentColorState by settingsViewModel.accentColorState.collectAsState()
+
+            val isSystemDark = isSystemInDarkTheme()
+            val darkTheme = when (themeState) {
+                "Ciemny" -> true
+                "Jasny" -> false
+                else -> isSystemDark
+            }
+
+            val accentColor = when (accentColorState) {
+                "Indigo" -> Indigo
+                "Coral" -> Coral
+                "Sky" -> Sky
+                "Rose" -> Rose
+                "Cactus" -> Cactus
+                "Amber" -> Amber
+                "Crimson" -> Crimson
+                else -> Mint
+            }
 
             SideEffect {
                 enableEdgeToEdge(
@@ -68,7 +107,7 @@ class MainActivity : ComponentActivity() {
 
             var currentScreen by remember { mutableStateOf(AppScreen.SPLASH) }
 
-            CheckTheme(darkTheme = darkTheme, accent = Mint) {
+            CheckTheme(darkTheme = darkTheme, accent = accentColor) {
                 AnimatedContent(
                     targetState = currentScreen,
                     transitionSpec = {
