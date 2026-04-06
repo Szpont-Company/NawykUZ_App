@@ -276,4 +276,13 @@
     <string name="details">Szczegóły</string>
     <string name="participating">Uczestniczysz</string>
     <string name="join">Dołącz</string>
+    <string name="nickname_hint1">Powiedz nam jak powinniśmy się do Ciebie zwracać</string>
+    <string name="nickname_hello">Witaj!</string>
+    <string name="nickname_placeholder">twój_nick</string>
+    <string name="nickname_min_characters">Min. 3 znaki</string>
+    <string name="nickname_character_hint">Tylko litery, cyfry i _</string>
+    <string name="nickname_praise">Wygląda dobrze!</string>
+    <string name="nickname_change_hint">Możesz to zmienić później w ustawieniach</string>
+    <string name="nickname_ready">Gotowe</string>
+    <string name="nickname_error">Nick jest już zajęty, spróbuj inny</string>
 </resources>

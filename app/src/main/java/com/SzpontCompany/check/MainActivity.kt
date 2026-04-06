@@ -58,9 +58,12 @@ import com.SzpontCompany.check.ui.theme.Indigo
 import com.SzpontCompany.check.ui.theme.Rose
 import com.SzpontCompany.check.ui.theme.Sky
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.core.os.LocaleListCompat
+import com.SzpontCompany.check.ui.user.OnboardingScreen
+import kotlinx.coroutines.launch
 
-enum class AppScreen { SPLASH, LOGIN, DASHBOARD, REGISTER_SUCCESS, RESET_PASSWORD }
+enum class AppScreen { SPLASH, LOGIN, DASHBOARD, REGISTER_SUCCESS, RESET_PASSWORD, SET_NICKNAME }
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -125,6 +128,10 @@ class MainActivity : AppCompatActivity() {
                                 }
                             }
 
+                            AppScreen.SET_NICKNAME ->
+                                (slideInHorizontally { it } + fadeIn(tween(400))) togetherWith
+                                        (slideOutHorizontally { -it } + fadeOut(tween(300)))
+
                             AppScreen.SPLASH ->
                                 fadeIn() togetherWith fadeOut()
 
@@ -146,10 +153,31 @@ class MainActivity : AppCompatActivity() {
                             )
                         }
 
-                        AppScreen.LOGIN -> LoginScreen(
+                        /*AppScreen.LOGIN -> LoginScreen(
                             onLoginSuccess = { currentScreen = AppScreen.DASHBOARD },
                             onRegisterSuccess = { currentScreen = AppScreen.REGISTER_SUCCESS },
                             onForgotPasswordClick = { currentScreen = AppScreen.RESET_PASSWORD },
+                        )*/
+                        AppScreen.LOGIN -> {
+                            val scope = rememberCoroutineScope()
+                            LoginScreen(
+                                onLoginSuccess = {
+                                    scope.launch {
+                                        val uid = authViewModel.currentUser.value?.uid ?: return@launch
+                                        currentScreen = if (authViewModel.isNicknameSet(uid)) {
+                                            AppScreen.DASHBOARD
+                                        } else {
+                                            AppScreen.SET_NICKNAME
+                                        }
+                                    }
+                                },
+                                onRegisterSuccess = { currentScreen = AppScreen.REGISTER_SUCCESS },
+                                onForgotPasswordClick = { currentScreen = AppScreen.RESET_PASSWORD }
+                            )
+                        }
+
+                        AppScreen.SET_NICKNAME -> OnboardingScreen(
+                            onNicknameSaved = {currentScreen = AppScreen.DASHBOARD},
                         )
 
                         AppScreen.DASHBOARD -> {
