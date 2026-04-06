@@ -6,6 +6,8 @@ data class User(
     val email: String = "",
     val nickname: String = "",
     val isAdmin: Boolean = false,
+    val avatarEmoji: String = "",
+    val bgColor: String = "Mint"
 ) {
     val initials: String
         get() = name

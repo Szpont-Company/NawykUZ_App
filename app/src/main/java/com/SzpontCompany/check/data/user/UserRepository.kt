@@ -1,13 +1,17 @@
 package com.SzpontCompany.check.data.user
 
 import android.util.Log
+import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
+import com.google.firebase.functions.functions
+import com.google.firebase.functions.ktx.functions
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.tasks.await
+
 
 class UserRepository(
     private val auth: FirebaseAuth,
@@ -55,7 +59,9 @@ class UserRepository(
             name = document.getString("name") ?: "",
             email = document.getString("email") ?: "",
             nickname = document.getString("nickname") ?: "",
-            isAdmin = document.getBoolean("isAdmin") ?: false
+            isAdmin = document.getBoolean("isAdmin") ?: false,
+            avatarEmoji = document.getString("avatarEmoji") ?: "",
+            bgColor = document.getString("bgColor") ?: "Mint"
         )
 
         cache.save(user)
@@ -121,4 +127,18 @@ class UserRepository(
         )
         cache.save(updatedUser)
     }
+
+    suspend fun updateProfileViaFunctions(name: String, nickname: String, avatarEmoji: String, bgColor: String) {
+        val data = hashMapOf(
+            "name" to name,
+            "nickname" to nickname,
+            "avatarEmoji" to avatarEmoji,
+            "bgColor" to bgColor
+        )
+
+        Firebase.functions.getHttpsCallable("updateUserProfile").call(data).await()
+
+        getUser(forceRefresh = true)
+    }
+
 }
