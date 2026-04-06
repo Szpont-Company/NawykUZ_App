@@ -1,4 +1,4 @@
-package com.SzpontCompany.check.data
+package com.SzpontCompany.check.data.social
 
 data class ChallengeInvite(
     val senderName: String,

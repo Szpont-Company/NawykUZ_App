@@ -19,7 +19,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.SzpontCompany.check.data.Event
+import com.SzpontCompany.check.data.social.Event
 
 @Composable
 fun EventCard(

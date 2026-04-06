@@ -26,12 +26,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import com.SzpontCompany.check.ui.components.ConfettiEffect
 import com.SzpontCompany.check.ui.components.EmojiExplosionEffect
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -132,11 +132,11 @@ fun TodayScreen(
 }
 
 @Composable
-fun TopSection(
-    onProfileClick: () -> Unit,
-    onOptionsClick: () -> Unit,
-    onNotificationsClick: () -> Unit
-) {
+fun TopSection(onProfileClick: () -> Unit,
+               onOptionsClick: () -> Unit,
+               onNotificationsClick: () -> Unit,
+               viewModel: TodayViewModel = viewModel()) {
+    val state by viewModel.uiState.collectAsState()
 
     val currentHour = remember { java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY) }
 
@@ -151,16 +151,29 @@ fun TopSection(
             modifier = Modifier
                 .size(48.dp)
                 .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary)
-                .clickable {onProfileClick() },
+                .then(
+                    if(state.isLoading) Modifier.shimmerEffect()
+                    else Modifier.background(MaterialTheme.colorScheme.primary)
+                )
+                .clickable(enabled = !state.isLoading) {onProfileClick() },
             contentAlignment = Alignment.Center
         ) {
-            Text("MK", color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Bold)
+            Text(state.user?.initials ?: "", color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Bold)
         }
         Spacer(modifier = Modifier.width(16.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(stringResource(id = greeting), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Text("Marek K.", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Bold)
+            if(state.isLoading) {
+                Box(modifier = Modifier
+                    .padding(top = 4.dp)
+                    .fillMaxWidth(0.6f)
+                    .height(28.dp)
+                    .clip(RoundedCornerShape(4.dp))
+                    .shimmerEffect()
+                )
+            } else {
+                Text(state.user?.name ?: "", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Bold)
+            }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Box(

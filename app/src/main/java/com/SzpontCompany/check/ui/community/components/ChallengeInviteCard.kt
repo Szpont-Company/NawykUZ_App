@@ -12,7 +12,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.SzpontCompany.check.data.ChallengeInvite
+import com.SzpontCompany.check.data.social.ChallengeInvite
 import androidx.compose.foundation.background
 
 @Composable

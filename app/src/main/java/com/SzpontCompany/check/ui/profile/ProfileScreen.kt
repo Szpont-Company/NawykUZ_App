@@ -47,10 +47,11 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.window.DialogProperties
-import com.SzpontCompany.check.data.BadgeProvider
+import com.SzpontCompany.check.data.badges.BadgeProvider
 import com.SzpontCompany.check.ui.components.CheckBackButton
 import androidx.lifecycle.Lifecycle
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import com.SzpontCompany.check.data.badges.Badge
 
 @Composable
 fun ProfileScreen(
@@ -513,7 +514,7 @@ fun SettingsItem(icon: ImageVector, iconTint: Color, title: String, onClick: () 
 @Composable
 fun BadgesSection() {
 
-    var selectedBadge by remember { mutableStateOf<com.SzpontCompany.check.data.Badge?>(null) }
+    var selectedBadge by remember { mutableStateOf<Badge?>(null) }
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
@@ -774,7 +775,7 @@ fun ShareStatItem(value: String, label: String, valueColor: Color = MaterialThem
 
 @Composable
 fun BadgeDetailsDialog(
-    badge: com.SzpontCompany.check.data.Badge,
+    badge: Badge,
     onDismiss: () -> Unit
 ) {
     AlertDialog(

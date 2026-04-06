@@ -1,4 +1,4 @@
-package com.SzpontCompany.check.data
+package com.SzpontCompany.check.data.settings
 
 import android.content.Context
 import androidx.datastore.preferences.core.edit

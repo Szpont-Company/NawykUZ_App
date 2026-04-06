@@ -8,12 +8,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
-import androidx.credentials.exceptions.NoCredentialException
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.SzpontCompany.check.data.UserRepository
+import com.SzpontCompany.check.data.user.UserCache
+import com.SzpontCompany.check.data.user.UserRepository
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
-import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
@@ -34,7 +33,9 @@ import kotlinx.coroutines.tasks.await
 class AuthViewModel(application: Application) : AndroidViewModel(application) {
    private val auth by lazy { FirebaseAuth.getInstance() }
    val recaptcha = RecaptchaManager(application, viewModelScope)
-   private val userRepository = UserRepository()
+   private val userRepository by lazy { UserRepository(auth, Firebase.firestore,
+       UserCache(application)
+   ) }
 
     var email by mutableStateOf("")
         private set
@@ -199,6 +200,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         )
 
     fun signOut() {
+        userRepository.clearCache()
         auth.signOut()
     }
 

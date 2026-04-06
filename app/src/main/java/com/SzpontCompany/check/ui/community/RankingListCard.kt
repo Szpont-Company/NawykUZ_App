@@ -13,7 +13,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.SzpontCompany.check.data.RankingEntry
+import com.SzpontCompany.check.data.social.RankingEntry
 import java.util.Locale
 
 @Composable
