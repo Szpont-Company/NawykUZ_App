@@ -863,32 +863,6 @@ fun BottomActions(onSaveClick: () -> Unit, isSaveEnabled: Boolean) {
     }
 }
 
-fun getColorByName(name: String): Color {
-    return when(name) {
-        "Amber" -> Amber
-        "Indigo" -> Indigo
-        "Coral" -> Coral
-        "Sky" -> Sky
-        "Rose" -> Rose
-        "Cactus" -> Cactus
-        "Crimson" -> Crimson
-        else -> Mint
-    }
-}
-
-fun getColorName(color: Color): String {
-    return when(color) {
-        Amber -> "Amber"
-        Indigo -> "Indigo"
-        Coral -> "Coral"
-        Sky -> "Sky"
-        Rose -> "Rose"
-        Cactus -> "Cactus"
-        Crimson -> "Crimson"
-        else -> "Mint"
-    }
-}
-
 @Preview(showBackground = true)
 @Composable
 fun EditProfileScreenPreview() {

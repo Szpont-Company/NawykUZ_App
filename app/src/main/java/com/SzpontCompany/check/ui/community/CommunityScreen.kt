@@ -22,6 +22,7 @@ import com.SzpontCompany.check.data.social.Event
 import com.SzpontCompany.check.data.social.RankingEntry
 import com.SzpontCompany.check.ui.theme.CheckTheme
 import com.SzpontCompany.check.ui.theme.Mint
+import com.SzpontCompany.check.ui.theme.getColorByName
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
@@ -33,13 +34,20 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.SzpontCompany.check.ui.profile.ProfileViewModel
 
 @Composable
 fun CommunityScreen(
-    onProfileClick: () -> Unit = {}
+    onProfileClick: () -> Unit = {},
+    viewModel: ProfileViewModel = viewModel()
 ) {
+    val state by viewModel.uiState.collectAsState()
+    val user = state.user
+
     val tabs = listOf("Battle", "Eventy", "Ranking", "Znajomi")
     var selectedTab by remember { mutableStateOf(0) }
     var selectedSubTab by remember { mutableStateOf(0) }
@@ -168,11 +176,12 @@ fun CommunityScreen(
                     modifier = Modifier
                         .size(44.dp)
                         .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary)
+                        .background(getColorByName(user?.bgColor ?: "Mint"))
                         .clickable { onProfileClick() },
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("MK", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                    val displayAvatar = if (user?.avatarEmoji.isNullOrEmpty()) user?.initials ?: "MK" else user?.avatarEmoji ?: ""
+                    Text(displayAvatar, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp)
                 }
             }
         }

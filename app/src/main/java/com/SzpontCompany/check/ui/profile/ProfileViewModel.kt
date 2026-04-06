@@ -4,11 +4,9 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.SzpontCompany.check.data.user.User
-import com.SzpontCompany.check.data.user.UserCache
 import com.SzpontCompany.check.data.user.UserRepository
-import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.firestore
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,13 +14,9 @@ import kotlinx.coroutines.launch
 
 class ProfileViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val userRepository by lazy {
-        UserRepository(
-            FirebaseAuth.getInstance(),
-            Firebase.firestore,
-            UserCache(application)
-        )
-    }
+    private val userRepository = UserRepository.getInstance(application.applicationContext)
+
+    val user: StateFlow<User?> = userRepository.userFlow
 
     private val _uiState = MutableStateFlow(ProfileUiState())
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
@@ -35,12 +29,16 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
             try {
-                val currentUser = userRepository.getUser()
+                userRepository.getUser()
 
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    user = currentUser
-                )
+                userRepository.userFlow.collect { currentUser ->
+                    if (currentUser != null) {
+                        _uiState.value = _uiState.value.copy(
+                            isLoading = false,
+                            user = currentUser
+                        )
+                    }
+                }
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
@@ -75,4 +73,3 @@ data class ProfileUiState(
     val user: User? = null,
     val error: String? = null
 )
-
