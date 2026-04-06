@@ -1,4 +1,4 @@
-package com.SzpontCompany.check.data
+package com.SzpontCompany.check.data.social
 
 data class Battle(
     val title: String,

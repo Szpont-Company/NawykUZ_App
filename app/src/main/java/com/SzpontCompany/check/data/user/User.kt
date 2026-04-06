@@ -1,4 +1,4 @@
-package com.SzpontCompany.check.data
+package com.SzpontCompany.check.data.user
 
 data class User(
     val uid: String = "",

@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.SzpontCompany.check.data.Badge
+import com.SzpontCompany.check.data.badges.Badge
 import com.SzpontCompany.check.ui.components.ConfettiEffect
 import com.SzpontCompany.check.R
 

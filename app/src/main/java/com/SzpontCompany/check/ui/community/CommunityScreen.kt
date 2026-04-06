@@ -16,10 +16,10 @@ import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import com.SzpontCompany.check.ui.community.components.ChallengeInviteCard
 import com.SzpontCompany.check.ui.community.components.YourPositionCard
 import com.SzpontCompany.check.ui.community.components.NotificationsSheet
-import com.SzpontCompany.check.data.Battle
-import com.SzpontCompany.check.data.ChallengeInvite
-import com.SzpontCompany.check.data.Event
-import com.SzpontCompany.check.data.RankingEntry
+import com.SzpontCompany.check.data.social.Battle
+import com.SzpontCompany.check.data.social.ChallengeInvite
+import com.SzpontCompany.check.data.social.Event
+import com.SzpontCompany.check.data.social.RankingEntry
 import com.SzpontCompany.check.ui.theme.CheckTheme
 import com.SzpontCompany.check.ui.theme.Mint
 import androidx.compose.foundation.shape.RoundedCornerShape

@@ -1,4 +1,4 @@
-package com.SzpontCompany.check.data
+package com.SzpontCompany.check.data.social
 
 import androidx.compose.ui.graphics.Color
 

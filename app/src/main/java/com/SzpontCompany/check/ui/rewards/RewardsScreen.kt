@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.SzpontCompany.check.ui.theme.CheckTheme
 import com.SzpontCompany.check.ui.theme.Mint
-import com.SzpontCompany.check.data.BadgeProvider
+import com.SzpontCompany.check.data.badges.BadgeProvider
 import com.SzpontCompany.check.R
 import com.SzpontCompany.check.ui.components.CheckBackButton
 

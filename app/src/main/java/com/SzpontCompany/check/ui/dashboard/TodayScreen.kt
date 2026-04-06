@@ -32,7 +32,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import com.SzpontCompany.check.ui.components.ConfettiEffect
 import com.SzpontCompany.check.ui.components.EmojiExplosionEffect
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -163,8 +162,6 @@ fun TopSection(onProfileClick: () -> Unit,
         }
         Spacer(modifier = Modifier.width(16.dp))
         Column(modifier = Modifier.weight(1f)) {
-            Text(stringResource(id = greeting), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Text("Marek K.", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Bold)
             Text(stringResource(id = greeting), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             if(state.isLoading) {
                 Box(modifier = Modifier
