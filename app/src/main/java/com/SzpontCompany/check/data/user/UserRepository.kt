@@ -2,6 +2,7 @@ package com.SzpontCompany.check.data.user
 
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -104,7 +105,10 @@ class UserRepository(
         val userData = mapOf(
             "uid" to uid,
             "name" to name,
-            "email" to email
+            "email" to email,
+            "nickname" to "",
+            "isAdmin" to false,
+            "createdAt" to FieldValue.serverTimestamp()
         )
         firestore
             .collection("users")

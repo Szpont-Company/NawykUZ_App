@@ -138,6 +138,9 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
             val authResult = auth.signInWithEmailAndPassword(email, password).await()
             if(authResult.user?.isEmailVerified == true) {
                 cleanCredentials()
+                if(isNicknameSet(authResult.user?.uid!!)) {
+
+                }
                 Result.success(authResult.user!!)
             } else {
                 auth.signOut()
@@ -202,6 +205,15 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     fun signOut() {
         userRepository.clearCache()
         auth.signOut()
+    }
+
+    suspend fun isNicknameSet(uid: String) : Boolean {
+        val document = Firebase.firestore.collection("users")
+            .document(uid)
+            .get()
+            .await()
+        val nickname = document.getString("nickname") ?: ""
+        return nickname.isNotBlank()
     }
 
     private companion object {
