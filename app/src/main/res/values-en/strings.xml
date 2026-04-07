@@ -276,4 +276,11 @@
     <string name="details">Details</string>
     <string name="participating">Participating</string>
     <string name="join">Join</string>
+
+    <!-- Notifications -->
+    <string name="notification_channel_name">Habit Reminders</string>
+    <string name="notification_channel_desc">Daily notifications reminding you of your goals</string>
+    <string name="notification_title">Time for habits!</string>
+    <string name="notification_content">Check what you have planned for today.</string>
+
 </resources>
