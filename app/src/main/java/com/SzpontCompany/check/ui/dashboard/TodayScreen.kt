@@ -37,6 +37,7 @@ import com.SzpontCompany.check.ui.theme.getColorByName
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.random.Random
+import androidx.compose.runtime.key
 
 data class HabitMock(
     val emoji: String,
@@ -107,7 +108,7 @@ fun TodayScreen(
 
                             if (!wasDone) {
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                val currentId = System.currentTimeMillis()
+                                val currentId = java.util.UUID.randomUUID().mostSignificantBits
                                 val newExplosion = ExplosionData(currentId, habit.emoji)
                                 explosions.add(newExplosion)
                                 coroutineScope.launch {
@@ -123,11 +124,13 @@ fun TodayScreen(
         }
 
         explosions.forEach { explosion ->
-            EmojiExplosionEffect(
-                modifier = Modifier.fillMaxSize(),
-                emoji = explosion.emoji,
-                triggerId = explosion.id
-            )
+            key(explosion.id) {
+                EmojiExplosionEffect(
+                    modifier = Modifier.fillMaxSize(),
+                    emoji = explosion.emoji,
+                    triggerId = explosion.id
+                )
+            }
         }
     }
 }
