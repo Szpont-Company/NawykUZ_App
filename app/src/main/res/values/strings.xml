@@ -276,4 +276,10 @@
     <string name="details">Szczegóły</string>
     <string name="participating">Uczestniczysz</string>
     <string name="join">Dołącz</string>
+
+    <!-- Notifications -->
+    <string name="notification_channel_name">Przypomnienia o nawykach</string>
+    <string name="notification_channel_desc">Codzienne powiadomienia przypominające o twoich celach</string>
+    <string name="notification_title">Czas na nawyki!</string>
+    <string name="notification_content">Sprawdź, co dziś zaplanowałeś(aś).</string>
 </resources>

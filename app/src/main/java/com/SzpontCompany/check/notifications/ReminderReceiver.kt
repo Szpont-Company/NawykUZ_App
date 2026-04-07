@@ -10,6 +10,8 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.SzpontCompany.check.MainActivity
 import com.SzpontCompany.check.R
+import kotlin.or
+import kotlin.text.compareTo
 
 class ReminderReceiver : BroadcastReceiver() {
 
@@ -29,12 +31,15 @@ class ReminderReceiver : BroadcastReceiver() {
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channelName = context.getString(R.string.notification_channel_name)
+            val channelDesc = context.getString(R.string.notification_channel_desc)
+
             val channel = NotificationChannel(
                 channelId,
-                "Przypomnienia o nawykach",
+                channelName,
                 NotificationManager.IMPORTANCE_DEFAULT
             ).apply {
-                description = "Codzienne powiadomienia przypominające o twoich celach"
+                description = channelDesc
             }
             manager.createNotificationChannel(channel)
         }
@@ -49,10 +54,13 @@ class ReminderReceiver : BroadcastReceiver() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
+        val notificationTitle = context.getString(R.string.notification_title)
+        val notificationContent = context.getString(R.string.notification_content)
+
         val notification = NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(R.drawable.ic_launcher_foreground) // TODO: ikonka do zmiany
-            .setContentTitle("Czas na nawyki!")
-            .setContentText("Sprawdź co dziś przygotowałeś.")
+            .setSmallIcon(R.drawable.ic_notification)
+            .setContentTitle(notificationTitle)
+            .setContentText(notificationContent)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
