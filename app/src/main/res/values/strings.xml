@@ -60,7 +60,7 @@
     <string name="greeting_evening">Dobry wieczór,</string>
 
     <!-- ================= PROFILE & SETTINGS ================= -->
-    <string name="profile_title">Profil</string>
+    <string name="profile_title">Twój Profil</string>
     <string name="profile_level">Poziom</string>
     <string name="profile_habits">Nawyki</string>
     <string name="profile_streak_days">Streak dni</string>
