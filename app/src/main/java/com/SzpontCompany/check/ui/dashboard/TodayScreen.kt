@@ -33,9 +33,11 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import com.SzpontCompany.check.ui.components.EmojiExplosionEffect
+import com.SzpontCompany.check.ui.theme.getColorByName
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.random.Random
+import androidx.compose.runtime.key
 
 data class HabitMock(
     val emoji: String,
@@ -106,7 +108,7 @@ fun TodayScreen(
 
                             if (!wasDone) {
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                val currentId = System.currentTimeMillis()
+                                val currentId = java.util.UUID.randomUUID().mostSignificantBits
                                 val newExplosion = ExplosionData(currentId, habit.emoji)
                                 explosions.add(newExplosion)
                                 coroutineScope.launch {
@@ -122,11 +124,13 @@ fun TodayScreen(
         }
 
         explosions.forEach { explosion ->
-            EmojiExplosionEffect(
-                modifier = Modifier.fillMaxSize(),
-                emoji = explosion.emoji,
-                triggerId = explosion.id
-            )
+            key(explosion.id) {
+                EmojiExplosionEffect(
+                    modifier = Modifier.fillMaxSize(),
+                    emoji = explosion.emoji,
+                    triggerId = explosion.id
+                )
+            }
         }
     }
 }
@@ -153,12 +157,13 @@ fun TopSection(onProfileClick: () -> Unit,
                 .clip(CircleShape)
                 .then(
                     if(state.isLoading) Modifier.shimmerEffect()
-                    else Modifier.background(MaterialTheme.colorScheme.primary)
+                    else Modifier.background(getColorByName(state.user?.bgColor ?: "Mint"))
                 )
                 .clickable(enabled = !state.isLoading) {onProfileClick() },
             contentAlignment = Alignment.Center
         ) {
-            Text(state.user?.initials ?: "", color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Bold)
+            val displayAvatar = if (state.user?.avatarEmoji.isNullOrEmpty()) state.user?.initials ?: "MK" else state.user?.avatarEmoji ?: ""
+            Text(displayAvatar, color = Color.White, fontWeight = FontWeight.Bold)
         }
         Spacer(modifier = Modifier.width(16.dp))
         Column(modifier = Modifier.weight(1f)) {

@@ -32,12 +32,14 @@ import androidx.compose.ui.unit.sp
 import com.SzpontCompany.check.R
 import com.SzpontCompany.check.ui.theme.CheckTheme
 import com.SzpontCompany.check.ui.theme.Mint
+import com.SzpontCompany.check.ui.theme.getColorByName
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.outlined.PersonAdd
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -59,8 +61,12 @@ fun ProfileScreen(
     onSettingsClick: () -> Unit = {},
     onRewardsClick: () -> Unit = {},
     onEditProfileClick: () -> Unit = {},
-    onLogoutClick: () -> Unit = {}
+    onLogoutClick: () -> Unit = {},
+    viewModel: ProfileViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
+
+    val uiState by viewModel.uiState.collectAsState()
+    val user = uiState.user
 
     var showLogoutDialog by remember { mutableStateOf(false) }
     var showShareDialog by remember { mutableStateOf(false) }
@@ -81,7 +87,7 @@ fun ProfileScreen(
         )
         Spacer(modifier = Modifier.height(24.dp))
 
-        UserHeaderSection()
+        UserHeaderSection(user = user)
         Spacer(modifier = Modifier.height(24.dp))
 
         LevelAndXpBar()
@@ -123,6 +129,7 @@ fun ProfileScreen(
 
         if (showShareDialog) {
             ShareProfileDialog(
+                user = user,
                 onDismiss = { showShareDialog = false },
                 onShareConfirm = {
                     showShareDialog = false
@@ -204,7 +211,7 @@ fun ProfileTopBar(onBackClick: () -> Unit, onShareClick: () -> Unit) {
 }
 
 @Composable
-fun UserHeaderSection() {
+fun UserHeaderSection(user: com.SzpontCompany.check.data.user.User?) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Box(contentAlignment = Alignment.BottomEnd) {
             Box(
@@ -213,10 +220,11 @@ fun UserHeaderSection() {
                     .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
                     .padding(6.dp)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary),
+                    .background(getColorByName(user?.bgColor ?: "Mint")),
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = "MK", color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.Bold)
+                val displayAvatar = if (user?.avatarEmoji.isNullOrEmpty()) user?.initials ?: "MK" else user?.avatarEmoji ?: ""
+                Text(text = displayAvatar, color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.Bold)
             }
             Box(
                 modifier = Modifier
@@ -231,12 +239,12 @@ fun UserHeaderSection() {
         Spacer(modifier = Modifier.width(24.dp))
         Column {
             Text(
-                text = "Marek Kowalski", // zostawiawmy hardcored, jak bedzie baza zmienimy
+                text = user?.name ?: "Brak danych",
                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                 color = MaterialTheme.colorScheme.onBackground
             )
             Text(
-                text = "@marekk • Check.", // Tez hardcored
+                text = if (user?.nickname.isNullOrBlank()) "@nick" else "@${user?.nickname} • Check.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -662,6 +670,7 @@ fun LogoutConfirmationDialog(
 
 @Composable
 fun ShareProfileDialog(
+    user: com.SzpontCompany.check.data.user.User?,
     onDismiss: () -> Unit,
     onShareConfirm: () -> Unit
 ) {
@@ -706,21 +715,22 @@ fun ShareProfileDialog(
                             modifier = Modifier
                                 .size(80.dp)
                                 .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.primary),
+                                .background(getColorByName(user?.bgColor ?: "Mint")),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text("MK", color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.Bold)
+                            val displayAvatar = if (user?.avatarEmoji.isNullOrEmpty()) user?.initials ?: "MK" else user?.avatarEmoji ?: ""
+                            Text(displayAvatar, color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.Bold)
                         }
 
                         Spacer(modifier = Modifier.height(12.dp))
 
                         Text(
-                            text = "Marek Kowalski",
+                            text = user?.name ?: "Marek Kowalski",
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onBackground
                         )
-                        Text(text = "@marekk", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp)
+                        Text(text = if (user?.nickname.isNullOrBlank()) "@marekk" else "@${user?.nickname}", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp)
 
                         Spacer(modifier = Modifier.height(24.dp))
 
