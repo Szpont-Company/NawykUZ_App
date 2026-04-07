@@ -40,8 +40,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import com.SzpontCompany.check.notifications.NotificationScheduler
-import kotlin.apply
-import kotlin.text.compareTo
 
 enum class NotificationFrequency {
     EVERYDAY, WORKDAYS, CUSTOM
@@ -58,13 +56,15 @@ fun NotificationsScreen(onBackClick: () -> Unit = {}) {
     var notificationSound by remember { mutableStateOf(prefs.getBoolean("notificationSound", true)) }
     var vibrations by remember { mutableStateOf(prefs.getBoolean("vibrations", true)) }
 
-    var selectedFrequency by remember { mutableStateOf(NotificationFrequency.EVERYDAY) }
+    val savedFrequencyStr = prefs.getString("selectedFrequency", NotificationFrequency.EVERYDAY.name) ?: NotificationFrequency.EVERYDAY.name
+    var selectedFrequency by remember { mutableStateOf(NotificationFrequency.valueOf(savedFrequencyStr)) }
 
     var savedHour by remember { mutableIntStateOf(prefs.getInt("savedHour", 20)) }
     var savedMinute by remember { mutableIntStateOf(prefs.getInt("savedMinute", 0)) }
     var showTimePicker by remember { mutableStateOf(false) }
 
-    var selectedDays by remember { mutableStateOf(setOf(0, 1, 2, 3, 4)) }
+    val savedDaysStrSet = prefs.getStringSet("selectedDays", setOf("0", "1", "2", "3", "4")) ?: setOf("0", "1", "2", "3", "4")
+    var selectedDays by remember { mutableStateOf(savedDaysStrSet.map { it.toInt() }.toSet()) }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
@@ -234,6 +234,8 @@ fun NotificationsScreen(onBackClick: () -> Unit = {}) {
                     .putBoolean("vibrations", vibrations)
                     .putInt("savedHour", savedHour)
                     .putInt("savedMinute", savedMinute)
+                    .putString("selectedFrequency", selectedFrequency.name)
+                    .putStringSet("selectedDays", selectedDays.map { it.toString() }.toSet())
                     .apply()
 
                 if (mainReminders) {
@@ -254,6 +256,7 @@ fun NotificationsScreen(onBackClick: () -> Unit = {}) {
                 } else {
                     scheduler.cancelReminder()
                 }
+                onBackClick()
             },
             modifier = Modifier
                 .fillMaxWidth()
