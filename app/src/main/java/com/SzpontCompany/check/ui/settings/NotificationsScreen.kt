@@ -31,6 +31,17 @@ import com.SzpontCompany.check.ui.components.WheelTimePicker
 import com.SzpontCompany.check.ui.theme.Amber
 import com.SzpontCompany.check.ui.theme.CheckTheme
 import com.SzpontCompany.check.ui.components.CheckBackButton
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
+import com.SzpontCompany.check.notifications.NotificationScheduler
+import kotlin.apply
+import kotlin.text.compareTo
 
 enum class NotificationFrequency {
     EVERYDAY, WORKDAYS, CUSTOM
@@ -38,18 +49,30 @@ enum class NotificationFrequency {
 
 @Composable
 fun NotificationsScreen(onBackClick: () -> Unit = {}) {
-    var mainReminders by remember { mutableStateOf(true) }
-    var eveningReminders by remember { mutableStateOf(true) }
-    var notificationSound by remember { mutableStateOf(true) }
-    var vibrations by remember { mutableStateOf(true) }
+    val context = LocalContext.current
+    val prefs = remember { context.getSharedPreferences("check_notifications", Context.MODE_PRIVATE) }
+    val scheduler = remember { NotificationScheduler(context) }
+
+    var mainReminders by remember { mutableStateOf(prefs.getBoolean("mainReminders", false)) }
+    var eveningReminders by remember { mutableStateOf(prefs.getBoolean("eveningReminders", true)) }
+    var notificationSound by remember { mutableStateOf(prefs.getBoolean("notificationSound", true)) }
+    var vibrations by remember { mutableStateOf(prefs.getBoolean("vibrations", true)) }
 
     var selectedFrequency by remember { mutableStateOf(NotificationFrequency.EVERYDAY) }
 
-    var savedHour by remember { mutableStateOf(8) }
-    var savedMinute by remember { mutableStateOf(0) }
+    var savedHour by remember { mutableIntStateOf(prefs.getInt("savedHour", 20)) }
+    var savedMinute by remember { mutableIntStateOf(prefs.getInt("savedMinute", 0)) }
     var showTimePicker by remember { mutableStateOf(false) }
 
     var selectedDays by remember { mutableStateOf(setOf(0, 1, 2, 3, 4)) }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            scheduler.scheduleDailyReminder(savedHour, savedMinute)
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -203,7 +226,35 @@ fun NotificationsScreen(onBackClick: () -> Unit = {}) {
         Spacer(modifier = Modifier.height(32.dp))
 
         OutlinedButton(
-            onClick = { /* TODO: Zapisz logikę */ },
+            onClick = {
+                prefs.edit()
+                    .putBoolean("mainReminders", mainReminders)
+                    .putBoolean("eveningReminders", eveningReminders)
+                    .putBoolean("notificationSound", notificationSound)
+                    .putBoolean("vibrations", vibrations)
+                    .putInt("savedHour", savedHour)
+                    .putInt("savedMinute", savedMinute)
+                    .apply()
+
+                if (mainReminders) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        val hasPermission = ContextCompat.checkSelfPermission(
+                            context,
+                            Manifest.permission.POST_NOTIFICATIONS
+                        ) == PackageManager.PERMISSION_GRANTED
+
+                        if (!hasPermission) {
+                            permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                        } else {
+                            scheduler.scheduleDailyReminder(savedHour, savedMinute)
+                        }
+                    } else {
+                        scheduler.scheduleDailyReminder(savedHour, savedMinute)
+                    }
+                } else {
+                    scheduler.cancelReminder()
+                }
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(64.dp),
