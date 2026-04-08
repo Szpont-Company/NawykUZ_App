@@ -35,7 +35,8 @@ fun FriendListItem(
     isSuggested: Boolean = false,
     onAction: () -> Unit = {},
     onProfileClick: () -> Unit = {},
-    onMessageClick: () -> Unit = {}
+    onMessageClick: () -> Unit = {},
+    onRemoveClick: () -> Unit = {}
 ) {
     val formattedXp = if (friend.xp > 0) String.format(Locale.US, "%,d", friend.xp).replace(',', ' ') else ""
     val haptic = LocalHapticFeedback.current
@@ -144,6 +145,7 @@ fun FriendListItem(
                             onClick = { 
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 expanded = false 
+                                onRemoveClick()
                             }
                         )
                     }

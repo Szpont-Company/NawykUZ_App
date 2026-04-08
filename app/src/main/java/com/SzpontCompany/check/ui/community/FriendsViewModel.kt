@@ -16,7 +16,8 @@ data class FriendsUiState(
     val searchResults: List<Friend> = emptyList(),
     val suggestedFriends: List<Friend> = emptyList(),
     val incomingRequests: List<FriendRequest> = emptyList(),
-    val isSearching: Boolean = false
+    val isSearching: Boolean = false,
+    val isLoading: Boolean = true
 )
 
 @OptIn(FlowPreview::class)
@@ -79,7 +80,7 @@ class FriendsViewModel(
             repository.getMyFriends().collect { friends ->
                 val online = friends.filter { it.online }
                 val offline = friends.filter { !it.online }
-                _uiState.update { it.copy(activeFriends = online, offlineFriends = offline) }
+                _uiState.update { it.copy(activeFriends = online, offlineFriends = offline, isLoading = false) }
 
                 val currentResults = _uiState.value.searchResults
                 if (currentResults.isNotEmpty()) {

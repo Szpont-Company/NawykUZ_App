@@ -41,6 +41,18 @@ fun FriendsCard(
     val subTabs = listOf("Znajomi (${uiState.activeFriends.size + uiState.offlineFriends.size})", "Zaproszenia (${uiState.incomingRequests.size})", "Szukaj")
     val haptic = LocalHapticFeedback.current
 
+    if (uiState.isLoading) {
+        Column(
+            modifier = modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+            Spacer(Modifier.height(16.dp))
+            Text("Ładowanie znajomych...", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp)
+        }
+        return
+    }
 
     Column(modifier = modifier.fillMaxSize()) {
         Row(
@@ -77,7 +89,13 @@ fun FriendsCard(
         Spacer(Modifier.height(16.dp))
 
         when (selectedSubTab) {
-            0 -> FriendsListSection(uiState.activeFriends, uiState.offlineFriends, onFriendProfileClick, onMessageClick)
+            0 -> FriendsListSection(
+                activeFriends = uiState.activeFriends,
+                offlineFriends = uiState.offlineFriends,
+                onFriendProfileClick = onFriendProfileClick,
+                onMessageClick = onMessageClick,
+                onRemoveClick = { friend -> viewModel.removeFriend(friend.uid) }
+            )
             1 -> FriendsInvitesSection(uiState.incomingRequests, onAccept = { req -> viewModel.respondToRequest(req.requestId, true, req.senderId) }, onReject = { req -> viewModel.respondToRequest(req.requestId, false, req.senderId) })
             2 -> FriendsSearchSection(
                 suggestedFriends = uiState.suggestedFriends,
@@ -99,9 +117,11 @@ fun FriendsListSection(
     activeFriends: List<Friend>,
     offlineFriends: List<Friend>,
     onFriendProfileClick: (Friend) -> Unit = {},
-    onMessageClick: (Friend) -> Unit = {}
+    onMessageClick: (Friend) -> Unit = {},
+    onRemoveClick: (Friend) -> Unit = {}
 ) {
     var searchQuery by remember { mutableStateOf("") }
+    var friendToRemove by remember { mutableStateOf<Friend?>(null) }
     val haptic = LocalHapticFeedback.current
 
     val filteredActive = activeFriends.filter { it.name.contains(searchQuery, ignoreCase = true) }
@@ -139,7 +159,8 @@ fun FriendsListSection(
                 FriendListItem(
                     friend = filteredActive[i],
                     onProfileClick = { onFriendProfileClick(filteredActive[i]) },
-                    onMessageClick = { onMessageClick(filteredActive[i]) }
+                    onMessageClick = { onMessageClick(filteredActive[i]) },
+                    onRemoveClick = { friendToRemove = filteredActive[i] }
                 )
             }
         }
@@ -154,7 +175,8 @@ fun FriendsListSection(
                 FriendListItem(
                     friend = filteredOffline[i],
                     onProfileClick = { onFriendProfileClick(filteredOffline[i]) },
-                    onMessageClick = { onMessageClick(filteredOffline[i]) }
+                    onMessageClick = { onMessageClick(filteredOffline[i]) },
+                    onRemoveClick = { friendToRemove = filteredOffline[i] }
                 )
             }
         }
@@ -195,6 +217,36 @@ fun FriendsListSection(
                 }
             }
         }
+    }
+
+    if (friendToRemove != null) {
+        AlertDialog(
+            onDismissRequest = { friendToRemove = null },
+            title = { Text("Usuwanie znajomego", fontWeight = FontWeight.Bold) },
+            text = { Text("Czy na pewno chcesz usunąć użytkownika ${friendToRemove?.name} ze znajomych? Tej operacji nie można cofnąć.") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        friendToRemove?.let { onRemoveClick(it) }
+                        friendToRemove = null
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5252)),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text("Usuń", fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                OutlinedButton(
+                    onClick = { friendToRemove = null },
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text("Anuluj", fontWeight = FontWeight.Bold)
+                }
+            },
+            containerColor = MaterialTheme.colorScheme.surface,
+            shape = RoundedCornerShape(16.dp)
+        )
     }
 }
 
