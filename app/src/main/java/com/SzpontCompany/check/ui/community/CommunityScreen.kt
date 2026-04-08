@@ -43,6 +43,8 @@ import com.SzpontCompany.check.ui.profile.ProfileViewModel
 @Composable
 fun CommunityScreen(
     onProfileClick: () -> Unit = {},
+    onFriendProfileClick: () -> Unit = {},
+    onMessageClick: () -> Unit = {},
     viewModel: ProfileViewModel = viewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -364,7 +366,11 @@ fun CommunityScreen(
                     }
                 }
                 3 -> { // Zakładka Znajomi
-                    FriendsCard(modifier = Modifier.fillMaxSize())
+                    FriendsCard(
+                        modifier = Modifier.fillMaxSize(),
+                        onFriendProfileClick = { onFriendProfileClick() },
+                        onMessageClick = { onMessageClick() }
+                    )
                 }
             }
         }
