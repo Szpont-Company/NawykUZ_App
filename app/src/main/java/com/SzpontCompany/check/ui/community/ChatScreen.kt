@@ -12,8 +12,8 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Bolt
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -30,6 +30,7 @@ import com.SzpontCompany.check.ui.theme.CheckTheme
 import com.SzpontCompany.check.ui.theme.Mint
 import com.SzpontCompany.check.ui.theme.Rose
 import com.SzpontCompany.check.ui.theme.getColorByName
+import androidx.lifecycle.viewmodel.compose.viewModel
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -37,7 +38,7 @@ enum class MessageType {
     SENT, RECEIVED, SYSTEM_HABIT, DATE_SEPARATOR
 }
 
-data class ChatMessage(
+data class UiChatMessage(
     val id: String = UUID.randomUUID().toString(),
     val text: String,
     val timestamp: Long = System.currentTimeMillis(),
@@ -48,25 +49,23 @@ data class ChatMessage(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(
+    friendId: String = "",
     onBackClick: () -> Unit = {},
     friendName: String = "Anna Nowak",
     friendEmoji: String = "🦊",
-    friendBgColor: String = "Lavender"
+    friendBgColor: String = "Lavender",
+    viewModel: ChatViewModel = viewModel()
 ) {
+    LaunchedEffect(friendId) {
+        if (friendId.isNotEmpty()) {
+            viewModel.startChat(friendId)
+        }
+    }
+
     var messageText by remember { mutableStateOf("") }
     val listState = rememberLazyListState()
 
-    // Fake messages
-    val messages = remember {
-        mutableStateListOf(
-            ChatMessage(text = "Wczoraj", type = MessageType.DATE_SEPARATOR),
-            ChatMessage(text = "Hej, świetnie Ci idzie z tym bieganiem! \uD83D\uDCAA", type = MessageType.RECEIVED, timestamp = System.currentTimeMillis() - 86400000),
-            ChatMessage(text = "Dzięki! Staram się trzymać rytm 🏃\u200D♂️", type = MessageType.SENT, isRead = true, timestamp = System.currentTimeMillis() - 82400000),
-            ChatMessage(text = "Dzisiaj", type = MessageType.DATE_SEPARATOR),
-            ChatMessage(text = "$friendName właśnie odhaczyła nawyk: \uD83D\uDCA7 Piję wodę! Dzień 24 z rzędu \uD83D\uDD25", type = MessageType.SYSTEM_HABIT),
-            ChatMessage(text = "Wow, 24 dni to niezły wynik!", type = MessageType.SENT, isRead = true, timestamp = System.currentTimeMillis() - 3600000)
-        )
-    }
+    val messages by viewModel.messages.collectAsState()
 
     var showQuickReactions by remember { mutableStateOf(false) }
 
@@ -83,7 +82,7 @@ fun ChatScreen(
             Column(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
                 AnimatedVisibility(visible = showQuickReactions) {
                     QuickReactionsRow(onReactionSelected = { reaction ->
-                        messages.add(ChatMessage(text = reaction, type = MessageType.SENT))
+                        viewModel.sendMessage(reaction, "TEXT")
                         showQuickReactions = false
                     })
                 }
@@ -92,7 +91,7 @@ fun ChatScreen(
                     onMessageChange = { messageText = it },
                     onSendClick = {
                         if (messageText.isNotBlank()) {
-                            messages.add(ChatMessage(text = messageText, type = MessageType.SENT))
+                            viewModel.sendMessage(messageText, "TEXT")
                             messageText = ""
                         }
                     },
@@ -187,7 +186,7 @@ fun ChatTopBar(
 }
 
 @Composable
-fun ChatMessageItem(message: ChatMessage) {
+fun ChatMessageItem(message: UiChatMessage) {
     val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
     val timeString = if (message.timestamp > 0) timeFormat.format(Date(message.timestamp)) else ""
 
@@ -230,16 +229,16 @@ fun ChatMessageItem(message: ChatMessage) {
         MessageType.RECEIVED -> {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
                 Surface(
-                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    color = MaterialTheme.colorScheme.secondaryContainer,
                     shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp, bottomEnd = 16.dp, bottomStart = 4.dp),
                     modifier = Modifier.widthIn(max = 280.dp)
                 ) {
                     Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
-                        Text(text = message.text, fontSize = 15.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(text = message.text, fontSize = 15.sp, color = MaterialTheme.colorScheme.onSecondaryContainer)
                         Text(
                             text = timeString,
                             fontSize = 10.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                            color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f),
                             modifier = Modifier.align(Alignment.End).padding(top = 2.dp)
                         )
                     }
@@ -369,7 +368,7 @@ fun ChatInputBar(
                     .background(MaterialTheme.colorScheme.primary, CircleShape)
             ) {
                 Icon(
-                    imageVector = Icons.Default.Send,
+                    imageVector = Icons.AutoMirrored.Filled.Send,
                     contentDescription = "Wyślij",
                     tint = MaterialTheme.colorScheme.onPrimary,
                     modifier = Modifier.padding(start = 4.dp)
@@ -386,4 +385,3 @@ fun ChatScreenPreview() {
         ChatScreen()
     }
 }
-

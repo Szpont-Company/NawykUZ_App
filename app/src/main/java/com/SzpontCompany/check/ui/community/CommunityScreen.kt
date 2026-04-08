@@ -38,13 +38,14 @@ import androidx.compose.material.icons.outlined.Search
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.SzpontCompany.check.data.social.Friend
 import com.SzpontCompany.check.ui.profile.ProfileViewModel
 
 @Composable
 fun CommunityScreen(
     onProfileClick: () -> Unit = {},
     onFriendProfileClick: () -> Unit = {},
-    onMessageClick: () -> Unit = {},
+    onMessageClick: (Friend) -> Unit = {},
     viewModel: ProfileViewModel = viewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -369,7 +370,7 @@ fun CommunityScreen(
                     FriendsCard(
                         modifier = Modifier.fillMaxSize(),
                         onFriendProfileClick = { onFriendProfileClick() },
-                        onMessageClick = { onMessageClick() }
+                        onMessageClick = { friend -> onMessageClick(friend) }
                     )
                 }
             }

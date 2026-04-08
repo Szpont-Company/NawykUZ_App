@@ -42,6 +42,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.SzpontCompany.check.ui.main.BottomTab
 import com.SzpontCompany.check.ui.main.CheckBottomNavigationBar
 import com.SzpontCompany.check.ui.profile.EditProfileScreen
@@ -236,8 +237,11 @@ fun RootNavigationGraph(onLogout: () -> Unit) {
                             launchSingleTop = true
                         }
                     },
-                    onMessageClick = {
-                        navController.navigate("chat_screen") {
+                    onMessageClick = { friend ->
+                        val encodedName = java.net.URLEncoder.encode(friend.name, "UTF-8")
+                        val encodedEmoji = java.net.URLEncoder.encode(friend.avatarEmoji.ifEmpty { friend.initials }, "UTF-8")
+                        val route = "chat_screen?friendId=${friend.uid}&friendName=$encodedName&friendEmoji=$encodedEmoji&friendBgColor=${friend.bgColor}"
+                        navController.navigate(route) {
                             launchSingleTop = true
                         }
                     }
@@ -285,12 +289,29 @@ fun RootNavigationGraph(onLogout: () -> Unit) {
                 )
             }
 
-            composable("chat_screen") {
+            composable(
+                route = "chat_screen?friendId={friendId}&friendName={friendName}&friendEmoji={friendEmoji}&friendBgColor={friendBgColor}",
+                arguments = listOf(
+                    navArgument("friendId") { defaultValue = "" },
+                    navArgument("friendName") { defaultValue = "" },
+                    navArgument("friendEmoji") { defaultValue = "" },
+                    navArgument("friendBgColor") { defaultValue = "Mint" }
+                )
+            ) { backStackEntry ->
+                val friendId = backStackEntry.arguments?.getString("friendId") ?: ""
+                val rawName = backStackEntry.arguments?.getString("friendName") ?: ""
+                val rawEmoji = backStackEntry.arguments?.getString("friendEmoji") ?: ""
+
+                val friendName = java.net.URLDecoder.decode(rawName, "UTF-8")
+                val friendEmoji = java.net.URLDecoder.decode(rawEmoji, "UTF-8")
+                val friendBgColor = backStackEntry.arguments?.getString("friendBgColor") ?: "Mint"
+                
                 ChatScreen(
+                    friendId = friendId,
                     onBackClick = { navController.popBackStack() },
-                    friendName = "Anna Nowak",
-                    friendEmoji = "🦊",
-                    friendBgColor = "Lavender"
+                    friendName = friendName,
+                    friendEmoji = friendEmoji,
+                    friendBgColor = friendBgColor
                 )
             }
 

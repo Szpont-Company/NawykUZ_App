@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.SzpontCompany.check.data.social.Friend
 import com.SzpontCompany.check.ui.dashboard.TodayScreen
 import com.SzpontCompany.check.ui.stats.StatsScreen
 import com.SzpontCompany.check.ui.map.MapScreen
@@ -30,7 +31,7 @@ fun MainScreen(
     onOptionsClick: () -> Unit = {},
     onNotificationsClick: () -> Unit = {},
     onFriendProfileClick: () -> Unit = {},
-    onMessageClick: () -> Unit = {}
+    onMessageClick: (Friend) -> Unit = {}
 ) {
 
     var showNotifications by remember { mutableStateOf(false) }
