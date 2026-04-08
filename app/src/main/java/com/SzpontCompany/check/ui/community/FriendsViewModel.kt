@@ -14,6 +14,7 @@ data class FriendsUiState(
     val activeFriends: List<Friend> = emptyList(),
     val offlineFriends: List<Friend> = emptyList(),
     val searchResults: List<Friend> = emptyList(),
+    val suggestedFriends: List<Friend> = emptyList(),
     val incomingRequests: List<FriendRequest> = emptyList(),
     val isSearching: Boolean = false
 )
@@ -30,20 +31,65 @@ class FriendsViewModel(
     private val _uiState = MutableStateFlow(FriendsUiState())
     val uiState: StateFlow<FriendsUiState> = _uiState.asStateFlow()
 
+    private val _outgoingRequests = MutableStateFlow<List<String>>(emptyList())
+
     init {
-        // Stream na moje przychodzące zaproszenia
+        viewModelScope.launch {
+            repository.updatePresence(true)
+        }
+
+        viewModelScope.launch {
+            val suggested = repository.getSuggestedFriends()
+            _uiState.update { it.copy(suggestedFriends = mapStatuses(suggested)) }
+        }
+
         viewModelScope.launch {
             repository.getIncomingRequests().collect { requests ->
                 _uiState.update { it.copy(incomingRequests = requests) }
+
+                val currentResults = _uiState.value.searchResults
+                if (currentResults.isNotEmpty()) {
+                    _uiState.update { it.copy(searchResults = mapStatuses(currentResults)) }
+                }
+
+                val currentSuggested = _uiState.value.suggestedFriends
+                if (currentSuggested.isNotEmpty()) {
+                    _uiState.update { it.copy(suggestedFriends = mapStatuses(currentSuggested)) }
+                }
             }
         }
 
-        // Stream na moich znajomych
+        viewModelScope.launch {
+            repository.getOutgoingRequests().collect { outIds ->
+                _outgoingRequests.value = outIds
+
+                val currentResults = _uiState.value.searchResults
+                if (currentResults.isNotEmpty()) {
+                    _uiState.update { it.copy(searchResults = mapStatuses(currentResults)) }
+                }
+
+                val currentSuggested = _uiState.value.suggestedFriends
+                if (currentSuggested.isNotEmpty()) {
+                    _uiState.update { it.copy(suggestedFriends = mapStatuses(currentSuggested)) }
+                }
+            }
+        }
+
         viewModelScope.launch {
             repository.getMyFriends().collect { friends ->
                 val online = friends.filter { it.online }
                 val offline = friends.filter { !it.online }
                 _uiState.update { it.copy(activeFriends = online, offlineFriends = offline) }
+
+                val currentResults = _uiState.value.searchResults
+                if (currentResults.isNotEmpty()) {
+                    _uiState.update { it.copy(searchResults = mapStatuses(currentResults)) }
+                }
+
+                val currentSuggested = _uiState.value.suggestedFriends
+                if (currentSuggested.isNotEmpty()) {
+                    _uiState.update { it.copy(suggestedFriends = mapStatuses(currentSuggested)) }
+                }
             }
         }
 
@@ -54,8 +100,25 @@ class FriendsViewModel(
                 .collectLatest { query ->
                     _uiState.update { it.copy(isSearching = true) }
                     val results = repository.searchUsers(query)
-                    _uiState.update { it.copy(searchResults = results, isSearching = false) }
+                    val mappedResults = mapStatuses(results)
+                    _uiState.update { it.copy(searchResults = mappedResults, isSearching = false) }
                 }
+        }
+    }
+
+    private fun mapStatuses(users: List<Friend>): List<Friend> {
+        val friendsIds = _uiState.value.activeFriends.map { it.uid } + _uiState.value.offlineFriends.map { it.uid }
+        val incomingIds = _uiState.value.incomingRequests.map { it.senderId }
+        val outgoingIds = _outgoingRequests.value
+
+        return users.map { friend ->
+            val newStatus = when {
+                friend.uid in friendsIds -> "Znajomy"
+                friend.uid in outgoingIds -> "Wysłano ✓"
+                friend.uid in incomingIds -> "Czeka na odpowiedź"
+                else -> ""
+            }
+            friend.copy(status = newStatus)
         }
     }
 
@@ -63,16 +126,25 @@ class FriendsViewModel(
         _searchQuery.value = query
         if (query.isEmpty() || query.length < 3) {
             _uiState.update { it.copy(searchResults = emptyList(), isSearching = false) }
+        } else {
+            _uiState.update { it.copy(isSearching = true) }
         }
     }
 
-    fun sendFriendRequest(receiverId: String, currentName: String, currentAvatar: String, currentBg: String) {
+    fun sendFriendRequest(receiverId: String) {
+        val updatedSearchResults = _uiState.value.searchResults.map {
+            if (it.uid == receiverId) it.copy(status = "Wysłano ✓") else it
+        }
+        val updatedSuggestedResults = _uiState.value.suggestedFriends.map {
+            if (it.uid == receiverId) it.copy(status = "Wysłano ✓") else it
+        }
+        _uiState.update { it.copy(
+            searchResults = updatedSearchResults,
+            suggestedFriends = updatedSuggestedResults
+        ) }
+
         viewModelScope.launch {
-            repository.sendFriendRequest(receiverId, currentName, currentAvatar, currentBg)
-            val updatedSearchResults = _uiState.value.searchResults.map {
-                if (it.uid == receiverId) it.copy(status = "Wysłano ✓") else it
-            }
-            _uiState.update { it.copy(searchResults = updatedSearchResults) }
+            repository.sendFriendRequest(receiverId)
         }
     }
 
@@ -81,5 +153,17 @@ class FriendsViewModel(
             repository.respondToRequest(requestId, accept, senderId)
         }
     }
-}
 
+    fun removeFriend(friendId: String) {
+        viewModelScope.launch {
+            repository.removeFriend(friendId)
+        }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO + kotlinx.coroutines.NonCancellable).launch {
+            repository.updatePresence(false)
+        }
+    }
+}

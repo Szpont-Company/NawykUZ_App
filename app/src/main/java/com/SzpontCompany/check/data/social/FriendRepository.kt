@@ -6,6 +6,7 @@ import com.google.firebase.firestore.Query
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
 class FriendRepository(
@@ -15,7 +16,19 @@ class FriendRepository(
     private val currentUserId: String?
         get() = auth.currentUser?.uid
 
-    // Szukanie użytkowników po nazwie (lub uchwycie)
+    suspend fun updatePresence(isOnline: Boolean) {
+        val myId = currentUserId ?: return
+        try {
+            firestore.collection("users").document(myId).update(
+                mapOf(
+                    "isOnline" to isOnline,
+                    "lastActive" to System.currentTimeMillis()
+                )
+            ).await()
+        } catch (e: Exception) {
+        }
+    }
+
     suspend fun searchUsers(query: String): List<Friend> {
         if (query.isBlank()) return emptyList()
 
@@ -36,7 +49,6 @@ class FriendRepository(
                 val avatar = doc.getString("avatarEmoji") ?: ""
                 val bgColor = doc.getString("bgColor") ?: "Mint"
 
-                // Tutaj można by jeszcze pobrać status (czy wysłano, czy znajomy), na razie mock
                 Friend(
                     uid = uid,
                     name = name,
@@ -52,10 +64,14 @@ class FriendRepository(
         }
     }
 
-    // Wysyłanie zaproszenia
-    suspend fun sendFriendRequest(receiverId: String, myName: String, myAvatar: String, myBgColor: String): Boolean {
+    suspend fun sendFriendRequest(receiverId: String): Boolean {
         val myId = currentUserId ?: return false
         return try {
+            val myDoc = firestore.collection("users").document(myId).get().await()
+            val myName = myDoc.getString("name") ?: "Zalogowany Użytkownik"
+            val myAvatar = myDoc.getString("avatarEmoji") ?: "👤"
+            val myBgColor = myDoc.getString("bgColor") ?: "Mint"
+
             val requestRef = firestore.collection("friend_requests").document()
             val request = FriendRequest(
                 requestId = requestRef.id,
@@ -70,11 +86,11 @@ class FriendRepository(
             requestRef.set(request).await()
             true
         } catch (e: Exception) {
+            e.printStackTrace()
             false
         }
     }
 
-    // Nasłuchiwanie na przychodzące zaproszenia
     fun getIncomingRequests(): Flow<List<FriendRequest>> = callbackFlow {
         val myId = currentUserId ?: run {
             trySend(emptyList())
@@ -85,9 +101,9 @@ class FriendRepository(
         val listener = firestore.collection("friend_requests")
             .whereEqualTo("receiverId", myId)
             .whereEqualTo("status", "PENDING")
-            .orderBy("timestamp", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
+                    error.printStackTrace()
                     trySend(emptyList())
                     return@addSnapshotListener
                 }
@@ -101,27 +117,63 @@ class FriendRepository(
         awaitClose { listener.remove() }
     }
 
-    // Akceptacja lub Odrzucenie
+    fun getOutgoingRequests(): Flow<List<String>> = callbackFlow {
+        val myId = currentUserId ?: run {
+            trySend(emptyList())
+            close()
+            return@callbackFlow
+        }
+
+        val listener = firestore.collection("friend_requests")
+            .whereEqualTo("senderId", myId)
+            .whereEqualTo("status", "PENDING")
+            .addSnapshotListener { snapshot, error ->
+                if (error != null || snapshot == null) {
+                    error?.printStackTrace()
+                    trySend(emptyList())
+                    return@addSnapshotListener
+                }
+                val receiverIds = snapshot.documents.mapNotNull { it.getString("receiverId") }
+                trySend(receiverIds)
+            }
+
+        awaitClose { listener.remove() }
+    }
+
     suspend fun respondToRequest(requestId: String, accept: Boolean, senderId: String): Boolean {
         val myId = currentUserId ?: return false
         return try {
             if (accept) {
-                // Dodajemy siebie nawzajem jako znajomych
+                val myDoc = firestore.collection("users").document(myId).get().await()
+                val hisDoc = firestore.collection("users").document(senderId).get().await()
+
+                val myData = mapOf(
+                    "uid" to myId,
+                    "name" to (myDoc.getString("name") ?: "Nieznany"),
+                    "avatarEmoji" to (myDoc.getString("avatarEmoji") ?: ""),
+                    "bgColor" to (myDoc.getString("bgColor") ?: "Mint"),
+                    "timestamp" to System.currentTimeMillis()
+                )
+
+                val hisData = mapOf(
+                    "uid" to senderId,
+                    "name" to (hisDoc.getString("name") ?: "Nieznany"),
+                    "avatarEmoji" to (hisDoc.getString("avatarEmoji") ?: ""),
+                    "bgColor" to (hisDoc.getString("bgColor") ?: "Mint"),
+                    "timestamp" to System.currentTimeMillis()
+                )
+
                 firestore.runBatch { batch ->
-                    // Usuń invite
                     val requestRef = firestore.collection("friend_requests").document(requestId)
                     batch.delete(requestRef)
 
-                    // Dodaj do moich
                     val myFriendRef = firestore.collection("users").document(myId).collection("friends").document(senderId)
-                    batch.set(myFriendRef, mapOf("timestamp" to System.currentTimeMillis()))
+                    batch.set(myFriendRef, hisData)
 
-                    // Dodaj do jego
                     val hisFriendRef = firestore.collection("users").document(senderId).collection("friends").document(myId)
-                    batch.set(hisFriendRef, mapOf("timestamp" to System.currentTimeMillis()))
+                    batch.set(hisFriendRef, myData)
                 }.await()
             } else {
-                // Po prostu usuń dokument na stałe
                 firestore.collection("friend_requests").document(requestId).delete().await()
             }
             true
@@ -130,7 +182,46 @@ class FriendRepository(
         }
     }
 
-    // Pobranie moich znajomych (tutaj uproszczone zapytanie do listy dla widoku)
+    suspend fun removeFriend(friendId: String): Boolean {
+        val myId = currentUserId ?: return false
+        return try {
+            firestore.runBatch { batch ->
+                val myFriendRef = firestore.collection("users").document(myId).collection("friends").document(friendId)
+                batch.delete(myFriendRef)
+
+                val hisFriendRef = firestore.collection("users").document(friendId).collection("friends").document(myId)
+                batch.delete(hisFriendRef)
+            }.await()
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    suspend fun getSuggestedFriends(): List<Friend> {
+        val myId = currentUserId ?: return emptyList()
+        return try {
+            val result = firestore.collection("users").limit(15).get().await()
+            result.documents.mapNotNull { doc ->
+                if (doc.id == myId) return@mapNotNull null
+
+                val name = doc.getString("name") ?: "Nieznany"
+                val initials = name.split(" ").mapNotNull { it.firstOrNull()?.uppercase() }.take(2).joinToString("")
+                Friend(
+                    uid = doc.id,
+                    name = name,
+                    initials = initials,
+                    xp = doc.getLong("xp")?.toInt() ?: 0,
+                    avatarEmoji = doc.getString("avatarEmoji") ?: "",
+                    bgColor = doc.getString("bgColor") ?: "Mint",
+                    status = ""
+                )
+            }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
     fun getMyFriends(): Flow<List<Friend>> = callbackFlow {
         val myId = currentUserId ?: run {
             trySend(emptyList())
@@ -139,38 +230,36 @@ class FriendRepository(
         }
 
         val listener = firestore.collection("users").document(myId).collection("friends")
+            .orderBy("timestamp", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshot, error ->
                 if (error != null || snapshot == null) {
                     trySend(emptyList())
                     return@addSnapshotListener
                 }
 
-                val friendIds = snapshot.documents.map { it.id }
-                if (friendIds.isEmpty()) {
-                    trySend(emptyList())
-                } else {
-                    // Żeby nie komplikować pobierania każdego z osobna w tym mocku, strzelamy `whereIn` jeśli < 10 osób
-                    if (friendIds.size <= 10) {
-                        firestore.collection("users").whereIn("uid", friendIds).get()
-                            .addOnSuccessListener { friendsSnapshot ->
-                                val friendsList = friendsSnapshot.documents.mapNotNull { doc ->
-                                    val name = doc.getString("name") ?: "Nieznany"
-                                    val initials = name.split(" ").mapNotNull { it.firstOrNull()?.uppercase() }.take(2).joinToString("")
-                                    Friend(
-                                        uid = doc.id,
-                                        name = name,
-                                        initials = initials,
-                                        xp = doc.getLong("xp")?.toInt() ?: 0,
-                                        avatarEmoji = doc.getString("avatarEmoji") ?: "",
-                                        bgColor = doc.getString("bgColor") ?: "Mint",
-                                        online = false // to do zaimplementowania logiki online/offline realnie
-                                    )
-                                }
-                                trySend(friendsList)
-                            }
-                    } else {
-                        trySend(emptyList())
+                kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+                    val friendsList = snapshot.documents.mapNotNull { doc ->
+                        val uid = doc.id
+                        val name = doc.getString("name") ?: "Nieznany"
+                        val initials = name.split(" ").mapNotNull { it.firstOrNull()?.uppercase() }.take(2).joinToString("")
+
+                        var isOnline = false
+                        try {
+                            val userDoc = firestore.collection("users").document(uid).get().await()
+                            isOnline = userDoc.getBoolean("isOnline") ?: false
+                        } catch (e: Exception) {}
+
+                        Friend(
+                            uid = uid,
+                            name = name,
+                            initials = initials,
+                            xp = doc.getLong("xp")?.toInt() ?: 0,
+                            avatarEmoji = doc.getString("avatarEmoji") ?: "",
+                            bgColor = doc.getString("bgColor") ?: "Mint",
+                            online = isOnline
+                        )
                     }
+                    trySend(friendsList)
                 }
             }
         awaitClose { listener.remove() }

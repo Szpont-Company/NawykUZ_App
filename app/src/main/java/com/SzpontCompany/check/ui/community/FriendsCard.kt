@@ -43,7 +43,6 @@ fun FriendsCard(
 
 
     Column(modifier = modifier.fillMaxSize()) {
-        // Pod-menu (Sub-tabs)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -81,12 +80,12 @@ fun FriendsCard(
             0 -> FriendsListSection(uiState.activeFriends, uiState.offlineFriends, onFriendProfileClick, onMessageClick)
             1 -> FriendsInvitesSection(uiState.incomingRequests, onAccept = { req -> viewModel.respondToRequest(req.requestId, true, req.senderId) }, onReject = { req -> viewModel.respondToRequest(req.requestId, false, req.senderId) })
             2 -> FriendsSearchSection(
-                suggestedFriends = emptyList(), // Można tu dodać logikę sugierowanych znajomych
+                suggestedFriends = uiState.suggestedFriends,
                 searchResults = uiState.searchResults,
                 searchQuery = searchQuery,
                 isSearching = uiState.isSearching,
                 onSearchQueryChange = viewModel::onSearchQueryChanged,
-                onSendInviteClick = { friend -> viewModel.sendFriendRequest(friend.uid, "Ja (Test)", "😎", "Mint") },
+                onSendInviteClick = { friend -> viewModel.sendFriendRequest(friend.uid) },
                 onFriendProfileClick = onFriendProfileClick,
                 onMessageClick = onMessageClick
             )
@@ -104,6 +103,9 @@ fun FriendsListSection(
 ) {
     var searchQuery by remember { mutableStateOf("") }
     val haptic = LocalHapticFeedback.current
+
+    val filteredActive = activeFriends.filter { it.name.contains(searchQuery, ignoreCase = true) }
+    val filteredOffline = offlineFriends.filter { it.name.contains(searchQuery, ignoreCase = true) }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -132,12 +134,12 @@ fun FriendsListSection(
             Text("AKTYWNI TERAZ", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
 
-        items(activeFriends.size, key = { "active_${activeFriends[it].name}" }) { i ->
+        items(filteredActive.size, key = { "active_${filteredActive[it].name}" }) { i ->
             Box(Modifier.animateItem()) {
                 FriendListItem(
-                    friend = activeFriends[i],
-                    onProfileClick = { onFriendProfileClick(activeFriends[i]) },
-                    onMessageClick = { onMessageClick(activeFriends[i]) }
+                    friend = filteredActive[i],
+                    onProfileClick = { onFriendProfileClick(filteredActive[i]) },
+                    onMessageClick = { onMessageClick(filteredActive[i]) }
                 )
             }
         }
@@ -147,19 +149,18 @@ fun FriendsListSection(
             Text("OSTATNIO AKTYWNI", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
 
-        items(offlineFriends.size, key = { "offline_${offlineFriends[it].name}" }) { i ->
+        items(filteredOffline.size, key = { "offline_${filteredOffline[it].name}" }) { i ->
             Box(Modifier.animateItem()) {
                 FriendListItem(
-                    friend = offlineFriends[i],
-                    onProfileClick = { onFriendProfileClick(offlineFriends[i]) },
-                    onMessageClick = { onMessageClick(offlineFriends[i]) }
+                    friend = filteredOffline[i],
+                    onProfileClick = { onFriendProfileClick(filteredOffline[i]) },
+                    onMessageClick = { onMessageClick(filteredOffline[i]) }
                 )
             }
         }
 
         item {
             Spacer(Modifier.height(16.dp))
-            // Zgarnij nagrodę card
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
@@ -326,13 +327,14 @@ fun FriendsSearchSection(
 
         if (!searched) {
             item {
-                Text("SUGEROWANE — MOŻESz ZNAĆ", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text("SUGEROWANE — MOŻESZ ZNAĆ", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             items(suggestedFriends.size, key = { "suggested_${suggestedFriends[it].name}" }) { i ->
                 Box(Modifier.animateItem()) {
                     FriendListItem(
                         friend = suggestedFriends[i],
                         isSuggested = true,
+                        onAction = { if (suggestedFriends[i].status.isEmpty()) onSendInviteClick(suggestedFriends[i]) },
                         onProfileClick = { onFriendProfileClick(suggestedFriends[i]) },
                         onMessageClick = { onMessageClick(suggestedFriends[i]) }
                     )
@@ -373,7 +375,7 @@ fun FriendsSearchSection(
                         FriendListItem(
                             friend = searchResults[i],
                             isSuggested = true,
-                            onAction = { onSendInviteClick(searchResults[i]) },
+                            onAction = { if (searchResults[i].status.isEmpty()) onSendInviteClick(searchResults[i]) },
                             onProfileClick = { onFriendProfileClick(searchResults[i]) },
                             onMessageClick = { onMessageClick(searchResults[i]) }
                         )
