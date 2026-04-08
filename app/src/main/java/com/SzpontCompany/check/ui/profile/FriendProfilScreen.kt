@@ -12,6 +12,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.outlined.Schedule
@@ -24,6 +25,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -40,11 +42,15 @@ enum class FriendshipStatus {
 
 @Composable
 fun FriendProfileScreen(
-    onBackClick: () -> Unit = {}
+    onBackClick: () -> Unit = {},
+    isInitiallyPrivate: Boolean = false,
+    privacySetting: String = "FRIENDS_ONLY"
 ) {
     var friendshipStatus by remember { mutableStateOf(FriendshipStatus.NONE) }
     var selectedBadge by remember { mutableStateOf<Badge?>(null) }
     var showRemoveFriendDialog by remember { mutableStateOf(false) }
+
+    val isProfileLocked = isInitiallyPrivate && friendshipStatus != FriendshipStatus.FRIENDS
 
     val friendName = "Anna Nowak"
     val friendNick = "@annanowak"
@@ -144,7 +150,7 @@ fun FriendProfileScreen(
             Spacer(modifier = Modifier.width(12.dp))
 
             OutlinedButton(
-                onClick = { /* TODO */ },
+                onClick = { /* TODO interakcja */ },
                 modifier = Modifier.size(54.dp),
                 shape = RoundedCornerShape(16.dp),
                 contentPadding = PaddingValues(0.dp),
@@ -156,65 +162,69 @@ fun FriendProfileScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        FriendLevelAndXpBar()
+        if (isProfileLocked) {
+            PrivateProfilState(isFriendsOnly = privacySetting == "FRIENDS_ONLY")
+        } else {
+            FriendLevelAndXpBar()
 
-        Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                StatCard(modifier = Modifier.weight(1f), targetValue = 28, label = "Nawyki")
-                StatCard(modifier = Modifier.weight(1f), targetValue = 12, label = "Dni w rzędzie", valueColor = MaterialTheme.colorScheme.primary)
-                StatCard(modifier = Modifier.weight(1f), targetValue = 420, label = "Monety", valueColor = Color(0xFFBA7517))
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    StatCard(modifier = Modifier.weight(1f), targetValue = 28, label = "Nawyki")
+                    StatCard(modifier = Modifier.weight(1f), targetValue = 12, label = "Dni w rzędzie", valueColor = MaterialTheme.colorScheme.primary)
+                    StatCard(modifier = Modifier.weight(1f), targetValue = 420, label = "Monety", valueColor = Color(0xFFBA7517))
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    StatCard(modifier = Modifier.weight(1f), targetValue = 7, label = "Wygrane")
+                    StatCard(modifier = Modifier.weight(1f), targetValue = 78, suffix = "%", label = "Skuteczność")
+                    StatCard(modifier = Modifier.weight(1f), targetValue = 12, label = "Znajomi")
+                }
             }
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                StatCard(modifier = Modifier.weight(1f), targetValue = 7, label = "Wygrane")
-                StatCard(modifier = Modifier.weight(1f), targetValue = 78, suffix = "%", label = "Skuteczność")
-                StatCard(modifier = Modifier.weight(1f), targetValue = 12, label = "Znajomi")
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Text(
+                text = "Zdobyte odznaki",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(bottom = 12.dp)
+            )
+
+            val friendBadges = BadgeProvider.allBadges.take(3).map {
+                it.copy(isUnlocked = true)
             }
-        }
 
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Text(
-            text = "Zdobyte odznaki",
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(bottom = 12.dp)
-        )
-
-        val friendBadges = BadgeProvider.allBadges.take(3).map {
-            it.copy(isUnlocked = true)
-        }
-
-        LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            contentPadding = PaddingValues(horizontal = 2.dp)
-        ) {
-            items(friendBadges) { badge ->
-                BadgeItem(
-                    emoji = badge.emoji,
-                    label = stringResource(id = badge.nameResId),
-                    isActive = badge.isUnlocked,
-                    onClick = { selectedBadge = badge }
-                )
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                contentPadding = PaddingValues(horizontal = 2.dp)
+            ) {
+                items(friendBadges) { badge ->
+                    BadgeItem(
+                        emoji = badge.emoji,
+                        label = stringResource(id = badge.nameResId),
+                        isActive = badge.isUnlocked,
+                        onClick = { selectedBadge = badge }
+                    )
+                }
             }
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            Text(
+                text = "Publiczne Nawyki",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+
+            FriendHabitCard(emoji = "🏃", title = "Bieganie", subtitle = "codziennie", streak = "12 dni")
+            Spacer(modifier = Modifier.height(12.dp))
+            FriendHabitCard(emoji = "📚", title = "Czytam książkę", subtitle = "30 min", streak = "5 dni")
+            Spacer(modifier = Modifier.height(12.dp))
+            FriendHabitCard(emoji = "💧", title = "Piję wodę", subtitle = "2 litry", streak = "24 dni")
         }
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        Text(
-            text = "Publiczne Nawyki",
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-
-        FriendHabitCard(emoji = "🏃", title = "Bieganie", subtitle = "codziennie", streak = "12 dni")
-        Spacer(modifier = Modifier.height(12.dp))
-        FriendHabitCard(emoji = "📚", title = "Czytam książkę", subtitle = "30 min", streak = "5 dni")
-        Spacer(modifier = Modifier.height(12.dp))
-        FriendHabitCard(emoji = "💧", title = "Piję wodę", subtitle = "2 litry", streak = "24 dni")
 
         Spacer(modifier = Modifier.height(32.dp))
     }
@@ -466,10 +476,61 @@ fun FriendHabitCard(emoji: String, title: String, subtitle: String, streak: Stri
     }
 }
 
+@Composable
+fun PrivateProfilState(
+    modifier: Modifier = Modifier,
+    isFriendsOnly: Boolean = false
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 48.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            imageVector = Icons.Default.Lock,
+            contentDescription = "Prywatny profil",
+            modifier = Modifier.size(64.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = "Konto jest prywatne",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = if (isFriendsOnly)
+                "Zaproś tego gracza do znajomych, aby zobaczyć jego statystyki i nawyki."
+            else
+                "Ten użytkownik ukrył swoje szczegóły profilu.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(horizontal = 32.dp)
+        )
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
 fun FriendProfileScreenPreview() {
     CheckTheme(darkTheme = true, accent = Mint) {
         FriendProfileScreen()
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun FriendProfilePrivatePreview() {
+    CheckTheme(darkTheme = true, accent = Mint) {
+        FriendProfileScreen(isInitiallyPrivate = true)
     }
 }
