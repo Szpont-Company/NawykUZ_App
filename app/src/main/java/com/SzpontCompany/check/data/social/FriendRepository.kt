@@ -240,22 +240,32 @@ class FriendRepository(
                 kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
                     val friendsList = snapshot.documents.mapNotNull { doc ->
                         val uid = doc.id
-                        val name = doc.getString("name") ?: "Nieznany"
-                        val initials = name.split(" ").mapNotNull { it.firstOrNull()?.uppercase() }.take(2).joinToString("")
-
+                        var name = doc.getString("name") ?: "Nieznany"
+                        var avatarEmoji = doc.getString("avatarEmoji") ?: ""
+                        var bgColor = doc.getString("bgColor") ?: "Mint"
+                        var xp = doc.getLong("xp")?.toInt() ?: 0
                         var isOnline = false
+
                         try {
                             val userDoc = firestore.collection("users").document(uid).get().await()
-                            isOnline = userDoc.getBoolean("isOnline") ?: false
+                            if (userDoc.exists()) {
+                                isOnline = userDoc.getBoolean("isOnline") ?: false
+                                userDoc.getString("name")?.let { name = it }
+                                userDoc.getString("avatarEmoji")?.let { avatarEmoji = it }
+                                userDoc.getString("bgColor")?.let { bgColor = it }
+                                userDoc.getLong("xp")?.toInt()?.let { xp = it }
+                            }
                         } catch (e: Exception) {}
+
+                        val initials = name.split(" ").mapNotNull { it.firstOrNull()?.uppercase() }.take(2).joinToString("")
 
                         Friend(
                             uid = uid,
                             name = name,
                             initials = initials,
-                            xp = doc.getLong("xp")?.toInt() ?: 0,
-                            avatarEmoji = doc.getString("avatarEmoji") ?: "",
-                            bgColor = doc.getString("bgColor") ?: "Mint",
+                            xp = xp,
+                            avatarEmoji = avatarEmoji,
+                            bgColor = bgColor,
                             online = isOnline
                         )
                     }

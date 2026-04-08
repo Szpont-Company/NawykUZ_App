@@ -304,7 +304,11 @@ fun FriendsInvitesSection(
                                 modifier = Modifier.size(40.dp).background(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f), CircleShape),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text(friendMock.initials, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                                if (friendMock.avatarEmoji.isNotEmpty()) {
+                                    Text(friendMock.avatarEmoji, fontSize = 24.sp)
+                                } else {
+                                    Text(friendMock.initials, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                                }
                             }
                             Spacer(Modifier.width(12.dp))
                             Column {
