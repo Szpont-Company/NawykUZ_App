@@ -40,6 +40,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.SzpontCompany.check.ui.main.BottomTab
 import com.SzpontCompany.check.ui.main.CheckBottomNavigationBar
 import com.SzpontCompany.check.ui.profile.EditProfileScreen
@@ -55,6 +56,10 @@ import com.SzpontCompany.check.ui.theme.Crimson
 import com.SzpontCompany.check.ui.theme.Indigo
 import com.SzpontCompany.check.ui.theme.Rose
 import com.SzpontCompany.check.ui.theme.Sky
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
+import com.SzpontCompany.check.ui.profile.FriendProfileScreen
+import com.SzpontCompany.check.ui.community.ChatScreen
 import androidx.compose.runtime.rememberCoroutineScope
 import com.SzpontCompany.check.ui.user.OnboardingScreen
 import com.google.firebase.auth.FirebaseAuth
@@ -236,14 +241,16 @@ fun RootNavigationGraph(onLogout: () -> Unit) {
 
     Scaffold(
         bottomBar = {
-            CheckBottomNavigationBar(
-                currentTab = if (currentRoute == "main") currentTab else null,
-                onTabSelected = { newTab ->
-                    currentTab = newTab
-                    navController.popBackStack("main", inclusive = false)
-                },
-                onAddClick = { /* TODO: Otwórz okno dodawania */ }
-            )
+            if (currentRoute == "main") {
+                CheckBottomNavigationBar(
+                    currentTab = currentTab ?: BottomTab.TODAY,
+                    onTabSelected = { newTab ->
+                        currentTab = newTab
+                        navController.popBackStack("main", inclusive = false)
+                    },
+                    onAddClick = { /* TODO: Otwórz okno dodawania */ }
+                )
+            }
         }
     ) { paddingValues ->
         NavHost(
@@ -266,6 +273,19 @@ fun RootNavigationGraph(onLogout: () -> Unit) {
                             launchSingleTop = true
                         }
                     },
+                    onFriendProfileClick = {
+                        navController.navigate("friend_profile") {
+                            launchSingleTop = true
+                        }
+                    },
+                    onMessageClick = { friend ->
+                        val encodedName = java.net.URLEncoder.encode(friend.name, "UTF-8")
+                        val encodedEmoji = java.net.URLEncoder.encode(friend.avatarEmoji.ifEmpty { friend.initials }, "UTF-8")
+                        val route = "chat_screen?friendId=${friend.uid}&friendName=$encodedName&friendEmoji=$encodedEmoji&friendBgColor=${friend.bgColor}"
+                        navController.navigate(route) {
+                            launchSingleTop = true
+                        }
+                    }
                 )
             }
 
@@ -299,6 +319,40 @@ fun RootNavigationGraph(onLogout: () -> Unit) {
             composable("edit_profile") {
                 EditProfileScreen(
                     onBackClick = { navController.popBackStack() }
+                )
+            }
+
+            composable("friend_profile") {
+                FriendProfileScreen(
+                    onBackClick = { navController.popBackStack() },
+                    onMessageClick = { navController.navigate("chat_screen") },
+                    isInitiallyPrivate = false
+                )
+            }
+
+            composable(
+                route = "chat_screen?friendId={friendId}&friendName={friendName}&friendEmoji={friendEmoji}&friendBgColor={friendBgColor}",
+                arguments = listOf(
+                    navArgument("friendId") { defaultValue = "" },
+                    navArgument("friendName") { defaultValue = "" },
+                    navArgument("friendEmoji") { defaultValue = "" },
+                    navArgument("friendBgColor") { defaultValue = "Mint" }
+                )
+            ) { backStackEntry ->
+                val friendId = backStackEntry.arguments?.getString("friendId") ?: ""
+                val rawName = backStackEntry.arguments?.getString("friendName") ?: ""
+                val rawEmoji = backStackEntry.arguments?.getString("friendEmoji") ?: ""
+
+                val friendName = java.net.URLDecoder.decode(rawName, "UTF-8")
+                val friendEmoji = java.net.URLDecoder.decode(rawEmoji, "UTF-8")
+                val friendBgColor = backStackEntry.arguments?.getString("friendBgColor") ?: "Mint"
+                
+                ChatScreen(
+                    friendId = friendId,
+                    onBackClick = { navController.popBackStack() },
+                    friendName = friendName,
+                    friendEmoji = friendEmoji,
+                    friendBgColor = friendBgColor
                 )
             }
 

@@ -34,6 +34,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.delay
+import androidx.compose.ui.platform.LocalContext
+import com.SzpontCompany.check.data.user.UserRepository
 import com.SzpontCompany.check.ui.components.CheckBackButton
 import com.SzpontCompany.check.ui.theme.*
 
@@ -45,13 +48,6 @@ fun EditProfileScreen(
 ) {
 
     val uiState by viewModel.uiState.collectAsState()
-
-    if (uiState.isLoading) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
-        }
-        return
-    }
 
     val user = uiState.user
 
@@ -68,10 +64,37 @@ fun EditProfileScreen(
     var showPasswordSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
+    val context = LocalContext.current
+    val userRepository = remember { UserRepository.getInstance(context) }
+    
+    var isCheckingNickname by remember { mutableStateOf(false) }
+    var isNicknameTaken by remember { mutableStateOf(false) }
+    var showSuccessAnimation by remember { mutableStateOf(false) }
+    var isSavingProfile by remember { mutableStateOf(false) }
+
+    LaunchedEffect(uiState.error) {
+        if (uiState.error != null) {
+            isSavingProfile = false
+        }
+    }
+
+    LaunchedEffect(nickname) {
+        if (nickname.length >= 3 && nickname != user?.nickname) {
+            isCheckingNickname = true
+            isNicknameTaken = false
+            delay(500)
+            isNicknameTaken = userRepository.isNicknameTaken(nickname)
+            isCheckingNickname = false
+        } else {
+            isCheckingNickname = false
+            isNicknameTaken = false
+        }
+    }
+
     val nameParts = fullName.trim().split("\\s+".toRegex())
     val isFullNameValid = fullName.isNotBlank() && nameParts.size >= 2
-    val isNicknameValid = nickname.isNotBlank() && nickname.matches(Regex("^[a-zA-Z0-9_.]+$"))
-    val canSave = hasChanges && isFullNameValid && isNicknameValid
+    val isNicknameValid = nickname.length >= 3 && nickname.matches(Regex("^[a-zA-Z0-9_.]+$")) && !isNicknameTaken && !isCheckingNickname
+    val canSave = hasChanges && isFullNameValid && isNicknameValid && !uiState.isLoading && !isSavingProfile
 
     Column(
         modifier = Modifier
@@ -83,17 +106,7 @@ fun EditProfileScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         EditProfileTopBar(
-            onBackClick = onBackClick,
-            onSaveClick = {
-                viewModel.saveProfile(
-                    newName = fullName,
-                    newNickname = nickname,
-                    newAvatar = selectedAvatar,
-                    newBgColor = getColorName(selectedBgColor),
-                    onSuccess = { onBackClick() }
-                )
-            },
-            isSaveEnabled = canSave
+            onBackClick = onBackClick
         )
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -134,7 +147,10 @@ fun EditProfileScreen(
                 }
             },
             nickname = nickname,
-            onNicknameChange = { nickname = it; hasChanges = true }
+            onNicknameChange = { nickname = it; hasChanges = true },
+            isCheckingNickname = isCheckingNickname,
+            isNicknameTaken = isNicknameTaken,
+            isLoading = uiState.isLoading
         )
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -148,18 +164,31 @@ fun EditProfileScreen(
 
         BottomActions(
             onSaveClick = {
+                isSavingProfile = true
                 viewModel.saveProfile(
                     newName = fullName,
                     newNickname = nickname,
                     newAvatar = selectedAvatar,
                     newBgColor = getColorName(selectedBgColor),
-                    onSuccess = { onBackClick() }
+                    onSuccess = { 
+                        isSavingProfile = false
+                        showSuccessAnimation = true
+                    }
                 )
             },
-            isSaveEnabled = canSave
+            isSaveEnabled = canSave,
+            isLoading = uiState.isLoading || isSavingProfile,
+            showSuccessAnimation = showSuccessAnimation
         )
 
         Spacer(modifier = Modifier.height(32.dp))
+    }
+
+    LaunchedEffect(showSuccessAnimation) {
+        if (showSuccessAnimation) {
+            delay(1000)
+            onBackClick()
+        }
     }
 
     if (showEmailSheet) {
@@ -186,7 +215,7 @@ fun EditProfileScreen(
 }
 
 @Composable
-fun EditProfileTopBar(onBackClick: () -> Unit, onSaveClick: () -> Unit, isSaveEnabled: Boolean) {
+fun EditProfileTopBar(onBackClick: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
@@ -201,17 +230,6 @@ fun EditProfileTopBar(onBackClick: () -> Unit, onSaveClick: () -> Unit, isSaveEn
             color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.weight(1f)
         )
-
-        TextButton(
-            onClick = onSaveClick,
-            enabled = isSaveEnabled
-        ) {
-            Text(
-                text = "Zapisz",
-                fontWeight = FontWeight.Bold,
-                color = if (isSaveEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
     }
 }
 
@@ -459,14 +477,24 @@ fun EmptyComingSoon(text: String) {
 @Composable
 fun ProfileFormSection(
     fullName: String, onFullNameChange: (String) -> Unit,
-    nickname: String, onNicknameChange: (String) -> Unit
+    nickname: String, onNicknameChange: (String) -> Unit,
+    isCheckingNickname: Boolean,
+    isNicknameTaken: Boolean,
+    isLoading: Boolean
 ) {
     val nameParts = fullName.trim().split("\\s+".toRegex())
     val isFullNameError = fullName.isBlank() || nameParts.size < 2
     val fullNameErrorMsg = if (fullName.isBlank()) "Imię i nazwisko nie może być puste" else if (nameParts.size < 2) "Podaj również nazwisko" else null
 
-    val isNickError = nickname.isBlank() || !nickname.matches(Regex("^[a-zA-Z0-9_.]+$"))
-    val nickErrorMsg = if (nickname.isBlank()) "Nick nie może być pusty" else if (isNickError) "Dozwolone litery, cyfry, '_' oraz '.'" else null
+    val isNickFormatError = nickname.length < 3 || !nickname.matches(Regex("^[a-zA-Z0-9_.]+$"))
+    val isNickError = isNickFormatError || isNicknameTaken
+    val nickErrorMsg = when {
+        nickname.isBlank() -> "Nick nie może być pusty"
+        nickname.length < 3 -> "Nick musi mieć min. 3 znaki"
+        !nickname.matches(Regex("^[a-zA-Z0-9_.]+$")) -> "Dozwolone litery, cyfry, '_' oraz '.'"
+        isNicknameTaken -> "Nazwa użytkownika jest już zajęta"
+        else -> null
+    }
 
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         CustomTextField(
@@ -475,7 +503,8 @@ fun ProfileFormSection(
             onValueChange = onFullNameChange,
             label = "Imię i Nazwisko",
             isError = isFullNameError,
-            errorMessage = fullNameErrorMsg
+            errorMessage = fullNameErrorMsg,
+            enabled = !isLoading
         )
         CustomTextField(
             modifier = Modifier.fillMaxWidth(),
@@ -484,7 +513,11 @@ fun ProfileFormSection(
             label = "Nazwa użytkownika (Nick)",
             prefix = "@",
             isError = isNickError,
-            errorMessage = nickErrorMsg
+            errorMessage = nickErrorMsg,
+            enabled = !isLoading,
+            trailingIcon = if (isCheckingNickname) {
+                { CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp) }
+            } else null
         )
     }
 }
@@ -498,7 +531,9 @@ fun CustomTextField(
     label: String,
     prefix: String? = null,
     isError: Boolean = false,
-    errorMessage: String? = null
+    errorMessage: String? = null,
+    enabled: Boolean = true,
+    trailingIcon: @Composable (() -> Unit)? = null
 ) {
     Column(modifier = modifier) {
         OutlinedTextField(
@@ -508,10 +543,19 @@ fun CustomTextField(
             leadingIcon = prefix?.let {
                 { Text(text = it, color = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Bold) }
             },
+            trailingIcon = trailingIcon,
+            supportingText = {
+                Text(
+                    text = errorMessage ?: " ",
+                    color = if (isError && errorMessage != null) MaterialTheme.colorScheme.error else Color.Transparent,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
             singleLine = true,
             isError = isError,
+            enabled = enabled,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
@@ -529,14 +573,6 @@ fun CustomTextField(
                 errorTextColor = MaterialTheme.colorScheme.onBackground
             )
         )
-        if (isError && errorMessage != null) {
-            Text(
-                text = errorMessage,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(start = 16.dp, top = 4.dp)
-            )
-        }
     }
 }
 
@@ -839,26 +875,38 @@ fun SecurityItem(icon: ImageVector, title: String, onClick: () -> Unit) {
 }
 
 @Composable
-fun BottomActions(onSaveClick: () -> Unit, isSaveEnabled: Boolean) {
+fun BottomActions(onSaveClick: () -> Unit, isSaveEnabled: Boolean, isLoading: Boolean, showSuccessAnimation: Boolean) {
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
         Button(
             onClick = onSaveClick,
-            enabled = isSaveEnabled,
+            enabled = isSaveEnabled && !isLoading,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(54.dp),
             shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary,
+                containerColor = if (showSuccessAnimation) Color(0xFF4CAF50) else MaterialTheme.colorScheme.primary,
                 disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant
             )
         ) {
-            Text(
-                "Zapisz zmiany",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                color = if (isSaveEnabled) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            if (isLoading && !showSuccessAnimation) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    strokeWidth = 2.dp
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Zapisywanie...", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimary)
+            } else if (showSuccessAnimation) {
+                Text("Zapisano!", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
+            } else {
+                Text(
+                    "Zapisz zmiany",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = if (isSaveEnabled) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     }
 }

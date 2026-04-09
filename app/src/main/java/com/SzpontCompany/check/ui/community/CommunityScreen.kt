@@ -35,21 +35,27 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.SzpontCompany.check.data.social.Friend
 import com.SzpontCompany.check.ui.profile.ProfileViewModel
 
 @Composable
 fun CommunityScreen(
     onProfileClick: () -> Unit = {},
+    onFriendProfileClick: () -> Unit = {},
+    onMessageClick: (Friend) -> Unit = {},
     viewModel: ProfileViewModel = viewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
     val user = state.user
 
     val tabs = listOf("Battle", "Eventy", "Ranking", "Znajomi")
-    var selectedTab by remember { mutableStateOf(0) }
+    var selectedTab by rememberSaveable { mutableIntStateOf(0) }
     var selectedSubTab by remember { mutableStateOf(0) }
     var showNotifications by remember { mutableStateOf(false) }
     val subTabs = listOf("Globalny", "Znajomi", "Tygodniowy")
@@ -364,7 +370,11 @@ fun CommunityScreen(
                     }
                 }
                 3 -> { // Zakładka Znajomi
-                    FriendsCard(modifier = Modifier.fillMaxSize())
+                    FriendsCard(
+                        modifier = Modifier.fillMaxSize(),
+                        onFriendProfileClick = { onFriendProfileClick() },
+                        onMessageClick = { friend -> onMessageClick(friend) }
+                    )
                 }
             }
         }
