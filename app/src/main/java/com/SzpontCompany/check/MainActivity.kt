@@ -10,12 +10,10 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
@@ -57,9 +55,7 @@ import com.SzpontCompany.check.ui.theme.Crimson
 import com.SzpontCompany.check.ui.theme.Indigo
 import com.SzpontCompany.check.ui.theme.Rose
 import com.SzpontCompany.check.ui.theme.Sky
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.core.os.LocaleListCompat
 import com.SzpontCompany.check.ui.user.OnboardingScreen
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.delay

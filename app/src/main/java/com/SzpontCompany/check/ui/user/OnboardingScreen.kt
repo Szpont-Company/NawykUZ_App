@@ -1,6 +1,5 @@
 package com.SzpontCompany.check.ui.user
 
-import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
@@ -51,7 +50,6 @@ fun OnboardingScreen(
     val scope = rememberCoroutineScope()
 
     val isValid = nickname.matches(Regex("^[a-zA-Z0-9_]{3,20}$"))
-    var errorMessage by remember { mutableStateOf<String?>(null) }
     val context = LocalContext.current
     val nicknameTakenMsg = stringResource(R.string.error_nicknameTaken)
     val genericErrorMsg = stringResource(R.string.unknown_error_nickname)
