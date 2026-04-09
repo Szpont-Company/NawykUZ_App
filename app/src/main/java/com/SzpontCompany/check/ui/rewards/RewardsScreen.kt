@@ -6,8 +6,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.ArrowBackIosNew
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -23,71 +21,68 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.SzpontCompany.check.ui.theme.CheckTheme
 import com.SzpontCompany.check.ui.theme.Mint
-import com.SzpontCompany.check.data.BadgeProvider
+import com.SzpontCompany.check.data.badges.BadgeProvider
 import com.SzpontCompany.check.R
-
+import com.SzpontCompany.check.ui.components.CheckBackButton
 
 val PremiumGold = Color(0xFFC78C18)
 val DarkGoldBackground = Color(0x33C78C18)
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RewardsScreen(
     onBackClick: () -> Unit
 ) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(text = stringResource(R.string.rewards_title), fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(
-                            imageVector = Icons.Rounded.ArrowBackIosNew,
-                            contentDescription = "Wróć")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background
-                )
-            )
-        },
-        containerColor = MaterialTheme.colorScheme.background
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .padding(horizontal = 24.dp)
+            .verticalScroll(rememberScrollState())
+    ) {
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)
         ) {
-            Spacer(modifier = Modifier.height(8.dp))
-
-            CoinsCard(currentCoins = 850, totalCoins = 3240)
-
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                SectionTitle(stringResource(R.string.rewards_section_badges))
-                BadgesGrid()
-            }
-
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                SectionTitle(stringResource(R.string.rewards_section_store))
-                StoreItem(
-                    emoji = "🎨",
-                    title = stringResource(R.string.store_item_accent_title),
-                    subtitle = stringResource(R.string.store_item_accent_desc),
-                    price = "200 C"
-                )
-                StoreItem(
-                    emoji = "🛡️",
-                    title = stringResource(R.string.store_item_shield_title),
-                    subtitle = stringResource(R.string.store_item_shield_desc),
-                    price = "150 C"
-                )
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
+            CheckBackButton(onClick = onBackClick)
+            Spacer(modifier = Modifier.width(16.dp))
+            Text(
+                text = stringResource(R.string.rewards_title),
+                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onBackground
+            )
         }
+
+        CoinsCard(currentCoins = 850, totalCoins = 3240)
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            SectionTitle(stringResource(R.string.rewards_section_badges))
+            BadgesGrid()
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            SectionTitle(stringResource(R.string.rewards_section_store))
+            StoreItem(
+                emoji = "🎨",
+                title = stringResource(R.string.store_item_accent_title),
+                subtitle = stringResource(R.string.store_item_accent_desc),
+                price = "200 C"
+            )
+            StoreItem(
+                emoji = "🛡️",
+                title = stringResource(R.string.store_item_shield_title),
+                subtitle = stringResource(R.string.store_item_shield_desc),
+                price = "150 C"
+            )
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
     }
 }
 
@@ -172,8 +167,6 @@ fun BadgeCard(
     }
 
     val borderColor = if (isUnlocked) MaterialTheme.colorScheme.primary else Color.Transparent
-
-
     val alpha = if (isUnlocked) 1f else 0.4f
 
     Column(

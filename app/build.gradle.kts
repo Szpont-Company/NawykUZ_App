@@ -29,6 +29,14 @@ android {
                 "proguard-rules.pro"
             )
         }
+        debug {
+            signingConfig = signingConfigs.create("sharedDebug").apply {
+                storeFile = file("../shared-debug.keystore")
+                storePassword = "android"
+                keyAlias = "androiddebugkey"
+                keyPassword = "android"
+            }
+        }
     }
     compileOptions {
         isCoreLibraryDesugaringEnabled = true
@@ -45,7 +53,7 @@ android {
 
 dependencies {
     implementation(libs.androidx.compose.foundation)
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -72,12 +80,18 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.10.0")
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.compose.foundation:foundation")
     implementation("androidx.navigation:navigation-compose:2.9.7")
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
+    implementation("androidx.appcompat:appcompat:1.6.1")
 
     // captcha
     implementation("com.google.android.recaptcha:recaptcha:18.8.0")
 
+    implementation("androidx.navigation:navigation-compose:2.9.7")
+
+    implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
+    implementation("com.google.firebase:firebase-functions")
 }

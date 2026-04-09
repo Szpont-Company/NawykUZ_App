@@ -1,4 +1,3 @@
-// Ścieżka: src/main/java/com/SzpontCompany/check/ui/main/MainScreen.kt
 package com.SzpontCompany.check.ui.main
 
 import androidx.compose.animation.AnimatedVisibility
@@ -20,42 +19,42 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.SzpontCompany.check.ui.addhabit.AddHabitHost
 import com.SzpontCompany.check.ui.dashboard.TodayScreen
 import com.SzpontCompany.check.ui.stats.StatsScreen
 import com.SzpontCompany.check.ui.map.MapScreen
 import com.SzpontCompany.check.ui.community.CommunityScreen
+import com.SzpontCompany.check.ui.community.components.NotificationsSheet
 
 enum class BottomTab {
     TODAY, STATS, MAP, COMMUNITY
 }
 
 @Composable
-fun MainScreen() {
-    var currentTab by remember { mutableStateOf(BottomTab.TODAY) }
-    var showAddHabit by remember { mutableStateOf(false) }
+fun MainScreen(
+    currentTab: BottomTab,
+    onProfileClick: () -> Unit = {},
+    onOptionsClick: () -> Unit = {},
+    onNotificationsClick: () -> Unit = {}
+) {
 
-    Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
-        bottomBar = {
-            CheckBottomNavigationBar(
-                currentTab = currentTab,
-                onTabSelected = { newTab -> currentTab = newTab },
-                onAddClick = {  showAddHabit = true}
+    var showNotifications by remember { mutableStateOf(false) }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        when (currentTab) {
+            BottomTab.TODAY -> TodayScreen(
+                onProfileClick = onProfileClick,
+                onOptionsClick = onOptionsClick,
+                onNotificationsClick = { showNotifications = true }
             )
+            BottomTab.STATS -> StatsScreen()
+            BottomTab.MAP -> MapScreen()
+            BottomTab.COMMUNITY -> CommunityScreen(onProfileClick = onProfileClick)
         }
-    ) { paddingValues ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            when (currentTab) {
-                BottomTab.TODAY -> TodayScreen()
-                BottomTab.STATS -> StatsScreen()
-                BottomTab.MAP -> MapScreen()
-                BottomTab.COMMUNITY -> CommunityScreen()
-            }
+
+        if (showNotifications) {
+            NotificationsSheet(
+                onDismiss = { showNotifications = false }
+            )
         }
     }
 
@@ -79,7 +78,7 @@ fun MainScreen() {
 
 @Composable
 fun CheckBottomNavigationBar(
-    currentTab: BottomTab,
+    currentTab: BottomTab?,
     onTabSelected: (BottomTab) -> Unit,
     onAddClick: () -> Unit
 ) {

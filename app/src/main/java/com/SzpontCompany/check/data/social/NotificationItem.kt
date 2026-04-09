@@ -1,0 +1,15 @@
+package com.SzpontCompany.check.data.social
+
+data class NotificationItem(
+    val id: String,
+    val title: String,
+    val message: String,
+    val timeAgo: String,
+    val type: NotificationType,
+    val isRead: Boolean = false,
+    val requiresAction: Boolean = false
+)
+
+enum class NotificationType {
+    CHALLENGE, FRIEND, REWARD, SYSTEM
+}
