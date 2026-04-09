@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.sp
 fun AddHabitStep4(
     name: String, icon: String, color: Color, frequency: String,
     dailyGoal: Int, unit: String, dailyReminder: Boolean,
-    reminderTime: String, difficulty: String,
+    reminderTime: String, eveningReminder: Boolean, eveningTime: String, difficulty: String,
     onBackClick: () -> Unit,
     onConfirmClick: () -> Unit
 ) {
@@ -81,7 +81,9 @@ fun AddHabitStep4(
                     HorizontalDivider(color = MaterialTheme.colorScheme.background, thickness = 1.dp)
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    SummaryRow(label = "Powiadomienie", value = if (dailyReminder) reminderTime else "Brak", valueColor = MaterialTheme.colorScheme.onBackground)
+                    SummaryRow(label = "Przypomnienie", value = if (dailyReminder) reminderTime else "Brak", valueColor = MaterialTheme.colorScheme.onBackground)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    SummaryRow(label = "Pow. wieczorne", value = if (eveningReminder) eveningTime else "Brak", valueColor = MaterialTheme.colorScheme.onBackground)
                     Spacer(modifier = Modifier.height(8.dp))
                     SummaryRow(label = "Trudność", value = difficulty, valueColor = MaterialTheme.colorScheme.primary)
                     Spacer(modifier = Modifier.height(8.dp))

@@ -24,7 +24,8 @@ fun AddHabitHost(
     // --- DANE Z KROKU 3 ---
     var finalDailyReminder by remember { mutableStateOf(false) }
     var finalReminderTime by remember { mutableStateOf("08:00") }
-    var finalPasserReminder by remember { mutableStateOf(false) }
+    var finalEveningReminder by remember { mutableStateOf(false) }
+    var finalEveningTime by remember { mutableStateOf("20:00") }
     var finalDifficulty by remember { mutableStateOf("Średni") }
 
     when (currentStep) {
@@ -55,10 +56,11 @@ fun AddHabitHost(
         3 -> {
             AddHabitStep3(
                 habitColor = finalHabitColor,
-                onNextClick = { dailyReminder, reminderTime, passerReminder, difficulty ->
+                onNextClick = { dailyReminder, reminderTime, eveningReminder, eveningTime, difficulty ->
                     finalDailyReminder = dailyReminder
                     finalReminderTime = reminderTime
-                    finalPasserReminder = passerReminder
+                    finalEveningReminder = eveningReminder
+                    finalEveningTime = eveningTime
                     finalDifficulty = difficulty
 
                     currentStep = 4
@@ -76,11 +78,11 @@ fun AddHabitHost(
                 unit = finalSelectedUnit,
                 dailyReminder = finalDailyReminder,
                 reminderTime = finalReminderTime,
+                eveningReminder = finalEveningReminder,
+                eveningTime = finalEveningTime,
                 difficulty = finalDifficulty,
                 onBackClick = { currentStep = 3 },
                 onConfirmClick = {
-                    //TODO - dodaj nawyk do bazy danych
-
                     currentStep = 5
                 }
             )

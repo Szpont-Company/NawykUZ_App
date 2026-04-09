@@ -21,18 +21,24 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.SzpontCompany.check.ui.components.WheelTimePicker
 import com.SzpontCompany.check.ui.theme.CheckTheme
 import com.SzpontCompany.check.ui.theme.Mint
 
 @Composable
 fun AddHabitStep3(
     habitColor: Color,
-    onNextClick: (dailyReminder: Boolean, reminderTime: String, passerReminder: Boolean, difficulty: String) -> Unit,
+    onNextClick: (dailyReminder: Boolean, reminderTime: String, eveningReminder: Boolean, eveningTime: String, difficulty: String) -> Unit,
     onBackClick: () -> Unit
 ) {
     var dailyReminderEnabled by remember { mutableStateOf(true) }
     var reminderTime by remember { mutableStateOf("08:00") }
-    var passerReminderEnabled by remember { mutableStateOf(false) }
+    var showMainTimePicker by remember { mutableStateOf(false) }
+
+    var eveningReminderEnabled by remember { mutableStateOf(false) }
+    var eveningReminderTime by remember { mutableStateOf("20:00") }
+    var showEveningTimePicker by remember { mutableStateOf(false) }
+
     var difficulty by remember { mutableStateOf("Średni") }
 
     Column(
@@ -82,7 +88,7 @@ fun AddHabitStep3(
         ) {
             Box(
                 modifier = Modifier
-                    .fillMaxWidth(0.75f) // 3/4 szerokości
+                    .fillMaxWidth(0.75f)
                     .fillMaxHeight()
                     .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(2.dp))
             )
@@ -106,48 +112,24 @@ fun AddHabitStep3(
             )
 
             if (dailyReminderEnabled) {
-                Spacer(modifier = Modifier.height(16.dp))
-                SectionTitle("GODZINA PRZYPOMNIENIA")
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
-                        .border(1.dp, MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(12.dp))
-                        .clickable { /* TODO: Pokaż systemowy TimePicker */ }
-                        .padding(horizontal = 16.dp),
-                    contentAlignment = Alignment.CenterStart
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = reminderTime,
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onBackground
-                        )
-                        Icon(
-                            imageVector = Icons.Outlined.Schedule,
-                            contentDescription = "Wybierz godzinę",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
+                Spacer(modifier = Modifier.height(8.dp))
+                TimeSelectionBox(time = reminderTime) { showMainTimePicker = true }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
             NotificationToggleCard(
-                title = "Powiadomienie o passerze",
-                subtitle = "Jeśli nie ukończyłeś do wieczora",
-                isChecked = passerReminderEnabled,
+                title = "Powiadomienie wieczorne",
+                subtitle = "Przypomina o nieukończonym nawyku",
+                isChecked = eveningReminderEnabled,
                 activeColor = habitColor,
-                onCheckedChange = { passerReminderEnabled = it }
+                onCheckedChange = { eveningReminderEnabled = it }
             )
+
+            if (eveningReminderEnabled) {
+                Spacer(modifier = Modifier.height(8.dp))
+                TimeSelectionBox(time = eveningReminderTime) { showEveningTimePicker = true }
+            }
 
             Spacer(modifier = Modifier.height(32.dp))
 
@@ -182,7 +164,7 @@ fun AddHabitStep3(
 
         Spacer(modifier = Modifier.height(16.dp))
         Button(
-            onClick = { onNextClick(dailyReminderEnabled, reminderTime, passerReminderEnabled, difficulty) },
+            onClick = { onNextClick(dailyReminderEnabled, reminderTime, eveningReminderEnabled, eveningReminderTime, difficulty) },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
@@ -212,8 +194,109 @@ fun AddHabitStep3(
             Text(text = "Wróć", fontSize = 16.sp, fontWeight = FontWeight.Medium)
         }
     }
+
+    // Modale wyboru czasu
+    if (showMainTimePicker) {
+        TimePickerDialog(
+            initialTime = reminderTime,
+            onDismiss = { showMainTimePicker = false },
+            onConfirm = {
+                reminderTime = it
+                showMainTimePicker = false
+            }
+        )
+    }
+
+    if (showEveningTimePicker) {
+        TimePickerDialog(
+            initialTime = eveningReminderTime,
+            onDismiss = { showEveningTimePicker = false },
+            onConfirm = {
+                eveningReminderTime = it
+                showEveningTimePicker = false
+            }
+        )
+    }
 }
 
+@Composable
+fun TimeSelectionBox(time: String, onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(56.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+            .border(1.dp, MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(12.dp))
+            .clickable { onClick() }
+            .padding(horizontal = 16.dp),
+        contentAlignment = Alignment.CenterStart
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = time,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            Icon(
+                imageVector = Icons.Outlined.Schedule,
+                contentDescription = "Wybierz godzinę",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
+fun TimePickerDialog(
+    initialTime: String,
+    onDismiss: () -> Unit,
+    onConfirm: (String) -> Unit
+) {
+    val parts = initialTime.split(":")
+    val initHour = parts.getOrNull(0)?.toIntOrNull() ?: 8
+    val initMin = parts.getOrNull(1)?.toIntOrNull() ?: 0
+
+    var tempHour by remember { mutableIntStateOf(initHour) }
+    var tempMinute by remember { mutableIntStateOf(initMin) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        modifier = Modifier.clip(RoundedCornerShape(24.dp)),
+        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+        title = null,
+        text = {
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                WheelTimePicker(
+                    initialHour = initHour,
+                    initialMinute = initMin,
+                    onTimeSelected = { h, m ->
+                        tempHour = h
+                        tempMinute = m
+                    }
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = {
+                val formatted = String.format(java.util.Locale.getDefault(), "%02d:%02d", tempHour, tempMinute)
+                onConfirm(formatted)
+            }) {
+                Text("Zapisz", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Anuluj", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 16.sp)
+            }
+        }
+    )
+}
 
 @Composable
 fun NotificationToggleCard(
@@ -291,18 +374,6 @@ fun DifficultyCard(
             color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = 13.sp,
             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
-        )
-    }
-}
-
-@Preview(showBackground = true, name = "Krok 3")
-@Composable
-fun AddHabitStep3DarkPreview() {
-    CheckTheme(darkTheme = true, accent = Mint) {
-        AddHabitStep3(
-            habitColor = Mint,
-            onNextClick = { _, _, _, _ -> },
-            onBackClick = { }
         )
     }
 }
