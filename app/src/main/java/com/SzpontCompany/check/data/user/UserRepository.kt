@@ -151,6 +151,17 @@ class UserRepository private constructor(
         cache.save(updatedUser)
     }
 
+    suspend fun isNicknameTaken(nickname: String): Boolean {
+        if (nickname.isBlank()) return false
+        val myUid = auth.currentUser?.uid
+        val snapshot = firestore.collection("users")
+            .whereEqualTo("nickname", nickname)
+            .get()
+            .await()
+
+        return snapshot.documents.any { it.id != myUid }
+    }
+
     suspend fun updateProfileViaFunctions(name: String, nickname: String, avatarEmoji: String, bgColor: String) {
         val data = hashMapOf(
             "name" to name,
