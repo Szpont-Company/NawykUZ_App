@@ -1,12 +1,24 @@
 package com.SzpontCompany.check.ui.addhabit
 
+import android.widget.Toast
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.SzpontCompany.check.data.habit.Habit
 import com.SzpontCompany.check.ui.theme.Mint
+import com.SzpontCompany.check.ui.theme.getColorName
 
 @Composable
 fun AddHabitHost(
-    onClose: () -> Unit
+    onClose: () -> Unit,
+    viewModel: AddHabitViewModel = viewModel()
 ) {
+    val context = LocalContext.current
     var currentStep by remember { mutableStateOf(1) }
 
     // --- DANE Z KROKU 1 ---
@@ -27,6 +39,12 @@ fun AddHabitHost(
     var finalEveningReminder by remember { mutableStateOf(false) }
     var finalEveningTime by remember { mutableStateOf("20:00") }
     var finalDifficulty by remember { mutableStateOf("Średni") }
+
+    LaunchedEffect(viewModel.errorMessage) {
+        viewModel.errorMessage?.let {
+            Toast.makeText(context, "Błąd zapisu: $it", Toast.LENGTH_LONG).show()
+        }
+    }
 
     when (currentStep) {
         1 -> {
@@ -83,7 +101,25 @@ fun AddHabitHost(
                 difficulty = finalDifficulty,
                 onBackClick = { currentStep = 3 },
                 onConfirmClick = {
-                    currentStep = 5
+                    val newHabit = Habit(
+                        name = finalHabitName,
+                        icon = finalHabitIcon,
+                        colorName = getColorName(finalHabitColor),
+                        frequency = finalFrequency,
+                        selectedDays = finalSelectedDays.toList(),
+                        timesPerWeek = finalTimesPerWeek,
+                        dailyGoal = finalDailyGoal,
+                        unit = finalSelectedUnit,
+                        dailyReminder = finalDailyReminder,
+                        reminderTime = finalReminderTime,
+                        eveningReminder = finalEveningReminder,
+                        eveningTime = finalEveningTime,
+                        difficulty = finalDifficulty
+                    )
+
+                    viewModel.saveHabit(habit = newHabit) {
+                        currentStep = 5
+                    }
                 }
             )
         }
