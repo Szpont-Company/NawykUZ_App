@@ -1,4 +1,4 @@
-package com.SzpontCompany.check
+package com.SzpontCompany.check.config
 
 import com.google.firebase.functions.FirebaseFunctions
 

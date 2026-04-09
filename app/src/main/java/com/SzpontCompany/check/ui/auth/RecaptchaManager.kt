@@ -2,7 +2,7 @@ package com.SzpontCompany.check.ui.auth
 
 import android.app.Application
 import android.util.Log
-import com.SzpontCompany.check.FirebaseConfig
+import com.SzpontCompany.check.config.FirebaseConfig
 import com.google.android.recaptcha.Recaptcha
 import com.google.android.recaptcha.RecaptchaAction
 import com.google.android.recaptcha.RecaptchaClient

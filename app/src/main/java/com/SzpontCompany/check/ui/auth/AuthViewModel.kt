@@ -241,6 +241,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
             }.await()
 
             needsNickname = false
+            userRepository.clearCache()
             Result.success(Unit)
 
         } catch (e: Exception) {

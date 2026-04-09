@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.tasks.await
 import android.content.Context
+import com.SzpontCompany.check.config.FirebaseConfig
 
 class UserRepository private constructor(
     private val auth: FirebaseAuth,
@@ -158,7 +159,7 @@ class UserRepository private constructor(
             "bgColor" to bgColor
         )
 
-        Firebase.functions.getHttpsCallable("updateUserProfile").call(data).await()
+        FirebaseConfig.functions.getHttpsCallable("updateUserProfile").call(data).await()
 
         val current = _userFlow.value
         if (current != null) {
