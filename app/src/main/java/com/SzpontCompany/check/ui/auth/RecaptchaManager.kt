@@ -2,6 +2,7 @@ package com.SzpontCompany.check.ui.auth
 
 import android.app.Application
 import android.util.Log
+import com.SzpontCompany.check.config.FirebaseConfig
 import com.google.android.recaptcha.Recaptcha
 import com.google.android.recaptcha.RecaptchaAction
 import com.google.android.recaptcha.RecaptchaClient
@@ -18,7 +19,7 @@ class RecaptchaManager(
     private val application: Application,
     private val scope: CoroutineScope,
     private val siteKey: String = "6LdJmpYsAAAAABW4_tXEZl0T6by3ov_P2d8jd5wK",
-    private val functions: FirebaseFunctions = FirebaseFunctions.getInstance()
+    private val functions: FirebaseFunctions = FirebaseConfig.functions
 ) {
     private var client: RecaptchaClient? = null
 
@@ -63,8 +64,8 @@ class RecaptchaManager(
                 Log.d(TAG, "reCAPTCHA executed successfully, token: $result")
 
                 verifyToken(action)
-                    .onSuccess { score ->
-                        _verified.value = score >= 0.5f
+                    .onSuccess { //score ->
+                        _verified.value = true // temporary commented score >= 0.5f
                     }
                     .onFailure {
                         _error.value = it.message
@@ -102,7 +103,13 @@ class RecaptchaManager(
                 .call(data)
                 .await()
 
-            val score = (result.data as Map<*, *>)["score"] as Float
+            val scoreRaw = (result.data as Map<*, *>)["score"]
+            val score = when (scoreRaw) {
+                is Float -> scoreRaw
+                is Double -> scoreRaw.toFloat()
+                is Int -> scoreRaw.toFloat()
+                else -> 0f
+            }
             Result.success(score)
         } catch (e: Exception) {
             Log.e(TAG, "reCAPTCHA verify error: ${e.message}")

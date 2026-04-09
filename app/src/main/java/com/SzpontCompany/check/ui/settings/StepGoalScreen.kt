@@ -5,9 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -40,8 +38,7 @@ fun StepGoalScreen(onBackClick: () -> Unit = {}) {
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .padding(horizontal = 24.dp)
-            .verticalScroll(rememberScrollState()),
+            .padding(horizontal = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(20.dp))
@@ -114,7 +111,11 @@ fun StepGoalScreen(onBackClick: () -> Unit = {}) {
                     value = sliderPosition,
                     onValueChange = { sliderPosition = it },
                     valueRange = 1000f..20000f,
-                    colors = SliderDefaults.colors(thumbColor = Mint, activeTrackColor = Mint, inactiveTrackColor = MaterialTheme.colorScheme.surface),
+                    colors = SliderDefaults.colors(
+                        thumbColor = MaterialTheme.colorScheme.primary,
+                        activeTrackColor = MaterialTheme.colorScheme.primary,
+                        inactiveTrackColor = MaterialTheme.colorScheme.surface
+                    ),
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -150,7 +151,7 @@ fun StepGoalScreen(onBackClick: () -> Unit = {}) {
             }
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.weight(1f))
 
         OutlinedButton(
             onClick = { },
@@ -173,10 +174,12 @@ fun StepGoalScreen(onBackClick: () -> Unit = {}) {
 
 @Composable
 fun PopularGoalItem(goal: PopularGoal, isSelected: Boolean, modifier: Modifier = Modifier, onClick: () -> Unit) {
-    val backgroundColor = if (isSelected) Mint.copy(alpha = 0.1f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
-    val borderColor = if (isSelected) Mint else Color.Transparent
-    val textColor = if (isSelected) Mint else MaterialTheme.colorScheme.onBackground
-    val labelColor = if (isSelected) Mint.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant
+    val primaryColor = MaterialTheme.colorScheme.primary
+
+    val backgroundColor = if (isSelected) primaryColor.copy(alpha = 0.1f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+    val borderColor = if (isSelected) primaryColor else Color.Transparent
+    val textColor = if (isSelected) primaryColor else MaterialTheme.colorScheme.onBackground
+    val labelColor = if (isSelected) primaryColor.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant
 
     Box(
         modifier = modifier

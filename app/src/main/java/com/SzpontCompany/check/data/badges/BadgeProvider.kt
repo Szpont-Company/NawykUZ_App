@@ -1,4 +1,4 @@
-package com.SzpontCompany.check.data
+package com.SzpontCompany.check.data.badges
 
 import com.SzpontCompany.check.R
 

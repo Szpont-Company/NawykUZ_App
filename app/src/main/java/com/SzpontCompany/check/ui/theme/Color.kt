@@ -20,3 +20,29 @@ val SurfaceDark = Color(0xFF1a1a1e)
 
 val BackgroundLight = Color(0xFFf4f4f0)
 val SurfaceLight = Color(0xFFffffff)
+
+fun getColorByName(name: String): Color {
+    return when(name) {
+        "Amber" -> Amber
+        "Indigo" -> Indigo
+        "Coral" -> Coral
+        "Sky" -> Sky
+        "Rose" -> Rose
+        "Cactus" -> Cactus
+        "Crimson" -> Crimson
+        else -> Mint
+    }
+}
+
+fun getColorName(color: Color): String {
+    return when(color) {
+        Amber -> "Amber"
+        Indigo -> "Indigo"
+        Coral -> "Coral"
+        Sky -> "Sky"
+        Rose -> "Rose"
+        Cactus -> "Cactus"
+        Crimson -> "Crimson"
+        else -> "Mint"
+    }
+}

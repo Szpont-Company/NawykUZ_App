@@ -12,11 +12,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.SzpontCompany.check.data.social.Friend
 import com.SzpontCompany.check.ui.dashboard.TodayScreen
 import com.SzpontCompany.check.ui.stats.StatsScreen
 import com.SzpontCompany.check.ui.map.MapScreen
 import com.SzpontCompany.check.ui.community.CommunityScreen
+import com.SzpontCompany.check.ui.community.components.NotificationsSheet
 
 enum class BottomTab {
     TODAY, STATS, MAP, COMMUNITY
@@ -25,14 +28,35 @@ enum class BottomTab {
 @Composable
 fun MainScreen(
     currentTab: BottomTab,
-    onProfileClick: () -> Unit = {}
+    onProfileClick: () -> Unit = {},
+    onOptionsClick: () -> Unit = {},
+    onNotificationsClick: () -> Unit = {},
+    onFriendProfileClick: () -> Unit = {},
+    onMessageClick: (Friend) -> Unit = {}
 ) {
+
+    var showNotifications by remember { mutableStateOf(false) }
+
     Box(modifier = Modifier.fillMaxSize()) {
         when (currentTab) {
-            BottomTab.TODAY -> TodayScreen(onProfileClick = onProfileClick)
+            BottomTab.TODAY -> TodayScreen(
+                onProfileClick = onProfileClick,
+                onOptionsClick = onOptionsClick,
+                onNotificationsClick = { showNotifications = true }
+            )
             BottomTab.STATS -> StatsScreen()
             BottomTab.MAP -> MapScreen()
-            BottomTab.COMMUNITY -> CommunityScreen()
+            BottomTab.COMMUNITY -> CommunityScreen(
+                onProfileClick = onProfileClick,
+                onFriendProfileClick = onFriendProfileClick,
+                onMessageClick = onMessageClick
+            )
+        }
+
+        if (showNotifications) {
+            NotificationsSheet(
+                onDismiss = { showNotifications = false }
+            )
         }
     }
 }
