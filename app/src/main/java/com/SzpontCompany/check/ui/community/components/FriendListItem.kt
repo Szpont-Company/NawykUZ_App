@@ -25,6 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.SzpontCompany.check.data.social.Friend
+import com.SzpontCompany.check.ui.theme.getColorByName
 import java.util.Locale
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -35,10 +36,14 @@ fun FriendListItem(
     isSuggested: Boolean = false,
     onAction: () -> Unit = {},
     onProfileClick: () -> Unit = {},
-    onMessageClick: () -> Unit = {}
+    onMessageClick: () -> Unit = {},
+    onRemoveClick: () -> Unit = {}
 ) {
     val formattedXp = if (friend.xp > 0) String.format(Locale.US, "%,d", friend.xp).replace(',', ' ') else ""
     val haptic = LocalHapticFeedback.current
+
+    val avatarBgColor = getColorByName(friend.bgColor)
+    val initialsColor = MaterialTheme.colorScheme.surface
 
     Card(
         modifier = Modifier
@@ -56,10 +61,14 @@ fun FriendListItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
-                modifier = Modifier.size(40.dp).background(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f), CircleShape),
+                modifier = Modifier.size(40.dp).background(avatarBgColor, CircleShape),
                 contentAlignment = Alignment.Center
             ) {
-                Text(friend.initials, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                if (friend.avatarEmoji.isNotEmpty()) {
+                    Text(friend.avatarEmoji, fontSize = 24.sp)
+                } else {
+                    Text(friend.initials, color = initialsColor, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                }
             }
 
             Spacer(Modifier.width(12.dp))
@@ -144,6 +153,7 @@ fun FriendListItem(
                             onClick = { 
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 expanded = false 
+                                onRemoveClick()
                             }
                         )
                     }

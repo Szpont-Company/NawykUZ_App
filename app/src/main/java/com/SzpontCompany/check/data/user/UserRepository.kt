@@ -171,6 +171,27 @@ class UserRepository private constructor(
             )
             cache.save(updatedUser)
             _userFlow.value = updatedUser
+
+            try {
+                val myId = updatedUser.uid
+                val myFriendsSnapshot = firestore.collection("users").document(myId).collection("friends").get().await()
+                if (!myFriendsSnapshot.isEmpty) {
+                    firestore.runBatch { batch ->
+                        val friendData = mapOf(
+                            "name" to name,
+                            "avatarEmoji" to avatarEmoji,
+                            "bgColor" to bgColor
+                        )
+                        for (doc in myFriendsSnapshot.documents) {
+                            val friendId = doc.id
+                            val theirFriendRef = firestore.collection("users").document(friendId).collection("friends").document(myId)
+                            batch.update(theirFriendRef, friendData)
+                        }
+                    }.await()
+                }
+            } catch (e: Exception) {
+                Log.e("UserRepository", "Failed to sync profile update to friends", e)
+            }
         }
     }
 

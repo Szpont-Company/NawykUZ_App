@@ -24,32 +24,37 @@ import com.SzpontCompany.check.ui.community.components.FriendListItem
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.SzpontCompany.check.data.social.FriendRequest
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FriendsCard(
     modifier: Modifier = Modifier,
     onFriendProfileClick: (Friend) -> Unit = {},
-    onMessageClick: (Friend) -> Unit = {}
+    onMessageClick: (Friend) -> Unit = {},
+    viewModel: FriendsViewModel = viewModel()
 ) {
     var selectedSubTab by remember { mutableStateOf(0) }
-    val subTabs = listOf("Znajomi (3)", "Zaproszenia", "Szukaj")
+    val uiState by viewModel.uiState.collectAsState()
+    val searchQuery by viewModel.searchQuery.collectAsState()
+    val subTabs = listOf("Znajomi (${uiState.activeFriends.size + uiState.offlineFriends.size})", "Zaproszenia (${uiState.incomingRequests.size})", "Szukaj")
     val haptic = LocalHapticFeedback.current
 
-    val activeFriends = listOf(
-        Friend("Kacper Malinowski", "KM", 4200, online = true),
-        Friend("Ania Wiśniewska", "AW", 780, online = true)
-    )
-    val offlineFriends = listOf(
-        Friend("Tomek Kowalczyk", "TK", 2100, lastActive = "2 godz. temu")
-    )
-    val suggestedFriends = listOf(
-        Friend("Łukasz Wróbel", "ŁW", 0, mutuals = 3),
-        Friend("Karolina Szymańska", "KS", 0, mutuals = 1, status = "Wysłano ✓"),
-        Friend("Dawid Krawczyk", "DK", 0, mutuals = 0)
-    )
+    if (uiState.isLoading) {
+        Column(
+            modifier = modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+            Spacer(Modifier.height(16.dp))
+            Text("Ładowanie znajomych...", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp)
+        }
+        return
+    }
 
     Column(modifier = modifier.fillMaxSize()) {
-        // Pod-menu (Sub-tabs)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -84,9 +89,24 @@ fun FriendsCard(
         Spacer(Modifier.height(16.dp))
 
         when (selectedSubTab) {
-            0 -> FriendsListSection(activeFriends, offlineFriends, onFriendProfileClick, onMessageClick)
-            1 -> FriendsInvitesSection()
-            2 -> FriendsSearchSection(suggestedFriends, onFriendProfileClick, onMessageClick)
+            0 -> FriendsListSection(
+                activeFriends = uiState.activeFriends,
+                offlineFriends = uiState.offlineFriends,
+                onFriendProfileClick = onFriendProfileClick,
+                onMessageClick = onMessageClick,
+                onRemoveClick = { friend -> viewModel.removeFriend(friend.uid) }
+            )
+            1 -> FriendsInvitesSection(uiState.incomingRequests, onAccept = { req -> viewModel.respondToRequest(req.requestId, true, req.senderId) }, onReject = { req -> viewModel.respondToRequest(req.requestId, false, req.senderId) })
+            2 -> FriendsSearchSection(
+                suggestedFriends = uiState.suggestedFriends,
+                searchResults = uiState.searchResults,
+                searchQuery = searchQuery,
+                isSearching = uiState.isSearching,
+                onSearchQueryChange = viewModel::onSearchQueryChanged,
+                onSendInviteClick = { friend -> viewModel.sendFriendRequest(friend.uid) },
+                onFriendProfileClick = onFriendProfileClick,
+                onMessageClick = onMessageClick
+            )
         }
     }
 }
@@ -97,10 +117,15 @@ fun FriendsListSection(
     activeFriends: List<Friend>,
     offlineFriends: List<Friend>,
     onFriendProfileClick: (Friend) -> Unit = {},
-    onMessageClick: (Friend) -> Unit = {}
+    onMessageClick: (Friend) -> Unit = {},
+    onRemoveClick: (Friend) -> Unit = {}
 ) {
     var searchQuery by remember { mutableStateOf("") }
+    var friendToRemove by remember { mutableStateOf<Friend?>(null) }
     val haptic = LocalHapticFeedback.current
+
+    val filteredActive = activeFriends.filter { it.name.contains(searchQuery, ignoreCase = true) }
+    val filteredOffline = offlineFriends.filter { it.name.contains(searchQuery, ignoreCase = true) }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -129,12 +154,13 @@ fun FriendsListSection(
             Text("AKTYWNI TERAZ", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
 
-        items(activeFriends.size, key = { "active_${activeFriends[it].name}" }) { i ->
+        items(filteredActive.size, key = { "active_${filteredActive[it].name}" }) { i ->
             Box(Modifier.animateItem()) {
                 FriendListItem(
-                    friend = activeFriends[i],
-                    onProfileClick = { onFriendProfileClick(activeFriends[i]) },
-                    onMessageClick = { onMessageClick(activeFriends[i]) }
+                    friend = filteredActive[i],
+                    onProfileClick = { onFriendProfileClick(filteredActive[i]) },
+                    onMessageClick = { onMessageClick(filteredActive[i]) },
+                    onRemoveClick = { friendToRemove = filteredActive[i] }
                 )
             }
         }
@@ -144,19 +170,19 @@ fun FriendsListSection(
             Text("OSTATNIO AKTYWNI", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
 
-        items(offlineFriends.size, key = { "offline_${offlineFriends[it].name}" }) { i ->
+        items(filteredOffline.size, key = { "offline_${filteredOffline[it].name}" }) { i ->
             Box(Modifier.animateItem()) {
                 FriendListItem(
-                    friend = offlineFriends[i],
-                    onProfileClick = { onFriendProfileClick(offlineFriends[i]) },
-                    onMessageClick = { onMessageClick(offlineFriends[i]) }
+                    friend = filteredOffline[i],
+                    onProfileClick = { onFriendProfileClick(filteredOffline[i]) },
+                    onMessageClick = { onMessageClick(filteredOffline[i]) },
+                    onRemoveClick = { friendToRemove = filteredOffline[i] }
                 )
             }
         }
 
         item {
             Spacer(Modifier.height(16.dp))
-            // Zgarnij nagrodę card
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
@@ -192,25 +218,122 @@ fun FriendsListSection(
             }
         }
     }
+
+    if (friendToRemove != null) {
+        AlertDialog(
+            onDismissRequest = { friendToRemove = null },
+            title = { Text("Usuwanie znajomego", fontWeight = FontWeight.Bold) },
+            text = { Text("Czy na pewno chcesz usunąć użytkownika ${friendToRemove?.name} ze znajomych? Tej operacji nie można cofnąć.") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        friendToRemove?.let { onRemoveClick(it) }
+                        friendToRemove = null
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5252)),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text("Usuń", fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                OutlinedButton(
+                    onClick = { friendToRemove = null },
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text("Anuluj", fontWeight = FontWeight.Bold)
+                }
+            },
+            containerColor = MaterialTheme.colorScheme.surface,
+            shape = RoundedCornerShape(16.dp)
+        )
+    }
 }
 
 @Composable
-fun FriendsInvitesSection() {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Box(
-            modifier = Modifier.size(80.dp).background(MaterialTheme.colorScheme.surfaceVariant, CircleShape),
-            contentAlignment = Alignment.Center
+fun FriendsInvitesSection(
+    requests: List<FriendRequest>,
+    onAccept: (FriendRequest) -> Unit,
+    onReject: (FriendRequest) -> Unit
+) {
+    if (requests.isEmpty()) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("📭", fontSize = 40.sp)
+            Box(
+                modifier = Modifier.size(80.dp).background(MaterialTheme.colorScheme.surfaceVariant, CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Text("📭", fontSize = 40.sp)
+            }
+            Spacer(Modifier.height(16.dp))
+            Text("Brak zaproszeń", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
+            Spacer(Modifier.height(8.dp))
+            Text("Nie masz żadnych oczekujących zaproszeń", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
-        Spacer(Modifier.height(16.dp))
-        Text("Brak zaproszeń", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
-        Spacer(Modifier.height(8.dp))
-        Text("Nie masz żadnych oczekujących zaproszeń", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    } else {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(bottom = 24.dp)
+        ) {
+            item {
+                Text("OCZEKUJĄCE ZAPROSZENIA", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            items(requests.size, key = { requests[it].requestId }) { i ->
+                val req = requests[i]
+                val friendMock = Friend(
+                    uid = req.senderId,
+                    name = req.senderName,
+                    initials = req.senderName.take(2).uppercase(),
+                    avatarEmoji = req.senderAvatar,
+                    bgColor = req.senderBgColor,
+                    status = "Czeka na odpowiedź"
+                )
+
+                Card(
+                    modifier = Modifier.fillMaxWidth().border(1.dp, MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(16.dp)),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Column(Modifier.padding(16.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier = Modifier.size(40.dp).background(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f), CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                if (friendMock.avatarEmoji.isNotEmpty()) {
+                                    Text(friendMock.avatarEmoji, fontSize = 24.sp)
+                                } else {
+                                    Text(friendMock.initials, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                                }
+                            }
+                            Spacer(Modifier.width(12.dp))
+                            Column {
+                                Text(friendMock.name, fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                                Text("Chce zostać Twoim znajomym", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                        }
+                        Spacer(Modifier.height(16.dp))
+                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            Button(
+                                onClick = { onAccept(req) },
+                                modifier = Modifier.weight(1f).height(36.dp),
+                                shape = RoundedCornerShape(8.dp)
+                            ) { Text("Akceptuj", fontSize = 12.sp) }
+
+                            OutlinedButton(
+                                onClick = { onReject(req) },
+                                modifier = Modifier.weight(1f).height(36.dp),
+                                shape = RoundedCornerShape(8.dp)
+                            ) { Text("Odrzuć", fontSize = 12.sp) }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -218,11 +341,15 @@ fun FriendsInvitesSection() {
 @Composable
 fun FriendsSearchSection(
     suggestedFriends: List<Friend>,
+    searchResults: List<Friend>,
+    searchQuery: String,
+    isSearching: Boolean,
+    onSearchQueryChange: (String) -> Unit,
+    onSendInviteClick: (Friend) -> Unit,
     onFriendProfileClick: (Friend) -> Unit = {},
     onMessageClick: (Friend) -> Unit = {}
 ) {
-    var searchQuery by remember { mutableStateOf("") }
-    var searched by remember { mutableStateOf(false) }
+    val searched = searchQuery.length > 2
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -232,16 +359,13 @@ fun FriendsSearchSection(
         item {
             OutlinedTextField(
                 value = searchQuery,
-                onValueChange = {
-                    searchQuery = it
-                    searched = it.length > 2
-                },
+                onValueChange = { onSearchQueryChange(it) },
                 modifier = Modifier.fillMaxWidth().height(56.dp),
                 placeholder = { Text("Szukaj po nazwie lub @nicku...", fontSize = 14.sp) },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                 trailingIcon = {
                     if (searchQuery.isNotEmpty()) {
-                        IconButton(onClick = { searchQuery = ""; searched = false }) {
+                        IconButton(onClick = { onSearchQueryChange("") }) {
                             Icon(Icons.Default.Close, contentDescription = "Wyczyść")
                         }
                     }
@@ -259,32 +383,59 @@ fun FriendsSearchSection(
 
         if (!searched) {
             item {
-                Text("SUGEROWANE — MOŻESz ZNAĆ", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text("SUGEROWANE — MOŻESZ ZNAĆ", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             items(suggestedFriends.size, key = { "suggested_${suggestedFriends[it].name}" }) { i ->
                 Box(Modifier.animateItem()) {
                     FriendListItem(
                         friend = suggestedFriends[i],
                         isSuggested = true,
+                        onAction = { if (suggestedFriends[i].status.isEmpty()) onSendInviteClick(suggestedFriends[i]) },
                         onProfileClick = { onFriendProfileClick(suggestedFriends[i]) },
                         onMessageClick = { onMessageClick(suggestedFriends[i]) }
                     )
                 }
             }
         } else {
-            item {
-                Spacer(Modifier.height(32.dp))
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Box(modifier = Modifier.size(64.dp).background(MaterialTheme.colorScheme.surfaceVariant, CircleShape), contentAlignment = Alignment.Center) {
-                        Icon(Icons.Default.Search, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(32.dp))
+            if (isSearching) {
+                item {
+                    Column(
+                        modifier = Modifier.fillMaxWidth().padding(top = 32.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                     }
-                    Spacer(Modifier.height(16.dp))
-                    Text("Brak wyników", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
-                    Spacer(Modifier.height(8.dp))
-                    Text("Nie znaleziono użytkownika \"$searchQuery\"", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            } else if (searchResults.isEmpty()) {
+                item {
+                    Spacer(Modifier.height(32.dp))
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Box(modifier = Modifier.size(64.dp).background(MaterialTheme.colorScheme.surfaceVariant, CircleShape), contentAlignment = Alignment.Center) {
+                            Icon(Icons.Default.Search, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(32.dp))
+                        }
+                        Spacer(Modifier.height(16.dp))
+                        Text("Brak wyników", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
+                        Spacer(Modifier.height(8.dp))
+                        Text("Nie znaleziono użytkownika \"$searchQuery\"", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
+            } else {
+                item {
+                    Text("WYNIKI WYSZUKIWANIA", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                items(searchResults.size, key = { searchResults[it].uid }) { i ->
+                    Box(Modifier.animateItem()) {
+                        FriendListItem(
+                            friend = searchResults[i],
+                            isSuggested = true,
+                            onAction = { if (searchResults[i].status.isEmpty()) onSendInviteClick(searchResults[i]) },
+                            onProfileClick = { onFriendProfileClick(searchResults[i]) },
+                            onMessageClick = { onMessageClick(searchResults[i]) }
+                        )
+                    }
                 }
             }
         }
