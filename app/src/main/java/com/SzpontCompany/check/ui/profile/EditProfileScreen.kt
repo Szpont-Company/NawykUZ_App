@@ -544,6 +544,13 @@ fun CustomTextField(
                 { Text(text = it, color = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Bold) }
             },
             trailingIcon = trailingIcon,
+            supportingText = {
+                Text(
+                    text = errorMessage ?: " ",
+                    color = if (isError && errorMessage != null) MaterialTheme.colorScheme.error else Color.Transparent,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
             singleLine = true,
@@ -566,14 +573,6 @@ fun CustomTextField(
                 errorTextColor = MaterialTheme.colorScheme.onBackground
             )
         )
-        if (isError && errorMessage != null) {
-            Text(
-                text = errorMessage,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(start = 16.dp, top = 4.dp)
-            )
-        }
     }
 }
 
