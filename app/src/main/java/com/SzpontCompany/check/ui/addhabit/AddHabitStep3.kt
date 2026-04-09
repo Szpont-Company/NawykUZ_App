@@ -19,10 +19,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.SzpontCompany.check.R
 import com.SzpontCompany.check.ui.components.WheelTimePicker
+import com.SzpontCompany.check.ui.theme.CheckTheme
+import com.SzpontCompany.check.ui.theme.Mint
 
 @Composable
 fun AddHabitStep3(
@@ -38,7 +43,8 @@ fun AddHabitStep3(
     var eveningReminderTime by remember { mutableStateOf("20:00") }
     var showEveningTimePicker by remember { mutableStateOf(false) }
 
-    var difficulty by remember { mutableStateOf("Średni") }
+    // STAN: Przechowuje angielskie klucze dla bazy danych
+    var difficultyKey by remember { mutableStateOf("MEDIUM") }
 
     // --- ANIMACJA PASKA POSTĘPU ---
     var progress by remember { mutableFloatStateOf(0f) }
@@ -48,8 +54,16 @@ fun AddHabitStep3(
         label = "progress_anim"
     )
     LaunchedEffect(Unit) {
-        progress = 0.75f
+        progress = 0.75f // 75% dla kroku 3
     }
+
+    // --- SŁOWNIK TRUDNOŚCI ---
+    val diffOptions = listOf("EASY" to "😊", "MEDIUM" to "💪", "HARD" to "🔥")
+    val diffLabels = mapOf(
+        "EASY" to stringResource(R.string.habit_diff_easy),
+        "MEDIUM" to stringResource(R.string.habit_diff_medium),
+        "HARD" to stringResource(R.string.habit_diff_hard)
+    )
 
     Column(
         modifier = Modifier
@@ -72,10 +86,10 @@ fun AddHabitStep3(
                     .clickable { onBackClick() },
                 contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Default.ChevronLeft, contentDescription = "Wróć", tint = MaterialTheme.colorScheme.onBackground)
+                Icon(Icons.Default.ChevronLeft, contentDescription = stringResource(R.string.habit_back_btn), tint = MaterialTheme.colorScheme.onBackground)
             }
             Text(
-                text = "Powiadomienia",
+                text = stringResource(R.string.habit_notifications),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onBackground,
                 fontWeight = FontWeight.Bold
@@ -99,7 +113,7 @@ fun AddHabitStep3(
         ) {
             Box(
                 modifier = Modifier
-                    .fillMaxWidth(animatedProgress) // Animowana szerokość
+                    .fillMaxWidth(animatedProgress)
                     .fillMaxHeight()
                     .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(2.dp))
             )
@@ -112,17 +126,16 @@ fun AddHabitStep3(
         ) {
             Spacer(modifier = Modifier.height(32.dp))
 
-            SectionTitle("POWIADOMIENIA")
+            SectionTitle(stringResource(R.string.habit_notifications_caps))
 
             NotificationToggleCard(
-                title = "Przypomnienie dzienne",
-                subtitle = "Codziennie o wybranej porze",
+                title = stringResource(R.string.habit_notif_daily),
+                subtitle = stringResource(R.string.habit_notif_daily_desc),
                 isChecked = dailyReminderEnabled,
                 activeColor = habitColor,
                 onCheckedChange = { dailyReminderEnabled = it }
             )
 
-            // Animowane pojawianie się wyboru czasu (dzienne)
             AnimatedVisibility(
                 visible = dailyReminderEnabled,
                 enter = expandVertically(spring(stiffness = Spring.StiffnessMediumLow)) + fadeIn(),
@@ -137,14 +150,13 @@ fun AddHabitStep3(
             Spacer(modifier = Modifier.height(16.dp))
 
             NotificationToggleCard(
-                title = "Powiadomienie wieczorne",
-                subtitle = "Przypomina o nieukończonym nawyku",
+                title = stringResource(R.string.habit_notif_evening),
+                subtitle = stringResource(R.string.habit_notif_evening_desc),
                 isChecked = eveningReminderEnabled,
                 activeColor = habitColor,
                 onCheckedChange = { eveningReminderEnabled = it }
             )
 
-            // Animowane pojawianie się wyboru czasu (wieczorne)
             AnimatedVisibility(
                 visible = eveningReminderEnabled,
                 enter = expandVertically(spring(stiffness = Spring.StiffnessMediumLow)) + fadeIn(),
@@ -158,38 +170,27 @@ fun AddHabitStep3(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            SectionTitle("TRUDNOŚĆ")
+            SectionTitle(stringResource(R.string.habit_difficulty_label))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                DifficultyCard(
-                    emoji = "😊",
-                    label = "Łatwy",
-                    isSelected = difficulty == "Łatwy",
-                    modifier = Modifier.weight(1f),
-                    onClick = { difficulty = "Łatwy" }
-                )
-                DifficultyCard(
-                    emoji = "💪",
-                    label = "Średni",
-                    isSelected = difficulty == "Średni",
-                    modifier = Modifier.weight(1f),
-                    onClick = { difficulty = "Średni" }
-                )
-                DifficultyCard(
-                    emoji = "🔥",
-                    label = "Trudny",
-                    isSelected = difficulty == "Trudny",
-                    modifier = Modifier.weight(1f),
-                    onClick = { difficulty = "Trudny" }
-                )
+                diffOptions.forEach { (key, emoji) ->
+                    DifficultyCard(
+                        emoji = emoji,
+                        label = diffLabels[key] ?: key,
+                        isSelected = difficultyKey == key,
+                        modifier = Modifier.weight(1f),
+                        onClick = { difficultyKey = key }
+                    )
+                }
             }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
         Button(
-            onClick = { onNextClick(dailyReminderEnabled, reminderTime, eveningReminderEnabled, eveningReminderTime, difficulty) },
+            // Przekazujemy klucz trudności (np. "EASY") zamiast słowa "Łatwy"
+            onClick = { onNextClick(dailyReminderEnabled, reminderTime, eveningReminderEnabled, eveningReminderTime, difficultyKey) },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
@@ -200,7 +201,7 @@ fun AddHabitStep3(
             ),
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f))
         ) {
-            Text(text = "Dalej", fontSize = 16.sp, fontWeight = FontWeight.Medium)
+            Text(text = stringResource(R.string.habit_next_btn), fontSize = 16.sp, fontWeight = FontWeight.Medium)
         }
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -216,7 +217,7 @@ fun AddHabitStep3(
             ),
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.surfaceVariant)
         ) {
-            Text(text = "Wróć", fontSize = 16.sp, fontWeight = FontWeight.Medium)
+            Text(text = stringResource(R.string.habit_back_btn), fontSize = 16.sp, fontWeight = FontWeight.Medium)
         }
     }
 
@@ -312,12 +313,12 @@ fun TimePickerDialog(
                 val formatted = String.format(java.util.Locale.getDefault(), "%02d:%02d", tempHour, tempMinute)
                 onConfirm(formatted)
             }) {
-                Text("Zapisz", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Text(stringResource(R.string.action_save), color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold, fontSize = 16.sp)
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Anuluj", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 16.sp)
+                Text(stringResource(R.string.action_cancel), color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 16.sp)
             }
         }
     )
@@ -399,6 +400,18 @@ fun DifficultyCard(
             color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = 13.sp,
             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun AddHabitStep3Preview() {
+    CheckTheme(darkTheme = true, accent = Mint) {
+        AddHabitStep3(
+            habitColor = Mint,
+            onNextClick = { _, _, _, _, _ -> },
+            onBackClick = {}
         )
     }
 }

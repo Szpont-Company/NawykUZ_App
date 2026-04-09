@@ -17,9 +17,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.SzpontCompany.check.R
 
 @Composable
 fun AddHabitStep4(
@@ -29,6 +31,7 @@ fun AddHabitStep4(
     onBackClick: () -> Unit,
     onConfirmClick: () -> Unit
 ) {
+    // --- ANIMACJA PASKA POSTĘPU ---
     var progress by remember { mutableFloatStateOf(0f) }
     val animatedProgress by animateFloatAsState(
         targetValue = progress,
@@ -37,8 +40,32 @@ fun AddHabitStep4(
     )
 
     LaunchedEffect(Unit) {
-        progress = 1.0f
+        progress = 1.0f // 100% dla kroku 4 (ostatniego)
     }
+
+    // --- MAPOWANIE KLUCZY NA TŁUMACZENIA UI ---
+    val freqLabels = mapOf(
+        "DAILY" to stringResource(R.string.habit_freq_daily),
+        "WEEKLY" to stringResource(R.string.habit_freq_weekly),
+        "CUSTOM" to stringResource(R.string.habit_freq_custom)
+    )
+
+    val unitLabels = mapOf(
+        "MINUTES" to stringResource(R.string.habit_unit_min),
+        "STEPS" to stringResource(R.string.habit_unit_steps),
+        "TIMES" to stringResource(R.string.habit_unit_times),
+        "ML" to stringResource(R.string.habit_unit_ml)
+    )
+
+    val diffLabels = mapOf(
+        "EASY" to stringResource(R.string.habit_diff_easy),
+        "MEDIUM" to stringResource(R.string.habit_diff_medium),
+        "HARD" to stringResource(R.string.habit_diff_hard)
+    )
+
+    val displayFreq = freqLabels[frequency] ?: frequency
+    val displayUnit = unitLabels[unit] ?: unit
+    val displayDiff = diffLabels[difficulty] ?: difficulty
 
     Column(
         modifier = Modifier
@@ -61,9 +88,14 @@ fun AddHabitStep4(
                     .clickable { onBackClick() },
                 contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Default.ChevronLeft, contentDescription = "Wróć", tint = MaterialTheme.colorScheme.onBackground)
+                Icon(Icons.Default.ChevronLeft, contentDescription = stringResource(R.string.habit_back_btn), tint = MaterialTheme.colorScheme.onBackground)
             }
-            Text("Podsumowanie", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Bold)
+            Text(
+                text = stringResource(R.string.habit_summary),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onBackground,
+                fontWeight = FontWeight.Bold
+            )
             Text("4 / 4", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, lineHeight = 14.sp)
         }
 
@@ -76,7 +108,7 @@ fun AddHabitStep4(
         ) {
             Box(
                 modifier = Modifier
-                    .fillMaxWidth(animatedProgress) // Animowana szerokość
+                    .fillMaxWidth(animatedProgress)
                     .fillMaxHeight()
                     .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(2.dp))
             )
@@ -89,7 +121,12 @@ fun AddHabitStep4(
                 .verticalScroll(rememberScrollState())
         ) {
             Spacer(modifier = Modifier.height(32.dp))
-            Text("PODSUMOWANIE", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(bottom = 8.dp))
+            Text(
+                text = stringResource(R.string.habit_summary).uppercase(),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -103,8 +140,16 @@ fun AddHabitStep4(
                         }
                         Spacer(modifier = Modifier.width(16.dp))
                         Column {
-                            Text(text = name.ifEmpty { "Bez nazwy" }, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onBackground)
-                            Text(text = "$frequency • $dailyGoal $unit", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(
+                                text = name.ifEmpty { stringResource(R.string.habit_unnamed) },
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onBackground
+                            )
+                            Text(
+                                text = "$displayFreq • $dailyGoal $displayUnit",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         }
                     }
 
@@ -112,13 +157,29 @@ fun AddHabitStep4(
                     HorizontalDivider(color = MaterialTheme.colorScheme.background, thickness = 1.dp)
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    SummaryRow(label = "Przypomnienie", value = if (dailyReminder) reminderTime else "Brak", valueColor = MaterialTheme.colorScheme.onBackground)
+                    SummaryRow(
+                        label = stringResource(R.string.habit_notif_daily),
+                        value = if (dailyReminder) reminderTime else stringResource(R.string.habit_none),
+                        valueColor = MaterialTheme.colorScheme.onBackground
+                    )
                     Spacer(modifier = Modifier.height(8.dp))
-                    SummaryRow(label = "Pow. wieczorne", value = if (eveningReminder) eveningTime else "Brak", valueColor = MaterialTheme.colorScheme.onBackground)
+                    SummaryRow(
+                        label = stringResource(R.string.habit_notif_evening),
+                        value = if (eveningReminder) eveningTime else stringResource(R.string.habit_none),
+                        valueColor = MaterialTheme.colorScheme.onBackground
+                    )
                     Spacer(modifier = Modifier.height(8.dp))
-                    SummaryRow(label = "Trudność", value = difficulty, valueColor = MaterialTheme.colorScheme.primary)
+                    SummaryRow(
+                        label = stringResource(R.string.habit_difficulty),
+                        value = displayDiff,
+                        valueColor = MaterialTheme.colorScheme.primary
+                    )
                     Spacer(modifier = Modifier.height(8.dp))
-                    SummaryRow(label = "Start", value = "Dziś", valueColor = MaterialTheme.colorScheme.onBackground)
+                    SummaryRow(
+                        label = stringResource(R.string.habit_start_today),
+                        value = stringResource(R.string.habit_start_today),
+                        valueColor = MaterialTheme.colorScheme.onBackground
+                    )
                 }
             }
 
@@ -132,7 +193,11 @@ fun AddHabitStep4(
                     .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
                     .padding(16.dp)
             ) {
-                Text(text = "Nawyk zostanie dodany do Twojego dashboardu i będzie śledzony od dziś.", fontSize = 13.sp, color = MaterialTheme.colorScheme.onBackground)
+                Text(
+                    text = stringResource(R.string.habit_summary_info),
+                    fontSize = 13.sp,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
             }
         }
 
@@ -144,7 +209,7 @@ fun AddHabitStep4(
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant, contentColor = MaterialTheme.colorScheme.onBackground),
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f))
         ) {
-            Text("Utwórz nawyk", fontSize = 16.sp, fontWeight = FontWeight.Medium)
+            Text(stringResource(R.string.habit_create_btn), fontSize = 16.sp, fontWeight = FontWeight.Medium)
         }
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -156,7 +221,7 @@ fun AddHabitStep4(
             colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onBackground),
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.surfaceVariant)
         ) {
-            Text("Wróć", fontSize = 16.sp, fontWeight = FontWeight.Medium)
+            Text(stringResource(R.string.habit_back_btn), fontSize = 16.sp, fontWeight = FontWeight.Medium)
         }
     }
 }

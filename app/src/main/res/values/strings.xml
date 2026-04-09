@@ -293,4 +293,54 @@
     <string name="notification_channel_desc">Codzienne powiadomienia przypominające o twoich celach</string>
     <string name="notification_title">Czas na nawyki!</string>
     <string name="notification_content">Sprawdź, co dziś zaplanowałeś(aś).</string>
+
+    <!-- AddHabit -->
+    <string name="habit_new">Nowy nawyk</string>
+    <string name="habit_name_label">NAZWA NAWYKU</string>
+    <string name="habit_name_placeholder">np. Poranny bieg</string>
+    <string name="habit_icon_label">IKONA</string>
+    <string name="habit_color_label">KOLOR</string>
+    <string name="habit_preview_label">PODGLĄD</string>
+    <string name="habit_next_btn">Dalej</string>
+    <string name="habit_back_btn">Wróć</string>
+
+    <string name="habit_schedule">Harmonogram</string>
+    <string name="habit_freq_label">CZĘSTOTLIWOŚĆ</string>
+    <string name="habit_freq_daily">Codziennie</string>
+    <string name="habit_freq_weekly">Tygodniowo</string>
+    <string name="habit_freq_custom">Własne</string>
+    <string name="habit_days_label">DNI TYGODNIA</string>
+    <string name="habit_times_week_label">ILE RAZY W TYGODNIU?</string>
+    <string name="habit_goal_session_label">CEL NA JEDEN RAZ</string>
+    <string name="habit_goal_daily_label">CEL DZIENNY</string>
+    <string name="habit_unit_label">JEDNOSTKA</string>
+    <string name="habit_unit_min">min</string>
+    <string name="habit_unit_steps">kroków</string>
+    <string name="habit_unit_times">razy</string>
+    <string name="habit_unit_ml">ml</string>
+
+    <string name="habit_notifications">Powiadomienia</string>
+    <string name="habit_notifications_caps">POWIADOMIENIA</string>
+    <string name="habit_notif_daily">Przypomnienie dzienne</string>
+    <string name="habit_notif_daily_desc">Codziennie o wybranej porze</string>
+    <string name="habit_notif_evening">Powiadomienie wieczorne</string>
+    <string name="habit_notif_evening_desc">Przypomina o nieukończonym nawyku</string>
+    <string name="habit_difficulty_label">TRUDNOŚĆ</string>
+    <string name="habit_difficulty">Trudność</string>
+    <string name="habit_diff_easy">Łatwy</string>
+    <string name="habit_diff_medium">Średni</string>
+    <string name="habit_diff_hard">Trudny</string>
+
+    <string name="habit_summary">Podsumowanie</string>
+    <string name="habit_unnamed">Bez nazwy</string>
+    <string name="habit_none">Brak</string>
+    <string name="habit_start_today">Dziś</string>
+    <string name="habit_summary_info">Nawyk zostanie dodany do Twojego dashboardu i będzie śledzony od dziś.</string>
+    <string name="habit_create_btn">Utwórz nawyk</string>
+
+    <string name="habit_success_title">Nawyk dodany!</string>
+    <string name="habit_success_subtitle">Dzień 1 — zaczynamy!</string>
+    <string name="habit_success_return">Wróć do dashboardu</string>
+    <string name="habit_success_reminder_on">Pierwsze przypomnienie jutro o %1$s.\nPowodzenia!</string>
+    <string name="habit_success_reminder_off">Powodzenia w budowaniu nawyku!</string>
 </resources>

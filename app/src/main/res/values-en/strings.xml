@@ -294,4 +294,53 @@
     <string name="notification_title">Time for habits!</string>
     <string name="notification_content">Check what you have planned for today.</string>
 
+    <!-- AddHabit -->
+    <string name="habit_new">New habit</string>
+    <string name="habit_name_label">HABIT NAME</string>
+    <string name="habit_name_placeholder">e.g. Morning run</string>
+    <string name="habit_icon_label">ICON</string>
+    <string name="habit_color_label">COLOR</string>
+    <string name="habit_preview_label">PREVIEW</string>
+    <string name="habit_next_btn">Next</string>
+    <string name="habit_back_btn">Back</string>
+
+    <string name="habit_schedule">Schedule</string>
+    <string name="habit_freq_label">FREQUENCY</string>
+    <string name="habit_freq_daily">Daily</string>
+    <string name="habit_freq_weekly">Weekly</string>
+    <string name="habit_freq_custom">Custom</string>
+    <string name="habit_days_label">DAYS OF WEEK</string>
+    <string name="habit_times_week_label">TIMES PER WEEK?</string>
+    <string name="habit_goal_session_label">GOAL PER SESSION</string>
+    <string name="habit_goal_daily_label">DAILY GOAL</string>
+    <string name="habit_unit_label">UNIT</string>
+    <string name="habit_unit_min">min</string>
+    <string name="habit_unit_steps">steps</string>
+    <string name="habit_unit_times">times</string>
+    <string name="habit_unit_ml">ml</string>
+
+    <string name="habit_notifications">Notifications</string>
+    <string name="habit_notifications_caps">NOTIFICATION</string>
+    <string name="habit_notif_daily">Daily reminder</string>
+    <string name="habit_notif_daily_desc">Every day at selected time</string>
+    <string name="habit_notif_evening">Evening reminder</string>
+    <string name="habit_notif_evening_desc">Reminds about unfinished habit</string>
+    <string name="habit_difficulty_label">DIFFICULTY</string>
+    <string name="habit_difficulty">Difficulty</string>
+    <string name="habit_diff_easy">Easy</string>
+    <string name="habit_diff_medium">Medium</string>
+    <string name="habit_diff_hard">Hard</string>
+
+    <string name="habit_summary">Summary</string>
+    <string name="habit_unnamed">Unnamed</string>
+    <string name="habit_none">None</string>
+    <string name="habit_start_today">Today</string>
+    <string name="habit_summary_info">Habit will be added to your dashboard and tracked starting today.</string>
+    <string name="habit_create_btn">Create habit</string>
+
+    <string name="habit_success_title">Habit added!</string>
+    <string name="habit_success_subtitle">Day 1 — let\'s go!</string>
+    <string name="habit_success_return">Back to dashboard</string>
+    <string name="habit_success_reminder_on">First reminder tomorrow at %1$s.\nGood luck!</string>
+    <string name="habit_success_reminder_off">Good luck building your habit!</string>
 </resources>

@@ -1,11 +1,11 @@
 package com.SzpontCompany.check.ui.addhabit
 
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -20,14 +20,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.SzpontCompany.check.R
 import com.SzpontCompany.check.ui.theme.*
 
-
-@OptIn(ExperimentalLayoutApi:: class)
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun AddHabitStep1(
     onNextClick: (name: String, icon: String, color: Color) -> Unit,
@@ -36,6 +37,17 @@ fun AddHabitStep1(
     var habitName by remember { mutableStateOf("") }
     var selectedIcon by remember { mutableStateOf("🎯") }
     var selectedColor by remember { mutableStateOf(Mint) }
+
+    // --- ANIMACJA PASKA POSTĘPU ---
+    var progress by remember { mutableFloatStateOf(0f) }
+    val animatedProgress by animateFloatAsState(
+        targetValue = progress,
+        animationSpec = tween(600, easing = FastOutSlowInEasing),
+        label = "progress_anim"
+    )
+    LaunchedEffect(Unit) {
+        progress = 0.25f
+    }
 
     val availableColors = listOf(Mint, Indigo, Coral, Sky, Rose, Cactus, Amber, Crimson)
     val availableIcons = listOf("🏃", "🚶", "📖", "💧", "🧘", "🏋️", "🚴", "🍎", "😴", "✍️", "🎸", "🧠", "💊", "🌿", "🏊", "🎯", "⚽", "💕")
@@ -47,6 +59,7 @@ fun AddHabitStep1(
             .padding(horizontal = 24.dp)
             .padding(top = 48.dp, bottom = 24.dp)
     ) {
+        // --- HEADER ---
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -59,13 +72,13 @@ fun AddHabitStep1(
                     .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
                     .border(width = 1.dp, color = MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(12.dp))
                     .clickable { onBackClick() },
-                    contentAlignment = Alignment.Center
+                contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Default.ChevronLeft, contentDescription = "Wróć", tint = MaterialTheme.colorScheme.onBackground)
+                Icon(Icons.Default.ChevronLeft, contentDescription = stringResource(R.string.habit_back_btn), tint = MaterialTheme.colorScheme.onBackground)
             }
 
             Text(
-                text = "Nowy nawyk",
+                text = stringResource(R.string.habit_new),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onBackground,
                 fontWeight = FontWeight.Bold
@@ -81,6 +94,7 @@ fun AddHabitStep1(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // --- PASEK POSTĘPU ---
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -89,7 +103,7 @@ fun AddHabitStep1(
         ) {
             Box(
                 modifier = Modifier
-                    .fillMaxWidth(0.25f)
+                    .fillMaxWidth(animatedProgress)
                     .fillMaxHeight()
                     .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(2.dp))
             )
@@ -102,11 +116,11 @@ fun AddHabitStep1(
         ) {
             Spacer(modifier = Modifier.height(32.dp))
 
-            SectionTitle("NAZWA NAWYKU")
+            SectionTitle(stringResource(R.string.habit_name_label))
             OutlinedTextField(
                 value = habitName,
                 onValueChange = { habitName = it },
-                placeholder = { Text("np. Poranny bieg", color = MaterialTheme.colorScheme.onSurfaceVariant) },
+                placeholder = { Text(stringResource(R.string.habit_name_placeholder), color = MaterialTheme.colorScheme.onSurfaceVariant) },
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
@@ -120,7 +134,7 @@ fun AddHabitStep1(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            SectionTitle("IKONA")
+            SectionTitle(stringResource(R.string.habit_icon_label))
             FlowRow(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -147,7 +161,7 @@ fun AddHabitStep1(
             }
             Spacer(modifier = Modifier.height(24.dp))
 
-            SectionTitle("KOLOR")
+            SectionTitle(stringResource(R.string.habit_color_label))
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier.fillMaxWidth()
@@ -171,14 +185,18 @@ fun AddHabitStep1(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            SectionTitle("PODGLĄD")
+            SectionTitle(stringResource(R.string.habit_preview_label))
             Card(
-                modifier = Modifier.fillMaxWidth().border(width = 1.dp, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f), shape = RoundedCornerShape(20.dp)),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(width = 1.dp, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f), shape = RoundedCornerShape(20.dp)),
                 shape = RoundedCornerShape(20.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 Row(
-                    modifier = Modifier.padding(horizontal = 16.dp, ).padding(top = 16.dp),
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                        .padding(top = 16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Box(
@@ -193,18 +211,19 @@ fun AddHabitStep1(
                     Spacer(modifier = Modifier.width(16.dp))
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = habitName.ifEmpty { "Nazwa nawyku" },
+                            text = habitName.ifEmpty { stringResource(R.string.habit_unnamed) },
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.onBackground
                         )
                         Text(
+                            // Przykładowy tekst podglądu – tu zostawiłem statyczny dla efektu wizualnego
                             text = "Cel: 30 min • codziennie",
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                     Text(
-                        text = "75%",
+                        text = "0%",
                         style = MaterialTheme.typography.titleMedium,
                         color = selectedColor
                     )
@@ -221,7 +240,7 @@ fun AddHabitStep1(
                 ) {
                     Box(
                         modifier = Modifier
-                            .fillMaxWidth(0.75f)
+                            .fillMaxWidth(0f)
                             .fillMaxHeight()
                             .background(
                                 selectedColor,
@@ -246,9 +265,8 @@ fun AddHabitStep1(
             ),
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurfaceVariant)
         ) {
-            Text(text = "Dalej", fontSize = 16.sp, fontWeight = FontWeight.Medium)
+            Text(text = stringResource(R.string.habit_next_btn), fontSize = 16.sp, fontWeight = FontWeight.Medium)
         }
-
     }
 }
 
@@ -262,16 +280,10 @@ fun SectionTitle(title: String) {
     )
 }
 
-@Preview(
-    showBackground = true,
-    name = "Krok 1"
-)
+@Preview(showBackground = true, name = "Krok 1")
 @Composable
 fun AddHabitStep1Preview() {
-    CheckTheme(
-        darkTheme = true,
-        accent = Mint
-    ) {
+    CheckTheme(darkTheme = true, accent = Mint) {
         AddHabitStep1(
             onNextClick = { _, _, _ -> },
             onBackClick = { }

@@ -11,7 +11,6 @@ import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -28,12 +27,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.SzpontCompany.check.R
-
 
 @Composable
 fun AddHabitSuccess(
@@ -127,12 +126,31 @@ fun AddHabitSuccess(
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Spacer(modifier = Modifier.height(32.dp))
-                    Text("Nawyk dodany!", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
+                    Text(
+                        text = stringResource(R.string.habit_success_title),
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text(name.ifEmpty { "Twój nowy nawyk" }, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(
+                        text = name.ifEmpty { stringResource(R.string.habit_unnamed) },
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                     Spacer(modifier = Modifier.height(8.dp))
-                    val reminderText = if (dailyReminder) "Pierwsze przypomnienie jutro o $reminderTime.\nPowodzenia!" else "Powodzenia w budowaniu nawyku!"
-                    Text(reminderText, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
+
+                    val reminderText = if (dailyReminder) {
+                        stringResource(R.string.habit_success_reminder_on, reminderTime)
+                    } else {
+                        stringResource(R.string.habit_success_reminder_off)
+                    }
+                    Text(
+                        text = reminderText,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center
+                    )
 
                     Spacer(modifier = Modifier.height(32.dp))
 
@@ -147,8 +165,16 @@ fun AddHabitSuccess(
                             }
                             Spacer(modifier = Modifier.width(16.dp))
                             Column(modifier = Modifier.weight(1f)) {
-                                Text(name.ifEmpty { "Bez nazwy" }, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onBackground)
-                                Text("Dzień 1 — zaczynamy!", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text(
+                                    text = name.ifEmpty { stringResource(R.string.habit_unnamed) },
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = MaterialTheme.colorScheme.onBackground
+                                )
+                                Text(
+                                    text = stringResource(R.string.habit_success_subtitle),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
                             }
                             Text("0%", style = MaterialTheme.typography.titleMedium, color = color)
                         }
@@ -165,7 +191,9 @@ fun AddHabitSuccess(
                     shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onBackground),
                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.surfaceVariant)
-                ) { Text("Wróć do dashboardu", fontSize = 16.sp, fontWeight = FontWeight.Medium) }
+                ) {
+                    Text(stringResource(R.string.habit_success_return), fontSize = 16.sp, fontWeight = FontWeight.Medium)
+                }
             }
         }
     }
