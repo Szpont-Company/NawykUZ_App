@@ -3,6 +3,7 @@ package com.SzpontCompany.check.data.user
 import android.util.Log
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.functions.functions
@@ -12,6 +13,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.tasks.await
 import android.content.Context
+import com.SzpontCompany.check.config.FirebaseConfig
 
 class UserRepository private constructor(
     private val auth: FirebaseAuth,
@@ -126,7 +128,10 @@ class UserRepository private constructor(
         val userData = mapOf(
             "uid" to uid,
             "name" to name,
-            "email" to email
+            "email" to email,
+            "nickname" to "",
+            "isAdmin" to false,
+            "createdAt" to FieldValue.serverTimestamp()
         )
         firestore
             .collection("users")
@@ -154,7 +159,7 @@ class UserRepository private constructor(
             "bgColor" to bgColor
         )
 
-        Firebase.functions.getHttpsCallable("updateUserProfile").call(data).await()
+        FirebaseConfig.functions.getHttpsCallable("updateUserProfile").call(data).await()
 
         val current = _userFlow.value
         if (current != null) {

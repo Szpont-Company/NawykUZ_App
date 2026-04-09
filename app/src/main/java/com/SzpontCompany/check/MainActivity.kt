@@ -10,12 +10,10 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
@@ -57,10 +55,13 @@ import com.SzpontCompany.check.ui.theme.Crimson
 import com.SzpontCompany.check.ui.theme.Indigo
 import com.SzpontCompany.check.ui.theme.Rose
 import com.SzpontCompany.check.ui.theme.Sky
-import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.os.LocaleListCompat
+import androidx.compose.runtime.rememberCoroutineScope
+import com.SzpontCompany.check.ui.user.OnboardingScreen
+import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
-enum class AppScreen { SPLASH, LOGIN, DASHBOARD, REGISTER_SUCCESS, RESET_PASSWORD }
+enum class AppScreen { SPLASH, LOGIN, DASHBOARD, REGISTER_SUCCESS, RESET_PASSWORD, SET_NICKNAME }
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -105,6 +106,7 @@ class MainActivity : AppCompatActivity() {
                 )
             }
 
+            val scope = rememberCoroutineScope()
             var currentScreen by remember { mutableStateOf(AppScreen.SPLASH) }
 
             CheckTheme(darkTheme = darkTheme, accent = accentColor) {
@@ -125,6 +127,10 @@ class MainActivity : AppCompatActivity() {
                                 }
                             }
 
+                            AppScreen.SET_NICKNAME ->
+                                (slideInHorizontally { it } + fadeIn(tween(400))) togetherWith
+                                        (slideOutHorizontally { -it } + fadeOut(tween(300)))
+
                             AppScreen.SPLASH ->
                                 fadeIn() togetherWith fadeOut()
 
@@ -141,15 +147,47 @@ class MainActivity : AppCompatActivity() {
                         AppScreen.SPLASH -> {
                             AnimatedSplashScreen(
                                 onSplashFinished = {
-                                    currentScreen = if (authViewModel.isLoggedIn) AppScreen.DASHBOARD else AppScreen.LOGIN
+                                    if(!authViewModel.isLoggedIn) {
+                                        currentScreen = AppScreen.LOGIN
+                                    } else {
+                                        scope.launch {
+                                            val uid = authViewModel.currentUser.value?.uid
+                                            currentScreen = if (uid != null && authViewModel.isNicknameSet(uid)) {
+                                                AppScreen.DASHBOARD
+                                            } else {
+                                                AppScreen.SET_NICKNAME
+                                            }
+                                        }
+                                    }
                                 }
                             )
                         }
 
-                        AppScreen.LOGIN -> LoginScreen(
-                            onLoginSuccess = { currentScreen = AppScreen.DASHBOARD },
-                            onRegisterSuccess = { currentScreen = AppScreen.REGISTER_SUCCESS },
-                            onForgotPasswordClick = { currentScreen = AppScreen.RESET_PASSWORD },
+                        AppScreen.LOGIN -> {
+                            LoginScreen(
+                                onLoginSuccess = {
+                                    scope.launch {
+                                        val uid = FirebaseAuth.getInstance().currentUser?.uid
+                                                    ?: run {
+                                                        delay(300)
+                                                        FirebaseAuth.getInstance().currentUser?.uid
+                                                    }
+                                                            ?: return@launch
+
+                                        currentScreen = if (authViewModel.isNicknameSet(uid)) {
+                                            AppScreen.DASHBOARD
+                                        } else {
+                                            AppScreen.SET_NICKNAME
+                                        }
+                                    }
+                                },
+                                onRegisterSuccess = { currentScreen = AppScreen.REGISTER_SUCCESS },
+                                onForgotPasswordClick = { currentScreen = AppScreen.RESET_PASSWORD }
+                            )
+                        }
+
+                        AppScreen.SET_NICKNAME -> OnboardingScreen(
+                            onNicknameSaved = {currentScreen = AppScreen.DASHBOARD},
                         )
 
                         AppScreen.DASHBOARD -> {
