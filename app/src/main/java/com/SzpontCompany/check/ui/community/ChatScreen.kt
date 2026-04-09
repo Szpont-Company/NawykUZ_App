@@ -107,19 +107,14 @@ fun ChatScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
                 .padding(horizontal = 16.dp),
+            reverseLayout = true,
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             item { Spacer(modifier = Modifier.height(8.dp)) }
-            items(messages) { message ->
+            items(messages.asReversed()) { message ->
                 ChatMessageItem(message = message)
             }
             item { Spacer(modifier = Modifier.height(8.dp)) }
-        }
-
-        LaunchedEffect(messages.size) {
-            if (messages.isNotEmpty()) {
-                listState.animateScrollToItem(messages.size - 1)
-            }
         }
     }
 }
