@@ -20,6 +20,7 @@ import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -88,6 +89,9 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         return valid
     }
 
+    var needsNickname by mutableStateOf(false)
+        private set
+
    val isLoggedIn: Boolean
         get() = auth.currentUser != null
 
@@ -121,8 +125,12 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
             val docRef = Firebase.firestore.collection("users").document(uid)
             val snapshot = docRef.get().await()
 
-            if(!snapshot.exists()) userRepository.saveUserData(uid, name, email)
-
+            if(!snapshot.exists()) {
+                userRepository.saveUserData(uid, name, email)
+                this.needsNickname = true
+            } else {
+                this.needsNickname = !isNicknameSet(uid)
+            }
 
             Result.success(authResult.user)
         } catch (e: Exception) {
@@ -136,6 +144,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
             val authResult = auth.signInWithEmailAndPassword(email, password).await()
             if(authResult.user?.isEmailVerified == true) {
                 cleanCredentials()
+                this.needsNickname = !isNicknameSet(authResult.user!!.uid)
                 Result.success(authResult.user!!)
             } else {
                 auth.signOut()
@@ -200,6 +209,45 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     fun signOut() {
         userRepository.clearCache()
         auth.signOut()
+    }
+
+    suspend fun isNicknameSet(uid: String) : Boolean {
+        val document = Firebase.firestore.collection("users")
+            .document(uid)
+            .get()
+            .await()
+        val nickname = document.getString("nickname") ?: ""
+        return nickname.isNotBlank()
+    }
+
+    suspend fun saveNickname(nickname: String): Result<Unit> {
+        val uid = auth.currentUser?.uid
+            ?: return Result.failure(Exception("No user logged in"))
+
+        val db = Firebase.firestore
+        val nicknameRef = db.collection("nicknames").document(nickname)
+        val userRef = db.collection("users").document(uid)
+
+        return try {
+            db.runTransaction { transaction ->
+                val snapshot = transaction.get(nicknameRef)
+
+                if (snapshot.exists()) {
+                    throw Exception("Nickname already taken")
+                }
+
+                transaction.set(nicknameRef, mapOf("uid" to uid))
+                transaction.set(userRef, mapOf("nickname" to nickname), SetOptions.merge())
+            }.await()
+
+            needsNickname = false
+            userRepository.clearCache()
+            Result.success(Unit)
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Result.failure(e)
+        }
     }
 
     private companion object {
