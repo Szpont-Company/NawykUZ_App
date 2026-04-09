@@ -33,20 +33,35 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.SzpontCompany.check.ui.components.CheckBackButton
 import com.SzpontCompany.check.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditProfileScreen(
-    onBackClick: () -> Unit = {}
+    onBackClick: () -> Unit = {},
+    viewModel: ProfileViewModel = viewModel()
 ) {
-    var fullName by remember { mutableStateOf("Marek Kowalski") }
-    var nickname by remember { mutableStateOf("marekk") }
+
+    val uiState by viewModel.uiState.collectAsState()
+
+    if (uiState.isLoading) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+        return
+    }
+
+    val user = uiState.user
+
+    var fullName by remember { mutableStateOf(user?.name ?: "") }
+    var nickname by remember { mutableStateOf(user?.nickname ?: "") }
+
+    var selectedAvatar by remember { mutableStateOf(user?.avatarEmoji ?: "") }
+    var selectedBgColor by remember { mutableStateOf(getColorByName(user?.bgColor ?: "Mint")) }
 
     var selectedTabIndex by remember { mutableIntStateOf(0) }
-    var selectedAvatar by remember { mutableStateOf("") }
-    var selectedBgColor by remember { mutableStateOf(Amber) }
     var hasChanges by remember { mutableStateOf(false) }
 
     var showEmailSheet by remember { mutableStateOf(false) }
@@ -69,7 +84,15 @@ fun EditProfileScreen(
 
         EditProfileTopBar(
             onBackClick = onBackClick,
-            onSaveClick = { /* TODO: Save changes */ },
+            onSaveClick = {
+                viewModel.saveProfile(
+                    newName = fullName,
+                    newNickname = nickname,
+                    newAvatar = selectedAvatar,
+                    newBgColor = getColorName(selectedBgColor),
+                    onSuccess = { onBackClick() }
+                )
+            },
             isSaveEnabled = canSave
         )
 
@@ -124,7 +147,15 @@ fun EditProfileScreen(
         Spacer(modifier = Modifier.height(32.dp))
 
         BottomActions(
-            onSaveClick = { /* TODO: Save */ },
+            onSaveClick = {
+                viewModel.saveProfile(
+                    newName = fullName,
+                    newNickname = nickname,
+                    newAvatar = selectedAvatar,
+                    newBgColor = getColorName(selectedBgColor),
+                    onSuccess = { onBackClick() }
+                )
+            },
             isSaveEnabled = canSave
         )
 

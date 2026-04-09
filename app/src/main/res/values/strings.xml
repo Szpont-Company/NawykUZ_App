@@ -60,7 +60,7 @@
     <string name="greeting_evening">Dobry wieczór,</string>
 
     <!-- ================= PROFILE & SETTINGS ================= -->
-    <string name="profile_title">Profil</string>
+    <string name="profile_title">Twój Profil</string>
     <string name="profile_level">Poziom</string>
     <string name="profile_habits">Nawyki</string>
     <string name="profile_streak_days">Streak dni</string>
@@ -287,4 +287,10 @@
     <string name="nickname_error">Nick jest już zajęty, spróbuj inny</string>
     <string name="error_nicknameTaken">Ten nick jest już zajęty!</string>
     <string name="unknown_error_nickname">Coś poszło nie tak</string>
+
+    <!-- Notifications -->
+    <string name="notification_channel_name">Przypomnienia o nawykach</string>
+    <string name="notification_channel_desc">Codzienne powiadomienia przypominające o twoich celach</string>
+    <string name="notification_title">Czas na nawyki!</string>
+    <string name="notification_content">Sprawdź, co dziś zaplanowałeś(aś).</string>
 </resources>

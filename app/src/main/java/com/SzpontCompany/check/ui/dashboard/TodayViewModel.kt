@@ -20,11 +20,7 @@ data class TopSectionUiState(
 
 class TodayViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val repo = UserRepository(
-        FirebaseAuth.getInstance(),
-        FirebaseFirestore.getInstance(),
-        com.SzpontCompany.check.data.user.UserCache(application.applicationContext)
-    )
+    private val repo = UserRepository.getInstance(application.applicationContext)
     private val _uiState = MutableStateFlow(TopSectionUiState())
     val uiState: StateFlow<TopSectionUiState> = _uiState.asStateFlow()
 

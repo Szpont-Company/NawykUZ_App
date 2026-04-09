@@ -1,12 +1,15 @@
 package com.SzpontCompany.check.ui.community.components
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.filled.Notifications
@@ -21,49 +24,24 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.ui.platform.LocalContext
+import android.widget.Toast
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import com.SzpontCompany.check.data.social.NotificationItem
 import com.SzpontCompany.check.data.social.NotificationType
+import com.SzpontCompany.check.ui.community.CommunityViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotificationsSheet(
+    viewModel: CommunityViewModel = viewModel(),
     onDismiss: () -> Unit
 ) {
-    // Hardcoded dane na start
-    val mockNotifications = listOf(
-        NotificationItem(
-            id = "1",
-            title = "Nowe wyzwanie!",
-            message = "Tomek K. zaprasza Cię do bitwy: Bieganie 30 min.",
-            timeAgo = "5 min temu",
-            type = NotificationType.CHALLENGE,
-            isRead = false
-        ),
-        NotificationItem(
-            id = "4",
-            title = "Nowy znajomy",
-            message = "Ania W. zaakceptowała Twoje zaproszenie do znajomych. Możecie teraz rywalizować!",
-            timeAgo = "1 godz. temu",
-            type = NotificationType.FRIEND,
-            isRead = false
-        ),
-        NotificationItem(
-            id = "2",
-            title = "Zdobyto odznakę!",
-            message = "Zdobyto odznakę \"Streak 21 dni\" 🔥. Wymóg: Utrzymaj passę 21 dni.",
-            timeAgo = "2 godz. temu",
-            type = NotificationType.REWARD,
-            isRead = true
-        ),
-        NotificationItem(
-            id = "3",
-            title = "Globalny event",
-            message = "Rozpoczął się nowy Globalny Marsz. Dołącz do reszty społeczności!",
-            timeAgo = "1 dzień temu",
-            type = NotificationType.SYSTEM,
-            isRead = true
-        )
-    )
+    val notifications by viewModel.notifications.collectAsState()
+    val context = LocalContext.current
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -87,14 +65,14 @@ fun NotificationsSheet(
                     style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                     color = MaterialTheme.colorScheme.onBackground
                 )
-                TextButton(onClick = { /* TODO: Oznacz jako przeczytane */ }) {
+                TextButton(onClick = { viewModel.markAllAsRead() }) {
                     Text("Oznacz przeczytane", fontSize = 13.sp)
                 }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            if (mockNotifications.isEmpty()) {
+            if (notifications.isEmpty()) {
                 Box(modifier = Modifier.fillMaxWidth().height(200.dp), contentAlignment = Alignment.Center) {
                     Text("Brak nowych powiadomień", color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
@@ -102,8 +80,66 @@ fun NotificationsSheet(
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    items(mockNotifications.size) { i ->
-                        NotificationCard(item = mockNotifications[i])
+                    items(
+                        items = notifications,
+                        key = { it.id }
+                    ) { item ->
+                        val dismissState = rememberSwipeToDismissBoxState(
+                            confirmValueChange = { value ->
+                                if (value == SwipeToDismissBoxValue.StartToEnd || value == SwipeToDismissBoxValue.EndToStart) {
+                                    viewModel.declineAction(item.id)
+                                    true
+                                } else {
+                                    false
+                                }
+                            }
+                        )
+
+                        SwipeToDismissBox(
+                            state = dismissState,
+                            backgroundContent = {
+                                val color by animateColorAsState(
+                                    targetValue = when (dismissState.targetValue) {
+                                        SwipeToDismissBoxValue.Settled -> MaterialTheme.colorScheme.surface
+                                        else -> Color(0xFFE24B4A)
+                                    },
+                                    label = "bg_color"
+                                )
+                                val alignment = if (dismissState.dismissDirection == SwipeToDismissBoxValue.StartToEnd) Alignment.CenterStart else Alignment.CenterEnd
+
+                                Box(
+                                    Modifier
+                                        .fillMaxSize()
+                                        .clip(RoundedCornerShape(16.dp))
+                                        .background(color)
+                                        .padding(horizontal = 20.dp),
+                                    contentAlignment = alignment
+                                ) {
+                                    if (dismissState.targetValue != SwipeToDismissBoxValue.Settled) {
+                                        Icon(
+                                            imageVector = Icons.Default.Delete,
+                                            contentDescription = "Usuń powiadomienie",
+                                            tint = Color.White
+                                        )
+                                    }
+                                }
+                            },
+                            content = {
+                                NotificationCard(
+                                    item = item,
+                                    onAccept = {
+                                        viewModel.acceptAction(item.id)
+                                        if (item.type == NotificationType.FRIEND) {
+                                            Toast.makeText(context, "Dodano do znajomych!", Toast.LENGTH_SHORT).show()
+                                        } else if (item.type == NotificationType.CHALLENGE) {
+                                            Toast.makeText(context, "Zaakceptowano wyzwanie!", Toast.LENGTH_SHORT).show()
+                                        }
+                                    },
+                                    onDecline = { viewModel.declineAction(item.id) },
+                                    onClick = { viewModel.markAsRead(item.id) }
+                                )
+                            }
+                        )
                     }
                 }
             }
@@ -112,7 +148,12 @@ fun NotificationsSheet(
 }
 
 @Composable
-fun NotificationCard(item: NotificationItem) {
+fun NotificationCard(
+    item: NotificationItem,
+    onAccept: () -> Unit = {},
+    onDecline: () -> Unit = {},
+    onClick: () -> Unit = {}
+) {
     val icon: ImageVector
     val iconTint: Color
     val iconBg: Color
@@ -125,12 +166,12 @@ fun NotificationCard(item: NotificationItem) {
         }
         NotificationType.FRIEND -> {
             icon = Icons.Default.PersonAdd
-            iconTint = Color(0xFF42A5F5) // Jasny niebieski dla znajomych
+            iconTint = Color(0xFF42A5F5)
             iconBg = Color(0xFF42A5F5).copy(alpha = 0.2f)
         }
         NotificationType.REWARD -> {
             icon = Icons.Default.EmojiEvents
-            iconTint = Color(0xFFFFD700) // Złoty
+            iconTint = Color(0xFFFFD700)
             iconBg = Color(0xFFFFD700).copy(alpha = 0.2f)
         }
         NotificationType.SYSTEM -> {
@@ -145,7 +186,7 @@ fun NotificationCard(item: NotificationItem) {
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .background(if (item.isRead) Color.Transparent else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-            .clickable { /* TODO: Akcja po kliknięciu powiadomienia */ }
+            .clickable { onClick() }
             .padding(16.dp),
         verticalAlignment = Alignment.Top
     ) {
@@ -174,6 +215,28 @@ fun NotificationCard(item: NotificationItem) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 lineHeight = 18.sp
             )
+
+            if (item.requiresAction) {
+                Spacer(modifier = Modifier.height(12.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Button(
+                        onClick = onAccept,
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.weight(1f).height(38.dp),
+                        contentPadding = PaddingValues(0.dp)
+                    ) {
+                        Text("Akceptuj", fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                    }
+                    OutlinedButton(
+                        onClick = onDecline,
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.weight(1f).height(38.dp),
+                        contentPadding = PaddingValues(0.dp)
+                    ) {
+                        Text("Odrzuć", fontSize = 13.sp)
+                    }
+                }
+            }
         }
 
         Spacer(modifier = Modifier.width(8.dp))

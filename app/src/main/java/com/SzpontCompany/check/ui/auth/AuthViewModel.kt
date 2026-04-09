@@ -34,9 +34,7 @@ import kotlinx.coroutines.tasks.await
 class AuthViewModel(application: Application) : AndroidViewModel(application) {
    private val auth by lazy { FirebaseAuth.getInstance() }
    val recaptcha = RecaptchaManager(application, viewModelScope)
-   private val userRepository by lazy { UserRepository(auth, Firebase.firestore,
-       UserCache(application)
-   ) }
+   private val userRepository by lazy { UserRepository.getInstance(application.applicationContext) }
 
     var email by mutableStateOf("")
         private set

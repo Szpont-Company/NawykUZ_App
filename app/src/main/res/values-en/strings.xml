@@ -60,7 +60,7 @@
     <string name="greeting_evening">Good evening,</string>
 
     <!-- ================= PROFILE & SETTINGS ================= -->
-    <string name="profile_title">Profile</string>
+    <string name="profile_title">Your Profile</string>
     <string name="profile_level">Level</string>
     <string name="profile_habits">Habits</string>
     <string name="profile_streak_days">Streak days</string>
@@ -287,4 +287,11 @@
     <string name="nickname_error">Nickname is taken, try another one</string>
     <string name="error_nicknameTaken">This nickname is already taken!</string>
     <string name="unknown_error_nickname">Something went wrong</string>
+
+    <!-- Notifications -->
+    <string name="notification_channel_name">Habit Reminders</string>
+    <string name="notification_channel_desc">Daily notifications reminding you of your goals</string>
+    <string name="notification_title">Time for habits!</string>
+    <string name="notification_content">Check what you have planned for today.</string>
+
 </resources>

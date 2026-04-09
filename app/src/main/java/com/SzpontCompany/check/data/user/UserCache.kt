@@ -13,6 +13,8 @@ class UserCache(private val context: Context) {
                 .putString("email", user.email)
                 .putString("nickname", user.nickname)
                 .putBoolean("isAdmin", user.isAdmin)
+                .putString("avatarEmoji", user.avatarEmoji)
+                .putString("bgColor", user.bgColor)
                 .putLong("updatedAt", System.currentTimeMillis())
         }
     }
@@ -24,8 +26,10 @@ class UserCache(private val context: Context) {
         val email = prefs.getString("email", "") ?: ""
         val nickname = prefs.getString("nickname", "") ?: ""
         val isAdmin = prefs.getBoolean("isAdmin", false)
+        val avatarEmoji = prefs.getString("avatarEmoji", "") ?: ""
+        val bgColor = prefs.getString("bgColor", "Mint") ?: "Mint"
 
-        return User(uid, name, email, nickname, isAdmin)
+        return User(uid, name, email, nickname, isAdmin, avatarEmoji, bgColor)
     }
 
     fun isValid() : Boolean {
