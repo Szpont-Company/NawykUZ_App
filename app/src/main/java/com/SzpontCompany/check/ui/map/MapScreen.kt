@@ -28,24 +28,10 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
-// ── Kolory motywu (dark) ──────────────────────────────────────────────────────
-private val BgDark        = Color(0xFF0F1117)
-private val SurfaceDark   = Color(0xFF1A1D26)
-private val CardDark      = Color(0xFF22262F)
-private val GreenAccent   = Color(0xFF4ADE80)
-private val GreenDim      = Color(0xFF1A3A28)
-private val MapBg         = Color(0xFF141922)
-private val MapRoad       = Color(0xFF1E2533)
-private val MapPark       = Color(0xFF1A3328)
-private val TextPrimary   = Color(0xFFE8EAF0)
-private val TextSecondary = Color(0xFF6B7280)
-private val TextMuted     = Color(0xFF3D4350)
-private val RedDot        = Color(0xFFEF4444)
-private val TabUnderline  = Color(0xFF4ADE80)
 
 enum class MapTab { TODAY, ROUTES, FRIENDS }
 
@@ -54,7 +40,9 @@ enum class MapTab { TODAY, ROUTES, FRIENDS }
 fun MapScreen() {
     var selectedTab by remember { mutableStateOf(MapTab.TODAY) }
 
-    // Zaktualizowany, poprawny stan BottomSheet'a
+    val configuration = LocalConfiguration.current
+    val screenHeight = configuration.screenHeightDp.dp
+
     val scaffoldState = rememberBottomSheetScaffoldState(
         bottomSheetState = rememberStandardBottomSheetState(
             initialValue = SheetValue.PartiallyExpanded,
@@ -64,23 +52,19 @@ fun MapScreen() {
 
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
-        // Kolor tła samego "uchwytu" i górnej części
-        sheetContainerColor = SurfaceDark,
-        // Jak dużo ekranu wystaje na dole w stanie zwiniętym
-        sheetPeekHeight = 160.dp,
+        sheetContainerColor = MaterialTheme.colorScheme.surface,
+        sheetPeekHeight = 125.dp,
         sheetShape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
         sheetDragHandle = {
             BottomSheetDefaults.DragHandle(
-                color = TextMuted,
+                color = MaterialTheme.colorScheme.outline,
                 modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
             )
         },
         sheetContent = {
-            // ── ZAWARTOŚĆ BOTTOM SHEET ─────────────────────────────────────────
             Column(
                 modifier = Modifier
-                    .fillMaxHeight(0.85f) // Rozwija się do max 85% wysokości ekranu
-                    .fillMaxWidth()
+                    .fillMaxSize() // ZMIANA: Zdejmujemy limit 0.65f, pasek rozwija się na pełny ekran!
             ) {
                 // 1. Pasek statystyk na górze panelu
                 Row(
@@ -90,7 +74,10 @@ fun MapScreen() {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Box(
-                        modifier = Modifier.size(9.dp).clip(CircleShape).background(RedDot)
+                        modifier = Modifier
+                            .size(9.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.error)
                     )
                     Spacer(Modifier.width(8.dp))
                     StatCell(value = "5057", label = "kroków", isHighlight = true)
@@ -121,11 +108,11 @@ fun MapScreen() {
                     MapTabItem("Znajomi", selectedTab == MapTab.FRIENDS) { selectedTab = MapTab.FRIENDS }
                 }
 
-                // 3. Treść wybranej zakładki (z tłem BgDark)
+                // 3. Treść wybranej zakładki
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(BgDark)
+                        .background(MaterialTheme.colorScheme.background)
                 ) {
                     when (selectedTab) {
                         MapTab.TODAY   -> TodayTab()
@@ -136,16 +123,13 @@ fun MapScreen() {
             }
         },
         content = {
-            // ── TŁO (MAPA) ───────────────────────────────────────────────────
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(BgDark)
+                    .background(MaterialTheme.colorScheme.background)
             ) {
-                // Mapa przyjmuje teraz cały dostępny rozmiar w tle
                 MapPlaceholder(modifier = Modifier.fillMaxSize())
 
-                // Przyciski górne: Eksploracja / Znajomi / Ustawienia
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -167,19 +151,19 @@ fun MapScreen() {
                         modifier = Modifier
                             .size(36.dp)
                             .clip(CircleShape)
-                            .background(SurfaceDark.copy(alpha = 0.85f))
+                            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.85f))
                             .clickable { },
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(Icons.Outlined.Settings, contentDescription = null, tint = TextPrimary, modifier = Modifier.size(16.dp))
+                        Icon(Icons.Outlined.Settings, contentDescription = null, tint = MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(16.dp))
                     }
                 }
 
-                // Zoom +/- (umieszczony nieco niżej po prawej stronie)
                 Column(
                     modifier = Modifier
                         .align(Alignment.CenterEnd)
-                        .padding(end = 10.dp, top = 100.dp),
+                        .padding(end = 10.dp)
+                        .offset(y = (-40).dp),
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     ZoomButton("+")
@@ -195,101 +179,107 @@ private fun TodayTab() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+            .padding(16.dp)
+            .navigationBarsPadding(),
+        // ZMIANA: Usunięty verticalScroll, żeby karta mogła rozepchnąć się na wysokość
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Karta z ringiem kroków + szczegółami
-        Row(
+        // GŁÓWNA KARTA – dzięki weight(1f) wypełnia calutką dostępną wysokość
+        Column(
             modifier = Modifier
+                .weight(1f)
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
-                .background(SurfaceDark)
-                .padding(horizontal = 16.dp, vertical = 20.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(18.dp)
+                .clip(RoundedCornerShape(24.dp))
+                .background(MaterialTheme.colorScheme.surface)
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceEvenly
         ) {
-            // Ring postępu – większy
-            StepsRing(
-                current = 5057,
-                goal    = 8000,
-                modifier = Modifier.size(96.dp)
-            )
+            // DUŻY WYKRES - zajmuje max przestrzeni, zachowując proporcje koła
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .aspectRatio(1f),
+                contentAlignment = Alignment.Center
+            ) {
+                StepsRing(
+                    current = 5057,
+                    goal    = 8000,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
 
-            // Metryki – zajmują resztę szerokości
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // STATYSTYKI POD WYKRESEM
             Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 // Wiersz: Dystans + Kcal
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     Column {
-                        Text("Dystans", color = TextSecondary, fontSize = 11.sp)
-                        Text("3.8 km", color = TextPrimary, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+                        Text("Dystans", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp)
+                        Text("3.8 km", color = MaterialTheme.colorScheme.onBackground, fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
                     }
                     Column(horizontalAlignment = Alignment.End) {
-                        Text("Kcal", color = TextSecondary, fontSize = 11.sp)
-                        Text("182", color = TextPrimary, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+                        Text("Kcal", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp)
+                        Text("182", color = MaterialTheme.colorScheme.onBackground, fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
                     }
                 }
 
-                // Separator
-                Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(TextMuted.copy(alpha = 0.4f)))
+                Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)))
 
-                // Tempo + pasek
                 TempoRow(tempo = "5 min/km", percent = 63)
 
-                // Separator
-                Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(TextMuted.copy(alpha = 0.4f)))
+                Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)))
 
-                // Streak
                 Row(
+                    modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text("Streak kroków", color = TextSecondary, fontSize = 12.sp)
-                    Text(
-                        "14 dni z rzędu",
-                        color = GreenAccent,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                    Text("🔥", fontSize = 13.sp)
+                    Text("Streak kroków", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            "14 dni z rzędu ",
+                            color = MaterialTheme.colorScheme.primary,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Text("🔥", fontSize = 16.sp)
+                    }
                 }
             }
         }
 
-        // Przycisk Rozpocznij trasę
+        // PRZYCISK – Zawsze twardo przyklejony na dole
         Button(
             onClick = { },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(52.dp),
-            shape = RoundedCornerShape(14.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = CardDark)
+                .height(56.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
         ) {
-            Icon(Icons.Default.PlayArrow, contentDescription = null, tint = TextPrimary, modifier = Modifier.size(18.dp))
+            Icon(Icons.Default.PlayArrow, contentDescription = null, tint = MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(20.dp))
             Spacer(Modifier.width(8.dp))
-            Text("Rozpocznij trasę", color = TextPrimary, fontSize = 15.sp, fontWeight = FontWeight.Medium)
+            Text("Rozpocznij trasę", color = MaterialTheme.colorScheme.onBackground, fontSize = 16.sp, fontWeight = FontWeight.Medium)
         }
-        // Spacer na samym dole aby wygodnie scrollować przy NavigationBar
-        Spacer(modifier = Modifier.height(40.dp))
     }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Zakładka TRASY
-// ─────────────────────────────────────────────────────────────────────────────
 @Composable
 private fun RoutesTab() {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(16.dp),
+            .padding(16.dp)
+            .navigationBarsPadding(),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Text("Historia tras", color = TextSecondary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+        Text("Historia tras", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
         repeat(3) { i ->
             RouteHistoryCard(
                 name     = listOf("Poranny spacer", "Bieg wieczorny", "Wycieczka do parku")[i],
@@ -299,23 +289,20 @@ private fun RoutesTab() {
                 kcal     = listOf("182", "310", "98")[i]
             )
         }
-        Spacer(modifier = Modifier.height(40.dp))
     }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Zakładka ZNAJOMI
-// ─────────────────────────────────────────────────────────────────────────────
 @Composable
 private fun FriendsTab() {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(16.dp),
+            .padding(16.dp)
+            .navigationBarsPadding(),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Text("Aktywni dziś", color = TextSecondary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+        Text("Aktywni dziś", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
         listOf(
             Triple("Kacper M.", "8 204 kroków", "#1"),
             Triple("Zuzia K.",  "6 731 kroków", "#2"),
@@ -323,7 +310,6 @@ private fun FriendsTab() {
         ).forEachIndexed { idx, (name, steps, rank) ->
             FriendRow(name = name, steps = steps, rank = rank, isMe = idx == 2)
         }
-        Spacer(modifier = Modifier.height(40.dp))
     }
 }
 
@@ -333,28 +319,28 @@ private fun FriendsTab() {
 
 @Composable
 private fun MapPlaceholder(modifier: Modifier = Modifier) {
+    val mapBgColor = MaterialTheme.colorScheme.surfaceVariant
+    val mapRoadColor = MaterialTheme.colorScheme.outlineVariant
+    val mapParkColor = MaterialTheme.colorScheme.secondaryContainer
+    val accentColor = MaterialTheme.colorScheme.primary
+
     Canvas(modifier = modifier) {
-        drawRect(color = MapBg)
+        drawRect(color = mapBgColor)
 
-        // Siatka ulic (dostosowana pod pełny ekran)
         val roadW = 14f
-        val roadColor = MapRoad
-
         for (y in listOf(size.height * 0.2f, size.height * 0.4f, size.height * 0.6f, size.height * 0.8f)) {
-            drawLine(roadColor, Offset(0f, y), Offset(size.width, y), strokeWidth = roadW)
+            drawLine(mapRoadColor, Offset(0f, y), Offset(size.width, y), strokeWidth = roadW)
         }
         for (x in listOf(size.width * 0.2f, size.width * 0.45f, size.width * 0.7f, size.width * 0.88f)) {
-            drawLine(roadColor, Offset(x, 0f), Offset(x, size.height), strokeWidth = roadW)
+            drawLine(mapRoadColor, Offset(x, 0f), Offset(x, size.height), strokeWidth = roadW)
         }
 
-        // Park (zielony blok)
         drawRect(
-            color = MapPark,
+            color = mapParkColor,
             topLeft = Offset(size.width * 0.22f, size.height * 0.18f),
             size = Size(size.width * 0.22f, size.height * 0.20f)
         )
 
-        // Trasa przerywana
         val pathPoints = listOf(
             Offset(size.width * 0.38f, size.height * 0.50f),
             Offset(size.width * 0.38f, size.height * 0.45f),
@@ -368,7 +354,7 @@ private fun MapPlaceholder(modifier: Modifier = Modifier) {
         }
         drawPath(
             path = routePath,
-            color = GreenAccent,
+            color = accentColor,
             style = Stroke(
                 width = 5f,
                 cap = StrokeCap.Round,
@@ -376,14 +362,12 @@ private fun MapPlaceholder(modifier: Modifier = Modifier) {
             )
         )
 
-        // Punkt końcowy (góra trasy)
-        drawCircle(color = GreenAccent, radius = 14f, center = pathPoints.last())
-        drawCircle(color = MapBg,       radius = 8f,  center = pathPoints.last())
+        drawCircle(color = accentColor, radius = 14f, center = pathPoints.last())
+        drawCircle(color = mapBgColor,  radius = 8f,  center = pathPoints.last())
 
-        // Punkt startowy (aktualny) – zielone kółko
-        drawCircle(color = GreenAccent, radius = 18f, center = pathPoints.first())
-        drawCircle(color = MapBg,       radius = 10f, center = pathPoints.first())
-        drawCircle(color = GreenAccent, radius = 5f,  center = pathPoints.first())
+        drawCircle(color = accentColor, radius = 18f, center = pathPoints.first())
+        drawCircle(color = mapBgColor,  radius = 10f, center = pathPoints.first())
+        drawCircle(color = accentColor, radius = 5f,  center = pathPoints.first())
     }
 }
 
@@ -392,14 +376,14 @@ private fun MapChip(icon: @Composable () -> Unit, label: String) {
     Row(
         modifier = Modifier
             .clip(RoundedCornerShape(20.dp))
-            .background(SurfaceDark.copy(alpha = 0.90f))
+            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.90f))
             .clickable { }
             .padding(horizontal = 12.dp, vertical = 7.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(5.dp)
     ) {
-        CompositionLocalProvider(LocalContentColor provides TextPrimary) { icon() }
-        Text(label, color = TextPrimary, fontSize = 13.sp, fontWeight = FontWeight.Medium)
+        CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onBackground) { icon() }
+        Text(label, color = MaterialTheme.colorScheme.onBackground, fontSize = 13.sp, fontWeight = FontWeight.Medium)
     }
 }
 
@@ -409,11 +393,11 @@ private fun ZoomButton(symbol: String) {
         modifier = Modifier
             .size(32.dp)
             .clip(RoundedCornerShape(8.dp))
-            .background(SurfaceDark.copy(alpha = 0.85f))
+            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.85f))
             .clickable { },
         contentAlignment = Alignment.Center
     ) {
-        Text(symbol, color = TextPrimary, fontSize = 18.sp, fontWeight = FontWeight.Light)
+        Text(symbol, color = MaterialTheme.colorScheme.onBackground, fontSize = 18.sp, fontWeight = FontWeight.Light)
     }
 }
 
@@ -422,14 +406,14 @@ private fun StatCell(value: String, label: String, isHighlight: Boolean = false)
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = value,
-            color = TextPrimary,
+            color = MaterialTheme.colorScheme.onBackground,
             fontSize = if (isHighlight) 22.sp else 16.sp,
             fontWeight = if (isHighlight) FontWeight.ExtraBold else FontWeight.SemiBold,
             letterSpacing = if (isHighlight) (-0.5).sp else 0.sp
         )
         Text(
             text = label,
-            color = TextSecondary,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = 10.sp,
             letterSpacing = 0.sp
         )
@@ -442,14 +426,14 @@ private fun StatDivider() {
         modifier = Modifier
             .width(1.dp)
             .height(28.dp)
-            .background(TextMuted)
+            .background(MaterialTheme.colorScheme.outline)
     )
 }
 
 @Composable
 private fun MapTabItem(label: String, selected: Boolean, onClick: () -> Unit) {
     val underlineColor by animateColorAsState(
-        targetValue = if (selected) TabUnderline else Color.Transparent,
+        targetValue = if (selected) MaterialTheme.colorScheme.primary else Color.Transparent,
         animationSpec = tween(200), label = "tab_underline"
     )
     Column(
@@ -460,7 +444,7 @@ private fun MapTabItem(label: String, selected: Boolean, onClick: () -> Unit) {
     ) {
         Text(
             text = label,
-            color = if (selected) GreenAccent else TextSecondary,
+            color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = 14.sp,
             fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
             modifier = Modifier.padding(vertical = 12.dp)
@@ -478,16 +462,22 @@ private fun MapTabItem(label: String, selected: Boolean, onClick: () -> Unit) {
 @Composable
 private fun StepsRing(current: Int, goal: Int, modifier: Modifier = Modifier) {
     val progress = (current.toFloat() / goal).coerceIn(0f, 1f)
+
+    val trackColor = MaterialTheme.colorScheme.surfaceVariant
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val textColor = MaterialTheme.colorScheme.onBackground
+    val secondaryTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         Canvas(modifier = Modifier.fillMaxSize()) {
-            val stroke = 10.dp.toPx()
+            val stroke = 12.dp.toPx() // Zwiększona grubość linii dla dużego ringu
             val radius = (size.minDimension - stroke) / 2f
             val center = Offset(size.width / 2f, size.height / 2f)
-            // Tło
-            drawCircle(color = CardDark, radius = radius, center = center, style = Stroke(stroke))
-            // Postęp
+
+            drawCircle(color = trackColor, radius = radius, center = center, style = Stroke(stroke))
+
             drawArc(
-                color = GreenAccent,
+                color = primaryColor,
                 startAngle = -90f,
                 sweepAngle = 360f * progress,
                 useCenter = false,
@@ -499,12 +489,12 @@ private fun StepsRing(current: Int, goal: Int, modifier: Modifier = Modifier) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
                 text = current.toString(),
-                color = TextPrimary,
-                fontSize = 16.sp,
+                color = textColor,
+                fontSize = 32.sp, // ZMIANA: Zwiększona czcionka wewnątrz ringu (bo wykres będzie potężny!)
                 fontWeight = FontWeight.Bold,
-                letterSpacing = (-0.5).sp
+                letterSpacing = (-1).sp
             )
-            Text(text = "/ ${goal / 1000}k", color = TextSecondary, fontSize = 11.sp)
+            Text(text = "/ ${goal / 1000}k", color = secondaryTextColor, fontSize = 16.sp)
         }
     }
 }
@@ -513,24 +503,23 @@ private fun StepsRing(current: Int, goal: Int, modifier: Modifier = Modifier) {
 private fun TempoRow(tempo: String, percent: Int) {
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text("Tempo", color = TextSecondary, fontSize = 11.sp)
-            Text("$percent%", color = GreenAccent, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+            Text("Tempo", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp)
+            Text("$percent%", color = MaterialTheme.colorScheme.primary, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
         }
-        Text(tempo, color = TextPrimary, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-        // Pasek postępu
+        Text(tempo, color = MaterialTheme.colorScheme.onBackground, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(4.dp)
                 .clip(RoundedCornerShape(2.dp))
-                .background(CardDark)
+                .background(MaterialTheme.colorScheme.surfaceVariant)
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth(percent / 100f)
                     .fillMaxHeight()
                     .clip(RoundedCornerShape(2.dp))
-                    .background(GreenAccent)
+                    .background(MaterialTheme.colorScheme.primary)
             )
         }
     }
@@ -542,7 +531,7 @@ private fun RouteHistoryCard(name: String, date: String, distance: String, durat
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(14.dp))
-            .background(SurfaceDark)
+            .background(MaterialTheme.colorScheme.surface)
             .padding(14.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -551,16 +540,16 @@ private fun RouteHistoryCard(name: String, date: String, distance: String, durat
             modifier = Modifier
                 .size(52.dp)
                 .clip(RoundedCornerShape(10.dp))
-                .background(MapBg),
+                .background(MaterialTheme.colorScheme.surfaceVariant),
             contentAlignment = Alignment.Center
         ) {
             Text("🗺️", fontSize = 22.sp)
         }
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(name, color = TextPrimary, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-            Text(date, color = TextSecondary, fontSize = 12.sp)
+            Text(name, color = MaterialTheme.colorScheme.onBackground, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+            Text(date, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text("$distance  ·  $duration  ·  $kcal kcal", color = TextSecondary, fontSize = 11.sp)
+                Text("$distance  ·  $duration  ·  $kcal kcal", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 11.sp)
             }
         }
     }
@@ -568,14 +557,17 @@ private fun RouteHistoryCard(name: String, date: String, distance: String, durat
 
 @Composable
 private fun FriendRow(name: String, steps: String, rank: String, isMe: Boolean) {
+    val bgColor = if (isMe) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface
+    val borderColor = if (isMe) MaterialTheme.colorScheme.primary.copy(alpha = 0.4f) else Color.Transparent
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(14.dp))
-            .background(if (isMe) GreenDim else SurfaceDark)
+            .background(bgColor)
             .border(
                 width = if (isMe) 1.dp else 0.dp,
-                color = if (isMe) GreenAccent.copy(alpha = 0.4f) else Color.Transparent,
+                color = borderColor,
                 shape = RoundedCornerShape(14.dp)
             )
             .padding(14.dp),
@@ -586,15 +578,15 @@ private fun FriendRow(name: String, steps: String, rank: String, isMe: Boolean) 
             modifier = Modifier
                 .size(40.dp)
                 .clip(CircleShape)
-                .background(CardDark),
+                .background(MaterialTheme.colorScheme.surfaceVariant),
             contentAlignment = Alignment.Center
         ) {
-            Text(name.first().toString(), color = GreenAccent, fontWeight = FontWeight.Bold)
+            Text(name.first().toString(), color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
         }
         Column(modifier = Modifier.weight(1f)) {
-            Text(name,  color = TextPrimary,   fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-            Text(steps, color = TextSecondary, fontSize = 12.sp)
+            Text(name,  color = MaterialTheme.colorScheme.onBackground,   fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+            Text(steps, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
         }
-        Text(rank, color = if (isMe) GreenAccent else TextSecondary, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+        Text(rank, color = if (isMe) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp, fontWeight = FontWeight.Bold)
     }
 }
