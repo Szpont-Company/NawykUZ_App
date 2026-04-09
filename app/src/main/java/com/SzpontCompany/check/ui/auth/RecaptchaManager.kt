@@ -2,6 +2,7 @@ package com.SzpontCompany.check.ui.auth
 
 import android.app.Application
 import android.util.Log
+import com.SzpontCompany.check.config.FirebaseConfig
 import com.google.android.recaptcha.Recaptcha
 import com.google.android.recaptcha.RecaptchaAction
 import com.google.android.recaptcha.RecaptchaClient
@@ -18,7 +19,7 @@ class RecaptchaManager(
     private val application: Application,
     private val scope: CoroutineScope,
     private val siteKey: String = "6LdJmpYsAAAAABW4_tXEZl0T6by3ov_P2d8jd5wK",
-    private val functions: FirebaseFunctions = FirebaseFunctions.getInstance()
+    private val functions: FirebaseFunctions = FirebaseConfig.functions
 ) {
     private var client: RecaptchaClient? = null
 
