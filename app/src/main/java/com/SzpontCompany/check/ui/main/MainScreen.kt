@@ -20,6 +20,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.SzpontCompany.check.ui.addhabit.AddHabitHost
 import com.SzpontCompany.check.ui.dashboard.TodayScreen
 import com.SzpontCompany.check.ui.stats.StatsScreen
 import com.SzpontCompany.check.ui.map.MapScreen
@@ -27,18 +28,25 @@ import com.SzpontCompany.check.ui.community.CommunityScreen
 import com.SzpontCompany.check.ui.community.components.NotificationsSheet
 
 enum class BottomTab {
-    TODAY, STATS, MAP, COMMUNITY
+    TODAY, STATS, MAP, COMMUNITY, ADD
 }
 
 @Composable
 fun MainScreen(
     currentTab: BottomTab,
+    onTabSelected: (BottomTab) -> Unit,
     onProfileClick: () -> Unit = {},
     onOptionsClick: () -> Unit = {},
     onNotificationsClick: () -> Unit = {}
 ) {
-
     var showNotifications by remember { mutableStateOf(false) }
+    var showAddHabit by remember { mutableStateOf(false) }
+
+    LaunchedEffect(currentTab) {
+        if (currentTab == BottomTab.ADD) {
+            showAddHabit = true
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         when (currentTab) {
@@ -50,6 +58,7 @@ fun MainScreen(
             BottomTab.STATS -> StatsScreen()
             BottomTab.MAP -> MapScreen()
             BottomTab.COMMUNITY -> CommunityScreen(onProfileClick = onProfileClick)
+            BottomTab.ADD -> {}
         }
 
         if (showNotifications) {
@@ -72,7 +81,10 @@ fun MainScreen(
         ) + fadeOut(animationSpec = tween(durationMillis = 300))
     ) {
         AddHabitHost(
-            onClose = { showAddHabit = false }
+            onClose = {
+                showAddHabit = false
+                onTabSelected(BottomTab.TODAY)
+            }
         )
     }
 }
@@ -114,7 +126,7 @@ fun CheckBottomNavigationBar(
 
         NavigationBarItem(
             selected = false,
-            onClick = onAddClick,
+            onClick = { onTabSelected(BottomTab.ADD) },
             icon = {
                 Box(
                     modifier = Modifier

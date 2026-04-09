@@ -255,6 +255,7 @@ fun RootNavigationGraph(onLogout: () -> Unit) {
             composable("main") {
                 MainScreen(
                     currentTab = currentTab ?: BottomTab.TODAY,
+                    onTabSelected = { newTab -> currentTab = newTab },
                     onProfileClick = {
                         navController.navigate("profile"){
                             launchSingleTop = true
