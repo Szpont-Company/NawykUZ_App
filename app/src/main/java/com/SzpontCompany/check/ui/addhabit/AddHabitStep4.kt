@@ -1,5 +1,6 @@
 package com.SzpontCompany.check.ui.addhabit
 
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -11,7 +12,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,6 +29,17 @@ fun AddHabitStep4(
     onBackClick: () -> Unit,
     onConfirmClick: () -> Unit
 ) {
+    var progress by remember { mutableFloatStateOf(0f) }
+    val animatedProgress by animateFloatAsState(
+        targetValue = progress,
+        animationSpec = tween(600, easing = FastOutSlowInEasing),
+        label = "progress_anim"
+    )
+
+    LaunchedEffect(Unit) {
+        progress = 1.0f
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -42,14 +54,33 @@ fun AddHabitStep4(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
-                modifier = Modifier.size(40.dp).clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.surfaceVariant).clickable { onBackClick() },
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .clickable { onBackClick() },
                 contentAlignment = Alignment.Center
-            ) { Icon(Icons.Default.ChevronLeft, contentDescription = "Wróć", tint = MaterialTheme.colorScheme.onBackground) }
+            ) {
+                Icon(Icons.Default.ChevronLeft, contentDescription = "Wróć", tint = MaterialTheme.colorScheme.onBackground)
+            }
             Text("Podsumowanie", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Bold)
             Text("4 / 4", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, lineHeight = 14.sp)
         }
 
-        Box(modifier = Modifier.fillMaxWidth().height(4.dp).background(MaterialTheme.colorScheme.primary, RoundedCornerShape(2.dp)))
+        // --- PASEK POSTĘPU ---
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(4.dp)
+                .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(2.dp))
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(animatedProgress) // Animowana szerokość
+                    .fillMaxHeight()
+                    .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(2.dp))
+            )
+        }
 
         Column(
             modifier = Modifier
@@ -93,7 +124,14 @@ fun AddHabitStep4(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            Box(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)).border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f), RoundedCornerShape(12.dp)).padding(16.dp)) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                    .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
+                    .padding(16.dp)
+            ) {
                 Text(text = "Nawyk zostanie dodany do Twojego dashboardu i będzie śledzony od dziś.", fontSize = 13.sp, color = MaterialTheme.colorScheme.onBackground)
             }
         }
@@ -105,7 +143,9 @@ fun AddHabitStep4(
             shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant, contentColor = MaterialTheme.colorScheme.onBackground),
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f))
-        ) { Text("Utwórz nawyk", fontSize = 16.sp, fontWeight = FontWeight.Medium) }
+        ) {
+            Text("Utwórz nawyk", fontSize = 16.sp, fontWeight = FontWeight.Medium)
+        }
 
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -115,7 +155,9 @@ fun AddHabitStep4(
             shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onBackground),
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.surfaceVariant)
-        ) { Text("Wróć", fontSize = 16.sp, fontWeight = FontWeight.Medium) }
+        ) {
+            Text("Wróć", fontSize = 16.sp, fontWeight = FontWeight.Medium)
+        }
     }
 }
 

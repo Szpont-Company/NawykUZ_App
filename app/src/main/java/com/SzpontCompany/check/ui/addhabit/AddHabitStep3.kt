@@ -1,5 +1,7 @@
 package com.SzpontCompany.check.ui.addhabit
 
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -18,12 +20,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.SzpontCompany.check.ui.components.WheelTimePicker
-import com.SzpontCompany.check.ui.theme.CheckTheme
-import com.SzpontCompany.check.ui.theme.Mint
 
 @Composable
 fun AddHabitStep3(
@@ -40,6 +39,17 @@ fun AddHabitStep3(
     var showEveningTimePicker by remember { mutableStateOf(false) }
 
     var difficulty by remember { mutableStateOf("Średni") }
+
+    // --- ANIMACJA PASKA POSTĘPU ---
+    var progress by remember { mutableFloatStateOf(0f) }
+    val animatedProgress by animateFloatAsState(
+        targetValue = progress,
+        animationSpec = tween(600, easing = FastOutSlowInEasing),
+        label = "progress_anim"
+    )
+    LaunchedEffect(Unit) {
+        progress = 0.75f
+    }
 
     Column(
         modifier = Modifier
@@ -80,6 +90,7 @@ fun AddHabitStep3(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // --- PASEK POSTĘPU ---
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -88,7 +99,7 @@ fun AddHabitStep3(
         ) {
             Box(
                 modifier = Modifier
-                    .fillMaxWidth(0.75f)
+                    .fillMaxWidth(animatedProgress) // Animowana szerokość
                     .fillMaxHeight()
                     .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(2.dp))
             )
@@ -111,9 +122,16 @@ fun AddHabitStep3(
                 onCheckedChange = { dailyReminderEnabled = it }
             )
 
-            if (dailyReminderEnabled) {
-                Spacer(modifier = Modifier.height(8.dp))
-                TimeSelectionBox(time = reminderTime) { showMainTimePicker = true }
+            // Animowane pojawianie się wyboru czasu (dzienne)
+            AnimatedVisibility(
+                visible = dailyReminderEnabled,
+                enter = expandVertically(spring(stiffness = Spring.StiffnessMediumLow)) + fadeIn(),
+                exit = shrinkVertically(spring(stiffness = Spring.StiffnessMediumLow)) + fadeOut()
+            ) {
+                Column {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    TimeSelectionBox(time = reminderTime) { showMainTimePicker = true }
+                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -126,9 +144,16 @@ fun AddHabitStep3(
                 onCheckedChange = { eveningReminderEnabled = it }
             )
 
-            if (eveningReminderEnabled) {
-                Spacer(modifier = Modifier.height(8.dp))
-                TimeSelectionBox(time = eveningReminderTime) { showEveningTimePicker = true }
+            // Animowane pojawianie się wyboru czasu (wieczorne)
+            AnimatedVisibility(
+                visible = eveningReminderEnabled,
+                enter = expandVertically(spring(stiffness = Spring.StiffnessMediumLow)) + fadeIn(),
+                exit = shrinkVertically(spring(stiffness = Spring.StiffnessMediumLow)) + fadeOut()
+            ) {
+                Column {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    TimeSelectionBox(time = eveningReminderTime) { showEveningTimePicker = true }
+                }
             }
 
             Spacer(modifier = Modifier.height(32.dp))

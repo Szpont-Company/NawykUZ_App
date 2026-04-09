@@ -25,11 +25,10 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.SzpontCompany.check.ui.theme.CheckTheme
-import com.SzpontCompany.check.ui.theme.Mint
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
 
 @Composable
 fun AddHabitStep2(
@@ -41,6 +40,16 @@ fun AddHabitStep2(
     var timesPerWeek by remember { mutableStateOf(3) }
     var dailyGoal by remember { mutableStateOf(30) }
     var selectedUnit by remember { mutableStateOf("min") }
+
+    var progress by remember { mutableFloatStateOf(0f) }
+    val animatedProgress by animateFloatAsState(
+        targetValue = progress,
+        animationSpec = tween(600, easing = FastOutSlowInEasing),
+        label = "progress_anim"
+    )
+    LaunchedEffect(Unit) {
+        progress = 0.5f
+    }
 
     val daysOfWeek = listOf("Pn", "Wt", "Śr", "Cz", "Pt", "So", "Nd")
     val units = listOf("min", "kroków", "razy", "ml")
@@ -93,7 +102,7 @@ fun AddHabitStep2(
         ) {
             Box(
                 modifier = Modifier
-                    .fillMaxWidth(0.5f) // 2/4 szerokości
+                    .fillMaxWidth(animatedProgress)
                     .fillMaxHeight()
                     .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(2.dp))
             )
@@ -124,49 +133,63 @@ fun AddHabitStep2(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            if (frequency == "Własne") {
-                SectionTitle("DNI TYGODNIA")
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    daysOfWeek.forEach { day ->
-                        val isSelected = selectedDays.contains(day)
-                        Box(
-                            modifier = Modifier
-                                .size(42.dp)
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f) else Color.Transparent)
-                                .border(
-                                    width = 1.dp,
-                                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
-                                    shape = RoundedCornerShape(12.dp)
+            AnimatedVisibility(
+                visible = frequency == "Własne",
+                enter = expandVertically(spring(stiffness = Spring.StiffnessMediumLow)) + fadeIn(),
+                exit = shrinkVertically(spring(stiffness = Spring.StiffnessMediumLow)) + fadeOut()
+            ) {
+                Column {
+                    SectionTitle("DNI TYGODNIA")
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        daysOfWeek.forEach { day ->
+                            val isSelected = selectedDays.contains(day)
+                            Box(
+                                modifier = Modifier
+                                    .size(42.dp)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f) else Color.Transparent)
+                                    .border(
+                                        width = 1.dp,
+                                        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
+                                        shape = RoundedCornerShape(12.dp)
+                                    )
+                                    .clickable {
+                                        selectedDays = if (isSelected) selectedDays - day else selectedDays + day
+                                    },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = day,
+                                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    fontSize = 14.sp,
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
                                 )
-                                .clickable {
-                                    selectedDays = if (isSelected) selectedDays - day else selectedDays + day
-                                },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = day,
-                                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                                fontSize = 14.sp,
-                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
-                            )
+                            }
                         }
                     }
+                    Spacer(modifier = Modifier.height(24.dp))
                 }
-                Spacer(modifier = Modifier.height(24.dp))
-            } else if (frequency == "Tygodniowo") {
-                SectionTitle("ILE RAZY W TYGODNIU?")
-                NumberPicker(
-                    value = timesPerWeek,
-                    onValueChange = { timesPerWeek = it.coerceIn(1, 7) },
-                    onMinus = { if (timesPerWeek > 1) timesPerWeek-- },
-                    onPlus = { if (timesPerWeek < 7) timesPerWeek++ },
-                    suffix = "razy"
-                )
-                Spacer(modifier = Modifier.height(24.dp))
+            }
+
+            AnimatedVisibility(
+                visible = frequency == "Tygodniowo",
+                enter = expandVertically(spring(stiffness = Spring.StiffnessMediumLow)) + fadeIn(),
+                exit = shrinkVertically(spring(stiffness = Spring.StiffnessMediumLow)) + fadeOut()
+            ) {
+                Column {
+                    SectionTitle("ILE RAZY W TYGODNIU?")
+                    NumberPicker(
+                        value = timesPerWeek,
+                        onValueChange = { timesPerWeek = it.coerceIn(1, 7) },
+                        onMinus = { if (timesPerWeek > 1) timesPerWeek-- },
+                        onPlus = { if (timesPerWeek < 7) timesPerWeek++ },
+                        suffix = "razy"
+                    )
+                    Spacer(modifier = Modifier.height(24.dp))
+                }
             }
 
             SectionTitle(if (frequency == "Tygodniowo") "CEL NA JEDEN RAZ" else "CEL DZIENNY")
