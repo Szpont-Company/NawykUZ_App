@@ -26,7 +26,11 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FriendsCard(modifier: Modifier = Modifier) {
+fun FriendsCard(
+    modifier: Modifier = Modifier,
+    onFriendProfileClick: (Friend) -> Unit = {},
+    onMessageClick: (Friend) -> Unit = {}
+) {
     var selectedSubTab by remember { mutableStateOf(0) }
     val subTabs = listOf("Znajomi (3)", "Zaproszenia", "Szukaj")
     val haptic = LocalHapticFeedback.current
@@ -80,16 +84,21 @@ fun FriendsCard(modifier: Modifier = Modifier) {
         Spacer(Modifier.height(16.dp))
 
         when (selectedSubTab) {
-            0 -> FriendsListSection(activeFriends, offlineFriends)
+            0 -> FriendsListSection(activeFriends, offlineFriends, onFriendProfileClick, onMessageClick)
             1 -> FriendsInvitesSection()
-            2 -> FriendsSearchSection(suggestedFriends)
+            2 -> FriendsSearchSection(suggestedFriends, onFriendProfileClick, onMessageClick)
         }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FriendsListSection(activeFriends: List<Friend>, offlineFriends: List<Friend>) {
+fun FriendsListSection(
+    activeFriends: List<Friend>,
+    offlineFriends: List<Friend>,
+    onFriendProfileClick: (Friend) -> Unit = {},
+    onMessageClick: (Friend) -> Unit = {}
+) {
     var searchQuery by remember { mutableStateOf("") }
     val haptic = LocalHapticFeedback.current
 
@@ -122,7 +131,11 @@ fun FriendsListSection(activeFriends: List<Friend>, offlineFriends: List<Friend>
 
         items(activeFriends.size, key = { "active_${activeFriends[it].name}" }) { i ->
             Box(Modifier.animateItem()) {
-                FriendListItem(activeFriends[i])
+                FriendListItem(
+                    friend = activeFriends[i],
+                    onProfileClick = { onFriendProfileClick(activeFriends[i]) },
+                    onMessageClick = { onMessageClick(activeFriends[i]) }
+                )
             }
         }
 
@@ -133,7 +146,11 @@ fun FriendsListSection(activeFriends: List<Friend>, offlineFriends: List<Friend>
 
         items(offlineFriends.size, key = { "offline_${offlineFriends[it].name}" }) { i ->
             Box(Modifier.animateItem()) {
-                FriendListItem(offlineFriends[i])
+                FriendListItem(
+                    friend = offlineFriends[i],
+                    onProfileClick = { onFriendProfileClick(offlineFriends[i]) },
+                    onMessageClick = { onMessageClick(offlineFriends[i]) }
+                )
             }
         }
 
@@ -199,7 +216,11 @@ fun FriendsInvitesSection() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FriendsSearchSection(suggestedFriends: List<Friend>) {
+fun FriendsSearchSection(
+    suggestedFriends: List<Friend>,
+    onFriendProfileClick: (Friend) -> Unit = {},
+    onMessageClick: (Friend) -> Unit = {}
+) {
     var searchQuery by remember { mutableStateOf("") }
     var searched by remember { mutableStateOf(false) }
 
@@ -242,7 +263,12 @@ fun FriendsSearchSection(suggestedFriends: List<Friend>) {
             }
             items(suggestedFriends.size, key = { "suggested_${suggestedFriends[it].name}" }) { i ->
                 Box(Modifier.animateItem()) {
-                    FriendListItem(suggestedFriends[i], isSuggested = true)
+                    FriendListItem(
+                        friend = suggestedFriends[i],
+                        isSuggested = true,
+                        onProfileClick = { onFriendProfileClick(suggestedFriends[i]) },
+                        onMessageClick = { onMessageClick(suggestedFriends[i]) }
+                    )
                 }
             }
         } else {

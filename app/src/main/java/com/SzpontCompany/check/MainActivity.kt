@@ -55,6 +55,10 @@ import com.SzpontCompany.check.ui.theme.Crimson
 import com.SzpontCompany.check.ui.theme.Indigo
 import com.SzpontCompany.check.ui.theme.Rose
 import com.SzpontCompany.check.ui.theme.Sky
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
+import com.SzpontCompany.check.ui.profile.FriendProfileScreen
+import com.SzpontCompany.check.ui.community.ChatScreen
 import androidx.compose.runtime.rememberCoroutineScope
 import com.SzpontCompany.check.ui.user.OnboardingScreen
 import com.google.firebase.auth.FirebaseAuth
@@ -236,14 +240,16 @@ fun RootNavigationGraph(onLogout: () -> Unit) {
 
     Scaffold(
         bottomBar = {
-            CheckBottomNavigationBar(
-                currentTab = if (currentRoute == "main") currentTab else null,
-                onTabSelected = { newTab ->
-                    currentTab = newTab
-                    navController.popBackStack("main", inclusive = false)
-                },
-                onAddClick = { /* TODO: Otwórz okno dodawania */ }
-            )
+            if (currentRoute == "main") {
+                CheckBottomNavigationBar(
+                    currentTab = currentTab ?: BottomTab.TODAY,
+                    onTabSelected = { newTab ->
+                        currentTab = newTab
+                        navController.popBackStack("main", inclusive = false)
+                    },
+                    onAddClick = { /* TODO: Otwórz okno dodawania */ }
+                )
+            }
         }
     ) { paddingValues ->
         NavHost(
@@ -265,6 +271,16 @@ fun RootNavigationGraph(onLogout: () -> Unit) {
                             launchSingleTop = true
                         }
                     },
+                    onFriendProfileClick = {
+                        navController.navigate("friend_profile") {
+                            launchSingleTop = true
+                        }
+                    },
+                    onMessageClick = {
+                        navController.navigate("chat_screen") {
+                            launchSingleTop = true
+                        }
+                    }
                 )
             }
 
@@ -298,6 +314,23 @@ fun RootNavigationGraph(onLogout: () -> Unit) {
             composable("edit_profile") {
                 EditProfileScreen(
                     onBackClick = { navController.popBackStack() }
+                )
+            }
+
+            composable("friend_profile") {
+                FriendProfileScreen(
+                    onBackClick = { navController.popBackStack() },
+                    onMessageClick = { navController.navigate("chat_screen") },
+                    isInitiallyPrivate = false
+                )
+            }
+
+            composable("chat_screen") {
+                ChatScreen(
+                    onBackClick = { navController.popBackStack() },
+                    friendName = "Anna Nowak",
+                    friendEmoji = "🦊",
+                    friendBgColor = "Lavender"
                 )
             }
 

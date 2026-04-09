@@ -12,6 +12,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PersonAdd
@@ -43,6 +44,7 @@ enum class FriendshipStatus {
 @Composable
 fun FriendProfileScreen(
     onBackClick: () -> Unit = {},
+    onMessageClick: () -> Unit = {},
     isInitiallyPrivate: Boolean = false,
     privacySetting: String = "FRIENDS_ONLY"
 ) {
@@ -64,7 +66,7 @@ fun FriendProfileScreen(
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp)
     ) {
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             CheckBackButton(onClick = onBackClick)
@@ -149,14 +151,26 @@ fun FriendProfileScreen(
 
             Spacer(modifier = Modifier.width(12.dp))
 
-            OutlinedButton(
-                onClick = { /* TODO interakcja */ },
-                modifier = Modifier.size(54.dp),
-                shape = RoundedCornerShape(16.dp),
-                contentPadding = PaddingValues(0.dp),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
-            ) {
-                Text("👋", fontSize = 24.sp)
+            if (friendshipStatus == FriendshipStatus.FRIENDS) {
+                Button(
+                    onClick = onMessageClick,
+                    modifier = Modifier.size(54.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                    contentPadding = PaddingValues(0.dp)
+                ) {
+                    Icon(imageVector = Icons.Default.Email, contentDescription = "Wiadomość")
+                }
+            } else {
+                OutlinedButton(
+                    onClick = { /* TODO interakcja */ },
+                    modifier = Modifier.size(54.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    contentPadding = PaddingValues(0.dp),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+                ) {
+                    Text("👋", fontSize = 24.sp)
+                }
             }
         }
 
@@ -226,7 +240,7 @@ fun FriendProfileScreen(
             FriendHabitCard(emoji = "💧", title = "Piję wodę", subtitle = "2 litry", streak = "24 dni")
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(16.dp))
     }
 
     selectedBadge?.let { badge ->

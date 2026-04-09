@@ -29,7 +29,9 @@ fun MainScreen(
     currentTab: BottomTab,
     onProfileClick: () -> Unit = {},
     onOptionsClick: () -> Unit = {},
-    onNotificationsClick: () -> Unit = {}
+    onNotificationsClick: () -> Unit = {},
+    onFriendProfileClick: () -> Unit = {},
+    onMessageClick: () -> Unit = {}
 ) {
 
     var showNotifications by remember { mutableStateOf(false) }
@@ -43,7 +45,11 @@ fun MainScreen(
             )
             BottomTab.STATS -> StatsScreen()
             BottomTab.MAP -> MapScreen()
-            BottomTab.COMMUNITY -> CommunityScreen(onProfileClick = onProfileClick)
+            BottomTab.COMMUNITY -> CommunityScreen(
+                onProfileClick = onProfileClick,
+                onFriendProfileClick = onFriendProfileClick,
+                onMessageClick = onMessageClick
+            )
         }
 
         if (showNotifications) {

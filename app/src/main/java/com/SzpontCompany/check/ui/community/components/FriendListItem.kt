@@ -30,7 +30,13 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 
 @Composable
-fun FriendListItem(friend: Friend, isSuggested: Boolean = false, onAction: () -> Unit = {}) {
+fun FriendListItem(
+    friend: Friend,
+    isSuggested: Boolean = false,
+    onAction: () -> Unit = {},
+    onProfileClick: () -> Unit = {},
+    onMessageClick: () -> Unit = {}
+) {
     val formattedXp = if (friend.xp > 0) String.format(Locale.US, "%,d", friend.xp).replace(',', ' ') else ""
     val haptic = LocalHapticFeedback.current
 
@@ -115,12 +121,18 @@ fun FriendListItem(friend: Friend, isSuggested: Boolean = false, onAction: () ->
                         DropdownMenuItem(
                             text = { Text("Pokaż profil", fontWeight = FontWeight.Medium, fontSize = 14.sp) },
                             leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
-                            onClick = { expanded = false }
+                            onClick = {
+                                expanded = false
+                                onProfileClick()
+                            }
                         )
                         DropdownMenuItem(
                             text = { Text("Wyślij wiadomość", fontWeight = FontWeight.Medium, fontSize = 14.sp) },
                             leadingIcon = { Icon(Icons.Default.Email, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
-                            onClick = { expanded = false }
+                            onClick = {
+                                expanded = false
+                                onMessageClick()
+                            }
                         )
                         HorizontalDivider(
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
