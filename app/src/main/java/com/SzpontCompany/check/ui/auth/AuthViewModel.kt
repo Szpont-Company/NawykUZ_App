@@ -223,8 +223,6 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     suspend fun saveNickname(nickname: String): Result<Unit> {
-        println("SAVE NICKNAME START")
-
         val uid = auth.currentUser?.uid
             ?: return Result.failure(Exception("No user logged in"))
 
@@ -234,28 +232,20 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
         return try {
             db.runTransaction { transaction ->
-                println("TRANSACTION START")
-
                 val snapshot = transaction.get(nicknameRef)
 
                 if (snapshot.exists()) {
-                    println("NICKNAME TAKEN")
                     throw Exception("Nickname already taken")
                 }
-
-                println("RESERVING NICKNAME")
 
                 transaction.set(nicknameRef, mapOf("uid" to uid))
                 transaction.set(userRef, mapOf("nickname" to nickname), SetOptions.merge())
             }.await()
 
-            println("SUCCESS")
-
             needsNickname = false
             Result.success(Unit)
 
         } catch (e: Exception) {
-            println("ERROR: ${e.message}")
             e.printStackTrace()
             Result.failure(e)
         }

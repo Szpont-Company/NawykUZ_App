@@ -285,4 +285,6 @@
     <string name="nickname_change_hint">Możesz to zmienić później w ustawieniach</string>
     <string name="nickname_ready">Gotowe</string>
     <string name="nickname_error">Nick jest już zajęty, spróbuj inny</string>
+    <string name="error_nicknameTaken">Ten nick jest już zajęty!</string>
+    <string name="unknown_error_nickname">Coś poszło nie tak</string>
 </resources>

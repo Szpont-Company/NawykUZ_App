@@ -1,5 +1,8 @@
 package com.SzpontCompany.check.ui.user
 
+import android.annotation.SuppressLint
+import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -23,6 +26,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.font.FontWeight
@@ -39,6 +43,8 @@ fun OnboardingScreen(
     onNicknameSaved: () -> Unit,
     authViewModel: AuthViewModel = viewModel()
 ) {
+    BackHandler(enabled = true) {// Do nothing to disable back navigation
+         }
     var nickname by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
     var errorMsg by remember { mutableStateOf<String?>(null) }
@@ -46,14 +52,18 @@ fun OnboardingScreen(
 
     val isValid = nickname.matches(Regex("^[a-zA-Z0-9_]{3,20}$"))
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    val context = LocalContext.current
+    val nicknameTakenMsg = stringResource(R.string.error_nicknameTaken)
+    val genericErrorMsg = stringResource(R.string.unknown_error_nickname)
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .padding(horizontal = 28.dp),
+            .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        Spacer(modifier = Modifier.height(48.dp))
         LogInHeader(
            accent = MaterialTheme.colorScheme.primary
         )
@@ -75,7 +85,6 @@ fun OnboardingScreen(
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Spacer(Modifier.height(8.dp))
-
         OutlinedTextField(
             value = nickname,
             onValueChange = {
@@ -120,7 +129,13 @@ fun OnboardingScreen(
                     if (result.isSuccess) {
                         onNicknameSaved()
                     } else {
-                        errorMessage = "Nickname_taken"
+                        val msg = result.exceptionOrNull()?.message
+                        if(msg == "Nickname already taken") {
+                            errorMsg = nicknameTakenMsg
+                        } else {
+                            Toast.makeText(context,
+                                genericErrorMsg, Toast.LENGTH_LONG).show()
+                        }
                     }
                     isLoading = false
                 }
