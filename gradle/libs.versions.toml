@@ -19,6 +19,7 @@ constraintlayoutCompose = "1.1.1"
 material3 = "1.4.0"
 foundationLayout = "1.10.5"
 animationCore = "1.10.5"
+foundation = "1.10.6"
 firebaseFunctionsKtx = "22.1.0"
 
 [libraries]
@@ -46,6 +47,7 @@ androidx-constraintlayout-compose = { group = "androidx.constraintlayout", name 
 androidx-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
 androidx-compose-foundation-layout = { group = "androidx.compose.foundation", name = "foundation-layout", version.ref = "foundationLayout" }
 androidx-compose-animation-core = { group = "androidx.compose.animation", name = "animation-core", version.ref = "animationCore" }
+androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
 firebase-functions-ktx = { group = "com.google.firebase", name = "firebase-functions-ktx", version.ref = "firebaseFunctionsKtx" }
 
 [plugins]

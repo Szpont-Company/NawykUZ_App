@@ -21,7 +21,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Check"
         android:name=".CheckApp"
-        android:localeConfig="@xml/locales_config"> 
+        android:localeConfig="@xml/locales_config">
         <activity
             android:name=".MainActivity"
             android:exported="true"
