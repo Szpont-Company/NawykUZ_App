@@ -276,6 +276,17 @@
     <string name="details">Details</string>
     <string name="participating">Participating</string>
     <string name="join">Join</string>
+    <string name="nickname_hint1">Tell us how should we call you</string>
+    <string name="nickname_hello">Hi!</string>
+    <string name="nickname_placeholder">your_nickname</string>
+    <string name="nickname_min_characters">At least 3 characters</string>
+    <string name="nickname_character_hint">Only letters, digits and _</string>
+    <string name="nickname_praise">Looks great!</string>
+    <string name="nickname_change_hint">You can change it later in settings</string>
+    <string name="nickname_ready">Done</string>
+    <string name="nickname_error">Nickname is taken, try another one</string>
+    <string name="error_nicknameTaken">This nickname is already taken!</string>
+    <string name="unknown_error_nickname">Something went wrong</string>
 
     <!-- Notifications -->
     <string name="notification_channel_name">Habit Reminders</string>

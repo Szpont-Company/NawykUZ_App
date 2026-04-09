@@ -117,7 +117,6 @@ fun LoginScreen(
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        //s
         LogInHeader(
             accent = accent
         )
