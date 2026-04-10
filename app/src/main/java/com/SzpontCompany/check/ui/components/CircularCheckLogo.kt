@@ -1,10 +1,9 @@
-package com.SzpontCompany.check.ui.components // Podmień na swój package jeśli trzeba
+package com.SzpontCompany.check.ui.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -37,17 +36,19 @@ fun CircularCheckLogo(
         ).apply {
             group(
                 name = "corrected_group",
-                translationX = -15f,
-                translationY = 15f,
-                scaleX = 0.9f,
-                scaleY = 0.9f,
+                translationX = -10f,
+                translationY = 10f,
+                scaleX = 0.95f,
+                scaleY = 0.95f,
                 pivotX = 256f,
                 pivotY = 261f
             ) {
+                // Ptaszek
                 addPath(
                     pathData = PathParser().parsePathString(checkPath).toNodes(),
                     fill = SolidColor(Color.White)
                 )
+                // Kropeczka
                 addPath(
                     pathData = PathParser().parsePathString(dotPath).toNodes(),
                     fill = SolidColor(secondaryColor)
@@ -67,7 +68,7 @@ fun CircularCheckLogo(
             contentDescription = null,
             modifier = Modifier
                 .matchParentSize()
-                .padding(16.dp)
+                .padding(10.dp)
         )
     }
 }
