@@ -33,6 +33,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.SzpontCompany.check.R
+import com.SzpontCompany.check.ui.components.CircularCheckLogo
+import com.SzpontCompany.check.ui.theme.getSecondaryColor
 
 @Composable
 fun AddHabitSuccess(
@@ -104,7 +106,9 @@ fun AddHabitSuccess(
                     )
                 }
 
-                Box(
+                CircularCheckLogo(
+                    primaryColor = MaterialTheme.colorScheme.primary,
+                    secondaryColor = getSecondaryColor(MaterialTheme.colorScheme.primary),
                     modifier = Modifier
                         .graphicsLayer {
                             translationY = checkmarkOffsetY.value * density.density
@@ -112,12 +116,7 @@ fun AddHabitSuccess(
                             scaleY = checkmarkScale.value
                         }
                         .size(100.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(Icons.Default.Check, "Sukces", tint = Color.White, modifier = Modifier.size(60.dp))
-                }
+                )
             }
 
             AnimatedVisibility(

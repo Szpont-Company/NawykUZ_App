@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -15,7 +16,10 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.PathParser
 import androidx.compose.ui.graphics.vector.group
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.SzpontCompany.check.ui.theme.Mint
+import com.SzpontCompany.check.ui.theme.SecondaryMint
 
 @Composable
 fun CircularCheckLogo(
@@ -68,7 +72,17 @@ fun CircularCheckLogo(
             contentDescription = null,
             modifier = Modifier
                 .matchParentSize()
-                .padding(10.dp)
+                .padding(5.dp)
         )
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun CircularCheckLogoPreview() {
+    CircularCheckLogo(
+        primaryColor = Mint,
+        secondaryColor = SecondaryMint,
+        modifier = Modifier.size(200.dp)
+    )
 }
