@@ -1,5 +1,6 @@
 package com.SzpontCompany.check.ui.auth
 
+import android.content.res.Configuration
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -29,8 +30,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.SzpontCompany.check.R
+import com.SzpontCompany.check.ui.components.CircularCheckLogo
+import com.SzpontCompany.check.ui.theme.CheckTheme
+import com.SzpontCompany.check.ui.theme.Mint
+import com.SzpontCompany.check.ui.theme.getSecondaryColor
 
 @Composable
 fun RegisterSuccessScreen(
@@ -53,24 +59,13 @@ fun RegisterSuccessScreen(
         Spacer(
             modifier = Modifier.height(60.dp)
         )
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier.size(80.dp)
-        ) {
-            Canvas(modifier = Modifier.matchParentSize()) {
-                drawCircle(
-                    color = accent.darkenOverlay(0.2f),
-                    radius = size.minDimension / 2,
-                )
-            }
 
-            Icon(
-                imageVector = Icons.Default.Check,
-                contentDescription = null,
-                tint = Color.White,
-                modifier = Modifier.size(32.dp)
-            )
-        }
+        CircularCheckLogo(
+            primaryColor = accent,
+            secondaryColor = getSecondaryColor(accent),
+            modifier = Modifier.size(80.dp)
+        )
+
         Text(
             text = stringResource(R.string.register_success),
             style = MaterialTheme.typography.headlineSmall,
