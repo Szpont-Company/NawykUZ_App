@@ -51,7 +51,8 @@ fun LogInForm(
     onLogInClick: () -> Unit,
     onForgotPasswordClick: () -> Unit,
     onGoogleLogInClick: () -> Unit,
-    validateCredentials: () -> Boolean
+    validateCredentials: () -> Boolean,
+    loginErrorMessage: String?,
 ) {
     var visible by remember { mutableStateOf(false) }
     var isEmailError by remember { mutableStateOf(false) }
@@ -119,6 +120,16 @@ fun LogInForm(
         singleLine = true,
         modifier = Modifier.fillMaxWidth()
     )
+    loginErrorMessage?.let {
+        Text(
+            text = it,
+            color = MaterialTheme.colorScheme.error,
+            style = MaterialTheme.typography.labelSmall,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 4.dp, top = 2.dp)
+        )
+    }
     Spacer(modifier = Modifier.height(32.dp))
     Text(
         text = stringResource(R.string.forgot_password),

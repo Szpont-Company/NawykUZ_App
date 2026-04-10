@@ -1,5 +1,6 @@
 package com.SzpontCompany.check.ui.auth
 
+import android.R.attr.enabled
 import android.widget.Toast
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
@@ -20,6 +21,7 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -117,7 +119,9 @@ fun RegisterForm(
     onGoogleRegisterClick: () -> Unit,
     captchaVerified: Boolean,
     onCaptchaClick: () -> Unit,
-    validateCredentials: () -> Boolean
+    validateCredentials: () -> Boolean,
+    emailErrorMessage: String?,
+    isLoading: Boolean = false,
 ) {
     var visible by remember { mutableStateOf(false) }
     val context = LocalContext.current
@@ -178,6 +182,16 @@ fun RegisterForm(
         modifier = Modifier
             .fillMaxWidth()
     )
+    emailErrorMessage?.let {
+        Text(
+            text = it,
+            color = MaterialTheme.colorScheme.error,
+            style = MaterialTheme.typography.labelSmall,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 4.dp, top = 2.dp)
+        )
+    }
     Spacer(modifier = Modifier.height(16.dp))
     Text(
         text = stringResource(R.string.password),
@@ -236,7 +250,9 @@ fun RegisterForm(
             } else {
                 Toast.makeText(context, "Please verify your input", Toast.LENGTH_SHORT).show()
             }
+
         },
+        enabled = !isLoading,
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
@@ -247,10 +263,17 @@ fun RegisterForm(
         ),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurfaceVariant)
     ) {
-        Text(
-            text = stringResource(R.string.create_account),
-            style = MaterialTheme.typography.bodyLarge
-        )
+        if(!isLoading) {
+            Text(
+                text = stringResource(R.string.create_account),
+                style = MaterialTheme.typography.bodyLarge
+            )} else {
+                CircularProgressIndicator(
+                modifier = Modifier.size(20.dp),
+                color = MaterialTheme.colorScheme.primary,
+                strokeWidth = 2.dp
+            )
+        }
     }
     Spacer(modifier = Modifier.height(8.dp))
     Row(

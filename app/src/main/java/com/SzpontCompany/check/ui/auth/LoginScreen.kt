@@ -95,6 +95,9 @@ fun LoginScreen(
     val recaptchaToken by viewModel.recaptcha.token.collectAsStateWithLifecycle()
     val captchaVerified = recaptchaToken != null
 
+    var loginError by remember { mutableStateOf<String?>(null) }
+    var registrationError by remember { mutableStateOf<String?>(null) }
+    var isRegistering by remember { mutableStateOf(false) }
 
     fun onGoogleClick() {
         scope.launch {
@@ -207,13 +210,12 @@ fun LoginScreen(
                             val res = viewModel.signInWithEmail(email.trim(), password)
                             res.onSuccess { onLoginSuccess() }
                             res.onFailure { error ->
-                                val message = when (error.message) {
-                                    "Email_not_verified" -> context.getString(R.string.email_not_verified)
-                                    "Invalid_credentials" -> context.getString(R.string.invalid_credentials)
-                                    "Account_not_found" -> context.getString(R.string.account_not_found)
-                                    else -> context.getString(R.string.login_failed)
+                                Log.d("RegisterError", "message: '${error.message}' | class: ${error::class.simpleName}")
+                                loginError  = when (error.message) {
+                                    "Invalid_credentials" -> context.getString(R.string.login_incorrect_credentials)
+                                    "Account_not_found" -> context.getString(R.string.login_notfound)
+                                    else -> context.getString(R.string.register_unknown_error)
                                 }
-                                Toast.makeText(context, message, Toast.LENGTH_LONG).show()
                             }
                         }},
                         onForgotPasswordClick = {
@@ -222,7 +224,8 @@ fun LoginScreen(
                         onGoogleLogInClick = {
                             onGoogleClick()
                         },
-                        validateCredentials = {viewModel.validateCredentials()}
+                        validateCredentials = {viewModel.validateCredentials()},
+                        loginErrorMessage = loginError
                     )
 
                     1 -> RegisterForm(
@@ -232,11 +235,22 @@ fun LoginScreen(
                         onNameChange = { viewModel.onNameChange(it) },
                         onEmailChange = { viewModel.onEmailChange(it) },
                         onPasswordChange = { viewModel.onPasswordChange(it) },
+                        emailErrorMessage = registrationError,
                         onRegisterClick = { scope.launch {
+                            isRegistering = true
                             val res = viewModel.signUpWithEmail(name, email, password)
+                            isRegistering = false
                             res.onSuccess { 
                                 Log.d("Auth", "Zarejestrowano: ${it.displayName}")
+                                registrationError = null
                                 onRegisterSuccess()
+                            }
+                            res.onFailure { error ->
+                                Log.d("RegisterError", "message: '${error.message}' | class: ${error::class.simpleName}")
+                                registrationError  = when (error.message) {
+                                    "Email_already_in_use" -> context.getString(R.string.register_email_taken_error)
+                                    else -> context.getString(R.string.register_unknown_error)
+                                }
                             }
                         }},
                         onGoogleRegisterClick = {
@@ -246,7 +260,8 @@ fun LoginScreen(
                         onCaptchaClick = {
                             viewModel.recaptcha.execute()
                         },
-                        validateCredentials = {viewModel.validateCredentials()}
+                        validateCredentials = {viewModel.validateCredentials()},
+                        isLoading = isRegistering
                     )
                 }
             }
