@@ -13,6 +13,18 @@ val Cactus = Color(0xFF639922)
 val Amber = Color(0xFFBA7517)
 val Crimson = Color(0xFFE24B4A)
 
+
+// Secondary Preset Colors
+
+val SecondaryMint = Color(0xFF25C599)
+val SecondaryIndigo = Color(0xFF9F99E9)
+val SecondaryCoral = Color(0xFFD2911E)
+val SecondaryCrimson = Color(0xFFE96E6C)
+val SecondarySky = Color(0xFF5AA3E8)
+val SecondaryRose = Color(0xFFE0769C)
+val SecondaryCactus = Color(0xFF7EC028)
+val SecondaryAmber = Color(0xFFE87956)
+
 // Background colors
 
 val BackgroundDark = Color(0xFF111112)
@@ -44,5 +56,18 @@ fun getColorName(color: Color): String {
         Cactus -> "Cactus"
         Crimson -> "Crimson"
         else -> "Mint"
+    }
+}
+
+fun getSecondaryColor(primary: Color): Color {
+    return when(primary) {
+        Amber -> SecondaryAmber
+        Indigo -> SecondaryIndigo
+        Coral -> SecondaryCoral
+        Sky -> SecondarySky
+        Rose -> SecondaryRose
+        Cactus -> SecondaryCactus
+        Crimson -> SecondaryCrimson
+        else -> SecondaryMint
     }
 }
