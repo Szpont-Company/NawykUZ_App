@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -38,9 +39,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.SzpontCompany.check.R
-import java.security.AccessController.getContext
 
 @Composable
 fun LogInForm(
@@ -51,7 +50,9 @@ fun LogInForm(
     onLogInClick: () -> Unit,
     onForgotPasswordClick: () -> Unit,
     onGoogleLogInClick: () -> Unit,
-    validateCredentials: () -> Boolean
+    validateCredentials: () -> Boolean,
+    loginErrorMessage: String?,
+    isLoading: Boolean = false,
 ) {
     var visible by remember { mutableStateOf(false) }
     var isEmailError by remember { mutableStateOf(false) }
@@ -119,6 +120,16 @@ fun LogInForm(
         singleLine = true,
         modifier = Modifier.fillMaxWidth()
     )
+    loginErrorMessage?.let {
+        Text(
+            text = it,
+            color = MaterialTheme.colorScheme.error,
+            style = MaterialTheme.typography.labelSmall,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 4.dp, top = 2.dp)
+        )
+    }
     Spacer(modifier = Modifier.height(32.dp))
     Text(
         text = stringResource(R.string.forgot_password),
@@ -132,6 +143,7 @@ fun LogInForm(
     Spacer(modifier = Modifier.height(24.dp))
     Button(
         onClick = {
+            if(isLoading) return@Button
             if(email.isBlank()) isEmailError = true
             if(password.isBlank()) isPasswordError = true
             if (validateCredentials()) onLogInClick()
@@ -147,12 +159,21 @@ fun LogInForm(
             containerColor = MaterialTheme.colorScheme.background,
             contentColor = MaterialTheme.colorScheme.onBackground
         ),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurfaceVariant)
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurfaceVariant),
+        enabled = !isLoading
     ) {
-        Text(
-            text = stringResource(R.string.login_btn),
-            style = MaterialTheme.typography.bodyLarge
-        )
+        if(!isLoading) {
+            Text(
+                text = stringResource(R.string.login_btn),
+                style = MaterialTheme.typography.bodyLarge
+            )
+        } else {
+            CircularProgressIndicator(
+                modifier = Modifier.size(20.dp),
+                color = MaterialTheme.colorScheme.primary,
+                strokeWidth = 2.dp
+            )
+        }
     }
     Spacer(modifier = Modifier.height(8.dp))
     Row(
@@ -179,7 +200,8 @@ fun LogInForm(
             containerColor = MaterialTheme.colorScheme.background,
             contentColor = MaterialTheme.colorScheme.onBackground
         ),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurfaceVariant)
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurfaceVariant),
+        enabled = !isLoading
     ) {
         Icon(
             painter = painterResource(id = R.drawable.google_logo),

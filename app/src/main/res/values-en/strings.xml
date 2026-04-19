@@ -343,4 +343,8 @@
     <string name="habit_success_return">Back to dashboard</string>
     <string name="habit_success_reminder_on">First reminder tomorrow at %1$s.\nGood luck!</string>
     <string name="habit_success_reminder_off">Good luck building your habit!</string>
+    <string name="register_email_taken_error">Email is already in use!</string>
+    <string name="register_unknown_error">An unknown register error occured!</string>
+    <string name="login_incorrect_credentials">Invalid email or password</string>
+    <string name="login_notfound">Account not found</string>
 </resources>

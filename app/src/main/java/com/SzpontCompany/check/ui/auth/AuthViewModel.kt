@@ -10,7 +10,6 @@ import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.SzpontCompany.check.data.user.UserCache
 import com.SzpontCompany.check.data.user.UserRepository
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
@@ -18,6 +17,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
+import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.SetOptions
@@ -173,7 +173,11 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
             userRepository.saveUserData(user.uid, name, email)
             auth.signOut()
             Result.success(user)
-        } catch (e: Exception) {
+        } catch (e: FirebaseAuthUserCollisionException) {
+            Log.e("EmailSignUp", "Email in use: ${e.message}")
+            Result.failure(Exception("Email_already_in_use"))
+        }
+        catch (e: Exception) {
             Log.e("EmailSignUp", "Error: ${e::class.simpleName} - ${e.message}")
             Result.failure(e)
         }
