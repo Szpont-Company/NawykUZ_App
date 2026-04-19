@@ -97,6 +97,7 @@ fun LoginScreen(
     var loginError by remember { mutableStateOf<String?>(null) }
     var registrationError by remember { mutableStateOf<String?>(null) }
     var isRegistering by remember { mutableStateOf(false) }
+    var isLoggingIn by remember { mutableStateOf(false) }
 
     fun onGoogleClick() {
         scope.launch {
@@ -206,7 +207,9 @@ fun LoginScreen(
                         onEmailChange = { viewModel.onEmailChange(it) },
                         onPasswordChange = { viewModel.onPasswordChange(it) },
                         onLogInClick = { scope.launch {
+                            isLoggingIn = true
                             val res = viewModel.signInWithEmail(email.trim(), password)
+                            isLoggingIn = false
                             res.onSuccess { onLoginSuccess() }
                             res.onFailure { error ->
                                 Log.d("RegisterError", "message: '${error.message}' | class: ${error::class.simpleName}")
@@ -224,7 +227,8 @@ fun LoginScreen(
                             onGoogleClick()
                         },
                         validateCredentials = {viewModel.validateCredentials()},
-                        loginErrorMessage = loginError
+                        loginErrorMessage = loginError,
+                        isLoading = isLoggingIn
                     )
 
                     1 -> RegisterForm(

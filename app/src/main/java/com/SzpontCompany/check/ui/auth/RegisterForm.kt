@@ -264,7 +264,7 @@ fun RegisterForm(
     ) {
         if(!isLoading) {
             Text(
-                text = stringResource(R.string.create_account),
+                text = stringResource(R.string.login),
                 style = MaterialTheme.typography.bodyLarge
             )} else {
                 CircularProgressIndicator(
