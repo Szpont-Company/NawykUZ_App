@@ -5,8 +5,6 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.SzpontCompany.check.data.user.User
 import com.SzpontCompany.check.data.user.UserRepository
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -32,7 +30,10 @@ class TodayViewModel(application: Application) : AndroidViewModel(application) {
     fun observeUser() {
         viewModelScope.launch {
             repo.userFlow.collect { user ->
-                _uiState.value = TopSectionUiState(isLoading = false, user = user)
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    user = user
+                )
             }
         }
     }
@@ -40,10 +41,17 @@ class TodayViewModel(application: Application) : AndroidViewModel(application) {
     fun loadUser() {
         viewModelScope.launch {
             try {
-                _uiState.value = TopSectionUiState(isLoading = true)
+                _uiState.value = _uiState.value.copy(isLoading = true)
+
                 repo.getUser()
+
+                _uiState.value = _uiState.value.copy(isLoading = false)
+
             } catch (e: Exception) {
-                _uiState.value = TopSectionUiState(isLoading = false, errorMessage = "Failed to load user: ${e.message}")
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    errorMessage = "Failed to load user: ${e.message}"
+                )
             }
         }
     }
