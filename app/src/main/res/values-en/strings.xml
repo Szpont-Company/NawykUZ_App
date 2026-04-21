@@ -348,4 +348,15 @@
     <string name="login_incorrect_credentials">Invalid email or password</string>
     <string name="login_notfound">Account not found</string>
     <string name="ad_loading">Loading...</string>
+    <string name="store_item_coins_title">Watch an ad</string>
+    <string name="store_item_coins_desc">Earn 10C. Yes, it\'s that simple!</string>
+    <string name="rewards_earn">EARNING ZONE</string>
+    <string name="rewards_earn_desc1">Lost everything to a friend?</string>
+    <string name="rewards_earn_desc2">No problem — earn some coins and jump back in!</string>
+    <string name="rewards_battle">Battle and win!</string>
+    <string name="rewards_battle_desc">Earn coins by winning duels!</string>
+    <string name="rewards_events">Special events</string>
+    <string name="rewards_events_desc">Take part in events and earn coins!</string>
+    <string name="shop_hero">Go ahead, splurge a little!</string>
+    <string name="shop_hero_desc">Turn your coins into your dream reward.</string>
 </resources>

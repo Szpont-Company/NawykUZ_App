@@ -1,19 +1,19 @@
 package com.SzpontCompany.check.data.user
 
 import android.util.Log
-import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
-import com.google.firebase.functions.functions
-import com.google.firebase.functions.ktx.functions
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.tasks.await
 import android.content.Context
 import com.SzpontCompany.check.config.FirebaseConfig
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 
 class UserRepository private constructor(
     private val auth: FirebaseAuth,
@@ -87,39 +87,6 @@ class UserRepository private constructor(
 
         return user
     }
-
-    suspend fun updateUsername(name: String) {
-        val uid = auth.currentUser?.uid ?: throw Exception("No user")
-
-        firestore.collection("users")
-            .document(uid)
-            .set(mapOf("name" to name), SetOptions.merge())
-            .await()
-
-        val current = _userFlow.value
-        if(current != null) {
-            val updatedUser = current.copy(name = name)
-            cache.save(updatedUser)
-            _userFlow.value = updatedUser
-        }
-    }
-
-    suspend fun updateEmail(email: String) {
-        val uid = auth.currentUser?.uid ?: throw Exception("No user")
-
-        firestore.collection("users")
-            .document(uid)
-            .set(mapOf("email" to email), SetOptions.merge())
-            .await()
-
-        val current = _userFlow.value
-        if(current != null) {
-            val updatedUser = current.copy(email = email)
-            cache.save(updatedUser)
-            _userFlow.value = updatedUser
-        }
-    }
-
     fun clearCache() {
         cache.clear()
     }
@@ -206,4 +173,28 @@ class UserRepository private constructor(
         }
     }
 
+    fun getUserCoins() : Flow<Int> = callbackFlow {
+        val uid = auth.currentUser?.uid
+
+        if(uid == null) {
+            trySend(0)
+            close(Exception("No user"))
+            return@callbackFlow
+        }
+
+        val listener = firestore.collection("users").document(uid)
+            .addSnapshotListener { snapshot, exception ->
+                if(exception != null) {
+                    return@addSnapshotListener
+                }
+
+                if(snapshot != null && snapshot.exists()) {
+                    val coins = snapshot.getLong("coins")?.toInt() ?: 0
+                    trySend(coins)
+                } else {
+                    trySend(0)
+                }
+            }
+        awaitClose { listener.remove() }
+    }
 }
