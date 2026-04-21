@@ -50,6 +50,7 @@ fun SettingsScreen(
     onStepGoalClick: () -> Unit,
     onPrivacyClick: () -> Unit,
     onNotificationsClick: () -> Unit,
+    onDeleteAccountConfirmed: () -> Unit,
     viewModel: SettingsViewModel = viewModel(
         factory = SettingsViewModelFactory(LocalContext.current.applicationContext)
     )
@@ -58,6 +59,9 @@ fun SettingsScreen(
     val currentTheme by viewModel.themeState.collectAsState()
     val currentAccentColor by viewModel.accentColorState.collectAsState()
     val currentLanguage by viewModel.languageState.collectAsState()
+
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var isDeleting by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -180,9 +184,7 @@ fun SettingsScreen(
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(16.dp))
                 .background(Crimson.copy(alpha = 0.1f))
-               // .background(Color(0xFF2A1515))
-             //   .border(1.dp, Color(0xFF592020), RoundedCornerShape(16.dp))
-                .clickable { /* TODO */ }
+                .clickable { showDeleteDialog = true }
                 .padding(16.dp),
         ) {
             Row(
@@ -219,6 +221,28 @@ fun SettingsScreen(
         }
 
         Spacer(modifier = Modifier.height(24.dp))
+    }
+
+    if (showDeleteDialog) {
+        DeleteAccountDialog(
+            isDeleting = isDeleting,
+            onDismiss = {
+                if (!isDeleting) showDeleteDialog = false
+            },
+            onConfirm = {
+                isDeleting = true
+                viewModel.deleteAccount { isSuccess ->
+                    isDeleting = false
+                    if (isSuccess) {
+                        showDeleteDialog = false
+                        onDeleteAccountConfirmed()
+                    } else {
+                        showDeleteDialog = false
+                        // TODO: opcjonalnie toast z błędem
+                    }
+                }
+            }
+        )
     }
 }
 
@@ -751,6 +775,91 @@ fun LanguageButton(
     }
 }
 
+@Composable
+fun DeleteAccountDialog(
+    isDeleting: Boolean,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
+) {
+    var confirmationText by remember { mutableStateOf("") }
+    val isConfirmed = confirmationText.trim().uppercase() == "USUŃ"
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = "Usuwanie konta",
+                color = Crimson,
+                fontWeight = FontWeight.Bold
+            )
+        },
+        text = {
+            Column {
+                Text(
+                    text = "Ta operacja jest nieodwracalna. Wszystkie Twoje dane, znajomi, nawyki i statystyki zostaną trwale usunięte.",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = 14.sp
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "Aby potwierdzić, wpisz słowo USUŃ poniżej:",
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 14.sp
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = confirmationText,
+                    onValueChange = { confirmationText = it },
+                    placeholder = { Text("USUŃ") },
+                    singleLine = true,
+                    enabled = !isDeleting,
+                    shape = RoundedCornerShape(12.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Crimson,
+                        cursorColor = Crimson
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = onConfirm,
+                enabled = isConfirmed && !isDeleting,
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.height(44.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Crimson,
+                    disabledContainerColor = Crimson.copy(alpha = 0.3f)
+                )
+            ) {
+                if (isDeleting) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        color = Color.White,
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Text("Usuń konto", color = Color.White, fontWeight = FontWeight.Bold)
+                }
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = onDismiss,
+                enabled = !isDeleting,
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.height(44.dp)
+            ) {
+                Text("Anuluj", color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Medium)
+            }
+        },
+        containerColor = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(20.dp)
+    )
+}
+
 @Preview(showBackground = true)
 @Composable
 fun SettingsScreenPreview() {
@@ -759,7 +868,8 @@ fun SettingsScreenPreview() {
             onBackClick = {},
             onStepGoalClick = {},
             onPrivacyClick = {},
-            onNotificationsClick = {}
+            onNotificationsClick = {},
+            onDeleteAccountConfirmed = {}
         )
     }
 }
