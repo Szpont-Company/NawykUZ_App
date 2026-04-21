@@ -61,6 +61,7 @@ fun SettingsScreen(
     val currentLanguage by viewModel.languageState.collectAsState()
 
     var showDeleteDialog by remember { mutableStateOf(false) }
+    var isDeleting by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -224,14 +225,20 @@ fun SettingsScreen(
 
     if (showDeleteDialog) {
         DeleteAccountDialog(
-            onDismiss = { showDeleteDialog = false },
+            isDeleting = isDeleting,
+            onDismiss = {
+                if (!isDeleting) showDeleteDialog = false
+            },
             onConfirm = {
-                showDeleteDialog = false
+                isDeleting = true
                 viewModel.deleteAccount { isSuccess ->
+                    isDeleting = false
                     if (isSuccess) {
+                        showDeleteDialog = false
                         onDeleteAccountConfirmed()
                     } else {
-                        //opcjonalnie toast z bledem
+                        showDeleteDialog = false
+                        // TODO: opcjonalnie toast z błędem
                     }
                 }
             }
@@ -770,6 +777,7 @@ fun LanguageButton(
 
 @Composable
 fun DeleteAccountDialog(
+    isDeleting: Boolean,
     onDismiss: () -> Unit,
     onConfirm: () -> Unit
 ) {
@@ -805,6 +813,8 @@ fun DeleteAccountDialog(
                     onValueChange = { confirmationText = it },
                     placeholder = { Text("USUŃ") },
                     singleLine = true,
+                    enabled = !isDeleting,
+                    shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = Crimson,
                         cursorColor = Crimson
@@ -816,22 +826,37 @@ fun DeleteAccountDialog(
         confirmButton = {
             Button(
                 onClick = onConfirm,
-                enabled = isConfirmed,
+                enabled = isConfirmed && !isDeleting,
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.height(44.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Crimson,
                     disabledContainerColor = Crimson.copy(alpha = 0.3f)
                 )
             ) {
-                Text("Usuń konto", color = Color.White)
+                if (isDeleting) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        color = Color.White,
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Text("Usuń konto", color = Color.White, fontWeight = FontWeight.Bold)
+                }
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Anuluj", color = MaterialTheme.colorScheme.onSurfaceVariant)
+            TextButton(
+                onClick = onDismiss,
+                enabled = !isDeleting,
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.height(44.dp)
+            ) {
+                Text("Anuluj", color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Medium)
             }
         },
         containerColor = MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(16.dp)
+        shape = RoundedCornerShape(20.dp)
     )
 }
 

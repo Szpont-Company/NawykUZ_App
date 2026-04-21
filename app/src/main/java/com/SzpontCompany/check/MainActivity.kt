@@ -370,7 +370,8 @@ fun RootNavigationGraph(onLogout: () -> Unit) {
 
             composable("settings") {
                 SettingsNavHost(
-                    onExitSettings = { navController.popBackStack() }
+                    onExitSettings = { navController.popBackStack() },
+                    onLogout = onLogout
                 )
 
             }

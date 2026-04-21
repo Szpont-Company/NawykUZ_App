@@ -9,7 +9,8 @@ import androidx.navigation.compose.rememberNavController
 @Composable
 fun SettingsNavHost(
     navController: NavHostController = rememberNavController(),
-    onExitSettings: () -> Unit
+    onExitSettings: () -> Unit,
+    onLogout: () -> Unit
 ) {
     NavHost(
         navController = navController,
@@ -22,11 +23,7 @@ fun SettingsNavHost(
                 onStepGoalClick = { navController.navigate("settings_step_goal") },
                 onPrivacyClick = { navController.navigate("settings_privacy") },
                 onNotificationsClick = { navController.navigate("settings_notifications") },
-                onDeleteAccountConfirmed = {
-                    navController.navigate("login_route") {
-                        popUpTo(0) { inclusive = true }
-                    }
-                }
+                onDeleteAccountConfirmed = { onLogout() }
             )
         }
 
