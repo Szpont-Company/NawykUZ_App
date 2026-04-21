@@ -1,7 +1,6 @@
 package com.SzpontCompany.check.ui.dashboard
 
 import android.view.LayoutInflater
-import android.view.RoundedCorner
 import android.view.View
 import android.widget.Button
 import android.widget.ImageView
@@ -12,7 +11,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.shape.CircleShape
@@ -48,8 +46,6 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.AdSize
-import com.google.android.gms.ads.AdView
 import com.SzpontCompany.check.R
 import com.google.android.gms.ads.AdLoader
 import com.google.android.gms.ads.nativead.NativeAd

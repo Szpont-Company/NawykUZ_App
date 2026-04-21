@@ -56,8 +56,6 @@ import com.SzpontCompany.check.ui.theme.Crimson
 import com.SzpontCompany.check.ui.theme.Indigo
 import com.SzpontCompany.check.ui.theme.Rose
 import com.SzpontCompany.check.ui.theme.Sky
-import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.os.LocaleListCompat
 import com.SzpontCompany.check.ui.profile.FriendProfileScreen
 import com.SzpontCompany.check.ui.community.ChatScreen
 import androidx.compose.runtime.rememberCoroutineScope
