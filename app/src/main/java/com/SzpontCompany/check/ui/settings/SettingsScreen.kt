@@ -50,6 +50,7 @@ fun SettingsScreen(
     onStepGoalClick: () -> Unit,
     onPrivacyClick: () -> Unit,
     onNotificationsClick: () -> Unit,
+    onDeleteAccountConfirmed: () -> Unit = {},
     viewModel: SettingsViewModel = viewModel(
         factory = SettingsViewModelFactory(LocalContext.current.applicationContext)
     )
@@ -58,6 +59,8 @@ fun SettingsScreen(
     val currentTheme by viewModel.themeState.collectAsState()
     val currentAccentColor by viewModel.accentColorState.collectAsState()
     val currentLanguage by viewModel.languageState.collectAsState()
+
+    var showDeleteDialog by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -180,9 +183,7 @@ fun SettingsScreen(
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(16.dp))
                 .background(Crimson.copy(alpha = 0.1f))
-               // .background(Color(0xFF2A1515))
-             //   .border(1.dp, Color(0xFF592020), RoundedCornerShape(16.dp))
-                .clickable { /* TODO */ }
+                .clickable { showDeleteDialog = true }
                 .padding(16.dp),
         ) {
             Row(
@@ -219,6 +220,16 @@ fun SettingsScreen(
         }
 
         Spacer(modifier = Modifier.height(24.dp))
+    }
+
+    if (showDeleteDialog) {
+        DeleteAccountDialog(
+            onDismiss = { showDeleteDialog = false },
+            onConfirm = {
+                showDeleteDialog = false
+                onDeleteAccountConfirmed()
+            }
+        )
     }
 }
 
@@ -749,6 +760,73 @@ fun LanguageButton(
             )
         }
     }
+}
+
+@Composable
+fun DeleteAccountDialog(
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
+) {
+    var confirmationText by remember { mutableStateOf("") }
+    val isConfirmed = confirmationText.trim().uppercase() == "USUŃ"
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = "Usuwanie konta",
+                color = Crimson,
+                fontWeight = FontWeight.Bold
+            )
+        },
+        text = {
+            Column {
+                Text(
+                    text = "Ta operacja jest nieodwracalna. Wszystkie Twoje dane, znajomi, nawyki i statystyki zostaną trwale usunięte.",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = 14.sp
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "Aby potwierdzić, wpisz słowo USUŃ poniżej:",
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 14.sp
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = confirmationText,
+                    onValueChange = { confirmationText = it },
+                    placeholder = { Text("USUŃ") },
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Crimson,
+                        cursorColor = Crimson
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = onConfirm,
+                enabled = isConfirmed,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Crimson,
+                    disabledContainerColor = Crimson.copy(alpha = 0.3f)
+                )
+            ) {
+                Text("Usuń konto", color = Color.White)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Anuluj", color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        },
+        containerColor = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(16.dp)
+    )
 }
 
 @Preview(showBackground = true)
