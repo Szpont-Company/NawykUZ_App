@@ -1,5 +1,10 @@
 package com.SzpontCompany.check.ui.rewards
 
+import android.app.Activity
+import android.widget.Toast
+import androidx.compose.animation.core.animateIntAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -8,22 +13,28 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.SzpontCompany.check.ui.theme.CheckTheme
 import com.SzpontCompany.check.ui.theme.Mint
 import com.SzpontCompany.check.data.badges.BadgeProvider
 import com.SzpontCompany.check.R
+import com.SzpontCompany.check.ads.RewardedAdManager
 import com.SzpontCompany.check.ui.components.CheckBackButton
+import androidx.compose.runtime.getValue
 
 val PremiumGold = Color(0xFFC78C18)
 val DarkGoldBackground = Color(0x33C78C18)
@@ -32,6 +43,18 @@ val DarkGoldBackground = Color(0x33C78C18)
 fun RewardsScreen(
     onBackClick: () -> Unit
 ) {
+    val context = LocalContext.current
+    val activity = context as Activity
+    val viewModel : RewardsViewModel = viewModel(
+        factory = RewardsViewmodelFactory(context)
+    )
+
+    LaunchedEffect(Unit) {
+        RewardedAdManager.load(context.applicationContext)
+    }
+
+    val coins by viewModel.currentCoins.collectAsState()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -44,7 +67,9 @@ fun RewardsScreen(
 
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 24.dp)
         ) {
             CheckBackButton(onClick = onBackClick)
             Spacer(modifier = Modifier.width(16.dp))
@@ -55,7 +80,7 @@ fun RewardsScreen(
             )
         }
 
-        CoinsCard(currentCoins = 850, totalCoins = 3240)
+        CoinsCard(currentCoins = coins, totalCoins = coins) // TODO: powinny byc 2 pola ale nie ma jeszcze wydawania wiec W/E
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -68,17 +93,65 @@ fun RewardsScreen(
 
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             SectionTitle(stringResource(R.string.rewards_section_store))
+            Hero(stringResource(R.string.shop_hero), stringResource(R.string.shop_hero_desc))
             StoreItem(
                 emoji = "🎨",
                 title = stringResource(R.string.store_item_accent_title),
                 subtitle = stringResource(R.string.store_item_accent_desc),
-                price = "200 C"
+                price = "200 C",
+                type = StoreItemType.PURCHASE,
+                onRedeem = { /*TODO: not implemented yet */}
             )
             StoreItem(
                 emoji = "🛡️",
                 title = stringResource(R.string.store_item_shield_title),
                 subtitle = stringResource(R.string.store_item_shield_desc),
-                price = "150 C"
+                price = "150 C",
+                type = StoreItemType.PURCHASE,
+                onRedeem = { /*TODO: not implemented yet */}
+            )
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            SectionTitle(stringResource(R.string.rewards_earn))
+            Hero(stringResource(R.string.rewards_earn_desc1), stringResource(R.string.rewards_earn_desc2))
+            StoreItem(
+                emoji = "💰",
+                title = stringResource(R.string.store_item_coins_title),
+                subtitle = stringResource(R.string.store_item_coins_desc),
+                price = "+10 C",
+                type = StoreItemType.EARN,
+                onRedeem = {
+                    if(activity != null) {
+                        RewardedAdManager.show(activity) {reward ->
+                            viewModel.onAdWatched(reward)
+                        }
+                    }
+                }
+            )
+            StoreItem(
+                emoji = "⚔️",
+                title = stringResource(R.string.rewards_battle),
+                subtitle = stringResource(R.string.rewards_battle_desc),
+                price = "+? C",
+                type = StoreItemType.EARN,
+                onRedeem = {
+                    // TODO: tutaj przekieruje sie do sekcji battli
+                    Toast.makeText(context, "Ta funkcja nie jest jeszcze dostępna", Toast.LENGTH_SHORT).show()
+                }
+            )
+            StoreItem(
+                emoji = "📅",
+                title = stringResource(R.string.rewards_events),
+                subtitle = stringResource(R.string.rewards_events_desc),
+                price = "+? C",
+                type = StoreItemType.EARN,
+                onRedeem = {
+                    // TODO: tutaj przekieruje do eventow
+                    Toast.makeText(context, "Ta funkcja nie jest jeszcze dostępna", Toast.LENGTH_SHORT).show()
+                }
             )
         }
 
@@ -86,6 +159,38 @@ fun RewardsScreen(
     }
 }
 
+@Composable
+fun Hero(string1: String, string2: String) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(DarkGoldBackground)
+            .border(1.5.dp, PremiumGold, RoundedCornerShape(16.dp))
+            .padding(20.dp)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = string1,
+                color = PremiumGold,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                lineHeight = 22.sp
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Text(
+                text = string2,
+                color = PremiumGold,
+                fontSize = 14.sp,
+                lineHeight = 18.sp
+            )
+        }
+    }
+}
 @Composable
 fun CoinsCard(currentCoins: Int, totalCoins: Int) {
     Box(
@@ -101,9 +206,14 @@ fun CoinsCard(currentCoins: Int, totalCoins: Int) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
+            val animatedCoins by animateIntAsState(
+                targetValue = currentCoins,
+                animationSpec = tween(durationMillis = 1000),
+                label = "CoinsAnimation"
+            )
             Column {
                 Text(text = stringResource(R.string.rewards_your_coins), color = PremiumGold, fontSize = 14.sp)
-                Text(text = currentCoins.toString(), color = PremiumGold, fontSize = 36.sp, fontWeight = FontWeight.Bold)
+                Text(text = "$animatedCoins C", color = PremiumGold, fontSize = 36.sp, fontWeight = FontWeight.Bold)
             }
             Column(horizontalAlignment = Alignment.End) {
                 Text(text = stringResource(R.string.rewards_total_earned), color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
@@ -206,8 +316,12 @@ fun BadgeCard(
     }
 }
 
+enum class StoreItemType {
+    PURCHASE, EARN
+}
+
 @Composable
-fun StoreItem(emoji: String, title: String, subtitle: String, price: String) {
+fun StoreItem(emoji: String, title: String, subtitle: String, price: String, type: StoreItemType, onRedeem: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -227,14 +341,24 @@ fun StoreItem(emoji: String, title: String, subtitle: String, price: String) {
 
         Spacer(modifier = Modifier.width(16.dp))
 
-        Box(
+        Button(
+            onClick = {
+                onRedeem()
+            },
+            shape = RoundedCornerShape(10.dp),
+            border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.Transparent,
+                contentColor = Color.White
+            ),
             modifier = Modifier
-                .clip(RoundedCornerShape(10.dp))
-                .border(1.5.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(10.dp))
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            contentAlignment = Alignment.Center
         ) {
-            Text(text = price, color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+            Text(
+                text = price,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold
+            )
         }
     }
 }
