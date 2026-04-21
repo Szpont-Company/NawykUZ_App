@@ -1,8 +1,9 @@
 package com.SzpontCompany.check.ui.rewards
 
 import android.app.Activity
-import android.util.Log
 import android.widget.Toast
+import androidx.compose.animation.core.animateIntAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -13,6 +14,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -32,9 +34,7 @@ import com.SzpontCompany.check.data.badges.BadgeProvider
 import com.SzpontCompany.check.R
 import com.SzpontCompany.check.ads.RewardedAdManager
 import com.SzpontCompany.check.ui.components.CheckBackButton
-import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.rewarded.RewardedAd
-import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
+import androidx.compose.runtime.getValue
 
 val PremiumGold = Color(0xFFC78C18)
 val DarkGoldBackground = Color(0x33C78C18)
@@ -45,11 +45,15 @@ fun RewardsScreen(
 ) {
     val context = LocalContext.current
     val activity = context as Activity
-    val viewModel : RewardsViewModel = viewModel()
+    val viewModel : RewardsViewModel = viewModel(
+        factory = RewardsViewmodelFactory(context)
+    )
 
     LaunchedEffect(Unit) {
         RewardedAdManager.load(context.applicationContext)
     }
+
+    val coins by viewModel.currentCoins.collectAsState()
 
     Column(
         modifier = Modifier
@@ -76,7 +80,7 @@ fun RewardsScreen(
             )
         }
 
-        CoinsCard(currentCoins = 850, totalCoins = 3240)
+        CoinsCard(currentCoins = coins, totalCoins = coins) // TODO: powinny byc 2 pola ale nie ma jeszcze wydawania wiec W/E
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -202,9 +206,14 @@ fun CoinsCard(currentCoins: Int, totalCoins: Int) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
+            val animatedCoins by animateIntAsState(
+                targetValue = currentCoins,
+                animationSpec = tween(durationMillis = 1000),
+                label = "CoinsAnimation"
+            )
             Column {
                 Text(text = stringResource(R.string.rewards_your_coins), color = PremiumGold, fontSize = 14.sp)
-                Text(text = currentCoins.toString(), color = PremiumGold, fontSize = 36.sp, fontWeight = FontWeight.Bold)
+                Text(text = "$animatedCoins C", color = PremiumGold, fontSize = 36.sp, fontWeight = FontWeight.Bold)
             }
             Column(horizontalAlignment = Alignment.End) {
                 Text(text = stringResource(R.string.rewards_total_earned), color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
