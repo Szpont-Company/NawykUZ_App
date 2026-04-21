@@ -1,13 +1,16 @@
 package com.SzpontCompany.check.ui.dashboard
 
-import com.SzpontCompany.check.R
+import android.view.LayoutInflater
+import android.view.View
+import android.widget.Button
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.shape.CircleShape
@@ -30,6 +33,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import com.SzpontCompany.check.ui.components.EmojiExplosionEffect
@@ -38,6 +42,14 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 import androidx.compose.runtime.key
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.viewinterop.AndroidView
+import com.google.android.gms.ads.AdRequest
+import com.SzpontCompany.check.R
+import com.google.android.gms.ads.AdLoader
+import com.google.android.gms.ads.nativead.NativeAd
+import com.google.android.gms.ads.nativead.NativeAdView
 
 data class HabitMock(
     val emoji: String,
@@ -61,7 +73,10 @@ fun TodayScreen(
     val habitsList = remember {
         mutableStateListOf(
             HabitMock("🚶", "Spacer", "8 000 kroków • codziennie", "63%", "5 040", "kroków", "14 dni", "streak", "82%", "tydzień"),
-            HabitMock("📖", "Czytanie", "30 min • 5×tydzień", "40%", "12 min", "dziś", "7 dni", "streak", "60%", "tydzień")
+            HabitMock("📖", "Czytanie", "30 min • 5×tydzień", "40%", "12 min", "dziś", "7 dni", "streak", "60%", "tydzień"),
+            HabitMock("💧", "Picie wody", "2 litry • codziennie", "50%", "1 litr", "dziś", "3 dni", "streak", "90%", "tydzień"),
+            HabitMock("🏋️‍♀️", "Siłownia", "30 min • codziennie", "0%", "0 min", "dziś", "0 dni", "streak", "10%", "tydzień")
+
         )
     }
 
@@ -91,20 +106,28 @@ fun TodayScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("Nawyki dziś (${habitsList.size})", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onBackground)
-                    Text("Zobacz wszystkie", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+                    Text(
+                        "Nawyki dziś (${habitsList.size})",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                    Text(
+                        "Zobacz wszystkie",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
                 }
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
-            items(habitsList) { habit ->
+            itemsIndexed(habitsList) { index, habit ->
                 HabitCard(
                     habit = habit,
                     onDoneClick = {
-                        val index = habitsList.indexOf(habit)
+                        val listIndex = habitsList.indexOf(habit)
                         if (index != -1) {
                             val wasDone = habit.isDoneToday
-                            habitsList[index] = habit.copy(isDoneToday = !wasDone)
+                            habitsList[listIndex] = habit.copy(isDoneToday = !wasDone)
 
                             if (!wasDone) {
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -120,6 +143,11 @@ fun TodayScreen(
                     }
                 )
                 Spacer(modifier = Modifier.height(16.dp))
+
+                if ((index + 1) % 3 == 0 && index != habitsList.lastIndex) {
+                    NativeAdCard()
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
             }
         }
 
@@ -156,10 +184,10 @@ fun TopSection(onProfileClick: () -> Unit,
                 .size(48.dp)
                 .clip(CircleShape)
                 .then(
-                    if(state.isLoading) Modifier.shimmerEffect()
+                    if (state.isLoading) Modifier.shimmerEffect()
                     else Modifier.background(getColorByName(state.user?.bgColor ?: "Mint"))
                 )
-                .clickable(enabled = !state.isLoading) {onProfileClick() },
+                .clickable(enabled = !state.isLoading) { onProfileClick() },
             contentAlignment = Alignment.Center
         ) {
             val displayAvatar = if (state.user?.avatarEmoji.isNullOrEmpty()) state.user?.initials ?: "MK" else state.user?.avatarEmoji ?: ""
@@ -233,7 +261,9 @@ fun HeroCard() {
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary)
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(24.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(24.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -241,7 +271,7 @@ fun HeroCard() {
                 Text("Aktualny streak", color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f), fontSize = 14.sp)
                 Text("21 dni", color = MaterialTheme.colorScheme.onPrimary, fontSize = 32.sp, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.height(4.dp))
-                Text("Rekord: 34 dni", color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f), fontSize = 12.sp)
+                Text("Rekord: 37 dni", color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f), fontSize = 12.sp)
             }
             MiniBarChart(color = MaterialTheme.colorScheme.onPrimary)
         }
@@ -264,7 +294,11 @@ fun MiniBarChart(color: Color) {
                 animationSpec = tween(durationMillis = 800, delayMillis = index * 100, easing = FastOutSlowInEasing),
                 label = "bar_anim_$index"
             )
-            Box(modifier = Modifier.width(6.dp).fillMaxHeight(animatedFraction).clip(RoundedCornerShape(3.dp)).background(color))
+            Box(modifier = Modifier
+                .width(6.dp)
+                .fillMaxHeight(animatedFraction)
+                .clip(RoundedCornerShape(3.dp))
+                .background(color))
         }
     }
 }
@@ -323,7 +357,9 @@ fun HabitCard(habit: HabitMock, onDoneClick: () -> Unit) {
                     if (habit.isDoneToday) {
                         Icon(Icons.Default.CheckCircle, contentDescription = "Zrobione", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(26.dp))
                     } else {
-                        Box(modifier = Modifier.size(22.dp).border(2.dp, MaterialTheme.colorScheme.onSurfaceVariant, CircleShape))
+                        Box(modifier = Modifier
+                            .size(22.dp)
+                            .border(2.dp, MaterialTheme.colorScheme.onSurfaceVariant, CircleShape))
                     }
                 }
 
@@ -393,9 +429,114 @@ fun HabitCard(habit: HabitMock, onDoneClick: () -> Unit) {
 }
 
 @Composable
+fun NativeAdCard(modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    var nativeAd by remember { mutableStateOf<NativeAd?>(null) }
+
+    val titleColor = MaterialTheme.colorScheme.onBackground.toArgb()
+    val bodyColor = MaterialTheme.colorScheme.onSurfaceVariant.toArgb()
+    val primaryColor = MaterialTheme.colorScheme.primary.toArgb()
+    val onPrimaryColor = MaterialTheme.colorScheme.onPrimary.toArgb()
+    val badgeBgColor = MaterialTheme.colorScheme.secondaryContainer.toArgb()
+    val badgeTextColor = MaterialTheme.colorScheme.onSecondaryContainer.toArgb()
+
+    LaunchedEffect(Unit) {
+        val adLoader = AdLoader.Builder(context, "ca-app-pub-3940256099942544/2247696110") // Testowe ID dla reklam natywnych
+            .forNativeAd { ad ->
+                nativeAd = ad
+            }
+            .build()
+        adLoader.loadAd(AdRequest.Builder().build())
+    }
+
+    if (nativeAd != null) {
+        Card(
+            modifier = modifier
+                .fillMaxWidth()
+                .height(72.dp),
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant
+            )
+        ) {
+            AndroidView(
+                modifier = Modifier.fillMaxWidth(),
+                factory = { ctx ->
+                    val inflater = LayoutInflater.from(ctx)
+                    val adView = inflater.inflate(R.layout.native_ad_habit_card, null) as NativeAdView
+
+                    val headlineView = adView.findViewById<TextView>(R.id.ad_headline)
+                    val bodyView = adView.findViewById<TextView>(R.id.ad_body)
+                    val badgeView = adView.findViewById<TextView>(R.id.ad_badge)
+                    val iconView = adView.findViewById<ImageView>(R.id.ad_icon)
+                    val ctaView = adView.findViewById<Button>(R.id.ad_call_to_action)
+
+                    headlineView.setTextColor(titleColor)
+                    bodyView.setTextColor(bodyColor)
+
+                    badgeView.setTextColor(badgeTextColor)
+                    badgeView.backgroundTintList = android.content.res.ColorStateList.valueOf(badgeBgColor)
+
+                    ctaView.setTextColor(onPrimaryColor)
+                    ctaView.backgroundTintList = android.content.res.ColorStateList.valueOf(primaryColor)
+
+                    headlineView.text = nativeAd?.headline
+                    adView.headlineView = headlineView
+
+                    if (nativeAd?.body == null) {
+                        bodyView.visibility = View.INVISIBLE
+                    } else {
+                        bodyView.visibility = View.VISIBLE
+                        bodyView.text = nativeAd?.body
+                    }
+                    adView.bodyView = bodyView
+
+                    if (nativeAd?.icon == null) {
+                        iconView.visibility = View.GONE
+                    } else {
+                        iconView.setImageDrawable(nativeAd?.icon?.drawable)
+                        iconView.visibility = View.VISIBLE
+                    }
+                    adView.iconView = iconView
+
+                    if (nativeAd?.callToAction == null) {
+                        ctaView.visibility = View.INVISIBLE
+                    } else {
+                        ctaView.visibility = View.VISIBLE
+                        ctaView.text = nativeAd?.callToAction
+                    }
+                    adView.callToActionView = ctaView
+
+                    adView.setNativeAd(nativeAd!!)
+                    adView
+                }
+            )
+        }
+    } else {
+        Box(
+            modifier = modifier
+                .fillMaxWidth()
+                .height(72.dp)
+                .clip(RoundedCornerShape(20.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                stringResource(R.string.ad_loading),
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                fontSize = 12.sp
+            )
+        }
+    }
+}
+
+@Composable
 fun StatBox(modifier: Modifier = Modifier, value: String, label: String) {
     Box(
-        modifier = modifier.clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.background).padding(vertical = 12.dp),
+        modifier = modifier
+            .clip(RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.background)
+            .padding(vertical = 12.dp),
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {

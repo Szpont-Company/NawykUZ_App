@@ -347,4 +347,5 @@
     <string name="register_unknown_error">Wystąpił błąd podczas rejestracji!</string>
     <string name="login_incorrect_credentials">Nieprawidłowy email lub hasło</string>
     <string name="login_notfound">Nie znaleziono konta o podanych danych</string>
+    <string name="ad_loading">Ładowanie...</string>
 </resources>

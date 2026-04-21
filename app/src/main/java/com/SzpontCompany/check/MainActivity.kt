@@ -56,13 +56,14 @@ import com.SzpontCompany.check.ui.theme.Crimson
 import com.SzpontCompany.check.ui.theme.Indigo
 import com.SzpontCompany.check.ui.theme.Rose
 import com.SzpontCompany.check.ui.theme.Sky
-import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.os.LocaleListCompat
 import com.SzpontCompany.check.ui.profile.FriendProfileScreen
 import com.SzpontCompany.check.ui.community.ChatScreen
 import androidx.compose.runtime.rememberCoroutineScope
 import com.SzpontCompany.check.ui.user.OnboardingScreen
+import com.google.android.gms.ads.MobileAds
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -71,6 +72,11 @@ enum class AppScreen { SPLASH, LOGIN, DASHBOARD, REGISTER_SUCCESS, RESET_PASSWOR
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        CoroutineScope(Dispatchers.IO).launch {
+            Log.e("MainActivity", "Initializing Mobile Ads SDK")
+            MobileAds.initialize(this@MainActivity) {}
+        }
 
         setContent {
             val authViewModel: AuthViewModel = viewModel()
