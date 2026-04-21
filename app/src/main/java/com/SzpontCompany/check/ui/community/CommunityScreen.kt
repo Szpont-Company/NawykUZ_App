@@ -42,6 +42,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.SzpontCompany.check.data.social.Friend
+import com.SzpontCompany.check.ui.community.components.CreateChallengeSheet
 import com.SzpontCompany.check.ui.profile.ProfileViewModel
 
 @Composable
@@ -49,7 +50,8 @@ fun CommunityScreen(
     onProfileClick: () -> Unit = {},
     onFriendProfileClick: () -> Unit = {},
     onMessageClick: (Friend) -> Unit = {},
-    viewModel: ProfileViewModel = viewModel()
+    viewModel: ProfileViewModel = viewModel(),
+    friendsViewModel: FriendsViewModel = viewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
     val user = state.user
@@ -60,6 +62,8 @@ fun CommunityScreen(
     var showNotifications by remember { mutableStateOf(false) }
     val subTabs = listOf("Globalny", "Znajomi", "Tygodniowy")
     val haptic = LocalHapticFeedback.current
+
+    var showCreateChallengeSheet by remember { mutableStateOf(false) }
 
     // --- Przykładowe dane ---
     val battles = listOf(
@@ -242,7 +246,10 @@ fun CommunityScreen(
                         item {
                             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                                 Button(
-                                    onClick = { haptic.performHapticFeedback(HapticFeedbackType.LongPress) },
+                                    onClick = {
+                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        showCreateChallengeSheet = true
+                                              },
                                     modifier = Modifier.weight(1f).height(54.dp),
                                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                                     shape = RoundedCornerShape(16.dp)
@@ -383,6 +390,22 @@ fun CommunityScreen(
     if (showNotifications) {
         NotificationsSheet(
             onDismiss = { showNotifications = false }
+        )
+    }
+
+    if (showCreateChallengeSheet) {
+        val friendsState by friendsViewModel.uiState.collectAsState()
+        // Łączymy aktywnych i nieaktywnych znajomych w jedną listę
+        val friendsList = friendsState.activeFriends + friendsState.offlineFriends
+
+        CreateChallengeSheet(
+            friendsList = friendsList,
+            onDismiss = { showCreateChallengeSheet = false },
+            onSendChallenge = { friend, template, betAmount ->
+                // Tu w przyszłości dodamy backend!
+                println("Wysyłam wyzwanie do: ${friend.name}, cel: ${template.title}, stawka: $betAmount")
+                showCreateChallengeSheet = false
+            }
         )
     }
 }
