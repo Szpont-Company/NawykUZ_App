@@ -1,15 +1,20 @@
 package com.SzpontCompany.check.ui.settings
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.SzpontCompany.check.data.settings.SettingsRepository
+import com.SzpontCompany.check.data.user.UserRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class SettingsViewModel(private val repository: SettingsRepository) : ViewModel() {
+class SettingsViewModel(
+    private val repository: SettingsRepository,
+    private val userRepository : UserRepository
+) : ViewModel() {
 
     val themeState = repository.themeFlow.stateIn(
         scope = viewModelScope,
@@ -40,14 +45,27 @@ class SettingsViewModel(private val repository: SettingsRepository) : ViewModel(
     fun updateLanguage(newLanguage: String) {
         viewModelScope.launch { repository.saveLanguage(newLanguage) }
     }
+
+    fun deleteAccount(onComplete: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            try {
+                userRepository.deleteUserAccount()
+                onComplete(true)
+            } catch (e: Exception) {
+                Log.e("SettingsViewModel", "Błąd usuwania konta", e)
+                onComplete(false)
+            }
+        }
+    }
 }
 
 class SettingsViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(SettingsViewModel::class.java)) {
-            val repository = SettingsRepository(context)
+            val settingsRepository = SettingsRepository(context)
+            val userRepository = UserRepository.getInstance(context)
             @Suppress("UNCHECKED_CAST")
-            return SettingsViewModel(repository) as T
+            return SettingsViewModel(settingsRepository, userRepository) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

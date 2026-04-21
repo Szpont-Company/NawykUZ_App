@@ -50,7 +50,7 @@ fun SettingsScreen(
     onStepGoalClick: () -> Unit,
     onPrivacyClick: () -> Unit,
     onNotificationsClick: () -> Unit,
-    onDeleteAccountConfirmed: () -> Unit = {},
+    onDeleteAccountConfirmed: () -> Unit,
     viewModel: SettingsViewModel = viewModel(
         factory = SettingsViewModelFactory(LocalContext.current.applicationContext)
     )
@@ -227,7 +227,13 @@ fun SettingsScreen(
             onDismiss = { showDeleteDialog = false },
             onConfirm = {
                 showDeleteDialog = false
-                onDeleteAccountConfirmed()
+                viewModel.deleteAccount { isSuccess ->
+                    if (isSuccess) {
+                        onDeleteAccountConfirmed()
+                    } else {
+                        //opcjonalnie toast z bledem
+                    }
+                }
             }
         )
     }
@@ -837,7 +843,8 @@ fun SettingsScreenPreview() {
             onBackClick = {},
             onStepGoalClick = {},
             onPrivacyClick = {},
-            onNotificationsClick = {}
+            onNotificationsClick = {},
+            onDeleteAccountConfirmed = {}
         )
     }
 }

@@ -21,7 +21,12 @@ fun SettingsNavHost(
                 onBackClick = onExitSettings,
                 onStepGoalClick = { navController.navigate("settings_step_goal") },
                 onPrivacyClick = { navController.navigate("settings_privacy") },
-                onNotificationsClick = { navController.navigate("settings_notifications") }
+                onNotificationsClick = { navController.navigate("settings_notifications") },
+                onDeleteAccountConfirmed = {
+                    navController.navigate("login_route") {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
             )
         }
 

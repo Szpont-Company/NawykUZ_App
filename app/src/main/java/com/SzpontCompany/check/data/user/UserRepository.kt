@@ -206,4 +206,15 @@ class UserRepository private constructor(
         }
     }
 
+    suspend fun deleteUserAccount() {
+        val user = auth.currentUser ?: throw Exception("Brak zalogowanego użytkownika")
+
+        FirebaseConfig.functions.getHttpsCallable("deleteUserAccount").call().await()
+
+        auth.signOut()
+
+        clearCache()
+        _userFlow.value = null
+    }
+
 }
