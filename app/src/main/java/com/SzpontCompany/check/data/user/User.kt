@@ -11,7 +11,6 @@ data class User(
     val currentStreak: Int = 0,
     val bestStreak: Int = 0,
 
-    // Nowe pole pod MiniBarChart (7 wartości od 0.0f do 1.0f)
     val weeklyProgress: List<Float> = listOf(0f, 0f, 0f, 0f, 0f, 0f, 0f)
 ) {
     val initials: String

@@ -42,7 +42,6 @@ class UserRepository private constructor(
     private val _userFlow = MutableStateFlow<User?>(value = null)
     val userFlow: StateFlow<User?> = _userFlow.asStateFlow()
 
-    // NOWOŚĆ: Automatyczne słuchanie zmian w profilu użytkownika
     fun startUserObservation() {
         val uid = auth.currentUser?.uid ?: return
         if (userListener != null) return // Już słuchamy
@@ -81,7 +80,6 @@ class UserRepository private constructor(
     suspend fun getUser(forceRefresh: Boolean = false): User {
         val uid = auth.currentUser?.uid ?: throw Exception("Brak UID")
 
-        // Jeśli już mamy dane w Flow i nie wymuszamy odświeżenia, używamy ich
         val current = _userFlow.value
         if (!forceRefresh && current != null && current.uid == uid) {
             return current
@@ -115,7 +113,6 @@ class UserRepository private constructor(
                 )
             ).await()
 
-        // Aktualizujemy Flow lokalnie, aby Dashboard natychmiast widział zmianę
         val current = _userFlow.value
         if (current != null && current.uid == uid) {
             val updated = current.copy(currentStreak = currentStreak, bestStreak = bestStreak)

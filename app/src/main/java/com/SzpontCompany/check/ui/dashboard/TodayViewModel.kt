@@ -29,7 +29,6 @@ class TodayViewModel(application: Application) : AndroidViewModel(application) {
     val uiState: StateFlow<TodayUiState> = _uiState.asStateFlow()
 
     init {
-        // Uruchamiamy nasłuchiwanie zmian użytkownika w repozytorium
         userRepo.startUserObservation()
         loadData()
     }
@@ -38,14 +37,12 @@ class TodayViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
 
-            // 1. Obserwuj nawyki (one mają własny listener w repo)
             launch {
                 habitRepo.getUserHabits().collect { fetchedHabits ->
                     _uiState.value = _uiState.value.copy(habits = fetchedHabits)
                 }
             }
 
-            // 2. Obserwuj użytkownika z repozytorium
             launch {
                 userRepo.userFlow.collect { user ->
                     if (user != null) {
@@ -64,12 +61,10 @@ class TodayViewModel(application: Application) : AndroidViewModel(application) {
 
         val habit = currentHabits.find { it.id == habitId } ?: return
 
-        // Czy dzień był już "Perfect Day" przed kliknięciem?
         val wasPerfectDay = currentHabits.isNotEmpty() && currentHabits.all {
             it.completedDates.contains(todayString)
         }
 
-        // Nowe daty dla nawyku
         val newDates = if (isDone) (habit.completedDates + todayString).distinct()
         else habit.completedDates.filter { it != todayString }
 
@@ -79,12 +74,10 @@ class TodayViewModel(application: Application) : AndroidViewModel(application) {
             if (it.id == habitId) it.copy(completedDates = newDates, streak = newHabitStreak) else it
         }
 
-        // Czy dzień jest "Perfect Day" po kliknięciu?
         val isPerfectDayNow = updatedHabits.isNotEmpty() && updatedHabits.all {
             it.completedDates.contains(todayString)
         }
 
-        // Obliczamy nowy Global Streak
         var newGlobalStreak = currentUser.currentStreak
         if (isPerfectDayNow && !wasPerfectDay) {
             newGlobalStreak += 1
@@ -94,13 +87,11 @@ class TodayViewModel(application: Application) : AndroidViewModel(application) {
 
         val newBestStreak = maxOf(currentUser.bestStreak, newGlobalStreak)
 
-        // 1. Optymistyczna aktualizacja UI lokalnie
         _uiState.value = currentState.copy(
             habits = updatedHabits,
             user = currentUser.copy(currentStreak = newGlobalStreak, bestStreak = newBestStreak)
         )
 
-        // 2. Zapis do Firebase
         viewModelScope.launch {
             try {
                 habitRepo.updateHabitCompletionAndStreak(habitId, newDates, newHabitStreak)

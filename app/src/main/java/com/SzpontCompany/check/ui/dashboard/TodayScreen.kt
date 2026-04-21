@@ -52,7 +52,6 @@ import java.time.LocalDate
 import java.util.UUID
 import kotlin.random.Random
 
-// Klasa danych dla efektu eksplozji emoji
 data class ExplosionData(val id: Long, val emoji: String)
 
 @Composable
@@ -124,7 +123,6 @@ fun TodayScreen(
                 }
             }
 
-            // Używamy klucza key = { _, habit -> habit.id }, aby Compose nie gubiło stanu
             itemsIndexed(items = state.habits, key = { _, habit -> habit.id }) { index, habit ->
                 HabitCard(
                     habit = habit,
@@ -313,7 +311,6 @@ fun MiniBarChart(color: Color, weeklyProgress: List<Float>) {
 fun HabitCard(habit: Habit, onToggleDone: (Boolean) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
 
-    // Obliczamy status dla dzisiejszego dnia na podstawie habit.completedDates
     val todayString = remember(habit.completedDates) { LocalDate.now().toString() }
     val isDoneToday = habit.completedDates.contains(todayString)
 
@@ -450,7 +447,6 @@ fun HabitHeatmap(habit: Habit) {
 
     val today = LocalDate.now()
 
-    // Przekształcamy daty z bazy (np. "2024-05-20") na obiekty LocalDate, żeby łatwo można było z nimi pracować
     val completedDates = habit.completedDates.mapNotNull { dateString ->
         try {
             LocalDate.parse(dateString)

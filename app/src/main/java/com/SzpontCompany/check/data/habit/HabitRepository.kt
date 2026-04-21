@@ -59,7 +59,6 @@ class HabitRepository {
         }
     }
 
-    // ZMIENIONA FUNKCJA: Teraz zapisuje jednocześnie listę dat ORAZ nową liczbę dla streaka
     suspend fun updateHabitCompletionAndStreak(habitId: String, completedDates: List<String>, streak: Int) {
         val uid = auth.currentUser?.uid ?: throw Exception("Brak zalogowanego użytkownika")
         firestore.collection("users")
