@@ -23,6 +23,7 @@ class AddHabitViewModel : ViewModel() {
             isLoading = true
             errorMessage = null
             try {
+                // Wracamy do bezpośredniego zapisu z Twojego pierwotnego kodu!
                 repository.addHabit(habit)
                 onSuccess()
             } catch (e: Exception) {

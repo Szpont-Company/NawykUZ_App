@@ -2,15 +2,18 @@ package com.SzpontCompany.check.ui.dashboard
 
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.shape.CircleShape
@@ -25,61 +28,41 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import com.SzpontCompany.check.R
+import com.SzpontCompany.check.data.habit.Habit
 import com.SzpontCompany.check.ui.components.EmojiExplosionEffect
 import com.SzpontCompany.check.ui.theme.getColorByName
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlin.random.Random
-import androidx.compose.runtime.key
-import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.viewinterop.AndroidView
-import com.google.android.gms.ads.AdRequest
-import com.SzpontCompany.check.R
 import com.google.android.gms.ads.AdLoader
+import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.nativead.NativeAd
 import com.google.android.gms.ads.nativead.NativeAdView
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.util.UUID
+import kotlin.random.Random
 
-data class HabitMock(
-    val emoji: String,
-    val title: String,
-    val subtitle: String,
-    val progress: String,
-    val stat1Value: String, val stat1Label: String,
-    val stat2Value: String, val stat2Label: String,
-    val stat3Value: String, val stat3Label: String,
-    val isDoneToday: Boolean = false
-)
-
+// Klasa danych dla efektu eksplozji emoji
 data class ExplosionData(val id: Long, val emoji: String)
 
 @Composable
 fun TodayScreen(
     onProfileClick: () -> Unit = {},
     onOptionsClick: () -> Unit = {},
-    onNotificationsClick: () -> Unit = {}
+    onNotificationsClick: () -> Unit = {},
+    viewModel: TodayViewModel = viewModel()
 ) {
-    val habitsList = remember {
-        mutableStateListOf(
-            HabitMock("🚶", "Spacer", "8 000 kroków • codziennie", "63%", "5 040", "kroków", "14 dni", "streak", "82%", "tydzień"),
-            HabitMock("📖", "Czytanie", "30 min • 5×tydzień", "40%", "12 min", "dziś", "7 dni", "streak", "60%", "tydzień"),
-            HabitMock("💧", "Picie wody", "2 litry • codziennie", "50%", "1 litr", "dziś", "3 dni", "streak", "90%", "tydzień"),
-            HabitMock("🏋️‍♀️", "Siłownia", "30 min • codziennie", "0%", "0 min", "dziś", "0 dni", "streak", "10%", "tydzień")
-
-        )
-    }
-
+    val state by viewModel.uiState.collectAsState()
     val explosions = remember { mutableStateListOf<ExplosionData>() }
     val haptic = LocalHapticFeedback.current
     val coroutineScope = rememberCoroutineScope()
@@ -95,10 +78,20 @@ fun TodayScreen(
                 TopSection(
                     onProfileClick = onProfileClick,
                     onOptionsClick = onOptionsClick,
-                    onNotificationsClick = onNotificationsClick
+                    onNotificationsClick = onNotificationsClick,
+                    state = state
                 )
                 Spacer(modifier = Modifier.height(24.dp))
-                HeroCard()
+
+                val currentStreak = state.user?.currentStreak ?: 0
+                val bestStreak = state.user?.bestStreak ?: 0
+                val weeklyProgress = state.user?.weeklyProgress ?: listOf(0f, 0f, 0f, 0f, 0f, 0f, 0f)
+
+                HeroCard(
+                    currentStreak = currentStreak,
+                    bestStreak = bestStreak,
+                    weeklyProgress = weeklyProgress
+                )
                 Spacer(modifier = Modifier.height(32.dp))
 
                 Row(
@@ -107,7 +100,7 @@ fun TodayScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        "Nawyki dziś (${habitsList.size})",
+                        "Twoje nawyki (${state.habits.size})",
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onBackground
                     )
@@ -120,31 +113,41 @@ fun TodayScreen(
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
-            itemsIndexed(habitsList) { index, habit ->
+            if (state.habits.isEmpty() && !state.isLoading) {
+                item {
+                    Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+                        Text(
+                            text = "Brak aktywnych nawyków. Dodaj coś!",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
+            // Używamy klucza key = { _, habit -> habit.id }, aby Compose nie gubiło stanu
+            itemsIndexed(items = state.habits, key = { _, habit -> habit.id }) { index, habit ->
                 HabitCard(
                     habit = habit,
-                    onDoneClick = {
-                        val listIndex = habitsList.indexOf(habit)
-                        if (index != -1) {
-                            val wasDone = habit.isDoneToday
-                            habitsList[listIndex] = habit.copy(isDoneToday = !wasDone)
+                    onToggleDone = { isNowDone ->
+                        if (isNowDone) {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            val id = UUID.randomUUID().mostSignificantBits
+                            val iconToExplode = if(habit.icon.isNotEmpty()) habit.icon else "🔥"
+                            val newExplosion = ExplosionData(id, iconToExplode)
 
-                            if (!wasDone) {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                val currentId = java.util.UUID.randomUUID().mostSignificantBits
-                                val newExplosion = ExplosionData(currentId, habit.emoji)
-                                explosions.add(newExplosion)
-                                coroutineScope.launch {
-                                    delay(2000)
-                                    explosions.remove(newExplosion)
-                                }
+                            explosions.add(newExplosion)
+                            coroutineScope.launch {
+                                delay(2000)
+                                explosions.removeAll { it.id == newExplosion.id }
                             }
                         }
+
+                        viewModel.toggleHabitCompletion(habit.id, isNowDone)
                     }
                 )
                 Spacer(modifier = Modifier.height(16.dp))
 
-                if ((index + 1) % 3 == 0 && index != habitsList.lastIndex) {
+                if ((index + 1) % 3 == 0 && index != state.habits.lastIndex) {
                     NativeAdCard()
                     Spacer(modifier = Modifier.height(16.dp))
                 }
@@ -164,12 +167,12 @@ fun TodayScreen(
 }
 
 @Composable
-fun TopSection(onProfileClick: () -> Unit,
-               onOptionsClick: () -> Unit,
-               onNotificationsClick: () -> Unit,
-               viewModel: TodayViewModel = viewModel()) {
-    val state by viewModel.uiState.collectAsState()
-
+fun TopSection(
+    onProfileClick: () -> Unit,
+    onOptionsClick: () -> Unit,
+    onNotificationsClick: () -> Unit,
+    state: TodayUiState
+) {
     val currentHour = remember { java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY) }
 
     val greeting = when (currentHour) {
@@ -205,7 +208,7 @@ fun TopSection(onProfileClick: () -> Unit,
                     .shimmerEffect()
                 )
             } else {
-                Text(state.user?.name ?: "", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Bold)
+                Text(state.user?.name ?: "Użytkownik", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Bold)
             }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -252,9 +255,8 @@ fun TopSection(onProfileClick: () -> Unit,
     }
 }
 
-
 @Composable
-fun HeroCard() {
+fun HeroCard(currentStreak: Int, bestStreak: Int, weeklyProgress: List<Float>) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
@@ -269,18 +271,21 @@ fun HeroCard() {
         ) {
             Column {
                 Text("Aktualny streak", color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f), fontSize = 14.sp)
-                Text("21 dni", color = MaterialTheme.colorScheme.onPrimary, fontSize = 32.sp, fontWeight = FontWeight.Bold)
+                Text("$currentStreak dni", color = MaterialTheme.colorScheme.onPrimary, fontSize = 32.sp, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.height(4.dp))
-                Text("Rekord: 37 dni", color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f), fontSize = 12.sp)
+                Text("Rekord: $bestStreak dni", color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f), fontSize = 12.sp)
             }
-            MiniBarChart(color = MaterialTheme.colorScheme.onPrimary)
+            MiniBarChart(
+                color = MaterialTheme.colorScheme.onPrimary,
+                weeklyProgress = weeklyProgress
+            )
         }
     }
 }
 
 @Composable
-fun MiniBarChart(color: Color) {
-    val heights = listOf(0.4f, 0.6f, 0.8f, 0.5f, 0.9f, 1.0f, 0.3f)
+fun MiniBarChart(color: Color, weeklyProgress: List<Float>) {
+    val heights = if (weeklyProgress.size == 7) weeklyProgress else List(7) { 0f }
     var animationPlayed by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
@@ -289,8 +294,9 @@ fun MiniBarChart(color: Color) {
 
     Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.Bottom, modifier = Modifier.height(48.dp)) {
         heights.forEachIndexed { index, fraction ->
+            val safeFraction = fraction.coerceIn(0f, 1f)
             val animatedFraction by animateFloatAsState(
-                targetValue = if (animationPlayed) fraction else 0.01f,
+                targetValue = if (animationPlayed) safeFraction else 0.01f,
                 animationSpec = tween(durationMillis = 800, delayMillis = index * 100, easing = FastOutSlowInEasing),
                 label = "bar_anim_$index"
             )
@@ -304,8 +310,12 @@ fun MiniBarChart(color: Color) {
 }
 
 @Composable
-fun HabitCard(habit: HabitMock, onDoneClick: () -> Unit) {
+fun HabitCard(habit: Habit, onToggleDone: (Boolean) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
+
+    // Obliczamy status dla dzisiejszego dnia na podstawie habit.completedDates
+    val todayString = remember(habit.completedDates) { LocalDate.now().toString() }
+    val isDoneToday = habit.completedDates.contains(todayString)
 
     val bringIntoViewRequester = remember { BringIntoViewRequester() }
     val coroutineScope = rememberCoroutineScope()
@@ -327,7 +337,6 @@ fun HabitCard(habit: HabitMock, onDoneClick: () -> Unit) {
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -338,23 +347,28 @@ fun HabitCard(habit: HabitMock, onDoneClick: () -> Unit) {
                     modifier = Modifier
                         .size(40.dp)
                         .clip(RoundedCornerShape(10.dp))
-                        .background(MaterialTheme.colorScheme.primary),
+                        .background(getColorByName(habit.colorName).copy(alpha = 0.2f)),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = habit.emoji,
+                        text = if(habit.icon.isNotEmpty()) habit.icon else "🔥",
                         fontSize = 20.sp
                     )
                 }
                 Spacer(modifier = Modifier.width(12.dp))
 
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(habit.title, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onBackground)
-                    Text(habit.subtitle, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(habit.name, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onBackground)
+                    Text(habit.frequency, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
 
-                IconButton(onClick = onDoneClick, modifier = Modifier.size(32.dp)) {
-                    if (habit.isDoneToday) {
+                IconButton(
+                    onClick = {
+                        onToggleDone(!isDoneToday)
+                    },
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    if (isDoneToday) {
                         Icon(Icons.Default.CheckCircle, contentDescription = "Zrobione", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(26.dp))
                     } else {
                         Box(modifier = Modifier
@@ -365,7 +379,7 @@ fun HabitCard(habit: HabitMock, onDoneClick: () -> Unit) {
 
                 Spacer(modifier = Modifier.width(4.dp))
 
-                Text(habit.progress, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+                Text(if (isDoneToday) "100%" else "0%", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
 
                 IconButton(onClick = { expanded = !expanded }, modifier = Modifier.size(32.dp)) {
                     Icon(
@@ -380,15 +394,13 @@ fun HabitCard(habit: HabitMock, onDoneClick: () -> Unit) {
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    StatBox(modifier = Modifier.weight(1f), value = habit.stat1Value, label = habit.stat1Label)
-                    StatBox(modifier = Modifier.weight(1f), value = habit.stat2Value, label = habit.stat2Label)
-                    StatBox(modifier = Modifier.weight(1f), value = habit.stat3Value, label = habit.stat3Label)
+                    StatBox(modifier = Modifier.weight(1f), value = habit.dailyGoal.toString(), label = habit.unit.ifEmpty { "Cel" })
+                    StatBox(modifier = Modifier.weight(1f), value = habit.streak.toString(), label = "streak")
+                    StatBox(modifier = Modifier.weight(1f), value = "${habit.monthlyCompletionRate}%", label = "miesiąc")
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
-
-                HeatmapMock()
-
+                HabitHeatmap(habit = habit)
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Row(
@@ -396,23 +408,25 @@ fun HabitCard(habit: HabitMock, onDoneClick: () -> Unit) {
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Button(
-                        onClick = onDoneClick,
+                        onClick = {
+                            onToggleDone(!isDoneToday)
+                        },
                         modifier = Modifier
                             .weight(1f)
                             .height(48.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = if (habit.isDoneToday) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.background,
-                            contentColor = if (habit.isDoneToday) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onBackground
+                            containerColor = if (isDoneToday) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.background,
+                            contentColor = if (isDoneToday) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onBackground
                         ),
                         shape = RoundedCornerShape(12.dp)
                     ) {
                         Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(if (habit.isDoneToday) "Zrobione" else "Zaznacz", fontWeight = FontWeight.Bold)
+                        Text(if (isDoneToday) "Zrobione" else "Zaznacz", fontWeight = FontWeight.Bold)
                     }
 
                     OutlinedButton(
-                        onClick = { /* TODO */ },
+                        onClick = { /* TODO Notatka */ },
                         modifier = Modifier
                             .weight(1f)
                             .height(48.dp),
@@ -421,6 +435,70 @@ fun HabitCard(habit: HabitMock, onDoneClick: () -> Unit) {
                         border = null
                     ) {
                         Text("Notatka")
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun HabitHeatmap(habit: Habit) {
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val bgColor = MaterialTheme.colorScheme.background
+    val daysOfWeek = listOf("Pn", "Wt", "Śr", "Cz", "Pt", "So", "Nd")
+
+    val today = LocalDate.now()
+
+    // Przekształcamy daty z bazy (np. "2024-05-20") na obiekty LocalDate, żeby łatwo można było z nimi pracować
+    val completedDates = habit.completedDates.mapNotNull { dateString ->
+        try {
+            LocalDate.parse(dateString)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    Column(
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        daysOfWeek.forEachIndexed { dayIndex, dayLabel ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = dayLabel,
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.width(36.dp)
+                )
+
+                Row(
+                    modifier = Modifier.weight(1f),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    for (week in 0 until 8) {
+                        val daysToSubtract = ((7 - week) * 7) + (today.dayOfWeek.value - 1) - dayIndex
+                        val cellDate = today.minusDays(daysToSubtract.toLong())
+
+                        val isFuture = cellDate.isAfter(today)
+                        val isCompleted = completedDates.contains(cellDate)
+
+                        val boxColor = when {
+                            isFuture -> bgColor.copy(alpha = 0.3f)
+                            isCompleted -> primaryColor
+                            else -> bgColor
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .aspectRatio(1f)
+                                .clip(RoundedCornerShape(3.dp))
+                                .background(boxColor)
+                        )
                     }
                 }
             }
@@ -441,7 +519,7 @@ fun NativeAdCard(modifier: Modifier = Modifier) {
     val badgeTextColor = MaterialTheme.colorScheme.onSecondaryContainer.toArgb()
 
     LaunchedEffect(Unit) {
-        val adLoader = AdLoader.Builder(context, "ca-app-pub-3940256099942544/2247696110") // Testowe ID dla reklam natywnych
+        val adLoader = AdLoader.Builder(context, "ca-app-pub-3940256099942544/2247696110")
             .forNativeAd { ad ->
                 nativeAd = ad
             }
@@ -469,14 +547,12 @@ fun NativeAdCard(modifier: Modifier = Modifier) {
                     val bodyView = adView.findViewById<TextView>(R.id.ad_body)
                     val badgeView = adView.findViewById<TextView>(R.id.ad_badge)
                     val iconView = adView.findViewById<ImageView>(R.id.ad_icon)
-                    val ctaView = adView.findViewById<Button>(R.id.ad_call_to_action)
+                    val ctaView = adView.findViewById<android.widget.Button>(R.id.ad_call_to_action)
 
                     headlineView.setTextColor(titleColor)
                     bodyView.setTextColor(bodyColor)
-
                     badgeView.setTextColor(badgeTextColor)
                     badgeView.backgroundTintList = android.content.res.ColorStateList.valueOf(badgeBgColor)
-
                     ctaView.setTextColor(onPrimaryColor)
                     ctaView.backgroundTintList = android.content.res.ColorStateList.valueOf(primaryColor)
 
@@ -542,51 +618,6 @@ fun StatBox(modifier: Modifier = Modifier, value: String, label: String) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(value, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Bold)
             Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-    }
-}
-
-@Composable
-fun HeatmapMock() {
-    val primaryColor = MaterialTheme.colorScheme.primary
-    val bgColor = MaterialTheme.colorScheme.background
-    val daysOfWeek = listOf("Pn", "Wt", "Śr", "Cz", "Pt", "So", "Nd")
-
-    Column(
-        verticalArrangement = Arrangement.spacedBy(6.dp),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        daysOfWeek.forEachIndexed { index, dayLabel ->
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = dayLabel,
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.width(36.dp)
-                )
-
-                Row(
-                    modifier = Modifier.weight(1f),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    for (week in 0 until 8) {
-                        val intensity = Random.nextFloat()
-                        val boxColor = if (intensity > 0.4f) primaryColor.copy(alpha = intensity) else bgColor
-
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .aspectRatio(1f)
-                                .clip(RoundedCornerShape(3.dp))
-                                .background(boxColor)
-                        )
-                    }
-                }
-            }
         }
     }
 }

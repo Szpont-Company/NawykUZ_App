@@ -19,5 +19,11 @@ data class Habit(
     val eveningTime: String = "",
     val difficulty: String = "",
     val isActive: Boolean = true,
+
+    // Nowe pola pod statystyki i Heatmapę
+    val streak: Int = 0,
+    val monthlyCompletionRate: Int = 0,
+    val completedDates: List<String> = emptyList(), // Np. ["2024-05-20", "2024-05-21"]
+
     @ServerTimestamp val createdAt: Date? = null
 )
