@@ -184,10 +184,10 @@ fun TopSection(onProfileClick: () -> Unit,
                 .size(48.dp)
                 .clip(CircleShape)
                 .then(
-                    if(state.isLoading) Modifier.shimmerEffect()
+                    if (state.isLoading) Modifier.shimmerEffect()
                     else Modifier.background(getColorByName(state.user?.bgColor ?: "Mint"))
                 )
-                .clickable(enabled = !state.isLoading) {onProfileClick() },
+                .clickable(enabled = !state.isLoading) { onProfileClick() },
             contentAlignment = Alignment.Center
         ) {
             val displayAvatar = if (state.user?.avatarEmoji.isNullOrEmpty()) state.user?.initials ?: "MK" else state.user?.avatarEmoji ?: ""
@@ -261,7 +261,9 @@ fun HeroCard() {
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary)
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(24.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(24.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -292,7 +294,11 @@ fun MiniBarChart(color: Color) {
                 animationSpec = tween(durationMillis = 800, delayMillis = index * 100, easing = FastOutSlowInEasing),
                 label = "bar_anim_$index"
             )
-            Box(modifier = Modifier.width(6.dp).fillMaxHeight(animatedFraction).clip(RoundedCornerShape(3.dp)).background(color))
+            Box(modifier = Modifier
+                .width(6.dp)
+                .fillMaxHeight(animatedFraction)
+                .clip(RoundedCornerShape(3.dp))
+                .background(color))
         }
     }
 }
@@ -351,7 +357,9 @@ fun HabitCard(habit: HabitMock, onDoneClick: () -> Unit) {
                     if (habit.isDoneToday) {
                         Icon(Icons.Default.CheckCircle, contentDescription = "Zrobione", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(26.dp))
                     } else {
-                        Box(modifier = Modifier.size(22.dp).border(2.dp, MaterialTheme.colorScheme.onSurfaceVariant, CircleShape))
+                        Box(modifier = Modifier
+                            .size(22.dp)
+                            .border(2.dp, MaterialTheme.colorScheme.onSurfaceVariant, CircleShape))
                     }
                 }
 
@@ -443,7 +451,9 @@ fun NativeAdCard(modifier: Modifier = Modifier) {
 
     if (nativeAd != null) {
         Card(
-            modifier = modifier.fillMaxWidth(),
+            modifier = modifier
+                .fillMaxWidth()
+                .height(72.dp),
             shape = RoundedCornerShape(20.dp),
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surfaceVariant
@@ -506,13 +516,13 @@ fun NativeAdCard(modifier: Modifier = Modifier) {
         Box(
             modifier = modifier
                 .fillMaxWidth()
-                .height(82.dp)
+                .height(72.dp)
                 .clip(RoundedCornerShape(20.dp))
                 .background(MaterialTheme.colorScheme.surfaceVariant),
             contentAlignment = Alignment.Center
         ) {
             Text(
-                "Ładowanie...",
+                stringResource(R.string.ad_loading),
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                 fontSize = 12.sp
             )
@@ -523,7 +533,10 @@ fun NativeAdCard(modifier: Modifier = Modifier) {
 @Composable
 fun StatBox(modifier: Modifier = Modifier, value: String, label: String) {
     Box(
-        modifier = modifier.clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.background).padding(vertical = 12.dp),
+        modifier = modifier
+            .clip(RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.background)
+            .padding(vertical = 12.dp),
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
