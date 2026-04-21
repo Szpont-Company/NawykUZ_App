@@ -348,4 +348,15 @@
     <string name="login_incorrect_credentials">Nieprawidłowy email lub hasło</string>
     <string name="login_notfound">Nie znaleziono konta o podanych danych</string>
     <string name="ad_loading">Ładowanie...</string>
+    <string name="store_item_coins_title">Obejrzyj reklamę</string>
+    <string name="store_item_coins_desc">Zarób 10C</string>
+    <string name="rewards_earn">STREFA ZARABIANIA</string>
+    <string name="rewards_earn_desc1">Kolega ograł Cię do zera?</string>
+    <string name="rewards_earn_desc2">Żaden problem — zarób trochę monet i wróć do gry!</string>
+    <string name="rewards_battle">Walcz i wygrywaj!</string>
+    <string name="rewards_battle_desc">Zdobądź monety za wygrane pojedynki</string>
+    <string name="rewards_events">Wydarzenia specjalne</string>
+    <string name="rewards_events_desc">Zdobądź monety biorąc udział!</string>
+    <string name="shop_hero">Zaszalej, należy ci się!</string>
+    <string name="shop_hero_desc">Wymień zgromadzone monety na wymarzoną nagrodę.</string>
 </resources>

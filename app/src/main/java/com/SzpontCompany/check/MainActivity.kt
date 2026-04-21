@@ -59,6 +59,7 @@ import com.SzpontCompany.check.ui.theme.Sky
 import com.SzpontCompany.check.ui.profile.FriendProfileScreen
 import com.SzpontCompany.check.ui.community.ChatScreen
 import androidx.compose.runtime.rememberCoroutineScope
+import com.SzpontCompany.check.ads.RewardedAdManager
 import com.SzpontCompany.check.ui.user.OnboardingScreen
 import com.google.android.gms.ads.MobileAds
 import com.google.firebase.auth.FirebaseAuth
