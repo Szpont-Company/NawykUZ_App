@@ -53,6 +53,7 @@ fun LogInForm(
     validateCredentials: () -> Boolean,
     loginErrorMessage: String?,
     isLoading: Boolean = false,
+    isGoogleLoading : Boolean = false
 ) {
     var visible by remember { mutableStateOf(false) }
     var isEmailError by remember { mutableStateOf(false) }
@@ -160,7 +161,7 @@ fun LogInForm(
             contentColor = MaterialTheme.colorScheme.onBackground
         ),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurfaceVariant),
-        enabled = !isLoading
+        enabled = !isLoading && !isGoogleLoading
     ) {
         if(!isLoading) {
             Text(
@@ -201,19 +202,27 @@ fun LogInForm(
             contentColor = MaterialTheme.colorScheme.onBackground
         ),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurfaceVariant),
-        enabled = !isLoading
+        enabled = !isLoading && !isGoogleLoading
     ) {
-        Icon(
-            painter = painterResource(id = R.drawable.google_logo),
-            contentDescription = null,
-            modifier = Modifier.size(18.dp),
-            tint = Color.Unspecified
-        )
-        Spacer(modifier = Modifier.width(12.dp))
-        Text(
-            text = stringResource(R.string.login_google),
-            style = MaterialTheme.typography.bodyLarge
-        )
+        if(!isGoogleLoading) {
+            Icon(
+                painter = painterResource(id = R.drawable.google_logo),
+                contentDescription = null,
+                modifier = Modifier.size(18.dp),
+                tint = Color.Unspecified
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Text(
+                text = stringResource(R.string.login_google),
+                style = MaterialTheme.typography.bodyLarge
+            )
+        } else {
+            CircularProgressIndicator(
+                modifier = Modifier.size(20.dp),
+                color = MaterialTheme.colorScheme.primary,
+                strokeWidth = 2.dp
+            )
+        }
     }
     Spacer(modifier = Modifier.height(16.dp))
 

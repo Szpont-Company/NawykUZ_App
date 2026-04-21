@@ -98,10 +98,13 @@ fun LoginScreen(
     var registrationError by remember { mutableStateOf<String?>(null) }
     var isRegistering by remember { mutableStateOf(false) }
     var isLoggingIn by remember { mutableStateOf(false) }
+    var isGoogleLoading by remember { mutableStateOf(false) }
 
     fun onGoogleClick() {
         scope.launch {
+            isGoogleLoading = true
             val res = viewModel.signInWithGoogle(context)
+            isGoogleLoading = false
             res.onSuccess { user ->
                 Log.d("Auth", "Zalogowano: ${user?.displayName}")
                 onLoginSuccess()
@@ -228,7 +231,8 @@ fun LoginScreen(
                         },
                         validateCredentials = {viewModel.validateCredentials()},
                         loginErrorMessage = loginError,
-                        isLoading = isLoggingIn
+                        isLoading = isLoggingIn,
+                        isGoogleLoading = isGoogleLoading
                     )
 
                     1 -> RegisterForm(
@@ -264,7 +268,8 @@ fun LoginScreen(
                             viewModel.recaptcha.execute()
                         },
                         validateCredentials = {viewModel.validateCredentials()},
-                        isLoading = isRegistering
+                        isLoading = isRegistering,
+                        isGoogleLoading = isGoogleLoading
                     )
                 }
             }
