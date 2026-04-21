@@ -76,6 +76,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         CoroutineScope(Dispatchers.IO).launch {
+            Log.e("MainActivity", "Initializing Mobile Ads SDK")
             MobileAds.initialize(this@MainActivity) {}
         }
 
