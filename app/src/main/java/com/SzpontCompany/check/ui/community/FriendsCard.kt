@@ -23,7 +23,7 @@ import com.SzpontCompany.check.data.social.Friend
 import com.SzpontCompany.check.ui.community.components.FriendListItem
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-
+import com.SzpontCompany.check.ui.theme.getColorByName
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.SzpontCompany.check.data.social.FriendRequest
 
@@ -288,7 +288,7 @@ fun FriendsInvitesSection(
                 val friendMock = Friend(
                     uid = req.senderId,
                     name = req.senderName,
-                    initials = req.senderName.take(2).uppercase(),
+                    initials = req.senderName.trim().split(" ").mapNotNull { it.firstOrNull()?.toString() }.take(2).joinToString("").uppercase(),
                     avatarEmoji = req.senderAvatar,
                     bgColor = req.senderBgColor,
                     status = "Czeka na odpowiedź"
@@ -302,13 +302,13 @@ fun FriendsInvitesSection(
                     Column(Modifier.padding(16.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Box(
-                                modifier = Modifier.size(40.dp).background(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f), CircleShape),
+                                modifier = Modifier.size(40.dp).background(getColorByName(friendMock.bgColor), CircleShape),
                                 contentAlignment = Alignment.Center
                             ) {
                                 if (friendMock.avatarEmoji.isNotEmpty()) {
                                     Text(friendMock.avatarEmoji, fontSize = 24.sp)
                                 } else {
-                                    Text(friendMock.initials, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                                    Text(friendMock.initials, color = Color.White, fontWeight = FontWeight.Bold)
                                 }
                             }
                             Spacer(Modifier.width(12.dp))

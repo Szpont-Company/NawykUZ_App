@@ -43,8 +43,6 @@ fun FriendListItem(
     val haptic = LocalHapticFeedback.current
 
     val avatarBgColor = getColorByName(friend.bgColor)
-    val initialsColor = MaterialTheme.colorScheme.surface
-
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -67,7 +65,7 @@ fun FriendListItem(
                 if (friend.avatarEmoji.isNotEmpty()) {
                     Text(friend.avatarEmoji, fontSize = 24.sp)
                 } else {
-                    Text(friend.initials, color = initialsColor, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                    Text(friend.initials, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 15.sp)
                 }
             }
 
