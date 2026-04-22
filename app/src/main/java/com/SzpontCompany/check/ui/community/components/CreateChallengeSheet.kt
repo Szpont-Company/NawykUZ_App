@@ -187,7 +187,16 @@ fun SelectableFriendItem(friend: Friend, isSelected: Boolean, onClick: () -> Uni
                 .border(2.dp, borderColor, CircleShape),
             contentAlignment = Alignment.Center
         ) {
-            Text(text = friend.avatarEmoji, fontSize = 28.sp, modifier = Modifier.alpha(alpha))
+            if (friend.avatarEmoji.isNotEmpty()) {
+                Text(text = friend.avatarEmoji, fontSize = 28.sp)
+            } else {
+                Text(
+                    text = friend.initials,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+            }
         }
         Spacer(modifier = Modifier.height(8.dp))
         Text(
