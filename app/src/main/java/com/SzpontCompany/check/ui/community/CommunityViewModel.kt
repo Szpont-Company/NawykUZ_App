@@ -12,11 +12,18 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.MaterialTheme
+import androidx.lifecycle.viewModelScope
 import com.SzpontCompany.check.data.social.*
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
-class CommunityViewModel : ViewModel() {
+class CommunityViewModel(
+    private val auth: FirebaseAuth = FirebaseAuth.getInstance(),
+    private val challengeRepository: ChallengeRepository = ChallengeRepository(FirebaseFirestore.getInstance())
+) : ViewModel() {
 
     // symulacja danych z backendu (mocki)
     private val initialNotifications = listOf(
@@ -75,15 +82,6 @@ class CommunityViewModel : ViewModel() {
         )
     )
 
-    private val initialInvites = listOf(
-        ChallengeInvite(
-            senderName = "Tomek K.",
-            activityName = "Bieganie",
-            durationMinutes = 30,
-            days = 30,
-            betAmount = 200
-        )
-    )
 
     private val initialEvents = listOf(
         Event(
@@ -116,7 +114,6 @@ class CommunityViewModel : ViewModel() {
             xp = 3100,
             avatarColor = Color(0xFFE24B4A)
         ),
-        // "Ty" kolor będzie ustawiony dynamicznie w UI
         RankingEntry(rank = 14, name = "Ty", initials = "TY", xp = 1240, avatarColor = Color.Gray, isMe = true)
     )
 
@@ -128,14 +125,18 @@ class CommunityViewModel : ViewModel() {
     private val _battles = MutableStateFlow(initialBattles)
     val battles: StateFlow<List<Battle>> = _battles.asStateFlow()
 
-    private val _invites = MutableStateFlow(initialInvites)
-    val invites: StateFlow<List<ChallengeInvite>> = _invites.asStateFlow()
+    private val _incomingInvites = MutableStateFlow<List<ChallengeInvite>>(emptyList())
+    val incomingInvites: StateFlow<List<ChallengeInvite>> = _incomingInvites.asStateFlow()
 
     private val _events = MutableStateFlow(initialEvents)
     val events: StateFlow<List<Event>> = _events.asStateFlow()
 
     private val _rankingEntries = MutableStateFlow(initialRanking)
     val rankingEntries: StateFlow<List<RankingEntry>> = _rankingEntries.asStateFlow()
+
+    init {
+        loadIncomingInvites()
+    }
 
     // ---- LOGIK ---
     fun markAsRead(notificationId: String) {
@@ -154,17 +155,33 @@ class CommunityViewModel : ViewModel() {
         _notifications.update { list -> list.filterNot { it.id == notificationId } }
     }
 
+    private fun loadIncomingInvites() {
+        val currentUserId = auth.currentUser?.uid ?: return
+        viewModelScope.launch {
+            try {
+                challengeRepository.getPendingInvitesForUser(currentUserId).collect { invites ->
+                    _incomingInvites.value = invites
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
     fun sendChallenge(friend: Friend, template: ChallengeTemplate, betAmount: Int) {
+        val currentUserId = auth.currentUser?.uid ?: return
+        val currentUserName = auth.currentUser?.displayName ?: "Nieznany"
+
         val newInvite = ChallengeInvite(
-            senderName = "Wysłano do: ${friend.name}",
-            activityName = template.title,
-            durationMinutes = 0,
-            days = 7,
-            betAmount = betAmount
+            senderId = currentUserId,
+            senderName = currentUserName,
+            receiverId = friend.uid,
+            habitName = template.title,
+            stake = betAmount
         )
 
-        _invites.update { currentList ->
-            listOf(newInvite) + currentList
+        viewModelScope.launch {
+            challengeRepository.sendInvite(newInvite)
         }
     }
 

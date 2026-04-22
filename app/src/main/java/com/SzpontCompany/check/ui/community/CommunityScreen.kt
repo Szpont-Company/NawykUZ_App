@@ -56,7 +56,7 @@ fun CommunityScreen(
     val user = state.user
 
     val battles by communityViewModel.battles.collectAsState()
-    val invites by communityViewModel.invites.collectAsState()
+    val incomingInvites by communityViewModel.incomingInvites.collectAsState()
     val events by communityViewModel.events.collectAsState()
     val rankingEntries by communityViewModel.rankingEntries.collectAsState()
 
@@ -114,7 +114,7 @@ fun CommunityScreen(
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     // Czerwona kropka jeśli są zaproszenia
-                    if (invites.isNotEmpty()) {
+                    if (incomingInvites.isNotEmpty()) {
                         Box(
                             modifier = Modifier
                                 .align(Alignment.TopEnd)
@@ -208,18 +208,18 @@ fun CommunityScreen(
                         }
 
                         // Sekcja zaproszeń WYNIESIONA NA POCZĄTEK
-                        if (invites.isNotEmpty()) {
+                        if (incomingInvites.isNotEmpty()) {
                             item {
                                 Text(
-                                    "OCZEKUJĄCE ZAPROSZENIA (${invites.size})",
+                                    "OCZEKUJĄCE ZAPROSZENIA (${incomingInvites.size})",
                                     style = MaterialTheme.typography.labelMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
                                 )
                             }
-                            items(invites.size) { i ->
+                            items(incomingInvites.size) { i ->
                                 ChallengeInviteCard(
-                                    invite = invites[i],
+                                    invite = incomingInvites[i],
                                     onAccept = {},
                                     onReject = {}
                                 )
