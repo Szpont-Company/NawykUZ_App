@@ -218,6 +218,7 @@ fun LoginScreen(
                                 Log.d("RegisterError", "message: '${error.message}' | class: ${error::class.simpleName}")
                                 loginError  = when (error.message) {
                                     "Invalid_credentials" -> context.getString(R.string.login_incorrect_credentials)
+                                    "Email_not_verified" -> context.getString(R.string.login_unverified)
                                     "Account_not_found" -> context.getString(R.string.login_notfound)
                                     else -> context.getString(R.string.register_unknown_error)
                                 }
