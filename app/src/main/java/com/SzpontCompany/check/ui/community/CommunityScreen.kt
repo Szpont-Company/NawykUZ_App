@@ -395,14 +395,13 @@ fun CommunityScreen(
 
     if (showCreateChallengeSheet) {
         val friendsState by friendsViewModel.uiState.collectAsState()
-        // Łączymy aktywnych i nieaktywnych znajomych w jedną listę
         val friendsList = friendsState.activeFriends + friendsState.offlineFriends
 
         CreateChallengeSheet(
             friendsList = friendsList,
             onDismiss = { showCreateChallengeSheet = false },
             onSendChallenge = { friend, template, betAmount ->
-                // Tu w przyszłości dodamy backend!
+                // Tu w przyszłości dodamy backend
                 println("Wysyłam wyzwanie do: ${friend.name}, cel: ${template.title}, stawka: $betAmount")
                 showCreateChallengeSheet = false
             }

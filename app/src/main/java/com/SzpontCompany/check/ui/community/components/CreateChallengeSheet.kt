@@ -27,7 +27,6 @@ import androidx.compose.ui.unit.sp
 import com.SzpontCompany.check.data.social.Friend
 import com.SzpontCompany.check.ui.theme.*
 
-// 1. Prosty model szablonu wyzwania
 data class ChallengeTemplate(
     val id: String,
     val title: String,
@@ -36,7 +35,6 @@ data class ChallengeTemplate(
     val color: Color
 )
 
-// Gotowe szablony do wyboru
 val PredefinedChallenges = listOf(
     ChallengeTemplate("1", "Królowie Kroków", "Kto zrobi więcej kroków w 3 dni?", "👟", Sky),
     ChallengeTemplate("2", "Wodny Pojedynek", "Pij minimum 2L wody przez 5 dni.", "💧", Mint),
@@ -47,29 +45,29 @@ val PredefinedChallenges = listOf(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateChallengeSheet(
-    friendsList: List<Friend>, // Lista Twoich znajomych
+    friendsList: List<Friend>,
     onDismiss: () -> Unit,
-    onSendChallenge: (Friend, ChallengeTemplate, Int) -> Unit // Akcja "Wyślij"
+    onSendChallenge: (Friend, ChallengeTemplate, Int) -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-    // Stany (co użytkownik aktualnie wybrał)
     var selectedFriend by remember { mutableStateOf<Friend?>(null) }
     var selectedTemplate by remember { mutableStateOf<ChallengeTemplate?>(null) }
-    var betAmount by remember { mutableStateOf(50) } // Domyślnie 50 monet
+    var betAmount by remember { mutableStateOf(50) }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         containerColor = MaterialTheme.colorScheme.background,
-        dragHandle = { BottomSheetDefaults.DragHandle() }
+        dragHandle = { BottomSheetDefaults.DragHandle() },
+
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp)
                 .padding(bottom = 32.dp)
-                .verticalScroll(rememberScrollState()) // Pozwala przewijać zawartość, jeśli ekran jest mały
+                .verticalScroll(rememberScrollState())
         ) {
             Text(
                 text = "Rzuć wyzwanie",
@@ -78,7 +76,6 @@ fun CreateChallengeSheet(
             )
             Spacer(modifier = Modifier.height(24.dp))
 
-            // --- SEKCJA 1: Wybór Znajomego ---
             Text(
                 text = "Kto podejmie rękawicę?",
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -100,7 +97,6 @@ fun CreateChallengeSheet(
             }
             Spacer(modifier = Modifier.height(24.dp))
 
-            // --- SEKCJA 2: Wybór Szablonu ---
             Text(
                 text = "O co walczycie?",
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -119,7 +115,6 @@ fun CreateChallengeSheet(
             }
             Spacer(modifier = Modifier.height(24.dp))
 
-            // --- SEKCJA 3: Stawka (Monety) ---
             Text(
                 text = "Stawka (Check Coins)",
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -142,7 +137,6 @@ fun CreateChallengeSheet(
             }
             Spacer(modifier = Modifier.height(32.dp))
 
-            // --- PRZYCISK WYŚLIJ ---
             val canSend = selectedFriend != null && selectedTemplate != null
             Button(
                 onClick = {
@@ -156,8 +150,8 @@ fun CreateChallengeSheet(
                     .height(52.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Coral, // Koralowy kolor akcji
-                    disabledContainerColor = Coral.copy(alpha = 0.3f)
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
                 )
             ) {
                 Text(
@@ -173,7 +167,9 @@ fun CreateChallengeSheet(
 
 @Composable
 fun SelectableFriendItem(friend: Friend, isSelected: Boolean, onClick: () -> Unit) {
-    val borderColor = if (isSelected) Coral else Color.Transparent
+    val accentColor = MaterialTheme.colorScheme.primary
+    val borderColor = if (isSelected) accentColor else Color.Transparent
+    val friendColor = getColorByName(friend.bgColor)
     val alpha = if (isSelected) 1f else 0.6f
 
     Column(
@@ -186,7 +182,7 @@ fun SelectableFriendItem(friend: Friend, isSelected: Boolean, onClick: () -> Uni
             modifier = Modifier
                 .size(60.dp)
                 .clip(CircleShape)
-                .background(Mint.copy(alpha = 0.2f)) // Używamy Mint jako domyślnego tła awatara
+                .background(friendColor)
                 .border(2.dp, borderColor, CircleShape),
             contentAlignment = Alignment.Center
         ) {
