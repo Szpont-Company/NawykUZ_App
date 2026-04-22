@@ -16,10 +16,6 @@ import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import com.SzpontCompany.check.ui.community.components.ChallengeInviteCard
 import com.SzpontCompany.check.ui.community.components.YourPositionCard
 import com.SzpontCompany.check.ui.community.components.NotificationsSheet
-import com.SzpontCompany.check.data.social.Battle
-import com.SzpontCompany.check.data.social.ChallengeInvite
-import com.SzpontCompany.check.data.social.Event
-import com.SzpontCompany.check.data.social.RankingEntry
 import com.SzpontCompany.check.ui.theme.CheckTheme
 import com.SzpontCompany.check.ui.theme.Mint
 import com.SzpontCompany.check.ui.theme.getColorByName
@@ -34,7 +30,6 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.material.icons.outlined.Search
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -44,6 +39,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.SzpontCompany.check.data.social.Friend
 import com.SzpontCompany.check.ui.community.components.CreateChallengeSheet
 import com.SzpontCompany.check.ui.profile.ProfileViewModel
+import kotlinx.coroutines.coroutineScope
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
 
 @Composable
 fun CommunityScreen(
@@ -75,6 +73,8 @@ fun CommunityScreen(
     val dynamicRankingEntries = rankingEntries.map {
         if (it.isMe) it.copy(avatarColor = primaryColor) else it
     }
+
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier
@@ -345,8 +345,13 @@ fun CommunityScreen(
             onDismiss = { showCreateChallengeSheet = false },
             onSendChallenge = { friend, template, betAmount ->
                 // Tu w przyszłości dodamy backend
-                println("Wysyłam wyzwanie do: ${friend.name}, cel: ${template.title}, stawka: $betAmount")
                 showCreateChallengeSheet = false
+                communityViewModel.sendChallenge(friend, template, betAmount)
+                Toast.makeText(
+                    context,
+                    "Wyzwanie rzucone: ${friend.name}!",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         )
     }

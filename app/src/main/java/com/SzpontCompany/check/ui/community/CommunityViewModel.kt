@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.update
 
 class CommunityViewModel : ViewModel() {
 
+    // symulacja danych z backendu (mocki)
     private val initialNotifications = listOf(
         NotificationItem(
             id = "1",
@@ -119,6 +120,8 @@ class CommunityViewModel : ViewModel() {
         RankingEntry(rank = 14, name = "Ty", initials = "TY", xp = 1240, avatarColor = Color.Gray, isMe = true)
     )
 
+    //--- state flow ---
+
     private val _notifications = MutableStateFlow(initialNotifications)
     val notifications: StateFlow<List<NotificationItem>> = _notifications.asStateFlow()
 
@@ -134,6 +137,7 @@ class CommunityViewModel : ViewModel() {
     private val _rankingEntries = MutableStateFlow(initialRanking)
     val rankingEntries: StateFlow<List<RankingEntry>> = _rankingEntries.asStateFlow()
 
+    // ---- LOGIK ---
     fun markAsRead(notificationId: String) {
         _notifications.update { list -> list.map { if (it.id == notificationId) it.copy(isRead = true) else it } }
     }
@@ -149,5 +153,20 @@ class CommunityViewModel : ViewModel() {
     fun declineAction(notificationId: String) {
         _notifications.update { list -> list.filterNot { it.id == notificationId } }
     }
+
+    fun sendChallenge(friend: Friend, template: ChallengeTemplate, betAmount: Int) {
+        val newInvite = ChallengeInvite(
+            senderName = "Wysłano do: ${friend.name}",
+            activityName = template.title,
+            durationMinutes = 0,
+            days = 7,
+            betAmount = betAmount
+        )
+
+        _invites.update { currentList ->
+            listOf(newInvite) + currentList
+        }
+    }
+
 }
 
