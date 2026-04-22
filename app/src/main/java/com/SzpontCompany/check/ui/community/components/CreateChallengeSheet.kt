@@ -34,7 +34,8 @@ import com.SzpontCompany.check.data.social.PredefinedChallenges
 fun CreateChallengeSheet(
     friendsList: List<Friend>,
     onDismiss: () -> Unit,
-    onSendChallenge: (Friend, ChallengeTemplate, Int) -> Unit
+    onSendChallenge: (Friend, ChallengeTemplate, Int) -> Unit,
+    onAddFriendClick: () -> Unit = {}
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
@@ -71,18 +72,49 @@ fun CreateChallengeSheet(
             )
             Spacer(modifier = Modifier.height(12.dp))
 
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                items(friendsList) { friend ->
-                    SelectableFriendItem(
-                        friend = friend,
-                        isSelected = selectedFriend == friend,
-                        onClick = { selectedFriend = friend }
+            if (friendsList.isEmpty()) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f), RoundedCornerShape(12.dp))
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Nie masz jeszcze znajomych do bitwy 😔",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium
                     )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    OutlinedButton(
+                        onClick = {
+                            onDismiss()
+                            onAddFriendClick()
+                        },
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.primary),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.height(40.dp)
+                    ) {
+                        Text("Znajdź znajomych", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                    }
+                }
+            } else {
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    items(friendsList) { friend ->
+                        SelectableFriendItem(
+                            friend = friend,
+                            isSelected = selectedFriend == friend,
+                            onClick = { selectedFriend = friend }
+                        )
+                    }
                 }
             }
+
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(

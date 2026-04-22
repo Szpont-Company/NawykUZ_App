@@ -30,12 +30,13 @@ import com.SzpontCompany.check.data.social.FriendRequest
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FriendsCard(
+    selectedSubTab: Int,
+    onSubTabSelected: (Int) -> Unit,
     modifier: Modifier = Modifier,
     onFriendProfileClick: (Friend) -> Unit = {},
     onMessageClick: (Friend) -> Unit = {},
     viewModel: FriendsViewModel = viewModel()
 ) {
-    var selectedSubTab by remember { mutableStateOf(0) }
     val uiState by viewModel.uiState.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
     val subTabs = listOf("Znajomi (${uiState.activeFriends.size + uiState.offlineFriends.size})", "Zaproszenia (${uiState.incomingRequests.size})", "Szukaj")
@@ -71,7 +72,7 @@ fun FriendsCard(
                         .background(if (isSelected) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent)
                         .clickable {
                             haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                            selectedSubTab = index
+                            onSubTabSelected(index)
                         }
                         .padding(vertical = 12.dp),
                     contentAlignment = Alignment.Center

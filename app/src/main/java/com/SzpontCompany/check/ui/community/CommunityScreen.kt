@@ -63,6 +63,7 @@ fun CommunityScreen(
     val tabs = listOf("Battle", "Eventy", "Ranking", "Znajomi")
     var selectedTab by rememberSaveable { mutableIntStateOf(0) }
     var selectedSubTab by remember { mutableStateOf(0) }
+    var friendsSubTab by remember { mutableStateOf(0) }
     var showNotifications by remember { mutableStateOf(false) }
     val subTabs = listOf("Globalny", "Znajomi", "Tygodniowy")
     val haptic = LocalHapticFeedback.current
@@ -321,6 +322,8 @@ fun CommunityScreen(
                 }
                 3 -> { // Zakładka Znajomi
                     FriendsCard(
+                       selectedSubTab = friendsSubTab,
+                        onSubTabSelected = { friendsSubTab = it },
                         modifier = Modifier.fillMaxSize(),
                         onFriendProfileClick = { onFriendProfileClick() },
                         onMessageClick = { friend -> onMessageClick(friend) }
@@ -343,6 +346,10 @@ fun CommunityScreen(
         CreateChallengeSheet(
             friendsList = friendsList,
             onDismiss = { showCreateChallengeSheet = false },
+            onAddFriendClick = {
+                selectedTab = 3
+                friendsSubTab = 2
+            },
             onSendChallenge = { friend, template, betAmount ->
                 // Tu w przyszłości dodamy backend
                 showCreateChallengeSheet = false
