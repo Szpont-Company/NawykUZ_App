@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.SzpontCompany.check.data.social.ChallengeInvite
 import androidx.compose.foundation.background
+import com.SzpontCompany.check.ui.theme.getColorByName
 
 @Composable
 fun ChallengeInviteCard(
@@ -40,16 +41,20 @@ fun ChallengeInviteCard(
                 Box(
                     modifier = Modifier
                         .size(40.dp)
-                        .background(MaterialTheme.colorScheme.primary, shape = CircleShape),
+                        .background(getColorByName(invite.senderBgColor), shape = CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
-                    // Zabezpieczenie przed pustym stringiem
-                    val initial = if (invite.senderName.isNotEmpty()) invite.senderName.take(1).uppercase() else "?"
+                    val displayContent = when {
+                        invite.senderEmoji.isNotEmpty() -> invite.senderEmoji
+                        invite.senderInitials.isNotEmpty() -> invite.senderInitials
+                        invite.senderName.isNotEmpty() -> invite.senderName.take(1).uppercase()
+                        else -> "?"
+                    }
                     Text(
-                        text = initial,
+                        text = displayContent,
                         color = Color.White,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp
+                        fontSize = 16.sp
                     )
                 }
                 Spacer(Modifier.width(12.dp))

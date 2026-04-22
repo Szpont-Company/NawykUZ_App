@@ -346,7 +346,7 @@ fun CommunityScreen(
             onSendChallenge = { friend, template, betAmount ->
                 // Tu w przyszłości dodamy backend
                 showCreateChallengeSheet = false
-                communityViewModel.sendChallenge(friend, template, betAmount)
+                communityViewModel.sendChallenge(user, friend, template, betAmount)
                 Toast.makeText(
                     context,
                     "Wyzwanie rzucone: ${friend.name}!",

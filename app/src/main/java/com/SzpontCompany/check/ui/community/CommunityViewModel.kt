@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.MaterialTheme
 import androidx.lifecycle.viewModelScope
 import com.SzpontCompany.check.data.social.*
+import com.SzpontCompany.check.data.user.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.asStateFlow
@@ -168,13 +169,15 @@ class CommunityViewModel(
         }
     }
 
-    fun sendChallenge(friend: Friend, template: ChallengeTemplate, betAmount: Int) {
-        val currentUserId = auth.currentUser?.uid ?: return
-        val currentUserName = auth.currentUser?.displayName ?: "Nieznany"
+    fun sendChallenge(currentUser: User?, friend: Friend, template: ChallengeTemplate, betAmount: Int) {
+        val currentUserId = currentUser?.uid ?: return
 
         val newInvite = ChallengeInvite(
             senderId = currentUserId,
-            senderName = currentUserName,
+            senderName = currentUser.name.ifEmpty { "Nieznany" },
+            senderInitials = currentUser.initials,
+            senderEmoji = currentUser.avatarEmoji,
+            senderBgColor = currentUser.bgColor,
             receiverId = friend.uid,
             habitName = template.title,
             stake = betAmount

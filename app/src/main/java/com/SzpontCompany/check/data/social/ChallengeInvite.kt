@@ -4,6 +4,9 @@ data class ChallengeInvite(
     val id: String = "",
     val senderId: String = "",
     val senderName: String = "",
+    val senderInitials: String = "",
+    val senderEmoji: String = "",
+    val senderBgColor: String = "Mint",
     val receiverId: String = "",
     val habitName: String = "",
     val challengeType: String = "",
@@ -11,5 +14,5 @@ data class ChallengeInvite(
     val status: String = "PENDING",
     val timestamp: Long = System.currentTimeMillis()
 ) {
-    constructor() : this("", "", "", "", "", "", 0, "PENDING", 0)
+    constructor() : this("", "", "", "", "", "Mint", "", "", "BATTLE", 0, "PENDING", 0)
 }
