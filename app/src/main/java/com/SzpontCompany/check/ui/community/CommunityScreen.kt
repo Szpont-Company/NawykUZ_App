@@ -34,7 +34,6 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.material.icons.outlined.Search
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -42,6 +41,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.SzpontCompany.check.data.social.Friend
+import com.SzpontCompany.check.ui.ads.NativeAdCard
 import com.SzpontCompany.check.ui.profile.ProfileViewModel
 
 @Composable
@@ -286,12 +286,18 @@ fun CommunityScreen(
                             )
                         }
 
+
                         items(battles.size) { i ->
                             BattleCard(
                                 battle = battles[i],
                                 onDoneClick = {},
                                 onDetailsOrSurrenderClick = {}
                             )
+
+                            if(i == 0) {
+                                Spacer(modifier = Modifier.height(16.dp))
+                                NativeAdCard()
+                            }
                         }
                     }
                 }
@@ -367,7 +373,11 @@ fun CommunityScreen(
                         item {
                             RankingListCard(entries = rankingEntries)
                         }
+                        item {
+                            NativeAdCard()
+                        }
                     }
+
                 }
                 3 -> { // Zakładka Znajomi
                     FriendsCard(
