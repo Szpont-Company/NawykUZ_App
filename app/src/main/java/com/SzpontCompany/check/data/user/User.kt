@@ -10,6 +10,7 @@ data class User(
     val bgColor: String = "Mint",
     val currentStreak: Int = 0,
     val bestStreak: Int = 0,
+    val lastGlobalStreakDate: String = "",
 
     val weeklyProgress: List<Float> = listOf(0f, 0f, 0f, 0f, 0f, 0f, 0f)
 ) {

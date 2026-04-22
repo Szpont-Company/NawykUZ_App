@@ -50,7 +50,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.util.UUID
-import kotlin.random.Random
 
 data class ExplosionData(val id: Long, val emoji: String)
 
@@ -141,6 +140,9 @@ fun TodayScreen(
                         }
 
                         viewModel.toggleHabitCompletion(habit.id, isNowDone)
+                    },
+                    onSaveNote = { date, newNote ->
+                        viewModel.updateHabitDailyNote(habit.id, date, newNote)
                     }
                 )
                 Spacer(modifier = Modifier.height(16.dp))
@@ -308,11 +310,67 @@ fun MiniBarChart(color: Color, weeklyProgress: List<Float>) {
 }
 
 @Composable
-fun HabitCard(habit: Habit, onToggleDone: (Boolean) -> Unit) {
+fun HabitCard(
+    habit: Habit,
+    onToggleDone: (Boolean) -> Unit,
+    onSaveNote: (String, String) -> Unit
+) {
     var expanded by remember { mutableStateOf(false) }
+    var editingNoteDate by remember { mutableStateOf<String?>(null) }
 
-    val todayString = remember(habit.completedDates) { LocalDate.now().toString() }
+    val today = remember { LocalDate.now() }
+    val todayString = remember { today.toString() }
     val isDoneToday = habit.completedDates.contains(todayString)
+    val todayNote = habit.dailyNotes[todayString] ?: ""
+
+    val expectedDatesInLast30 = remember(habit, today) {
+        val last30Dates = (0..29).map { today.minusDays(it.toLong()) }
+
+        when {
+            habit.selectedDays.isNotEmpty() -> {
+                last30Dates.filter { date ->
+                    val dayNameEn = date.dayOfWeek.name
+                    val dayNameShortPl = listOf("Pn", "Wt", "Śr", "Cz", "Pt", "So", "Nd")[date.dayOfWeek.value - 1]
+                    val dayNameLongPl = listOf("poniedziałek", "wtorek", "środa", "czwartek", "piątek", "sobota", "niedziela")[date.dayOfWeek.value - 1]
+                    val dayValueStr = date.dayOfWeek.value.toString()
+
+                    habit.selectedDays.any { selectedDay ->
+                        selectedDay.equals(dayNameEn, ignoreCase = true) ||
+                                selectedDay.equals(dayNameShortPl, ignoreCase = true) ||
+                                selectedDay.equals(dayNameLongPl, ignoreCase = true) ||
+                                selectedDay == dayValueStr
+                    }
+                }
+            }
+            else -> last30Dates
+        }
+    }
+
+    val monthlyPercentage = remember(habit.completedDates, expectedDatesInLast30, habit, today) {
+        val last30DaysStr = (0..29).map { today.minusDays(it.toLong()).toString() }
+
+        when {
+            habit.selectedDays.isNotEmpty() -> {
+                if (expectedDatesInLast30.isEmpty()) return@remember 0
+
+                val expectedDatesStr = expectedDatesInLast30.map { it.toString() }
+                val completedExpectedCount = habit.completedDates.count { it in expectedDatesStr }
+
+                ((completedExpectedCount.toFloat() / expectedDatesStr.size) * 100).toInt().coerceIn(0, 100)
+            }
+            habit.timesPerWeek > 0 -> {
+                val expectedTotal = (habit.timesPerWeek * (30.0 / 7.0)).toInt()
+                if (expectedTotal <= 0) return@remember 0
+
+                val completedCount = habit.completedDates.count { it in last30DaysStr }
+                ((completedCount.toFloat() / expectedTotal) * 100).toInt().coerceIn(0, 100)
+            }
+            else -> {
+                val completedCount = habit.completedDates.count { it in last30DaysStr }
+                ((completedCount.toFloat() / 30f) * 100).toInt().coerceIn(0, 100)
+            }
+        }
+    }
 
     val bringIntoViewRequester = remember { BringIntoViewRequester() }
     val coroutineScope = rememberCoroutineScope()
@@ -393,11 +451,16 @@ fun HabitCard(habit: Habit, onToggleDone: (Boolean) -> Unit) {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     StatBox(modifier = Modifier.weight(1f), value = habit.dailyGoal.toString(), label = habit.unit.ifEmpty { "Cel" })
                     StatBox(modifier = Modifier.weight(1f), value = habit.streak.toString(), label = "streak")
-                    StatBox(modifier = Modifier.weight(1f), value = "${habit.monthlyCompletionRate}%", label = "miesiąc")
+                    StatBox(modifier = Modifier.weight(1f), value = "${monthlyPercentage}%", label = "30 dni")
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
-                HabitHeatmap(habit = habit)
+                HabitHeatmap(
+                    habit = habit,
+                    onDayClick = { clickedDate ->
+                        editingNoteDate = clickedDate
+                    }
+                )
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Row(
@@ -423,7 +486,7 @@ fun HabitCard(habit: Habit, onToggleDone: (Boolean) -> Unit) {
                     }
 
                     OutlinedButton(
-                        onClick = { /* TODO Notatka */ },
+                        onClick = { editingNoteDate = todayString },
                         modifier = Modifier
                             .weight(1f)
                             .height(48.dp),
@@ -431,16 +494,31 @@ fun HabitCard(habit: Habit, onToggleDone: (Boolean) -> Unit) {
                         shape = RoundedCornerShape(12.dp),
                         border = null
                     ) {
-                        Text("Notatka")
+                        Text(if (todayNote.isNotEmpty()) "Edytuj notatkę" else "Notatka")
                     }
                 }
             }
+        }
+
+        editingNoteDate?.let { date ->
+            HabitNoteDialog(
+                initialNote = habit.dailyNotes[date] ?: "",
+                dateString = date,
+                onDismiss = { editingNoteDate = null },
+                onSave = { newNote ->
+                    onSaveNote(date, newNote)
+                    editingNoteDate = null
+                }
+            )
         }
     }
 }
 
 @Composable
-fun HabitHeatmap(habit: Habit) {
+fun HabitHeatmap(
+    habit: Habit,
+    onDayClick: (String) -> Unit
+) {
     val primaryColor = MaterialTheme.colorScheme.primary
     val bgColor = MaterialTheme.colorScheme.background
     val daysOfWeek = listOf("Pn", "Wt", "Śr", "Cz", "Pt", "So", "Nd")
@@ -478,9 +556,11 @@ fun HabitHeatmap(habit: Habit) {
                     for (week in 0 until 8) {
                         val daysToSubtract = ((7 - week) * 7) + (today.dayOfWeek.value - 1) - dayIndex
                         val cellDate = today.minusDays(daysToSubtract.toLong())
+                        val dateString = cellDate.toString()
 
                         val isFuture = cellDate.isAfter(today)
                         val isCompleted = completedDates.contains(cellDate)
+                        val hasNote = habit.dailyNotes[dateString]?.isNotBlank() == true
 
                         val boxColor = when {
                             isFuture -> bgColor.copy(alpha = 0.3f)
@@ -494,7 +574,23 @@ fun HabitHeatmap(habit: Habit) {
                                 .aspectRatio(1f)
                                 .clip(RoundedCornerShape(3.dp))
                                 .background(boxColor)
-                        )
+                                .clickable(enabled = !isFuture && hasNote) {
+                                    onDayClick(dateString)
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (hasNote) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(6.dp)
+                                        .clip(CircleShape)
+                                        .background(
+                                            if (isCompleted) MaterialTheme.colorScheme.onPrimary
+                                            else MaterialTheme.colorScheme.primary
+                                        )
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -616,4 +712,71 @@ fun StatBox(modifier: Modifier = Modifier, value: String, label: String) {
             Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
+}
+
+@Composable
+fun HabitNoteDialog(
+    initialNote: String,
+    dateString: String,
+    onDismiss: () -> Unit,
+    onSave: (String) -> Unit
+) {
+    var noteText by remember { mutableStateOf(initialNote) }
+    val today = LocalDate.now().toString()
+    val isPast = dateString < today
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        shape = RoundedCornerShape(24.dp),
+        containerColor = MaterialTheme.colorScheme.surface,
+        title = {
+            Text(
+                text = if (isPast) "Podgląd notatki ($dateString)" else "Notatka ($dateString)",
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+        },
+        text = {
+            OutlinedTextField(
+                value = noteText,
+                onValueChange = { if (!isPast) noteText = it },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(140.dp),
+                readOnly = isPast,
+                placeholder = { Text("Zapisz swoje przemyślenia, przeszkody lub sukcesy z tego dnia...") },
+                shape = RoundedCornerShape(16.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.surfaceVariant,
+                )
+            )
+        },
+        confirmButton = {
+            if (!isPast) {
+                Button(
+                    onClick = { onSave(noteText) },
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                ) {
+                    Text("Zapisz", fontWeight = FontWeight.Bold)
+                }
+            } else {
+                Button(
+                    onClick = onDismiss,
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                ) {
+                    Text("Zamknij", fontWeight = FontWeight.Bold)
+                }
+            }
+        },
+        dismissButton = {
+            if (!isPast) {
+                TextButton(onClick = onDismiss) {
+                    Text("Anuluj", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+        }
+    )
 }

@@ -73,4 +73,13 @@ class HabitRepository {
             )
             .await()
     }
+
+    suspend fun updateHabitDailyNote(habitId: String, dateString: String, newNote: String) {
+        val uid = auth.currentUser?.uid ?: return
+
+        firestore.collection("users").document(uid)
+            .collection("habits").document(habitId)
+            .update("dailyNotes.$dateString", newNote)
+            .await()
+    }
 }
