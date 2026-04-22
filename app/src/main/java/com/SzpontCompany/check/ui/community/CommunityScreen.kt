@@ -51,10 +51,16 @@ fun CommunityScreen(
     onFriendProfileClick: () -> Unit = {},
     onMessageClick: (Friend) -> Unit = {},
     viewModel: ProfileViewModel = viewModel(),
-    friendsViewModel: FriendsViewModel = viewModel()
+    friendsViewModel: FriendsViewModel = viewModel(),
+    communityViewModel: CommunityViewModel = viewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
     val user = state.user
+
+    val battles by communityViewModel.battles.collectAsState()
+    val invites by communityViewModel.invites.collectAsState()
+    val events by communityViewModel.events.collectAsState()
+    val rankingEntries by communityViewModel.rankingEntries.collectAsState()
 
     val tabs = listOf("Battle", "Eventy", "Ranking", "Znajomi")
     var selectedTab by rememberSaveable { mutableIntStateOf(0) }
@@ -65,73 +71,10 @@ fun CommunityScreen(
 
     var showCreateChallengeSheet by remember { mutableStateOf(false) }
 
-    // --- Przykładowe dane ---
-    val battles = listOf(
-        Battle(
-            title = "Codzienny spacer", daysLeft = 3,
-            myDays = 6, totalDays = 7, myHp = 95,
-            opponentName = "Kacper M.", opponentDays = 5, opponentHp = 60,
-            opponentCompleted = false, betAmount = 50, endDate = "23 mar",
-            isLosingWarning = false, isDoneToday = true
-        ),
-        Battle(
-            title = "Czytanie 20 min", daysLeft = 5,
-            myDays = 4, totalDays = 7, myHp = 55,
-            opponentName = "Ania W.", opponentDays = 7, opponentHp = 100,
-            opponentCompleted = true, betAmount = 100, endDate = null,
-            isLosingWarning = true, isDoneToday = false
-        )
-    )
-
-    val invites = listOf(
-        ChallengeInvite(
-            senderName = "Tomek K.",
-            activityName = "Bieganie",
-            durationMinutes = 30,
-            days = 30,
-            betAmount = 200
-        )
-    )
-
-    val events = listOf(
-        Event(
-            title = "Globalny Marsz Marca",
-            subtitle = "Łącznie 1 000 000 kroków",
-            badgeText = "Global",
-            themeColor = Color(0xFF00BFA5),
-            progress = 0.67f,
-            progressText = "672 450 / 1 000 000 kroków",
-            timeText = "12 dni",
-            participantsCount = "8 431 uczestników",
-            buttonText = "Dołącz"
-        ),
-        Event(
-            title = "Tydzień Czytania",
-            subtitle = "7 dni z rzędu min. 20 min",
-            badgeText = "Społeczność",
-            themeColor = Color(0xFF8C9EFF),
-            progress = 0.43f,
-            progressText = "3 / 7 dni ukończono",
-            timeText = "4 dni",
-            rewardHighlight = "Odznaka \"Bookworm\" + 300 monet"
-        ),
-        Event(
-            title = "Wiosenny Sprint",
-            subtitle = "Rusza za 3 dni!",
-            isSubtitleColored = true,
-            badgeText = "Wkrótce",
-            themeColor = Color(0xFFF57C00),
-            description = "30-dniowe wyzwanie aktywności fizycznej.\nNagroda: ekskluzywna odznaka + 500 monet.",
-            buttonText = "Przypomnij mi"
-        )
-    )
-
-    val rankingEntries = listOf(
-        RankingEntry(rank = 1, name = "Piotr K.", initials = "PK", xp = 4200, avatarColor = Color(0xFFD8912A)),
-        RankingEntry(rank = 2, name = "Ania S.", initials = "AS", xp = 3800, avatarColor = Color(0xFF5E35B1)),
-        RankingEntry(rank = 3, name = "Marek J.", initials = "MJ", xp = 3100, avatarColor = Color(0xFFE24B4A)),
-        RankingEntry(rank = 14, name = "Ty", initials = "TY", xp = 1240, avatarColor = MaterialTheme.colorScheme.primary, isMe = true)
-    )
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val dynamicRankingEntries = rankingEntries.map {
+        if (it.isMe) it.copy(avatarColor = primaryColor) else it
+    }
 
     Column(
         modifier = Modifier
@@ -372,7 +315,7 @@ fun CommunityScreen(
                         }
 
                         item {
-                            RankingListCard(entries = rankingEntries)
+                            RankingListCard(entries = dynamicRankingEntries)
                         }
                     }
                 }

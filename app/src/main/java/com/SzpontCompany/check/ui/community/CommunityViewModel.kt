@@ -1,10 +1,18 @@
 package com.SzpontCompany.check.ui.community
 
 import androidx.lifecycle.ViewModel
+import com.SzpontCompany.check.data.social.Battle
+import com.SzpontCompany.check.data.social.ChallengeInvite
 import com.SzpontCompany.check.data.social.NotificationItem
 import com.SzpontCompany.check.data.social.NotificationType
+import com.SzpontCompany.check.data.social.RankingEntry
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import androidx.compose.ui.graphics.Color
+import androidx.compose.material3.MaterialTheme
+import com.SzpontCompany.check.data.social.*
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
@@ -49,36 +57,97 @@ class CommunityViewModel : ViewModel() {
         )
     )
 
+    private val initialBattles = listOf(
+        Battle(
+            title = "Codzienny spacer", daysLeft = 3,
+            myDays = 6, totalDays = 7, myHp = 95,
+            opponentName = "Kacper M.", opponentDays = 5, opponentHp = 60,
+            opponentCompleted = false, betAmount = 50, endDate = "23 mar",
+            isLosingWarning = false, isDoneToday = true
+        ),
+        Battle(
+            title = "Czytanie 20 min", daysLeft = 5,
+            myDays = 4, totalDays = 7, myHp = 55,
+            opponentName = "Ania W.", opponentDays = 7, opponentHp = 100,
+            opponentCompleted = true, betAmount = 100, endDate = null,
+            isLosingWarning = true, isDoneToday = false
+        )
+    )
+
+    private val initialInvites = listOf(
+        ChallengeInvite(
+            senderName = "Tomek K.",
+            activityName = "Bieganie",
+            durationMinutes = 30,
+            days = 30,
+            betAmount = 200
+        )
+    )
+
+    private val initialEvents = listOf(
+        Event(
+            title = "Globalny Marsz Marca", subtitle = "Łącznie 1 000 000 kroków",
+            badgeText = "Global", themeColor = Color(0xFF00BFA5),
+            progress = 0.67f, progressText = "672 450 / 1 000 000 kroków",
+            timeText = "12 dni", participantsCount = "8 431 uczestników", buttonText = "Dołącz"
+        ),
+        Event(
+            title = "Tydzień Czytania", subtitle = "7 dni z rzędu min. 20 min",
+            badgeText = "Społeczność", themeColor = Color(0xFF8C9EFF),
+            progress = 0.43f, progressText = "3 / 7 dni ukończono",
+            timeText = "4 dni", rewardHighlight = "Odznaka \"Bookworm\" + 300 monet"
+        ),
+        Event(
+            title = "Wiosenny Sprint", subtitle = "Rusza za 3 dni!", isSubtitleColored = true,
+            badgeText = "Wkrótce", themeColor = Color(0xFFF57C00),
+            description = "30-dniowe wyzwanie aktywności fizycznej.\nNagroda: ekskluzywna odznaka + 500 monet.",
+            buttonText = "Przypomnij mi"
+        )
+    )
+
+    private val initialRanking = listOf(
+        RankingEntry(rank = 1, name = "Piotr K.", initials = "PK", xp = 4200, avatarColor = Color(0xFFD8912A)),
+        RankingEntry(rank = 2, name = "Ania S.", initials = "AS", xp = 3800, avatarColor = Color(0xFF5E35B1)),
+        RankingEntry(
+            rank = 3,
+            name = "Marek J.",
+            initials = "MJ",
+            xp = 3100,
+            avatarColor = Color(0xFFE24B4A)
+        ),
+        // "Ty" kolor będzie ustawiony dynamicznie w UI
+        RankingEntry(rank = 14, name = "Ty", initials = "TY", xp = 1240, avatarColor = Color.Gray, isMe = true)
+    )
+
     private val _notifications = MutableStateFlow(initialNotifications)
     val notifications: StateFlow<List<NotificationItem>> = _notifications.asStateFlow()
 
+    private val _battles = MutableStateFlow(initialBattles)
+    val battles: StateFlow<List<Battle>> = _battles.asStateFlow()
+
+    private val _invites = MutableStateFlow(initialInvites)
+    val invites: StateFlow<List<ChallengeInvite>> = _invites.asStateFlow()
+
+    private val _events = MutableStateFlow(initialEvents)
+    val events: StateFlow<List<Event>> = _events.asStateFlow()
+
+    private val _rankingEntries = MutableStateFlow(initialRanking)
+    val rankingEntries: StateFlow<List<RankingEntry>> = _rankingEntries.asStateFlow()
+
     fun markAsRead(notificationId: String) {
-        _notifications.update { list ->
-            list.map {
-                if (it.id == notificationId) it.copy(isRead = true) else it
-            }
-        }
+        _notifications.update { list -> list.map { if (it.id == notificationId) it.copy(isRead = true) else it } }
     }
 
     fun markAllAsRead() {
-        _notifications.update { list ->
-            list.map { it.copy(isRead = true) }
-        }
+        _notifications.update { list -> list.map { it.copy(isRead = true) } }
     }
 
     fun acceptAction(notificationId: String) {
-        // W przyszłości: wywołanie do bazy danych (zmiana statusu zaproszenia, dodanie do znajomych)
-
-        // Na razie usuwamy powiadomienie z widoku, symulując sukces backendu
-        _notifications.update { list ->
-            list.filterNot { it.id == notificationId }
-        }
+        _notifications.update { list -> list.filterNot { it.id == notificationId } }
     }
 
     fun declineAction(notificationId: String) {
-        _notifications.update { list ->
-            list.filterNot { it.id == notificationId }
-        }
+        _notifications.update { list -> list.filterNot { it.id == notificationId } }
     }
 }
 
