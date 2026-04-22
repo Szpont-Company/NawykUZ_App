@@ -66,8 +66,9 @@ fun CreateChallengeSheet(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp)
-                .padding(bottom = 32.dp)
+                .navigationBarsPadding()
                 .verticalScroll(rememberScrollState())
+                .padding(bottom = 24.dp)
         ) {
             Text(
                 text = "Rzuć wyzwanie",
