@@ -221,8 +221,13 @@ fun CommunityScreen(
                             items(incomingInvites.size) { i ->
                                 ChallengeInviteCard(
                                     invite = incomingInvites[i],
-                                    onAccept = {},
-                                    onReject = {}
+                                    onAccept = {
+                                        communityViewModel.acceptInvite(incomingInvites[i])
+                                        Toast.makeText(context, "Bitwa rozpoczęta! Sprawdź ekran Dzisiaj.", Toast.LENGTH_SHORT).show()
+                                    },
+                                    onReject = {
+                                        communityViewModel.rejectInvite(incomingInvites[i])
+                                    }
                                 )
                             }
                         }

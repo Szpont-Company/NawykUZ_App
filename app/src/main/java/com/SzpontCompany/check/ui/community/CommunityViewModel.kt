@@ -13,6 +13,8 @@ import kotlinx.coroutines.flow.update
 import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.MaterialTheme
 import androidx.lifecycle.viewModelScope
+import com.SzpontCompany.check.data.habit.Habit
+import com.SzpontCompany.check.data.habit.HabitRepository
 import com.SzpontCompany.check.data.social.*
 import com.SzpontCompany.check.data.user.User
 import com.google.firebase.auth.FirebaseAuth
@@ -185,6 +187,42 @@ class CommunityViewModel(
 
         viewModelScope.launch {
             challengeRepository.sendInvite(newInvite)
+        }
+    }
+
+    private val habitRepository = HabitRepository()
+
+    fun acceptInvite(invite: ChallengeInvite) {
+        viewModelScope.launch {
+            try {
+
+                challengeRepository.updateInviteStatus(invite.id, "ACCEPTED")
+
+                val battleHabit = Habit(
+                    name = invite.habitName,
+                    icon = "⚔️",
+                    colorName = "Coral",
+                    frequency = "daily",
+                    selectedDays = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"),
+                    timesPerWeek = 7,
+                    battleId = invite.id,
+                    opponentName = invite.senderName,
+                    isActive = true
+                )
+
+                habitRepository.addHabit(battleHabit)
+
+                // potem dodajemy tu kod generujacy wspolny dokument battle w bazie firebase
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    fun rejectInvite(invite: ChallengeInvite) {
+        viewModelScope.launch {
+            challengeRepository.updateInviteStatus(invite.id, "REJECTED")
         }
     }
 
