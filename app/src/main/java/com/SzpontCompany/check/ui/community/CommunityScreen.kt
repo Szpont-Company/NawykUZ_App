@@ -222,7 +222,7 @@ fun CommunityScreen(
                                 ChallengeInviteCard(
                                     invite = incomingInvites[i],
                                     onAccept = {
-                                        communityViewModel.acceptInvite(incomingInvites[i])
+                                        communityViewModel.acceptInvite(incomingInvites[i], user?.name ?: "Nieznajomy")
                                         Toast.makeText(context, "Bitwa rozpoczęta! Sprawdź ekran Dzisiaj.", Toast.LENGTH_SHORT).show()
                                     },
                                     onReject = {

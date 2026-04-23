@@ -82,4 +82,11 @@ class HabitRepository {
             .update("dailyNotes.$dateString", newNote)
             .await()
     }
+
+    suspend fun addHabitForUser(userId: String, habit: Habit) {
+        val docRef = firestore.collection("users").document(userId).collection("habits").document()
+        val habitWithId = habit.copy(id = docRef.id)
+
+        docRef.set(habitWithId).await()
+    }
 }

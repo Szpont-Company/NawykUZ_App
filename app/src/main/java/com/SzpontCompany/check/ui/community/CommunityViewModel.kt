@@ -1,17 +1,7 @@
 package com.SzpontCompany.check.ui.community
 
-import androidx.lifecycle.ViewModel
-import com.SzpontCompany.check.data.social.Battle
-import com.SzpontCompany.check.data.social.ChallengeInvite
-import com.SzpontCompany.check.data.social.NotificationItem
-import com.SzpontCompany.check.data.social.NotificationType
-import com.SzpontCompany.check.data.social.RankingEntry
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import androidx.compose.ui.graphics.Color
-import androidx.compose.material3.MaterialTheme
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.SzpontCompany.check.data.habit.Habit
 import com.SzpontCompany.check.data.habit.HabitRepository
@@ -19,6 +9,8 @@ import com.SzpontCompany.check.data.social.*
 import com.SzpontCompany.check.data.user.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -27,6 +19,8 @@ class CommunityViewModel(
     private val auth: FirebaseAuth = FirebaseAuth.getInstance(),
     private val challengeRepository: ChallengeRepository = ChallengeRepository(FirebaseFirestore.getInstance())
 ) : ViewModel() {
+
+    private val habitRepository = HabitRepository()
 
     // symulacja danych z backendu (mocki)
     private val initialNotifications = listOf(
@@ -190,15 +184,13 @@ class CommunityViewModel(
         }
     }
 
-    private val habitRepository = HabitRepository()
 
-    fun acceptInvite(invite: ChallengeInvite) {
+    fun acceptInvite(invite: ChallengeInvite, currentUserName: String) {
         viewModelScope.launch {
             try {
-
                 challengeRepository.updateInviteStatus(invite.id, "ACCEPTED")
 
-                val battleHabit = Habit(
+                val myBattleHabit = Habit(
                     name = invite.habitName,
                     icon = "⚔️",
                     colorName = "Coral",
@@ -210,9 +202,12 @@ class CommunityViewModel(
                     isActive = true
                 )
 
-                habitRepository.addHabit(battleHabit)
+                habitRepository.addHabit(myBattleHabit)
 
-                // potem dodajemy tu kod generujacy wspolny dokument battle w bazie firebase
+                val opponentBattleHabit = myBattleHabit.copy(
+                    opponentName = currentUserName
+                )
+                habitRepository.addHabitForUser(invite.senderId, opponentBattleHabit)
 
             } catch (e: Exception) {
                 e.printStackTrace()
