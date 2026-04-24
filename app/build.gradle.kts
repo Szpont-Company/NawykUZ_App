@@ -44,6 +44,9 @@ android {
     buildFeatures {
         compose = true
         viewBinding = true
+        composeOptions {
+            kotlinCompilerExtensionVersion = "1.5.15"
+        }
     }
 }
 
@@ -92,6 +95,8 @@ dependencies {
     implementation("com.google.firebase:firebase-functions")
 
     implementation("com.google.android.gms:play-services-ads:25.2.0")
+
+    implementation("androidx.glance:glance-appwidget:1.1.1")
 }
 
 kotlin {
