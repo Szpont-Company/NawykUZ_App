@@ -73,4 +73,49 @@ class ChallengeRepository(private val db: FirebaseFirestore) {
             }
         awaitClose { listener.remove() }
     }
+
+    suspend fun updateBattleProgress(battleId: String, currentUserId: String, isDone: Boolean): Result<Unit> {
+        return try {
+            val battleRef = battlesCollection.document(battleId)
+
+            db.runTransaction { transaction ->
+                val snapshot = transaction.get(battleRef)
+                val battle = snapshot.toObject(Battle::class.java) ?: throw Exception("Battle not found")
+
+                val isPlayer1 = battle.player1Id == currentUserId
+                val totalDays = battle.totalDays
+
+                if (isPlayer1) {
+                    if (isDone && battle.player1CompletedToday) return@runTransaction
+                    if (!isDone && !battle.player1CompletedToday) return@runTransaction
+
+                    val newDays = if (isDone) battle.player1Days + 1 else maxOf(0, battle.player1Days - 1)
+                    val opponentNewHp = 100 - ((newDays * 100) / totalDays)
+
+                    transaction.update(battleRef, mapOf(
+                        "player1Days" to newDays,
+                        "player2Hp" to opponentNewHp,
+                        "player1CompletedToday" to isDone
+                    ))
+                } else {
+                    if (isDone && battle.player2CompletedToday) return@runTransaction
+                    if (!isDone && !battle.player2CompletedToday) return@runTransaction
+
+                    val newDays = if (isDone) battle.player2Days + 1 else maxOf(0, battle.player2Days - 1)
+                    val opponentNewHp = 100 - ((newDays * 100) / totalDays)
+
+                    transaction.update(battleRef, mapOf(
+                        "player2Days" to newDays,
+                        "player1Hp" to opponentNewHp,
+                        "player2CompletedToday" to isDone
+                    ))
+                }
+            }.await()
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
 }

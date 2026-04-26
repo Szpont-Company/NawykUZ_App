@@ -41,6 +41,7 @@ import com.SzpontCompany.check.ui.community.components.CreateChallengeSheet
 import com.SzpontCompany.check.ui.profile.ProfileViewModel
 import kotlinx.coroutines.coroutineScope
 import android.widget.Toast
+import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.platform.LocalContext
 
 @Composable
@@ -242,12 +243,19 @@ fun CommunityScreen(
                             )
                         }
 
-                        items(battles.size) { i ->
+                        items(
+                            items = battles,
+                            key = { battle -> battle.id }
+                        ) { battle ->
                             BattleCard(
-                                battle = battles[i],
+                                battle = battle,
                                 currentUserId = user?.uid ?: "",
-                                onDoneClick = {},
-                                onDetailsOrSurrenderClick = {}
+                                onDoneClick = { isNowDone ->
+                                    communityViewModel.toggleBattleDone(battle, isNowDone)
+                                },
+                                onDetailsOrSurrenderClick = {
+                                    /* TODO: do zrobienia */
+                                }
                             )
                         }
                     }

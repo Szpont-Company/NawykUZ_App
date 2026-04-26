@@ -7,6 +7,7 @@ import com.SzpontCompany.check.data.user.User
 import com.SzpontCompany.check.data.user.UserRepository
 import com.SzpontCompany.check.data.habit.Habit
 import com.SzpontCompany.check.data.habit.HabitRepository
+import com.SzpontCompany.check.data.social.ChallengeRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,6 +25,7 @@ class TodayViewModel(application: Application) : AndroidViewModel(application) {
 
     private val userRepo = UserRepository.getInstance(application.applicationContext)
     private val habitRepo = HabitRepository()
+    private val challengeRepository = ChallengeRepository(com.google.firebase.firestore.FirebaseFirestore.getInstance())
 
     private val _uiState = MutableStateFlow(TodayUiState())
     val uiState: StateFlow<TodayUiState> = _uiState.asStateFlow()
@@ -145,6 +147,9 @@ class TodayViewModel(application: Application) : AndroidViewModel(application) {
                 }
 
                 if (isDone) completeAction("habit_done")
+                if (habit.battleId != null && currentUser != null) {
+                    challengeRepository.updateBattleProgress(habit.battleId, currentUser.uid, isDone)
+                }
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(errorMessage = "Błąd zapisu: ${e.message}")
             }

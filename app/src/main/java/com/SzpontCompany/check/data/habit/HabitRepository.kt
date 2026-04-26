@@ -89,4 +89,29 @@ class HabitRepository {
 
         docRef.set(habitWithId).await()
     }
+
+    suspend fun markHabitDoneByBattleId(battleId: String, dateString: String, isDone: Boolean) {
+        val uid = auth.currentUser?.uid ?: return
+        val habitsRef = firestore.collection("users").document(uid).collection("habits")
+
+        val querySnapshot = habitsRef.whereEqualTo("battleId", battleId).get().await()
+
+        for (doc in querySnapshot.documents) {
+            val habit = doc.toObject(Habit::class.java) ?: continue
+
+            val newDates = if (isDone) {
+                (habit.completedDates + dateString).distinct()
+            } else {
+                habit.completedDates.filter { it != dateString }
+            }
+            val newStreak = if (isDone) habit.streak + 1 else maxOf(0, habit.streak - 1)
+
+            doc.reference.update(
+                mapOf(
+                    "completedDates" to newDates,
+                    "streak" to newStreak
+                )
+            ).await()
+        }
+    }
 }

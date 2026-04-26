@@ -234,6 +234,20 @@ class CommunityViewModel(
         }
     }
 
+    fun toggleBattleDone(battle: Battle, isDone: Boolean) {
+        val currentUserId = auth.currentUser?.uid ?: return
+        val todayString = java.time.LocalDate.now().toString()
+
+        viewModelScope.launch {
+            try {
+                challengeRepository.updateBattleProgress(battle.id, currentUserId, isDone)
+
+                habitRepository.markHabitDoneByBattleId(battle.id, todayString, isDone)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
 
 }
 

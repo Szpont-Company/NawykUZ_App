@@ -29,7 +29,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 fun BattleCard(
     battle: Battle,
     currentUserId: String,
-    onDoneClick: () -> Unit,
+    onDoneClick: (Boolean) -> Unit,
     onDetailsOrSurrenderClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -149,7 +149,7 @@ fun BattleCard(
                 Button(
                     onClick = {
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        onDoneClick()
+                        onDoneClick(!isDoneToday)
                     },
                     modifier = Modifier.weight(1f).height(40.dp),
                     colors = ButtonDefaults.buttonColors(
