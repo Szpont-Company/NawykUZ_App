@@ -33,10 +33,23 @@ import com.SzpontCompany.check.ui.components.CheckBackButton
 @Composable
 fun BattleDetailScreen(
     battle: Battle,
+    currentUserId: String,
     onBackClick: () -> Unit,
     onMarkDoneClick: () -> Unit,
     onSurrenderClick: () -> Unit
 ) {
+    val isPlayer1 = battle.player1Id == currentUserId
+
+    val myHp = if (isPlayer1) battle.player1Hp else battle.player2Hp
+    val myDays = if (isPlayer1) battle.player1Days else battle.player2Days
+    val isDoneToday = if (isPlayer1) battle.player1CompletedToday else battle.player2CompletedToday
+
+    val opponentName = if (isPlayer1) battle.player2Name else battle.player1Name
+    val opponentHp = if (isPlayer1) battle.player2Hp else battle.player1Hp
+    val opponentDays = if (isPlayer1) battle.player2Days else battle.player1Days
+
+    val daysLeft = battle.totalDays - maxOf(battle.player1Days, battle.player2Days)
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -65,7 +78,6 @@ fun BattleDetailScreen(
         ) {
             Spacer(modifier = Modifier.height(16.dp))
 
-            // --- NAGŁÓWEK WYZWANIA ---
             Text(
                 text = battle.title,
                 style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
@@ -95,7 +107,6 @@ fun BattleDetailScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // --- SEKCJA VS (Karta z graczami) ---
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -109,18 +120,16 @@ fun BattleDetailScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Gracz 1 (Ty)
                     PlayerDetailColumn(
                         name = "Ty",
                         avatarText = "TY",
-                        hp = battle.myHp,
-                        days = battle.myDays,
+                        hp = myHp,
+                        days = myDays,
                         totalDays = battle.totalDays,
                         avatarColor = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.weight(1f)
                     )
 
-                    // Znaczek VS
                     Box(
                         modifier = Modifier
                             .padding(horizontal = 16.dp)
@@ -133,12 +142,11 @@ fun BattleDetailScreen(
                         Text("VS", fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
                     }
 
-                    // Gracz 2 (Przeciwnik)
                     PlayerDetailColumn(
-                        name = battle.opponentName,
-                        avatarText = battle.opponentName.take(2).uppercase(),
-                        hp = battle.opponentHp,
-                        days = battle.opponentDays,
+                        name = opponentName,
+                        avatarText = opponentName.take(2).uppercase(),
+                        hp = opponentHp,
+                        days = opponentDays,
                         totalDays = battle.totalDays,
                         avatarColor = Color(0xFFD85A30),
                         modifier = Modifier.weight(1f)
@@ -148,23 +156,21 @@ fun BattleDetailScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // --- DODATKOWE INFORMACJE ---
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceAround
             ) {
-                InfoBadge(title = "Pozostało", value = "${battle.daysLeft} dni")
+                InfoBadge(title = "Pozostało", value = "$daysLeft dni")
                 InfoBadge(
                     title = "Koniec",
                     value = battle.endDate ?: "Nieznany",
-                    valueColor = if (battle.daysLeft <= 1) Crimson else MaterialTheme.colorScheme.onBackground
+                    valueColor = if (daysLeft <= 1) Crimson else MaterialTheme.colorScheme.onBackground
                 )
             }
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            // --- PRZYCISKI AKCJI ---
-            if (!battle.isDoneToday) {
+            if (!isDoneToday) {
                 Button(
                     onClick = onMarkDoneClick,
                     modifier = Modifier
@@ -178,7 +184,6 @@ fun BattleDetailScreen(
                     Text("Oznacz jako zrobione", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
                 }
             } else {
-                // Zrobione dzisiaj stan
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -226,7 +231,6 @@ fun PlayerDetailColumn(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
     ) {
-        // Avatar
         Box(
             modifier = Modifier
                 .size(64.dp)
@@ -249,7 +253,6 @@ fun PlayerDetailColumn(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Customowy pasek HP dla detali
         Text(text = "HP: $hp", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(4.dp))
         LinearProgressIndicator(
@@ -264,7 +267,6 @@ fun PlayerDetailColumn(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Progress dni
         Text(text = "Dni", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Text(
             text = "$days / $totalDays",
@@ -288,15 +290,24 @@ fun InfoBadge(title: String, value: String, valueColor: Color = MaterialTheme.co
 @Composable
 fun BattleDetailScreenPreview() {
     val sampleBattle = Battle(
-        title = "Codzienny spacer", daysLeft = 3,
-        myDays = 6, totalDays = 7, myHp = 95,
-        opponentName = "Kacper M.", opponentDays = 5, opponentHp = 25,
-        opponentCompleted = false, betAmount = 50, endDate = "23 mar",
-        isLosingWarning = false, isDoneToday = false
+        id = "preview_1",
+        title = "Codzienny spacer",
+        totalDays = 7,
+        betAmount = 50,
+        endDate = "23 mar",
+        player1Id = "my_id",
+        player1Name = "Ty",
+        player1Hp = 95,
+        player1Days = 6,
+        player2Id = "enemy_id",
+        player2Name = "Kacper M.",
+        player2Hp = 25,
+        player2Days = 5
     )
     CheckTheme(darkTheme = true, accent = Mint) {
         BattleDetailScreen(
             battle = sampleBattle,
+            currentUserId = "my_id",
             onBackClick = {},
             onMarkDoneClick = {},
             onSurrenderClick = {}

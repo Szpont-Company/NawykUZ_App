@@ -62,24 +62,6 @@ class CommunityViewModel(
         )
     )
 
-    private val initialBattles = listOf(
-        Battle(
-            title = "Codzienny spacer", daysLeft = 3,
-            myDays = 6, totalDays = 7, myHp = 95,
-            opponentName = "Kacper M.", opponentDays = 5, opponentHp = 60,
-            opponentCompleted = false, betAmount = 50, endDate = "23 mar",
-            isLosingWarning = false, isDoneToday = true
-        ),
-        Battle(
-            title = "Czytanie 20 min", daysLeft = 5,
-            myDays = 4, totalDays = 7, myHp = 55,
-            opponentName = "Ania W.", opponentDays = 7, opponentHp = 100,
-            opponentCompleted = true, betAmount = 100, endDate = null,
-            isLosingWarning = true, isDoneToday = false
-        )
-    )
-
-
     private val initialEvents = listOf(
         Event(
             title = "Globalny Marsz Marca", subtitle = "Łącznie 1 000 000 kroków",
@@ -119,7 +101,7 @@ class CommunityViewModel(
     private val _notifications = MutableStateFlow(initialNotifications)
     val notifications: StateFlow<List<NotificationItem>> = _notifications.asStateFlow()
 
-    private val _battles = MutableStateFlow(initialBattles)
+    private val _battles = MutableStateFlow<List<Battle>>(emptyList())
     val battles: StateFlow<List<Battle>> = _battles.asStateFlow()
 
     private val _incomingInvites = MutableStateFlow<List<ChallengeInvite>>(emptyList())
@@ -133,6 +115,7 @@ class CommunityViewModel(
 
     init {
         loadIncomingInvites()
+        loadActiveBattles()
     }
 
     // ---- LOGIK ---
@@ -150,6 +133,19 @@ class CommunityViewModel(
 
     fun declineAction(notificationId: String) {
         _notifications.update { list -> list.filterNot { it.id == notificationId } }
+    }
+
+    private fun loadActiveBattles() {
+        val currentUserId = auth.currentUser?.uid ?: return
+        viewModelScope.launch {
+            try {
+                challengeRepository.getActiveBattlesForUser(currentUserId).collect { activeBattles ->
+                    _battles.value = activeBattles
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 
     private fun loadIncomingInvites() {
@@ -186,22 +182,39 @@ class CommunityViewModel(
 
 
     fun acceptInvite(invite: ChallengeInvite, currentUserName: String) {
+        val currentUserId = auth.currentUser?.uid ?: return
+
         viewModelScope.launch {
             try {
                 challengeRepository.updateInviteStatus(invite.id, "ACCEPTED")
+
+                val newBattle = Battle(
+                    title = invite.habitName,
+                    betAmount = invite.stake,
+                    totalDays = 7,
+                    participants = listOf(invite.senderId, currentUserId),
+
+                    player1Id = invite.senderId,
+                    player1Name = invite.senderName,
+
+                    player2Id = currentUserId,
+                    player2Name = currentUserName
+                )
+
+                val result = challengeRepository.createBattle(newBattle)
+                val generatedBattleId = result.getOrNull() ?: return@launch
 
                 val myBattleHabit = Habit(
                     name = invite.habitName,
                     icon = "⚔️",
                     colorName = "Coral",
-                    frequency = "daily",
-                    selectedDays = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"),
+                    frequency = "codziennie",
+                    selectedDays = listOf("poniedziałek", "wtorek", "środa", "czwartek", "piątek", "sobota", "niedziela"),
                     timesPerWeek = 7,
-                    battleId = invite.id,
+                    battleId = generatedBattleId,
                     opponentName = invite.senderName,
                     isActive = true
                 )
-
                 habitRepository.addHabit(myBattleHabit)
 
                 val opponentBattleHabit = myBattleHabit.copy(
@@ -220,6 +233,7 @@ class CommunityViewModel(
             challengeRepository.updateInviteStatus(invite.id, "REJECTED")
         }
     }
+
 
 }
 

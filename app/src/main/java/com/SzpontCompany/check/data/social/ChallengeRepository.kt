@@ -9,6 +9,7 @@ import kotlinx.coroutines.tasks.await
 class ChallengeRepository(private val db: FirebaseFirestore) {
 
     private val invitesCollection = db.collection("challenge_invites")
+    private val battlesCollection = db.collection("battles")
 
     fun getPendingInvitesForUser(userId: String): Flow<List<ChallengeInvite>> = callbackFlow {
         val listener = invitesCollection
@@ -29,9 +30,7 @@ class ChallengeRepository(private val db: FirebaseFirestore) {
     suspend fun sendInvite(invite: ChallengeInvite): Result<Unit> {
         return try {
             val docRef = invitesCollection.document()
-
             val inviteWithId = invite.copy(id = docRef.id)
-
             docRef.set(inviteWithId).await()
             Result.success(Unit)
         } catch (e: Exception) {
@@ -46,5 +45,32 @@ class ChallengeRepository(private val db: FirebaseFirestore) {
         } catch (e: Exception) {
             Result.failure(e)
         }
+    }
+
+    suspend fun createBattle(battle: Battle): Result<String> {
+        return try {
+            val docRef = battlesCollection.document()
+            val battleWithId = battle.copy(id = docRef.id)
+            docRef.set(battleWithId).await()
+            Result.success(docRef.id)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    fun getActiveBattlesForUser(userId: String): Flow<List<Battle>> = callbackFlow {
+        val listener = battlesCollection
+            .whereArrayContains("participants", userId)
+            .whereEqualTo("status", "ACTIVE")
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    close(error)
+                    return@addSnapshotListener
+                }
+
+                val battles = snapshot?.toObjects(Battle::class.java) ?: emptyList()
+                trySend(battles).isSuccess
+            }
+        awaitClose { listener.remove() }
     }
 }

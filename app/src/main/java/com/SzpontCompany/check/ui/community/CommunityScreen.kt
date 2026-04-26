@@ -245,6 +245,7 @@ fun CommunityScreen(
                         items(battles.size) { i ->
                             BattleCard(
                                 battle = battles[i],
+                                currentUserId = user?.uid ?: "",
                                 onDoneClick = {},
                                 onDetailsOrSurrenderClick = {}
                             )

@@ -28,11 +28,27 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 @Composable
 fun BattleCard(
     battle: Battle,
+    currentUserId: String,
     onDoneClick: () -> Unit,
     onDetailsOrSurrenderClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val haptic = LocalHapticFeedback.current
+
+    val isPlayer1 = battle.player1Id == currentUserId
+
+    val myHp = if (isPlayer1) battle.player1Hp else battle.player2Hp
+    val myDays = if (isPlayer1) battle.player1Days else battle.player2Days
+    val isDoneToday = if (isPlayer1) battle.player1CompletedToday else battle.player2CompletedToday
+
+    val opponentName = if (isPlayer1) battle.player2Name else battle.player1Name
+    val opponentHp = if (isPlayer1) battle.player2Hp else battle.player1Hp
+    val opponentDays = if (isPlayer1) battle.player2Days else battle.player1Days
+    val opponentCompleted = if (isPlayer1) battle.player2CompletedToday else battle.player1CompletedToday
+
+    val daysLeft = battle.totalDays - maxOf(battle.player1Days, battle.player2Days)
+
+    val isLosingWarning = myHp < opponentHp && myHp < 50
 
     Card(
         modifier = modifier
@@ -66,20 +82,20 @@ fun BattleCard(
                     )
                 }
                 Spacer(Modifier.width(6.dp))
-                Text("${battle.daysLeft} dni", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
+                Text("${daysLeft} dni", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
             }
 
             Spacer(Modifier.height(12.dp))
 
             // Gracze VS
             PlayerVsRow(
-                myDays = battle.myDays,
+                myDays = myDays,
                 totalDays = battle.totalDays,
-                myHp = battle.myHp,
-                opponentName = battle.opponentName,
-                opponentDays = battle.opponentDays,
-                opponentHp = battle.opponentHp,
-                opponentCompleted = battle.opponentCompleted
+                myHp = myHp,
+                opponentName = opponentName,
+                opponentDays = opponentDays,
+                opponentHp = opponentHp,
+                opponentCompleted = opponentCompleted
             )
 
             Spacer(Modifier.height(12.dp))
@@ -94,7 +110,7 @@ fun BattleCard(
                     style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
                 )
                 Spacer(Modifier.weight(1f))
-                if (battle.isLosingWarning) {
+                if (isLosingWarning) {
                     val infiniteTransition = rememberInfiniteTransition(label = "pulse")
                     val pulseScale by infiniteTransition.animateFloat(
                         initialValue = 1f,
@@ -137,13 +153,13 @@ fun BattleCard(
                     },
                     modifier = Modifier.weight(1f).height(40.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (battle.isDoneToday) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.primary
+                        containerColor = if (isDoneToday) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.primary
                     ),
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Text(
-                        if (battle.isDoneToday) "✓ Zrobione dziś" else "✓ Zrobione!",
-                        color = if (battle.isDoneToday) MaterialTheme.colorScheme.onSurfaceVariant else Color.White,
+                        if (isDoneToday) "✓ Zrobione dziś" else "✓ Zrobione!",
+                        color = if (isDoneToday) MaterialTheme.colorScheme.onSurfaceVariant else Color.White,
                         fontWeight = FontWeight.Bold,
                         fontSize = 13.sp
                     )
@@ -158,8 +174,8 @@ fun BattleCard(
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Text(
-                        if (battle.isLosingWarning) "Poddaj się" else "Szczegóły",
-                        color = if (battle.isLosingWarning) Color(0xFFE24B4A) else MaterialTheme.colorScheme.onSurfaceVariant,
+                        if (isLosingWarning) "Poddaj się" else "Szczegóły",
+                        color = if (isLosingWarning) Color(0xFFE24B4A) else MaterialTheme.colorScheme.onSurfaceVariant,
                         fontWeight = FontWeight.Bold,
                         fontSize = 13.sp
                     )

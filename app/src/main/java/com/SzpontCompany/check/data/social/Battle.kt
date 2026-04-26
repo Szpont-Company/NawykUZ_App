@@ -1,17 +1,26 @@
 package com.SzpontCompany.check.data.social
 
 data class Battle(
-    val title: String,
-    val daysLeft: Int,
-    val myDays: Int,
-    val totalDays: Int,
-    val myHp: Int,
-    val opponentName: String,
-    val opponentDays: Int,
-    val opponentHp: Int,
-    val opponentCompleted: Boolean,
-    val betAmount: Int,
-    val endDate: String?,
-    val isLosingWarning: Boolean,
-    val isDoneToday: Boolean
+    val id: String = "",
+    val title: String = "",
+    val totalDays: Int = 7, // domyslnie 7, potem bedziemy przekazywac z invite
+    val betAmount: Int = 0,
+    val endDate: String? = null,
+    val status: String = "ACTIVE", // ACTIVE, COMPLETED, SURRENDERED
+
+    val participants: List<String> = emptyList(),
+
+    // Player 1 (sender)
+    val player1Id: String = "",
+    val player1Name: String = "",
+    val player1Hp: Int = 100,
+    val player1Days: Int = 0,
+    val player1CompletedToday: Boolean = false,
+
+    //Player 2 ( receiver)
+    val player2Id: String = "",
+    val player2Name: String = "",
+    val player2Hp: Int = 100,
+    val player2Days: Int = 0,
+    val player2CompletedToday: Boolean = false
 )
