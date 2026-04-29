@@ -1,4 +1,3 @@
-// Ścieżka: src/main/java/com/SzpontCompany/check/ui/dashboard/StatsScreen.kt
 package com.SzpontCompany.check.ui.stats
 
 import androidx.compose.foundation.Canvas
@@ -11,7 +10,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.FilterAlt
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material3.*
@@ -21,14 +19,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.SzpontCompany.check.data.habit.Habit
 import kotlin.random.Random
 
 @Composable
-fun StatsScreen() {
+fun StatsScreen(
+    viewModel: StatsViewModel = viewModel(factory = StatsViewModel.Factory)
+) {
+    val uiState by viewModel.uiState.collectAsState()
+
+    if (uiState.isLoading) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+        }
+        return
+    }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -37,16 +47,46 @@ fun StatsScreen() {
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         item { StatsTopSection() }
-        item { TimeRangeSelector() }
-        item { MetricsGrid() }
-        item { HabitFilterChips() }
-        item { WeeklyActivityChart() }
+
+        item {
+            TimeRangeSelector(
+                selectedIndex = uiState.selectedTimeRangeIndex,
+                onSelect = { viewModel.setTimeRange(it) }
+            )
+        }
+
+        item {
+            MetricsGrid(
+                totalCompleted = uiState.totalCompletedHabits,
+                successRate = uiState.overallSuccessRate,
+                bestStreak = uiState.user?.bestStreak ?: 0,
+                coins = uiState.coins,
+                timeRangeIndex = uiState.selectedTimeRangeIndex
+            )
+        }
+
+        item {
+            HabitFilterChips(
+                habits = uiState.habits,
+                selectedHabitId = uiState.selectedHabitId,
+                onSelect = { viewModel.setHabitFilter(it) }
+            )
+        }
+
+        item {
+            WeeklyActivityChart(
+                chartData = uiState.weeklyChartData,
+                averagePercentage = uiState.weeklyAveragePercentage
+            )
+        }
+
         item { HeatmapSection() }
-        item { HabitDetailsSection() }
+
+        item { HabitDetailsSection(habits = uiState.filteredHabits) }
+
         item { StreakCalendarSection() }
     }
 }
-
 
 @Composable
 fun StatsTopSection() {
@@ -79,9 +119,8 @@ fun StatsTopSection() {
 }
 
 @Composable
-fun TimeRangeSelector() {
+fun TimeRangeSelector(selectedIndex: Int, onSelect: (Int) -> Unit) {
     val options = listOf("7 dni", "30 dni", "3 mies.", "Wszystko")
-    var selectedIndex by remember { mutableStateOf(0) }
 
     Row(
         modifier = Modifier
@@ -97,7 +136,7 @@ fun TimeRangeSelector() {
                     .weight(1f)
                     .clip(RoundedCornerShape(8.dp))
                     .background(if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f) else Color.Transparent)
-                    .clickable { selectedIndex = index }
+                    .clickable { onSelect(index) }
                     .padding(vertical = 10.dp),
                 contentAlignment = Alignment.Center
             ) {
@@ -113,26 +152,48 @@ fun TimeRangeSelector() {
 }
 
 @Composable
-fun MetricsGrid() {
+fun MetricsGrid(
+    totalCompleted: Int,
+    successRate: Int,
+    bestStreak: Int,
+    coins: Int,
+    timeRangeIndex: Int
+) {
+    val timeRangeText = when(timeRangeIndex) {
+        0 -> "Ostatnie 7 dni"
+        1 -> "Ostatnie 30 dni"
+        2 -> "Ostatnie 90 dni"
+        else -> "Łącznie"
+    }
+
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             MetricCard(
-                modifier = Modifier.weight(1f), title = "Ukończono nawyków", value = "34",
-                subtext = "+12% vs poprz.", subtextColor = MaterialTheme.colorScheme.primary
+                modifier = Modifier.weight(1f),
+                title = "Ukończono",
+                value = totalCompleted.toString(),
+                subtext = timeRangeText, subtextColor = MaterialTheme.colorScheme.primary
             )
             MetricCard(
-                modifier = Modifier.weight(1f), title = "Skuteczność", value = "78%",
-                subtext = "+6% vs poprz.", subtextColor = MaterialTheme.colorScheme.primary
+                modifier = Modifier.weight(1f),
+                title = "Skuteczność",
+                value = "$successRate%",
+                subtext = timeRangeText, subtextColor = MaterialTheme.colorScheme.primary
             )
         }
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             MetricCard(
-                modifier = Modifier.weight(1f), title = "Najdłuższy streak", value = "21", valueSuffix = "dni",
+                modifier = Modifier.weight(1f),
+                title = "Najdłuższy streak",
+                value = bestStreak.toString(),
+                valueSuffix = "dni",
                 subtext = "Aktualny rekord", subtextColor = MaterialTheme.colorScheme.onSurfaceVariant
             )
             MetricCard(
-                modifier = Modifier.weight(1f), title = "XP zdobyte", value = "1240",
-                subtext = "Poziom 8", subtextColor = MaterialTheme.colorScheme.primary
+                modifier = Modifier.weight(1f),
+                title = "Monety (XP)",
+                value = coins.toString(),
+                subtext = "Na walkę Habit Battle", subtextColor = MaterialTheme.colorScheme.primary
             )
         }
     }
@@ -163,29 +224,44 @@ fun MetricCard(
 }
 
 @Composable
-fun HabitFilterChips() {
+fun HabitFilterChips(
+    habits: List<Habit>,
+    selectedHabitId: String?,
+    onSelect: (String?) -> Unit
+) {
     val scrollState = rememberScrollState()
     Row(
         modifier = Modifier.horizontalScroll(scrollState),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        FilterChip(text = "Wszystko", isSelected = false)
-        FilterChip(text = "🚶 Spacer", isSelected = false)
-        FilterChip(text = "📖 Czytanie", isSelected = true)
-        FilterChip(text = "💧 Woda", isSelected = false)
+        FilterChip(
+            text = "Wszystko",
+            isSelected = selectedHabitId == null,
+            onClick = { onSelect(null) }
+        )
+
+        habits.forEach { habit ->
+            FilterChip(
+                text = "${habit.icon.ifEmpty { "🎯" }} ${habit.name}",
+                isSelected = selectedHabitId == habit.id,
+                onClick = { onSelect(habit.id) }
+            )
+        }
     }
 }
 
 @Composable
-fun FilterChip(text: String, isSelected: Boolean) {
+fun FilterChip(text: String, isSelected: Boolean, onClick: () -> Unit) {
     Box(
         modifier = Modifier
+            .clip(RoundedCornerShape(20.dp))
             .border(
                 1.dp,
                 if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
                 RoundedCornerShape(20.dp)
             )
-            .background(if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f) else Color.Transparent, RoundedCornerShape(20.dp))
+            .background(if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f) else Color.Transparent)
+            .clickable { onClick() }
             .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
         Text(
@@ -198,7 +274,10 @@ fun FilterChip(text: String, isSelected: Boolean) {
 }
 
 @Composable
-fun WeeklyActivityChart() {
+fun WeeklyActivityChart(
+    chartData: List<Pair<String, Float>>,
+    averagePercentage: Int
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -207,12 +286,9 @@ fun WeeklyActivityChart() {
     ) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(text = "Aktywność tygodniowa", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
-            Text(text = "śr. 4,8 / dzień", fontSize = 12.sp, color = MaterialTheme.colorScheme.primary)
+            Text(text = "śr. $averagePercentage% / dzień", fontSize = 12.sp, color = MaterialTheme.colorScheme.primary)
         }
         Spacer(modifier = Modifier.height(16.dp))
-
-        val days = listOf("Pn", "Wt", "Śr", "Cz", "Pt", "So", "Nd")
-        val values = listOf(0.4f, 0.6f, 0.5f, 0.7f, 0.6f, 0.5f, 1.0f)
 
         Row(
             modifier = Modifier
@@ -221,8 +297,11 @@ fun WeeklyActivityChart() {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.Bottom
         ) {
-            days.forEachIndexed { index, day ->
-                val isToday = day == "Nd"
+            chartData.forEachIndexed { index, data ->
+                val dayLabel = data.first
+                val value = data.second
+                val isToday = index == chartData.lastIndex
+
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
@@ -238,14 +317,14 @@ fun WeeklyActivityChart() {
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .fillMaxHeight(values[index])
+                                .fillMaxHeight(value)
                                 .clip(RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp))
                                 .background(if (isToday) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary.copy(alpha = 0.6f))
                         )
                     }
 
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text(text = day, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(text = dayLabel, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         }
@@ -351,7 +430,7 @@ fun HeatmapSection() {
 }
 
 @Composable
-fun HabitDetailsSection() {
+fun HabitDetailsSection(habits: List<Habit>) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = "Nawyki — szczegóły",
@@ -367,9 +446,34 @@ fun HabitDetailsSection() {
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            HabitDetailItem(emoji = "🚶", name = "Spacer", percent = "80%", streak = "14 dni streak", progress = 0.8f, color = MaterialTheme.colorScheme.primary)
-            HabitDetailItem(emoji = "📖", name = "Czytanie", percent = "60%", streak = "7 dni streak", progress = 0.6f, color = Color(0xFF7F77DD)) // Indigo
-            HabitDetailItem(emoji = "💧", name = "Woda", percent = "91%", streak = "21 dni streak", progress = 0.91f, color = Color(0xFF378ADD)) // Sky
+            if (habits.isEmpty()) {
+                Text(
+                    text = "Brak nawyków dla wybranego filtru.",
+                    fontSize = 13.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            } else {
+                val colors = listOf(
+                    MaterialTheme.colorScheme.primary,
+                    Color(0xFF7F77DD),
+                    Color(0xFF378ADD),
+                    Color(0xFFE24B4A)
+                )
+
+                habits.forEachIndexed { index, habit ->
+                    val streak = habit.streak
+                    val isHabitActive = streak > 0
+
+                    HabitDetailItem(
+                        emoji = habit.icon.ifEmpty { "🎯" },
+                        name = habit.name.ifEmpty { "Nieznany nawyk" },
+                        percent = if(isHabitActive) "Aktywny" else "Wstrzymany",
+                        streak = "$streak dni streak",
+                        progress = if(isHabitActive) 0.7f else 0.2f,
+                        color = colors[index % colors.size]
+                    )
+                }
+            }
         }
     }
 }
@@ -408,7 +512,6 @@ fun HabitDetailItem(emoji: String, name: String, percent: String, streak: String
         Text(text = streak, fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.wrapContentWidth())
     }
 }
-
 
 @Composable
 fun StreakCalendarSection() {
