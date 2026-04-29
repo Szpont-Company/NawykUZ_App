@@ -7,7 +7,12 @@ data class User(
     val nickname: String = "",
     val isAdmin: Boolean = false,
     val avatarEmoji: String = "",
-    val bgColor: String = "Mint"
+    val bgColor: String = "Mint",
+    val currentStreak: Int = 0,
+    val bestStreak: Int = 0,
+    val lastGlobalStreakDate: String = "",
+
+    val weeklyProgress: List<Float> = listOf(0f, 0f, 0f, 0f, 0f, 0f, 0f)
 ) {
     val initials: String
         get() = name

@@ -19,5 +19,11 @@ data class Habit(
     val eveningTime: String = "",
     val difficulty: String = "",
     val isActive: Boolean = true,
+
+    val streak: Int = 0,
+    val monthlyCompletionRate: Int = 0,
+    val completedDates: List<String> = emptyList(),
+    val dailyNotes: Map<String, String> = emptyMap(),
+
     @ServerTimestamp val createdAt: Date? = null
 )
