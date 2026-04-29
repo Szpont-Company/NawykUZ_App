@@ -580,14 +580,12 @@ fun HabitHeatmap(
                             contentAlignment = Alignment.Center
                         ) {
                             if (hasNote) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(6.dp)
-                                        .clip(CircleShape)
-                                        .background(
-                                            if (isCompleted) MaterialTheme.colorScheme.onPrimary
-                                            else MaterialTheme.colorScheme.primary
-                                        )
+                                Icon(
+                                    imageVector = Icons.Default.Edit,
+                                    contentDescription = "Notatka",
+                                    modifier = Modifier.size(14.dp),
+                                    tint = if (isCompleted) MaterialTheme.colorScheme.onPrimary
+                                    else MaterialTheme.colorScheme.primary
                                 )
                             }
                         }

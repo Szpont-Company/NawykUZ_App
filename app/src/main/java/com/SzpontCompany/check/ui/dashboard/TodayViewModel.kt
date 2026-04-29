@@ -38,9 +38,35 @@ class TodayViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
             userRepo.userFlow.collect { user ->
-                val progress = calculateWeeklyProgress(_uiState.value.habits)
-                val userWithProgress = user?.copy(weeklyProgress = progress)
-                _uiState.value = _uiState.value.copy(user = userWithProgress, isLoading = false)
+                if (user != null) {
+                    val todayString = LocalDate.now().toString()
+                    val yesterdayString = LocalDate.now().minusDays(1).toString()
+
+                    var activeUser = user
+
+                    if (user.currentStreak > 0 && user.lastGlobalStreakDate != todayString && user.lastGlobalStreakDate != yesterdayString) {
+
+                        activeUser = user.copy(currentStreak = 0)
+
+                        viewModelScope.launch {
+                            try {
+                                userRepo.updateUserStreaks(
+                                    uid = user.uid,
+                                    currentStreak = 0,
+                                    bestStreak = user.bestStreak,
+                                    lastGlobalStreakDate = user.lastGlobalStreakDate
+                                )
+                            } catch (e: Exception) {
+                            }
+                        }
+                    }
+
+                    val progress = calculateWeeklyProgress(_uiState.value.habits)
+                    val userWithProgress = activeUser.copy(weeklyProgress = progress)
+                    _uiState.value = _uiState.value.copy(user = userWithProgress, isLoading = false)
+                } else {
+                    _uiState.value = _uiState.value.copy(user = null, isLoading = false)
+                }
             }
         }
     }
@@ -48,9 +74,32 @@ class TodayViewModel(application: Application) : AndroidViewModel(application) {
     private fun observeHabits() {
         viewModelScope.launch {
             habitRepo.getUserHabits().collect { fetchedHabits ->
-                val progress = calculateWeeklyProgress(fetchedHabits)
+                val todayString = LocalDate.now().toString()
+                val yesterdayString = LocalDate.now().minusDays(1).toString()
+
+                val processedHabits = fetchedHabits.map { habit ->
+                    if (habit.streak > 0 && !habit.completedDates.contains(todayString) && !habit.completedDates.contains(yesterdayString)) {
+
+                        viewModelScope.launch {
+                            try {
+                                habitRepo.updateHabitCompletionAndStreak(habit.id, habit.completedDates, 0)
+                            } catch (e: Exception) {
+                            }
+                        }
+
+                        habit.copy(streak = 0)
+                    } else {
+                        habit
+                    }
+                }
+
+                val progress = calculateWeeklyProgress(processedHabits)
                 val userWithProgress = _uiState.value.user?.copy(weeklyProgress = progress)
-                _uiState.value = _uiState.value.copy(habits = fetchedHabits, user = userWithProgress)
+
+                _uiState.value = _uiState.value.copy(
+                    habits = processedHabits,
+                    user = userWithProgress
+                )
             }
         }
     }
