@@ -359,4 +359,5 @@
     <string name="rewards_events_desc">Zdobądź monety biorąc udział!</string>
     <string name="shop_hero">Zaszalej, należy ci się!</string>
     <string name="shop_hero_desc">Wymień zgromadzone monety na wymarzoną nagrodę.</string>
+    <string name="login_unverified">Zweryfikuj adres email, zanim się zalogujesz.</string>
 </resources>

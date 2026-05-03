@@ -42,8 +42,10 @@ import com.SzpontCompany.check.ui.profile.ProfileViewModel
 import kotlinx.coroutines.coroutineScope
 import android.widget.Toast
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.ui.platform.LocalContext
 import com.SzpontCompany.check.data.social.Battle
+import com.SzpontCompany.check.ui.ads.NativeAdCard
 
 @Composable
 fun CommunityScreen(
@@ -196,7 +198,7 @@ fun CommunityScreen(
                                     onClick = {
                                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                         showCreateChallengeSheet = true
-                                              },
+                                    },
                                     modifier = Modifier.weight(1f).height(54.dp),
                                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                                     shape = RoundedCornerShape(16.dp)
@@ -245,10 +247,10 @@ fun CommunityScreen(
                             )
                         }
 
-                        items(
+                        itemsIndexed(
                             items = battles,
-                            key = { battle -> battle.id }
-                        ) { battle ->
+                            key = { _, battle -> battle.id }
+                        ) { index, battle ->
                             BattleCard(
                                 battle = battle,
                                 currentUserId = user?.uid ?: "",
@@ -262,6 +264,11 @@ fun CommunityScreen(
                                     communityViewModel.acknowledgeBattle(battle)
                                 }
                             )
+
+                            if (index == 0) {
+                                Spacer(modifier = Modifier.height(16.dp))
+                                NativeAdCard()
+                            }
                         }
                     }
                 }
@@ -337,11 +344,15 @@ fun CommunityScreen(
                         item {
                             RankingListCard(entries = dynamicRankingEntries)
                         }
+
+                        item {
+                            NativeAdCard()
+                        }
                     }
                 }
                 3 -> { // Zakładka Znajomi
                     FriendsCard(
-                       selectedSubTab = friendsSubTab,
+                        selectedSubTab = friendsSubTab,
                         onSubTabSelected = { friendsSubTab = it },
                         modifier = Modifier.fillMaxSize(),
                         onFriendProfileClick = { onFriendProfileClick() },
@@ -370,7 +381,6 @@ fun CommunityScreen(
                 friendsSubTab = 2
             },
             onSendChallenge = { friend, template, betAmount ->
-                // Tu w przyszłości dodamy backend
                 showCreateChallengeSheet = false
                 communityViewModel.sendChallenge(user, friend, template, betAmount)
                 Toast.makeText(
