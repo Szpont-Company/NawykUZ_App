@@ -47,9 +47,12 @@ class HabitRepository {
         awaitClose { listener.remove() }
     }
 
-    suspend fun earnCoinsCloud(actionType: String): Result<Int> {
+    suspend fun earnCoinsCloud(actionType: String, amount: Int? = null): Result<Int> {
         return try {
-            val data = hashMapOf("actionType" to actionType)
+            val data = hashMapOf<String, Any>("actionType" to actionType)
+            if (amount != null) {
+                data["amount"] = amount
+            }
             val result = functions.getHttpsCallable("earnCoins").call(data).await()
             val response = result.data as? Map<*, *>
             val added = (response?.get("added") as? Number)?.toInt() ?: 0

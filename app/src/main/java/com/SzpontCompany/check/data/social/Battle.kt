@@ -7,6 +7,7 @@ data class Battle(
     val betAmount: Int = 0,
     val endDate: String? = null,
     val status: String = "ACTIVE", // ACTIVE, COMPLETED, SURRENDERED
+    val winnerId: String? = null,
 
     val participants: List<String> = emptyList(),
 
@@ -16,11 +17,13 @@ data class Battle(
     val player1Hp: Int = 100,
     val player1Days: Int = 0,
     val player1LastLogDate: String? = null,
+    val player1Acknowledged: Boolean = false,
 
     //Player 2 ( receiver)
     val player2Id: String = "",
     val player2Name: String = "",
     val player2Hp: Int = 100,
     val player2Days: Int = 0,
-    val player2LastLogDate: String? = null
+    val player2LastLogDate: String? = null,
+    val player2Acknowledged: Boolean = false
 )

@@ -255,6 +255,9 @@ fun CommunityScreen(
                                 },
                                 onDetailsOrSurrenderClick = {
                                     /* TODO: do zrobienia */
+                                },
+                                onAcknowledgeClick = {
+                                    communityViewModel.acknowledgeBattle(battle)
                                 }
                             )
                         }

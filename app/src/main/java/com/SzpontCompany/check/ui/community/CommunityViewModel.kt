@@ -245,7 +245,7 @@ class CommunityViewModel(
                 val db = FirebaseFirestore.getInstance()
                 val userRef = db.collection("users").document(currentUserId)
                 val habitsRef = userRef.collection("habits")
-                
+
                 val querySnapshot = habitsRef.whereEqualTo("battleId", battle.id).get().await()
 
                 if (querySnapshot.isEmpty) {
@@ -261,21 +261,27 @@ class CommunityViewModel(
                     } else {
                         habit.completedDates.filter { it != todayString }
                     }
-                    val newHabitStreak = if (isDone) habit.streak + 1 else maxOf(0, habit.streak - 1)
+                    val newHabitStreak =
+                        if (isDone) habit.streak + 1 else maxOf(0, habit.streak - 1)
 
                     val allHabitsSnapshot = habitsRef.get().await()
                     val updatedHabits = allHabitsSnapshot.mapNotNull { snapshot ->
                         val h = snapshot.toObject(Habit::class.java) ?: return@mapNotNull null
-                        if (snapshot.id == habitId) h.copy(completedDates = newDates, streak = newHabitStreak) else h
+                        if (snapshot.id == habitId) h.copy(
+                            completedDates = newDates,
+                            streak = newHabitStreak
+                        ) else h
                     }
-                    
-                    val allDoneToday = updatedHabits.isNotEmpty() && updatedHabits.all { it.completedDates.contains(todayString) }
-                    
+
+                    val allDoneToday = updatedHabits.isNotEmpty() && updatedHabits.all {
+                        it.completedDates.contains(todayString)
+                    }
+
                     val userSnapshot = userRef.get().await()
                     val userObj = userSnapshot.toObject(User::class.java)
-                    
+
                     var userUpdates: Map<String, Any>? = null
-                    
+
                     if (userObj != null) {
                         var newGlobalStreak = userObj.currentStreak
                         var newLastDate = userObj.lastGlobalStreakDate
@@ -293,7 +299,7 @@ class CommunityViewModel(
                         }
 
                         val newBestStreak = maxOf(userObj.bestStreak, newGlobalStreak)
-                        
+
                         if (newGlobalStreak != userObj.currentStreak || newLastDate != userObj.lastGlobalStreakDate) {
                             userUpdates = mapOf(
                                 "currentStreak" to newGlobalStreak,
@@ -311,11 +317,11 @@ class CommunityViewModel(
                         newDates = newDates,
                         newHabitStreak = newHabitStreak
                     )
-                    
+
                     if (userUpdates != null) {
                         userRef.update(userUpdates).await()
                     }
-                    
+
                     if (isDone) habitRepository.earnCoinsCloud("habit_done")
                 }
             } catch (e: Exception) {
@@ -324,5 +330,34 @@ class CommunityViewModel(
         }
     }
 
-}
+    fun acknowledgeBattle(battle: Battle) {
+        val currentUserId = auth.currentUser?.uid ?: return
 
+        viewModelScope.launch {
+            try {
+                val db = FirebaseFirestore.getInstance()
+                val isPlayer1 = battle.player1Id == currentUserId
+                val isWinner = battle.winnerId == currentUserId
+
+                val ackField = if (isPlayer1) "player1Acknowledged" else "player2Acknowledged"
+                db.collection("battles").document(battle.id).update(ackField, true).await()
+
+                if (isWinner) {
+                    val reward = battle.betAmount * 2
+                    habitRepository.earnCoinsCloud("battle_win", reward)
+                }
+
+                val habitsRef = db.collection("users").document(currentUserId).collection("habits")
+                val snapshot = habitsRef.whereEqualTo("battleId", battle.id).get().await()
+                if (!snapshot.isEmpty) {
+                    for (doc in snapshot.documents) {
+                        doc.reference.delete().await()
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+}

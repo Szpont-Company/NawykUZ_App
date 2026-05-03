@@ -21,6 +21,7 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -31,12 +32,16 @@ fun BattleCard(
     currentUserId: String,
     onDoneClick: (Boolean) -> Unit,
     onDetailsOrSurrenderClick: () -> Unit,
+    onAcknowledgeClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val haptic = LocalHapticFeedback.current
 
     val isPlayer1 = battle.player1Id == currentUserId
     val todayString = java.time.LocalDate.now().toString()
+
+    val isCompleted = battle.status == "COMPLETED"
+    var showResultDialog by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
 
     val myHp = if (isPlayer1) battle.player1Hp else battle.player2Hp
     val myDays = if (isPlayer1) battle.player1Days else battle.player2Days
@@ -50,6 +55,38 @@ fun BattleCard(
     val daysLeft = battle.totalDays - maxOf(battle.player1Days, battle.player2Days)
 
     val isLosingWarning = myHp < opponentHp && myHp < 50
+    val isWinner = battle.winnerId == currentUserId
+
+    if (showResultDialog) {
+        val rewardAmount = battle.betAmount * 2
+        AlertDialog(
+            onDismissRequest = {},
+            title = {
+                Text(
+                    text = if (isWinner) "🎉 ZWYCIĘSTWO!" else "💀 PORAŻKA",
+                    fontWeight = FontWeight.Bold,
+                    color = if (isWinner) Color(0xFFD8912A) else Color(0xFFE24B4A)
+                )
+            },
+            text = {
+                Text(
+                    text = if (isWinner) "Rozgromiłeś przeciwnika o imieniu $opponentName! Twoja nagroda to $rewardAmount 🪙 monet."
+                    else "Tym razem to $opponentName okazał się silniejszy. Twój zakład przepada, spróbuj odegrać się w kolejnej bitwie!"
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showResultDialog = false
+                        onAcknowledgeClick()
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = if (isWinner) Color(0xFFD8912A) else MaterialTheme.colorScheme.primary)
+                ) {
+                    Text(if (isWinner) "Odbierz Nagrodę" else "Zrozumiałem", color = Color.White)
+                }
+            }
+        )
+    }
 
     Card(
         modifier = modifier
@@ -146,40 +183,58 @@ fun BattleCard(
             Spacer(Modifier.height(16.dp))
 
             // Przyciski
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            if (isCompleted) {
                 Button(
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        onDoneClick(!isDoneToday)
-                    },
-                    modifier = Modifier.weight(1f).height(40.dp),
+                    onClick = { showResultDialog = true },
+                    modifier = Modifier.fillMaxWidth().height(48.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (isDoneToday) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.primary
+                        containerColor = if (isWinner) Color(0xFFD8912A) else Color(0xFFE24B4A)
                     ),
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Text(
-                        if (isDoneToday) "✓ Zrobione dziś" else "✓ Zrobione!",
-                        color = if (isDoneToday) MaterialTheme.colorScheme.onSurfaceVariant else Color.White,
+                        if (isWinner) "🏆 Odbierz nagrodę (${battle.betAmount * 2} monet)!" else "💀 Zobacz podsumowanie",
+                        color = Color.White,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 13.sp
+                        fontSize = 14.sp
                     )
                 }
-                Button(
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        onDetailsOrSurrenderClick()
-                    },
-                    modifier = Modifier.weight(1f).height(40.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Text(
-                        if (isLosingWarning) "Poddaj się" else "Szczegóły",
-                        color = if (isLosingWarning) Color(0xFFE24B4A) else MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 13.sp
-                    )
+            } else {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Button(
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            onDoneClick(!isDoneToday)
+                        },
+                        modifier = Modifier.weight(1f).height(40.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (isDoneToday) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.primary
+                        ),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text(
+                            if (isDoneToday) "✓ Zrobione dziś" else "✓ Zrobione!",
+                            color = if (isDoneToday) MaterialTheme.colorScheme.onSurfaceVariant else Color.White,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 13.sp
+                        )
+                    }
+                    Button(
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            onDetailsOrSurrenderClick()
+                        },
+                        modifier = Modifier.weight(1f).height(40.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text(
+                            if (isLosingWarning) "Poddaj się" else "Szczegóły",
+                            color = if (isLosingWarning) Color(0xFFE24B4A) else MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 13.sp
+                        )
+                    }
                 }
             }
         }
