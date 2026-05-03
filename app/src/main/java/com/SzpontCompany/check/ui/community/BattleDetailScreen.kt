@@ -39,15 +39,19 @@ fun BattleDetailScreen(
     onSurrenderClick: () -> Unit
 ) {
     val isPlayer1 = battle.player1Id == currentUserId
+    val todayString = java.time.LocalDate.now().toString()
+
+    val myLastLogDate = if (isPlayer1) battle.player1LastLogDate else battle.player2LastLogDate
+    val opponentLastLogDate = if (isPlayer1) battle.player2LastLogDate else battle.player1LastLogDate
 
     val myHp = if (isPlayer1) battle.player1Hp else battle.player2Hp
     val myDays = if (isPlayer1) battle.player1Days else battle.player2Days
-    val isDoneToday = if (isPlayer1) battle.player1CompletedToday else battle.player2CompletedToday
+    val myCompletedToday = myLastLogDate == todayString
 
     val opponentName = if (isPlayer1) battle.player2Name else battle.player1Name
     val opponentHp = if (isPlayer1) battle.player2Hp else battle.player1Hp
     val opponentDays = if (isPlayer1) battle.player2Days else battle.player1Days
-
+    val opponentCompletedToday = opponentLastLogDate == todayString
     val daysLeft = battle.totalDays - maxOf(battle.player1Days, battle.player2Days)
 
     Scaffold(
@@ -170,7 +174,7 @@ fun BattleDetailScreen(
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            if (!isDoneToday) {
+            if (!myCompletedToday) {
                 Button(
                     onClick = onMarkDoneClick,
                     modifier = Modifier

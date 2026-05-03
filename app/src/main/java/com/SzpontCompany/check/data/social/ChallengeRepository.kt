@@ -84,30 +84,35 @@ class ChallengeRepository(private val db: FirebaseFirestore) {
 
                 val isPlayer1 = battle.player1Id == currentUserId
                 val totalDays = battle.totalDays
+                val todayString = java.time.LocalDate.now().toString()
 
                 if (isPlayer1) {
-                    if (isDone && battle.player1CompletedToday) return@runTransaction
-                    if (!isDone && !battle.player1CompletedToday) return@runTransaction
+                    val wasDoneToday = battle.player1LastLogDate == todayString
+                    if (isDone && wasDoneToday) return@runTransaction
+                    if (!isDone && !wasDoneToday) return@runTransaction
 
                     val newDays = if (isDone) battle.player1Days + 1 else maxOf(0, battle.player1Days - 1)
                     val opponentNewHp = 100 - ((newDays * 100) / totalDays)
+                    val newLogDate = if (isDone) todayString else ""
 
                     transaction.update(battleRef, mapOf(
                         "player1Days" to newDays,
                         "player2Hp" to opponentNewHp,
-                        "player1CompletedToday" to isDone
+                        "player1LastLogDate" to newLogDate
                     ))
                 } else {
-                    if (isDone && battle.player2CompletedToday) return@runTransaction
-                    if (!isDone && !battle.player2CompletedToday) return@runTransaction
+                    val wasDoneToday = battle.player2LastLogDate == todayString
+                    if (isDone && wasDoneToday) return@runTransaction
+                    if (!isDone && !wasDoneToday) return@runTransaction
 
                     val newDays = if (isDone) battle.player2Days + 1 else maxOf(0, battle.player2Days - 1)
                     val opponentNewHp = 100 - ((newDays * 100) / totalDays)
+                    val newLogDate = if (isDone) todayString else ""
 
                     transaction.update(battleRef, mapOf(
                         "player2Days" to newDays,
                         "player1Hp" to opponentNewHp,
-                        "player2CompletedToday" to isDone
+                        "player2LastLogDate" to newLogDate
                     ))
                 }
             }.await()

@@ -15,12 +15,12 @@ data class Battle(
     val player1Name: String = "",
     val player1Hp: Int = 100,
     val player1Days: Int = 0,
-    val player1CompletedToday: Boolean = false,
+    val player1LastLogDate: String? = null,
 
     //Player 2 ( receiver)
     val player2Id: String = "",
     val player2Name: String = "",
     val player2Hp: Int = 100,
     val player2Days: Int = 0,
-    val player2CompletedToday: Boolean = false
+    val player2LastLogDate: String? = null
 )

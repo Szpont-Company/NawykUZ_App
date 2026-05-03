@@ -36,15 +36,16 @@ fun BattleCard(
     val haptic = LocalHapticFeedback.current
 
     val isPlayer1 = battle.player1Id == currentUserId
+    val todayString = java.time.LocalDate.now().toString()
 
     val myHp = if (isPlayer1) battle.player1Hp else battle.player2Hp
     val myDays = if (isPlayer1) battle.player1Days else battle.player2Days
-    val isDoneToday = if (isPlayer1) battle.player1CompletedToday else battle.player2CompletedToday
+    val isDoneToday = if (isPlayer1) battle.player1LastLogDate == todayString else battle.player2LastLogDate == todayString
 
     val opponentName = if (isPlayer1) battle.player2Name else battle.player1Name
     val opponentHp = if (isPlayer1) battle.player2Hp else battle.player1Hp
     val opponentDays = if (isPlayer1) battle.player2Days else battle.player1Days
-    val opponentCompleted = if (isPlayer1) battle.player2CompletedToday else battle.player1CompletedToday
+    val opponentCompleted = if (isPlayer1) battle.player2LastLogDate == todayString else battle.player1LastLogDate == todayString
 
     val daysLeft = battle.totalDays - maxOf(battle.player1Days, battle.player2Days)
 
