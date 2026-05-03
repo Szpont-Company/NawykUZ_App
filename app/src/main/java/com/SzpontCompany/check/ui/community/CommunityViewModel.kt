@@ -238,15 +238,19 @@ class CommunityViewModel(
     fun toggleBattleDone(battle: Battle, isDone: Boolean) {
         val currentUserId = auth.currentUser?.uid ?: return
         val todayString = java.time.LocalDate.now().toString()
+        val yesterdayString = java.time.LocalDate.now().minusDays(1).toString()
 
         viewModelScope.launch {
             try {
                 val db = FirebaseFirestore.getInstance()
-                val habitsRef = db.collection("users").document(currentUserId).collection("habits")
+                val userRef = db.collection("users").document(currentUserId)
+                val habitsRef = userRef.collection("habits")
+                
                 val querySnapshot = habitsRef.whereEqualTo("battleId", battle.id).get().await()
 
                 if (querySnapshot.isEmpty) {
                     challengeRepository.updateBattleProgress(battle.id, currentUserId, isDone)
+                    if (isDone) habitRepository.earnCoinsCloud("habit_done")
                 } else {
                     val doc = querySnapshot.documents.first()
                     val habit = doc.toObject(Habit::class.java) ?: return@launch
@@ -259,6 +263,46 @@ class CommunityViewModel(
                     }
                     val newHabitStreak = if (isDone) habit.streak + 1 else maxOf(0, habit.streak - 1)
 
+                    val allHabitsSnapshot = habitsRef.get().await()
+                    val updatedHabits = allHabitsSnapshot.mapNotNull { snapshot ->
+                        val h = snapshot.toObject(Habit::class.java) ?: return@mapNotNull null
+                        if (snapshot.id == habitId) h.copy(completedDates = newDates, streak = newHabitStreak) else h
+                    }
+                    
+                    val allDoneToday = updatedHabits.isNotEmpty() && updatedHabits.all { it.completedDates.contains(todayString) }
+                    
+                    val userSnapshot = userRef.get().await()
+                    val userObj = userSnapshot.toObject(User::class.java)
+                    
+                    var userUpdates: Map<String, Any>? = null
+                    
+                    if (userObj != null) {
+                        var newGlobalStreak = userObj.currentStreak
+                        var newLastDate = userObj.lastGlobalStreakDate
+
+                        if (allDoneToday) {
+                            if (userObj.lastGlobalStreakDate != todayString) {
+                                newGlobalStreak += 1
+                                newLastDate = todayString
+                            }
+                        } else {
+                            if (userObj.lastGlobalStreakDate == todayString) {
+                                newGlobalStreak = maxOf(0, newGlobalStreak - 1)
+                                newLastDate = yesterdayString
+                            }
+                        }
+
+                        val newBestStreak = maxOf(userObj.bestStreak, newGlobalStreak)
+                        
+                        if (newGlobalStreak != userObj.currentStreak || newLastDate != userObj.lastGlobalStreakDate) {
+                            userUpdates = mapOf(
+                                "currentStreak" to newGlobalStreak,
+                                "bestStreak" to newBestStreak,
+                                "lastGlobalStreakDate" to newLastDate
+                            )
+                        }
+                    }
+
                     challengeRepository.updateBattleProgress(
                         battleId = battle.id,
                         currentUserId = currentUserId,
@@ -267,6 +311,12 @@ class CommunityViewModel(
                         newDates = newDates,
                         newHabitStreak = newHabitStreak
                     )
+                    
+                    if (userUpdates != null) {
+                        userRef.update(userUpdates).await()
+                    }
+                    
+                    if (isDone) habitRepository.earnCoinsCloud("habit_done")
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
