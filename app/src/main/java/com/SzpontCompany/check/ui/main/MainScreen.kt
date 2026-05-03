@@ -22,6 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.SzpontCompany.check.ui.addhabit.AddHabitHost
 import com.SzpontCompany.check.data.social.Friend
+import com.SzpontCompany.check.data.social.Battle
 import com.SzpontCompany.check.ui.dashboard.TodayScreen
 import com.SzpontCompany.check.ui.stats.StatsScreen
 import com.SzpontCompany.check.ui.map.MapScreen
@@ -40,7 +41,8 @@ fun MainScreen(
     onOptionsClick: () -> Unit = {},
     onNotificationsClick: () -> Unit = {},
     onFriendProfileClick: () -> Unit = {},
-    onMessageClick: (Friend) -> Unit = {}
+    onMessageClick: (Friend) -> Unit = {},
+    onBattleClick: (Battle) -> Unit = {}
 ) {
     var showNotifications by remember { mutableStateOf(false) }
     var showAddHabit by remember { mutableStateOf(false) }
@@ -63,7 +65,8 @@ fun MainScreen(
             BottomTab.COMMUNITY -> CommunityScreen(
                 onProfileClick = onProfileClick,
                 onFriendProfileClick = onFriendProfileClick,
-                onMessageClick = onMessageClick
+                onMessageClick = onMessageClick,
+                onBattleClick = onBattleClick
             )
             BottomTab.ADD -> {}
         }

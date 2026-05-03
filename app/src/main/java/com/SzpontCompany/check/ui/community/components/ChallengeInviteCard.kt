@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.SzpontCompany.check.data.social.ChallengeInvite
 import androidx.compose.foundation.background
+import com.SzpontCompany.check.ui.theme.getColorByName
 
 @Composable
 fun ChallengeInviteCard(
@@ -40,20 +41,26 @@ fun ChallengeInviteCard(
                 Box(
                     modifier = Modifier
                         .size(40.dp)
-                        .background(MaterialTheme.colorScheme.primary, shape = CircleShape),
+                        .background(getColorByName(invite.senderBgColor), shape = CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
+                    val displayContent = when {
+                        invite.senderEmoji.isNotEmpty() -> invite.senderEmoji
+                        invite.senderInitials.isNotEmpty() -> invite.senderInitials
+                        invite.senderName.isNotEmpty() -> invite.senderName.take(1).uppercase()
+                        else -> "?"
+                    }
                     Text(
-                        text = invite.senderName.take(1),
+                        text = displayContent,
                         color = Color.White,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp
+                        fontSize = 16.sp
                     )
                 }
                 Spacer(Modifier.width(12.dp))
                 Column {
                     Text(
-                        text = invite.senderName,
+                        text = invite.senderName.ifEmpty { "Nieznajomy" },
                         color = MaterialTheme.colorScheme.onBackground,
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp,
@@ -69,7 +76,7 @@ fun ChallengeInviteCard(
 
             Spacer(Modifier.height(16.dp))
 
-            // Info o wyzwaniu
+            // Info o wyzwaniu - zaktualizowane do nowego modelu Firebase
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -79,18 +86,12 @@ fun ChallengeInviteCard(
             ) {
                 Column {
                     Text("Nawyk", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 11.sp)
-                    Text(invite.activityName, color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
-                    Spacer(Modifier.height(4.dp))
-                    Text("Czas", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 11.sp)
-                    Text("${invite.durationMinutes} min / dzień", color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                    Text(invite.habitName, color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
                 }
                 Column(horizontalAlignment = Alignment.End) {
-                    Text("Dni", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 11.sp)
-                    Text("${invite.days} dni", color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
-                    Spacer(Modifier.height(4.dp))
                     Text("Stawka", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 11.sp)
                     Text(
-                        "${invite.betAmount} monet",
+                        "${invite.stake} monet",
                         color = Color(0xFFBA7517),
                         fontWeight = FontWeight.Bold,
                         fontSize = 14.sp
