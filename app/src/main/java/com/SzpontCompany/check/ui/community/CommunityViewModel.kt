@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 class CommunityViewModel(
     private val auth: FirebaseAuth = FirebaseAuth.getInstance(),
@@ -240,9 +241,33 @@ class CommunityViewModel(
 
         viewModelScope.launch {
             try {
-                challengeRepository.updateBattleProgress(battle.id, currentUserId, isDone)
+                val db = FirebaseFirestore.getInstance()
+                val habitsRef = db.collection("users").document(currentUserId).collection("habits")
+                val querySnapshot = habitsRef.whereEqualTo("battleId", battle.id).get().await()
 
-                habitRepository.markHabitDoneByBattleId(battle.id, todayString, isDone)
+                if (querySnapshot.isEmpty) {
+                    challengeRepository.updateBattleProgress(battle.id, currentUserId, isDone)
+                } else {
+                    val doc = querySnapshot.documents.first()
+                    val habit = doc.toObject(Habit::class.java) ?: return@launch
+                    val habitId = doc.id
+
+                    val newDates = if (isDone) {
+                        (habit.completedDates + todayString).distinct()
+                    } else {
+                        habit.completedDates.filter { it != todayString }
+                    }
+                    val newHabitStreak = if (isDone) habit.streak + 1 else maxOf(0, habit.streak - 1)
+
+                    challengeRepository.updateBattleProgress(
+                        battleId = battle.id,
+                        currentUserId = currentUserId,
+                        isDone = isDone,
+                        habitId = habitId,
+                        newDates = newDates,
+                        newHabitStreak = newHabitStreak
+                    )
+                }
             } catch (e: Exception) {
                 e.printStackTrace()
             }

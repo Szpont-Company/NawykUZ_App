@@ -74,9 +74,17 @@ class ChallengeRepository(private val db: FirebaseFirestore) {
         awaitClose { listener.remove() }
     }
 
-    suspend fun updateBattleProgress(battleId: String, currentUserId: String, isDone: Boolean): Result<Unit> {
+    suspend fun updateBattleProgress(
+        battleId: String,
+        currentUserId: String,
+        isDone: Boolean,
+        habitId: String? = null,
+        newDates: List<String>? = null,
+        newHabitStreak: Int? = null
+    ): Result<Unit> {
         return try {
             val battleRef = battlesCollection.document(battleId)
+            val habitRef = habitId?.let { db.collection("users").document(currentUserId).collection("habits").document(it) }
 
             db.runTransaction { transaction ->
                 val snapshot = transaction.get(battleRef)
@@ -113,6 +121,13 @@ class ChallengeRepository(private val db: FirebaseFirestore) {
                         "player2Days" to newDays,
                         "player1Hp" to opponentNewHp,
                         "player2LastLogDate" to newLogDate
+                    ))
+                }
+
+                if (habitRef != null && newDates != null && newHabitStreak != null) {
+                    transaction.update(habitRef, mapOf(
+                        "completedDates" to newDates,
+                        "streak" to newHabitStreak
                     ))
                 }
             }.await()

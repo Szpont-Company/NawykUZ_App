@@ -135,7 +135,18 @@ class TodayViewModel(application: Application) : AndroidViewModel(application) {
 
         viewModelScope.launch {
             try {
-                habitRepo.updateHabitCompletionAndStreak(habitId, newDates, newHabitStreak)
+                if (habit.battleId != null && currentUser != null) {
+                    challengeRepository.updateBattleProgress(
+                        battleId = habit.battleId,
+                        currentUserId = currentUser.uid,
+                        isDone = isDone,
+                        habitId = habitId,
+                        newDates = newDates,
+                        newHabitStreak = newHabitStreak
+                    )
+                } else {
+                    habitRepo.updateHabitCompletionAndStreak(habitId, newDates, newHabitStreak)
+                }
 
                 if (updatedUser != null && currentUser != updatedUser) {
                     userRepo.updateUserStreaks(
@@ -147,9 +158,6 @@ class TodayViewModel(application: Application) : AndroidViewModel(application) {
                 }
 
                 if (isDone) completeAction("habit_done")
-                if (habit.battleId != null && currentUser != null) {
-                    challengeRepository.updateBattleProgress(habit.battleId, currentUser.uid, isDone)
-                }
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(errorMessage = "Błąd zapisu: ${e.message}")
             }
