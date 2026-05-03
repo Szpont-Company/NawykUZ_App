@@ -102,28 +102,9 @@ class TodayViewModel(application: Application) : AndroidViewModel(application) {
         var updatedUser = currentUser
 
         if (currentUser != null) {
-            var newGlobalStreak = currentUser.currentStreak
-            var newLastDate = currentUser.lastGlobalStreakDate
-
-            if (allDoneToday) {
-                if (currentUser.lastGlobalStreakDate != todayString) {
-                    newGlobalStreak += 1
-                    newLastDate = todayString
-                }
-            } else {
-                if (currentUser.lastGlobalStreakDate == todayString) {
-                    newGlobalStreak = maxOf(0, newGlobalStreak - 1)
-                    newLastDate = yesterdayString
-                }
-            }
-
-            val newBestStreak = maxOf(currentUser.bestStreak, newGlobalStreak)
             val newProgress = calculateWeeklyProgress(updatedHabits)
 
-            updatedUser = currentUser.copy(
-                currentStreak = newGlobalStreak,
-                bestStreak = newBestStreak,
-                lastGlobalStreakDate = newLastDate,
+            updatedUser = currentUser.calculateNewStreak(allDoneToday, todayString, yesterdayString).copy(
                 weeklyProgress = newProgress
             )
         }

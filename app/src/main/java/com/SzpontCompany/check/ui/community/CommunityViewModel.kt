@@ -283,28 +283,13 @@ class CommunityViewModel(
                     var userUpdates: Map<String, Any>? = null
 
                     if (userObj != null) {
-                        var newGlobalStreak = userObj.currentStreak
-                        var newLastDate = userObj.lastGlobalStreakDate
+                        val newUserObj = userObj.calculateNewStreak(allDoneToday, todayString, yesterdayString)
 
-                        if (allDoneToday) {
-                            if (userObj.lastGlobalStreakDate != todayString) {
-                                newGlobalStreak += 1
-                                newLastDate = todayString
-                            }
-                        } else {
-                            if (userObj.lastGlobalStreakDate == todayString) {
-                                newGlobalStreak = maxOf(0, newGlobalStreak - 1)
-                                newLastDate = yesterdayString
-                            }
-                        }
-
-                        val newBestStreak = maxOf(userObj.bestStreak, newGlobalStreak)
-
-                        if (newGlobalStreak != userObj.currentStreak || newLastDate != userObj.lastGlobalStreakDate) {
+                        if (newUserObj.currentStreak != userObj.currentStreak || newUserObj.lastGlobalStreakDate != userObj.lastGlobalStreakDate) {
                             userUpdates = mapOf(
-                                "currentStreak" to newGlobalStreak,
-                                "bestStreak" to newBestStreak,
-                                "lastGlobalStreakDate" to newLastDate
+                                "currentStreak" to newUserObj.currentStreak,
+                                "bestStreak" to newUserObj.bestStreak,
+                                "lastGlobalStreakDate" to newUserObj.lastGlobalStreakDate
                             )
                         }
                     }
