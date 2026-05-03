@@ -66,6 +66,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import com.SzpontCompany.check.ui.community.BattleDetailScreen
+import com.SzpontCompany.check.ui.community.CommunityViewModel
 
 enum class AppScreen { SPLASH, LOGIN, DASHBOARD, REGISTER_SUCCESS, RESET_PASSWORD, SET_NICKNAME }
 
@@ -237,6 +239,7 @@ class MainActivity : AppCompatActivity() {
 fun RootNavigationGraph(onLogout: () -> Unit) {
     val navController = rememberNavController()
     val authViewModel: AuthViewModel = viewModel()
+    val communityViewModel: CommunityViewModel = viewModel()
 
     var currentTab by remember { mutableStateOf<BottomTab?>(BottomTab.TODAY) }
 
@@ -289,6 +292,11 @@ fun RootNavigationGraph(onLogout: () -> Unit) {
                         val encodedEmoji = java.net.URLEncoder.encode(friend.avatarEmoji.ifEmpty { friend.initials }, "UTF-8")
                         val route = "chat_screen?friendId=${friend.uid}&friendName=$encodedName&friendEmoji=$encodedEmoji&friendBgColor=${friend.bgColor}"
                         navController.navigate(route) {
+                            launchSingleTop = true
+                        }
+                    },
+                    onBattleClick = { battle ->
+                        navController.navigate("battle_detail/${battle.id}") {
                             launchSingleTop = true
                         }
                     }
@@ -374,6 +382,30 @@ fun RootNavigationGraph(onLogout: () -> Unit) {
                     onLogout = onLogout
                 )
 
+            }
+
+            composable(
+                route = "battle_detail/{battleId}",
+                arguments = listOf(navArgument("battleId") { defaultValue = "" })
+            ) { backStackEntry ->
+                val battleId = backStackEntry.arguments?.getString("battleId") ?: ""
+                val battles by communityViewModel.battles.collectAsState()
+                val battle = battles.find { it.id == battleId }
+                val currentUserId = authViewModel.currentUser.value?.uid ?: ""
+
+                if (battle != null) {
+                    BattleDetailScreen(
+                        battle = battle,
+                        currentUserId = currentUserId,
+                        onBackClick = { navController.popBackStack() },
+                        onMarkDoneClick = {
+                            communityViewModel.toggleBattleDone(battle, true)
+                        },
+                        onSurrenderClick = {
+                            communityViewModel.surrenderBattle(battle)
+                        }
+                    )
+                }
             }
         }
     }

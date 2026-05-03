@@ -1,6 +1,7 @@
 package com.SzpontCompany.check.ui.community
 
 import androidx.compose.animation.animateColor
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -8,6 +9,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -25,6 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import com.SzpontCompany.check.ui.theme.getColorByName
 
 @Composable
 fun BattleCard(
@@ -40,27 +43,31 @@ fun BattleCard(
     val isPlayer1 = battle.player1Id == currentUserId
     val todayString = java.time.LocalDate.now().toString()
 
-    val isCompleted = battle.status == "COMPLETED"
+    val isFinished = battle.status == "COMPLETED" || battle.status == "SURRENDERED"
     var showResultDialog by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
 
     val myHp = if (isPlayer1) battle.player1Hp else battle.player2Hp
     val myDays = if (isPlayer1) battle.player1Days else battle.player2Days
+    val myEmoji = if (isPlayer1) battle.player1Emoji else battle.player2Emoji
+    val myBgColor = if (isPlayer1) battle.player1BgColor else battle.player2BgColor
     val isDoneToday = if (isPlayer1) battle.player1LastLogDate == todayString else battle.player2LastLogDate == todayString
 
     val opponentName = if (isPlayer1) battle.player2Name else battle.player1Name
     val opponentHp = if (isPlayer1) battle.player2Hp else battle.player1Hp
     val opponentDays = if (isPlayer1) battle.player2Days else battle.player1Days
+    val opponentEmoji = if (isPlayer1) battle.player2Emoji else battle.player1Emoji
+    val opponentBgColor = if (isPlayer1) battle.player2BgColor else battle.player1BgColor
     val opponentCompleted = if (isPlayer1) battle.player2LastLogDate == todayString else battle.player1LastLogDate == todayString
 
-    val daysLeft = battle.totalDays - maxOf(battle.player1Days, battle.player2Days)
+    val daysLeft = maxOf(0, battle.totalDays - maxOf(battle.player1Days, battle.player2Days))
 
-    val isLosingWarning = myHp < opponentHp && myHp < 50
+    val isLosingWarning = myHp < opponentHp && myHp < 50 && battle.status == "ACTIVE"
     val isWinner = battle.winnerId == currentUserId
 
     if (showResultDialog) {
         val rewardAmount = battle.betAmount * 2
         AlertDialog(
-            onDismissRequest = {},
+            onDismissRequest = { showResultDialog = false },
             title = {
                 Text(
                     text = if (isWinner) "🎉 ZWYCIĘSTWO!" else "💀 PORAŻKA",
@@ -101,6 +108,19 @@ fun BattleCard(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                // Ikona wyzwania
+                Box(
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(getColorByName(battle.habitColorName).copy(alpha = 0.15f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = battle.habitIcon, fontSize = 18.sp)
+                }
+
+                Spacer(Modifier.width(10.dp))
+
                 Text(
                     text = battle.title,
                     color = MaterialTheme.colorScheme.onBackground,
@@ -109,11 +129,23 @@ fun BattleCard(
                 )
                 Surface(
                     shape = RoundedCornerShape(6.dp),
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+                    color = when(battle.status) {
+                        "ACTIVE" -> MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+                        "SURRENDERED" -> Color(0xFFE24B4A).copy(alpha = 0.15f)
+                        else -> Color(0xFFD8912A).copy(alpha = 0.15f)
+                    }
                 ) {
                     Text(
-                        text = "Aktywna",
-                        color = MaterialTheme.colorScheme.primary,
+                        text = when(battle.status) {
+                            "ACTIVE" -> "Aktywna"
+                            "SURRENDERED" -> "Poddana"
+                            else -> "Ukończona"
+                        },
+                        color = when(battle.status) {
+                            "ACTIVE" -> MaterialTheme.colorScheme.primary
+                            "SURRENDERED" -> Color(0xFFE24B4A)
+                            else -> Color(0xFFD8912A)
+                        },
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Medium,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
@@ -130,9 +162,13 @@ fun BattleCard(
                 myDays = myDays,
                 totalDays = battle.totalDays,
                 myHp = myHp,
+                myEmoji = myEmoji,
+                myBgColor = myBgColor,
                 opponentName = opponentName,
                 opponentDays = opponentDays,
                 opponentHp = opponentHp,
+                opponentEmoji = opponentEmoji,
+                opponentBgColor = opponentBgColor,
                 opponentCompleted = opponentCompleted
             )
 
@@ -183,7 +219,7 @@ fun BattleCard(
             Spacer(Modifier.height(16.dp))
 
             // Przyciski
-            if (isCompleted) {
+            if (isFinished) {
                 Button(
                     onClick = { showResultDialog = true },
                     modifier = Modifier.fillMaxWidth().height(48.dp),
@@ -228,8 +264,9 @@ fun BattleCard(
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
                         shape = RoundedCornerShape(8.dp)
                     ) {
+                        val labelText = if (isLosingWarning) "Poddaj się" else "Szczegóły"
                         Text(
-                            if (isLosingWarning) "Poddaj się" else "Szczegóły",
+                            labelText,
                             color = if (isLosingWarning) Color(0xFFE24B4A) else MaterialTheme.colorScheme.onSurfaceVariant,
                             fontWeight = FontWeight.Bold,
                             fontSize = 13.sp

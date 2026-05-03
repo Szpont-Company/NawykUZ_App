@@ -9,10 +9,11 @@ data class ChallengeInvite(
     val senderBgColor: String = "Mint",
     val receiverId: String = "",
     val habitName: String = "",
-    val challengeType: String = "",
+    val habitColorName: String = "Mint", // Dodano pole koloru nawyku
+    val challengeType: String = "", // Tu przechowujemy emoji nawyku
     val stake: Int = 0,
     val status: String = "PENDING",
     val timestamp: Long = System.currentTimeMillis()
 ) {
-    constructor() : this("", "", "", "", "", "Mint", "", "", "BATTLE", 0, "PENDING", 0)
+    constructor() : this("", "", "", "", "", "Mint", "", "", "Mint", "BATTLE", 0, "PENDING", 0)
 }

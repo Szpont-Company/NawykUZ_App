@@ -43,12 +43,14 @@ import kotlinx.coroutines.coroutineScope
 import android.widget.Toast
 import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.platform.LocalContext
+import com.SzpontCompany.check.data.social.Battle
 
 @Composable
 fun CommunityScreen(
     onProfileClick: () -> Unit = {},
     onFriendProfileClick: () -> Unit = {},
     onMessageClick: (Friend) -> Unit = {},
+    onBattleClick: (Battle) -> Unit = {},
     viewModel: ProfileViewModel = viewModel(),
     friendsViewModel: FriendsViewModel = viewModel(),
     communityViewModel: CommunityViewModel = viewModel()
@@ -209,7 +211,7 @@ fun CommunityScreen(
                             }
                         }
 
-                        // Sekcja zaproszeń WYNIESIONA NA POCZĄTEK
+                        // Sekcja zaproszeń
                         if (incomingInvites.isNotEmpty()) {
                             item {
                                 Text(
@@ -223,7 +225,7 @@ fun CommunityScreen(
                                 ChallengeInviteCard(
                                     invite = incomingInvites[i],
                                     onAccept = {
-                                        communityViewModel.acceptInvite(incomingInvites[i], user?.name ?: "Nieznajomy")
+                                        communityViewModel.acceptInvite(incomingInvites[i], user)
                                         Toast.makeText(context, "Bitwa rozpoczęta! Sprawdź ekran Dzisiaj.", Toast.LENGTH_SHORT).show()
                                     },
                                     onReject = {
@@ -254,7 +256,7 @@ fun CommunityScreen(
                                     communityViewModel.toggleBattleDone(battle, isNowDone)
                                 },
                                 onDetailsOrSurrenderClick = {
-                                    /* TODO: do zrobienia */
+                                    onBattleClick(battle)
                                 },
                                 onAcknowledgeClick = {
                                     communityViewModel.acknowledgeBattle(battle)

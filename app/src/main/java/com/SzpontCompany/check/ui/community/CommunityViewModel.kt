@@ -7,6 +7,7 @@ import com.SzpontCompany.check.data.habit.Habit
 import com.SzpontCompany.check.data.habit.HabitRepository
 import com.SzpontCompany.check.data.social.*
 import com.SzpontCompany.check.data.user.User
+import com.SzpontCompany.check.ui.theme.getColorName
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -173,6 +174,8 @@ class CommunityViewModel(
             senderBgColor = currentUser.bgColor,
             receiverId = friend.uid,
             habitName = template.title,
+            habitColorName = getColorName(template.color),
+            challengeType = template.emoji,
             stake = betAmount
         )
 
@@ -182,8 +185,9 @@ class CommunityViewModel(
     }
 
 
-    fun acceptInvite(invite: ChallengeInvite, currentUserName: String) {
+    fun acceptInvite(invite: ChallengeInvite, currentUser: User?) {
         val currentUserId = auth.currentUser?.uid ?: return
+        val currentUserName = currentUser?.name ?: "Nieznajomy"
 
         viewModelScope.launch {
             try {
@@ -191,15 +195,21 @@ class CommunityViewModel(
 
                 val newBattle = Battle(
                     title = invite.habitName,
+                    habitIcon = invite.challengeType.ifEmpty { "⚔️" },
+                    habitColorName = invite.habitColorName,
                     betAmount = invite.stake,
                     totalDays = 7,
                     participants = listOf(invite.senderId, currentUserId),
 
                     player1Id = invite.senderId,
                     player1Name = invite.senderName,
+                    player1Emoji = invite.senderEmoji,
+                    player1BgColor = invite.senderBgColor,
 
                     player2Id = currentUserId,
-                    player2Name = currentUserName
+                    player2Name = currentUserName,
+                    player2Emoji = currentUser?.avatarEmoji ?: "",
+                    player2BgColor = currentUser?.bgColor ?: "Mint"
                 )
 
                 val result = challengeRepository.createBattle(newBattle)
@@ -207,8 +217,8 @@ class CommunityViewModel(
 
                 val myBattleHabit = Habit(
                     name = invite.habitName,
-                    icon = "⚔️",
-                    colorName = "Coral",
+                    icon = invite.challengeType.ifEmpty { "⚔️" },
+                    colorName = invite.habitColorName,
                     frequency = "codziennie",
                     selectedDays = listOf("poniedziałek", "wtorek", "środa", "czwartek", "piątek", "sobota", "niedziela"),
                     timesPerWeek = 7,
@@ -309,6 +319,25 @@ class CommunityViewModel(
 
                     if (isDone) habitRepository.earnCoinsCloud("habit_done")
                 }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    fun surrenderBattle(battle: Battle) {
+        val currentUserId = auth.currentUser?.uid ?: return
+        val opponentId = if (battle.player1Id == currentUserId) battle.player2Id else battle.player1Id
+
+        viewModelScope.launch {
+            try {
+                val db = FirebaseFirestore.getInstance()
+                db.collection("battles").document(battle.id).update(
+                    mapOf(
+                        "status" to "SURRENDERED",
+                        "winnerId" to opponentId
+                    )
+                ).await()
             } catch (e: Exception) {
                 e.printStackTrace()
             }

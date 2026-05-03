@@ -61,7 +61,7 @@ class ChallengeRepository(private val db: FirebaseFirestore) {
     fun getActiveBattlesForUser(userId: String): Flow<List<Battle>> = callbackFlow {
         val listener = battlesCollection
             .whereArrayContains("participants", userId)
-            .whereIn("status", listOf("ACTIVE", "COMPLETED"))
+            .whereIn("status", listOf("ACTIVE", "COMPLETED", "SURRENDERED"))
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
                     close(error)

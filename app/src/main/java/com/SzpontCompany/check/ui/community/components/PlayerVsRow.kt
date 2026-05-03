@@ -1,23 +1,33 @@
 package com.SzpontCompany.check.ui.community.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.SzpontCompany.check.ui.theme.getColorByName
+import com.SzpontCompany.check.ui.theme.Mint
+import com.SzpontCompany.check.ui.theme.Crimson
 
 @Composable
 fun PlayerVsRow(
     myDays: Int,
     totalDays: Int,
     myHp: Int,
+    myEmoji: String = "",
+    myBgColor: String = "Mint",
     opponentName: String,
     opponentDays: Int,
     opponentHp: Int,
+    opponentEmoji: String = "",
+    opponentBgColor: String = "Mint",
     opponentCompleted: Boolean,
     modifier: Modifier = Modifier
 ) {
@@ -26,36 +36,95 @@ fun PlayerVsRow(
         verticalAlignment = Alignment.CenterVertically
     ) {
         // Ty (lewa strona)
-        Column(modifier = Modifier.weight(1f)) {
+        Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
+            SmallAvatar(emoji = myEmoji, bgColorName = myBgColor, initials = "Ty")
+            Spacer(Modifier.height(8.dp))
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text("Ty", color = MaterialTheme.colorScheme.onBackground, fontSize = 14.sp, fontWeight = FontWeight.Medium)
-                Text("$myDays/$totalDays dni", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
+                Text("Ty", color = MaterialTheme.colorScheme.onBackground, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                Text("$myDays/$totalDays", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 11.sp)
             }
             Spacer(Modifier.height(4.dp))
-            HpBar(hp = myHp, color = MaterialTheme.colorScheme.primary)
+            HpBar(hp = myHp, color = MaterialTheme.colorScheme.primary, showValue = true)
         }
 
         // VS
         Text(
             text = "VS",
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            fontWeight = FontWeight.Bold,
-            fontSize = 14.sp,
-            modifier = Modifier.padding(horizontal = 16.dp)
+            fontWeight = FontWeight.Black,
+            fontSize = 12.sp,
+            modifier = Modifier.padding(horizontal = 12.dp)
         )
 
         // Przeciwnik
-        Column(modifier = Modifier.weight(1f)) {
+        Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
+            val opponentInitials = opponentName.trim().split("\\s+".toRegex())
+                .mapNotNull { it.firstOrNull()?.uppercase() }
+                .take(2).joinToString("")
+                .ifEmpty { "??" }
+
+            SmallAvatar(emoji = opponentEmoji, bgColorName = opponentBgColor, initials = opponentInitials)
+            Spacer(Modifier.height(8.dp))
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(opponentName, color = MaterialTheme.colorScheme.onBackground, fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                Text(opponentName, color = MaterialTheme.colorScheme.onBackground, fontSize = 12.sp, fontWeight = FontWeight.Bold, maxLines = 1)
                 Text(
-                    if (opponentCompleted) "Zrobione" else "$opponentDays/$totalDays dni",
+                    text = "$opponentDays/$totalDays" + (if (opponentCompleted) " ✓" else ""),
                     color = if (opponentCompleted) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontSize = 12.sp
+                    fontSize = 11.sp
                 )
             }
             Spacer(Modifier.height(4.dp))
-            HpBar(hp = opponentHp, color = Color(0xFFE24B4A), alignEnd = true)
+            HpBar(hp = opponentHp, color = Crimson, alignEnd = true, showValue = true)
+        }
+    }
+}
+
+@Composable
+fun SmallAvatar(emoji: String, bgColorName: String, initials: String) {
+    Box(
+        modifier = Modifier
+            .size(36.dp)
+            .clip(CircleShape)
+            .background(getColorByName(bgColorName)),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = if (emoji.isEmpty()) initials else emoji,
+            color = if (emoji.isEmpty()) Color.White else Color.Unspecified,
+            fontSize = if (emoji.isEmpty()) (if (initials == "Ty") 12.sp else 14.sp) else 18.sp,
+            fontWeight = FontWeight.Bold
+        )
+    }
+}
+
+@Composable
+fun HpBar(hp: Int, color: Color, alignEnd: Boolean = false, showValue: Boolean = false) {
+    val displayHp = hp.coerceIn(0, 100)
+    Column(horizontalAlignment = if (alignEnd) Alignment.End else Alignment.Start) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(6.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.surfaceVariant)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(displayHp / 100f)
+                    .fillMaxHeight()
+                    .clip(CircleShape)
+                    .background(color)
+                    .align(if (alignEnd) Alignment.CenterEnd else Alignment.CenterStart)
+            )
+        }
+        if (showValue) {
+            Text(
+                text = "$displayHp/100 HP",
+                fontSize = 9.sp,
+                fontWeight = FontWeight.Bold,
+                color = color.copy(alpha = 0.8f),
+                modifier = Modifier.padding(top = 2.dp)
+            )
         }
     }
 }
