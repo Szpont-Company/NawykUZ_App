@@ -40,6 +40,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.SzpontCompany.check.R
 import com.SzpontCompany.check.data.habit.Habit
+import com.SzpontCompany.check.ui.community.components.NotificationsViewModel
 import com.SzpontCompany.check.ui.components.EmojiExplosionEffect
 import com.SzpontCompany.check.ui.theme.getColorByName
 import com.google.android.gms.ads.AdLoader
@@ -58,9 +59,11 @@ fun TodayScreen(
     onProfileClick: () -> Unit = {},
     onOptionsClick: () -> Unit = {},
     onNotificationsClick: () -> Unit = {},
-    viewModel: TodayViewModel = viewModel()
+    viewModel: TodayViewModel = viewModel(),
+    notificationsViewModel: NotificationsViewModel = viewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
+    val unreadNotificationsCount by notificationsViewModel.unreadCount.collectAsState()
     val explosions = remember { mutableStateListOf<ExplosionData>() }
     val haptic = LocalHapticFeedback.current
     val coroutineScope = rememberCoroutineScope()
@@ -77,7 +80,8 @@ fun TodayScreen(
                     onProfileClick = onProfileClick,
                     onOptionsClick = onOptionsClick,
                     onNotificationsClick = onNotificationsClick,
-                    state = state
+                    state = state,
+                    unreadCount = unreadNotificationsCount
                 )
                 Spacer(modifier = Modifier.height(24.dp))
 
@@ -171,7 +175,8 @@ fun TopSection(
     onProfileClick: () -> Unit,
     onOptionsClick: () -> Unit,
     onNotificationsClick: () -> Unit,
-    state: TodayUiState
+    state: TodayUiState,
+    unreadCount: Int
 ) {
     val currentHour = remember { java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY) }
 
@@ -226,8 +231,7 @@ fun TopSection(
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
-                val hasUnreadNotifications = true
-                if (hasUnreadNotifications) {
+                if (unreadCount > 0) {
                     Box(
                         modifier = Modifier
                             .align(Alignment.TopEnd)

@@ -46,6 +46,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.ui.platform.LocalContext
 import com.SzpontCompany.check.data.social.Battle
 import com.SzpontCompany.check.ui.ads.NativeAdCard
+import com.SzpontCompany.check.ui.community.components.NotificationsViewModel
 
 @Composable
 fun CommunityScreen(
@@ -55,9 +56,13 @@ fun CommunityScreen(
     onBattleClick: (Battle) -> Unit = {},
     viewModel: ProfileViewModel = viewModel(),
     friendsViewModel: FriendsViewModel = viewModel(),
-    communityViewModel: CommunityViewModel = viewModel()
+    communityViewModel: CommunityViewModel = viewModel(),
+    notificationsViewModel: NotificationsViewModel = viewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
+
+    val unreadNotificationsCount by notificationsViewModel.unreadCount.collectAsState()
+
     val user = state.user
 
     val battles by communityViewModel.battles.collectAsState()
@@ -119,8 +124,8 @@ fun CommunityScreen(
                         contentDescription = "Powiadomienia",
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    // Czerwona kropka jeśli są zaproszenia
-                    if (incomingInvites.isNotEmpty()) {
+
+                    if (unreadNotificationsCount > 0) {
                         Box(
                             modifier = Modifier
                                 .align(Alignment.TopEnd)
@@ -129,6 +134,7 @@ fun CommunityScreen(
                                 .background(MaterialTheme.colorScheme.primary, CircleShape)
                         )
                     }
+
                 }
 
                 Box(
