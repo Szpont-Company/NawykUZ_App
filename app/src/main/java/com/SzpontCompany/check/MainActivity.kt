@@ -19,6 +19,7 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
@@ -69,6 +70,8 @@ import kotlinx.coroutines.launch
 import com.SzpontCompany.check.ui.community.BattleDetailScreen
 import com.SzpontCompany.check.ui.community.CommunityViewModel
 import com.SzpontCompany.check.ui.community.components.NotificationsViewModel
+import com.google.firebase.messaging.FirebaseMessaging
+import com.google.firebase.firestore.FirebaseFirestore
 
 enum class AppScreen { SPLASH, LOGIN, DASHBOARD, REGISTER_SUCCESS, RESET_PASSWORD, SET_NICKNAME }
 
@@ -161,16 +164,17 @@ class MainActivity : AppCompatActivity() {
                         AppScreen.SPLASH -> {
                             AnimatedSplashScreen(
                                 onSplashFinished = {
-                                    if(!authViewModel.isLoggedIn) {
+                                    if (!authViewModel.isLoggedIn) {
                                         currentScreen = AppScreen.LOGIN
                                     } else {
                                         scope.launch {
                                             val uid = authViewModel.currentUser.value?.uid
-                                            currentScreen = if (uid != null && authViewModel.isNicknameSet(uid)) {
-                                                AppScreen.DASHBOARD
-                                            } else {
-                                                AppScreen.SET_NICKNAME
-                                            }
+                                            currentScreen =
+                                                if (uid != null && authViewModel.isNicknameSet(uid)) {
+                                                    AppScreen.DASHBOARD
+                                                } else {
+                                                    AppScreen.SET_NICKNAME
+                                                }
                                         }
                                     }
                                 }
@@ -182,11 +186,11 @@ class MainActivity : AppCompatActivity() {
                                 onLoginSuccess = {
                                     scope.launch {
                                         val uid = FirebaseAuth.getInstance().currentUser?.uid
-                                                    ?: run {
-                                                        delay(300)
-                                                        FirebaseAuth.getInstance().currentUser?.uid
-                                                    }
-                                                            ?: return@launch
+                                            ?: run {
+                                                delay(300)
+                                                FirebaseAuth.getInstance().currentUser?.uid
+                                            }
+                                            ?: return@launch
 
                                         currentScreen = if (authViewModel.isNicknameSet(uid)) {
                                             AppScreen.DASHBOARD
@@ -201,10 +205,32 @@ class MainActivity : AppCompatActivity() {
                         }
 
                         AppScreen.SET_NICKNAME -> OnboardingScreen(
-                            onNicknameSaved = {currentScreen = AppScreen.DASHBOARD},
+                            onNicknameSaved = { currentScreen = AppScreen.DASHBOARD },
                         )
 
                         AppScreen.DASHBOARD -> {
+                            LaunchedEffect(Unit) {
+                                val currentUser = FirebaseAuth.getInstance().currentUser
+                                if (currentUser != null) {
+                                    FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+                                        if (!task.isSuccessful) {
+                                            Log.w(
+                                                "FCM",
+                                                "Fetching FCM registration token failed",
+                                                task.exception
+                                            )
+                                            return@addOnCompleteListener
+                                        }
+                                        val token = task.result
+                                        Log.d("FCM", "FCM Token: $token")
+
+                                        FirebaseFirestore.getInstance().collection("users")
+                                            .document(currentUser.uid)
+                                            .update("fcmToken", token)
+                                    }
+                                }
+                            }
+
                             RootNavigationGraph(
                                 onLogout = { currentScreen = AppScreen.LOGIN }
                             )
@@ -219,15 +245,20 @@ class MainActivity : AppCompatActivity() {
                         AppScreen.RESET_PASSWORD -> ResetPasswordScreen(
                             onBack = { currentScreen = AppScreen.LOGIN },
                             accent = MaterialTheme.colorScheme.primary,
-                            onPasswordReset = { authViewModel.resetPassword { result ->
-                                if (result.isSuccess) {
-                                    currentScreen = AppScreen.LOGIN
-                                } else {
-                                    Log.e("ResetPassword", "Error resetting password: ${result.exceptionOrNull()?.message}")
+                            onPasswordReset = {
+                                authViewModel.resetPassword { result ->
+                                    if (result.isSuccess) {
+                                        currentScreen = AppScreen.LOGIN
+                                    } else {
+                                        Log.e(
+                                            "ResetPassword",
+                                            "Error resetting password: ${result.exceptionOrNull()?.message}"
+                                        )
+                                    }
                                 }
-                            } },
+                            },
                             email = authViewModel.email,
-                            onEmailChange = { authViewModel.onEmailChange(it)}
+                            onEmailChange = { authViewModel.onEmailChange(it) }
                         )
                     }
                 }
@@ -276,12 +307,12 @@ fun RootNavigationGraph(onLogout: () -> Unit) {
                     currentTab = currentTab ?: BottomTab.TODAY,
                     onTabSelected = { newTab -> currentTab = newTab },
                     onProfileClick = {
-                        navController.navigate("profile"){
+                        navController.navigate("profile") {
                             launchSingleTop = true
                         }
                     },
                     onOptionsClick = {
-                        navController.navigate("settings"){
+                        navController.navigate("settings") {
                             launchSingleTop = true
                         }
                     },
@@ -292,8 +323,12 @@ fun RootNavigationGraph(onLogout: () -> Unit) {
                     },
                     onMessageClick = { friend ->
                         val encodedName = java.net.URLEncoder.encode(friend.name, "UTF-8")
-                        val encodedEmoji = java.net.URLEncoder.encode(friend.avatarEmoji.ifEmpty { friend.initials }, "UTF-8")
-                        val route = "chat_screen?friendId=${friend.uid}&friendName=$encodedName&friendEmoji=$encodedEmoji&friendBgColor=${friend.bgColor}"
+                        val encodedEmoji = java.net.URLEncoder.encode(
+                            friend.avatarEmoji.ifEmpty { friend.initials },
+                            "UTF-8"
+                        )
+                        val route =
+                            "chat_screen?friendId=${friend.uid}&friendName=$encodedName&friendEmoji=$encodedEmoji&friendBgColor=${friend.bgColor}"
                         navController.navigate(route) {
                             launchSingleTop = true
                         }
@@ -365,7 +400,7 @@ fun RootNavigationGraph(onLogout: () -> Unit) {
                 val friendName = java.net.URLDecoder.decode(rawName, "UTF-8")
                 val friendEmoji = java.net.URLDecoder.decode(rawEmoji, "UTF-8")
                 val friendBgColor = backStackEntry.arguments?.getString("friendBgColor") ?: "Mint"
-                
+
                 ChatScreen(
                     friendId = friendId,
                     onBackClick = { navController.popBackStack() },
