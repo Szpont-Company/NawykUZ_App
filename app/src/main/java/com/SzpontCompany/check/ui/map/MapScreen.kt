@@ -34,8 +34,14 @@ import com.google.maps.android.compose.*
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
+import coil.compose.AsyncImage
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.foundation.interaction.MutableInteractionSource
 
-enum class MapTab { TODAY, ROUTES, FRIENDS }
+enum class MapTab { ROUTES }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,7 +49,7 @@ fun MapScreen(
     viewModel: MapViewModel = viewModel()
 ) {
     val context = LocalContext.current
-    var selectedTab by remember { mutableStateOf(MapTab.TODAY) }
+    var selectedTab by remember { mutableStateOf(MapTab.ROUTES) }
 
     val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
     val cameraPositionState = rememberCameraPositionState {
@@ -203,7 +209,6 @@ fun MapOverlays(
     onLocationClick: () -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
-        // Przyciski boczne (Zoom i GPS)
         Column(
             modifier = Modifier
                 .align(Alignment.CenterEnd)
@@ -212,7 +217,6 @@ fun MapOverlays(
         ) {
             ZoomButton("+", onClick = onZoomIn)
             ZoomButton("−", onClick = onZoomOut)
-            // Przycisk "Moja lokalizacja"
             Box(
                 modifier = Modifier
                     .size(40.dp)
@@ -245,7 +249,7 @@ fun MapSheetContent(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .defaultMinSize(minHeight = 450.dp) // 2. NAPRAWA: Wymuszenie minimalnej wysokości, co pozwala rozwijać BottomSheet!
+            .defaultMinSize(minHeight = 450.dp)
             .padding(bottom = 16.dp)
     ) {
 
@@ -265,13 +269,11 @@ fun MapSheetContent(
         ) {
             Button(
                 onClick = {
-                    // 3. NAPRAWA: Feedback w formie Toasta, żeby wiedzieć, że przycisk w ogóle kliknięto
                     Toast.makeText(
                         context,
                         if (isTracking) "Zapisywanie trasy..." else "Rozpoczęto śledzenie trasy!",
                         Toast.LENGTH_SHORT
                     ).show()
-
                     onToggleTracking()
                 },
                 colors = ButtonDefaults.buttonColors(
@@ -290,12 +292,12 @@ fun MapSheetContent(
         }
 
         Row(Modifier.padding(horizontal = 16.dp)) {
-            MapTabItem("Dziś", selectedTab == MapTab.TODAY) { onTabSelected(MapTab.TODAY) }
             MapTabItem("Moje Trasy", selectedTab == MapTab.ROUTES) { onTabSelected(MapTab.ROUTES) }
         }
 
-        // Widok dla "Moje Trasy" (Historii)
         if (selectedTab == MapTab.ROUTES) {
+            var selectedImageUrl by remember { mutableStateOf<String?>(null) }
+
             Spacer(modifier = Modifier.height(8.dp))
             if (routesHistory.isEmpty()) {
                 Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
@@ -311,17 +313,93 @@ fun MapSheetContent(
                         val dateStr = if (route.startTime > 0) dateFormat.format(Date(route.startTime)) else "Nieznana data"
 
                         Card(
-                            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp),
+                            shape = RoundedCornerShape(16.dp),
                             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha=0.5f))
                         ) {
-                            Column(Modifier.padding(16.dp)) {
-                                Text(dateStr, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
-                                Spacer(Modifier.height(4.dp))
-                                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                    Text("Dystans: ${String.format(Locale.US, "%.2f", route.distanceKm)} km", fontSize=13.sp)
-                                    Text("Czas: ${formatDuration(route.durationMs)}", fontSize=13.sp)
+                            Column {
+                                if (route.mapImageUrl.isNotEmpty()) {
+                                    AsyncImage(
+                                        model = route.mapImageUrl,
+                                        contentDescription = "Mapa przebytej trasy",
+                                        contentScale = ContentScale.Crop,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(140.dp)
+                                            .background(MaterialTheme.colorScheme.surfaceVariant)
+                                            .clickable { selectedImageUrl = route.mapImageUrl }
+                                    )
+                                }
+
+                                Column(Modifier.padding(16.dp)) {
+                                    Text(dateStr, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
+                                    Spacer(Modifier.height(8.dp))
+
+                                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                        Column {
+                                            Text("Dystans", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                            Text("${String.format(Locale.US, "%.2f", route.distanceKm)} km", fontSize=15.sp, fontWeight = FontWeight.Bold)
+                                        }
+                                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                            Text("Czas", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                            Text(formatDuration(route.durationMs), fontSize=15.sp, fontWeight = FontWeight.Bold)
+                                        }
+                                        Column(horizontalAlignment = Alignment.End) {
+                                            Text("Kroki", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                            Text("${route.steps}", fontSize=15.sp, fontWeight = FontWeight.Bold)
+                                        }
+                                    }
                                 }
                             }
+                        }
+                    }
+                }
+            }
+
+            // DODANO: Pełnoekranowy Dialog z powiększonym zdjęciem
+            if (selectedImageUrl != null) {
+                Dialog(
+                    onDismissRequest = { selectedImageUrl = null },
+                    properties = DialogProperties(
+                        usePlatformDefaultWidth = false, // Pozwala na rozciągnięcie na 100% szerokości ekranu
+                        dismissOnBackPress = true,
+                        dismissOnClickOutside = true
+                    )
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = 0.9f)) // Przyciemnione, czarne tło
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null, // Brak efektu fali przy kliknięciu w puste tło
+                                onClick = { selectedImageUrl = null } // Kliknięcie gdziekolwiek zamyka obrazek
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        AsyncImage(
+                            model = selectedImageUrl,
+                            contentDescription = "Powiększona mapa",
+                            contentScale = ContentScale.Fit, // Zmienia na Fit, żeby zdjęcie zachowało proporcje
+                            modifier = Modifier.fillMaxSize()
+                        )
+
+                        // Przycisk zamykania (X) w prawym górnym rogu
+                        IconButton(
+                            onClick = { selectedImageUrl = null },
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .statusBarsPadding() // Omija notch/wycięcie na aparat
+                                .padding(16.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Zamknij",
+                                tint = Color.White,
+                                modifier = Modifier.size(32.dp)
+                            )
                         }
                     }
                 }

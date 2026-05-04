@@ -9,10 +9,11 @@ import com.SzpontCompany.check.data.map.LatLngPoint
 import com.SzpontCompany.check.data.map.Route
 import com.SzpontCompany.check.data.map.RouteRepository
 import com.google.android.gms.maps.model.LatLng
+import com.SzpontCompany.check.BuildConfig
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-
+import com.google.maps.android.PolyUtil
 class MapViewModel(application: Application) : AndroidViewModel(application) {
     private val repository = RouteRepository()
     val isTracking = TrackingManager.isTracking
@@ -28,14 +29,12 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
         get() = (_distanceKm.value * 60).toInt()
 
     init {
-        // Liczenie dystansu na żywo
         viewModelScope.launch {
             pathPoints.collect { points ->
                 _distanceKm.value = calculateDistance(points)
             }
         }
 
-        // Licznik czasu
         viewModelScope.launch {
             while (true) {
                 if (isTracking.value) {
@@ -49,12 +48,10 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
     fun toggleTracking(context: android.content.Context) {
         val intent = Intent(context, LocationTrackingService::class.java)
         if (isTracking.value) {
-            // Zatrzymujemy i Zapisujemy
             intent.action = LocationTrackingService.ACTION_STOP
             context.startService(intent)
             saveCurrentRoute()
         } else {
-            // Startujemy
             _distanceKm.value = 0.0
             _durationMs.value = 0L
             intent.action = LocationTrackingService.ACTION_START
@@ -70,8 +67,10 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
         val points = pathPoints.value
         if (points.size < 2) {
             TrackingManager.clearData()
-            return // Ignorujemy zbyt krótkie trasy
+            return
         }
+
+        val staticMapUrl = generateStaticMapUrl(points)
 
         val routeToSave = Route(
             points = points.map { LatLngPoint(it.latitude, it.longitude) },
@@ -80,7 +79,8 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
             distanceKm = _distanceKm.value,
             durationMs = _durationMs.value,
             calories = calories,
-            steps = stepsCount.value
+            steps = stepsCount.value,
+            mapImageUrl = staticMapUrl
         )
 
         viewModelScope.launch {
@@ -89,6 +89,19 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
             _distanceKm.value = 0.0
             _durationMs.value = 0L
         }
+    }
+
+    private fun generateStaticMapUrl(points: List<LatLng>): String {
+        val encodedPath = PolyUtil.encode(points)
+
+        val apiKey = BuildConfig.MAPS_API_KEY
+        return "https://maps.googleapis.com/maps/api/staticmap?" +
+                "size=600x300" +
+                "&scale=2" +
+                "&path=color:0xE24B4A|weight:5|enc:$encodedPath" +
+                "&markers=size:tiny|color:green|${points.first().latitude},${points.first().longitude}" +
+                "&markers=size:tiny|color:red|${points.last().latitude},${points.last().longitude}" +
+                "&key=$apiKey"
     }
 
     private fun calculateDistance(points: List<LatLng>): Double {

@@ -13,5 +13,6 @@ data class Route(
     val distanceKm: Double = 0.0,
     val durationMs: Long = 0L,
     val calories: Int = 0,
-    val steps: Int = 0
+    val steps: Int = 0,
+    val mapImageUrl: String = ""
 )
