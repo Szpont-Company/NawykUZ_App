@@ -68,6 +68,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.SzpontCompany.check.ui.community.BattleDetailScreen
 import com.SzpontCompany.check.ui.community.CommunityViewModel
+import com.SzpontCompany.check.ui.community.components.NotificationsViewModel
 
 enum class AppScreen { SPLASH, LOGIN, DASHBOARD, REGISTER_SUCCESS, RESET_PASSWORD, SET_NICKNAME }
 
@@ -241,9 +242,9 @@ fun RootNavigationGraph(onLogout: () -> Unit) {
     val authViewModel: AuthViewModel = viewModel()
     val communityViewModel: CommunityViewModel = viewModel()
 
+    val notificationsViewModel: NotificationsViewModel = viewModel()
+
     var currentTab by remember { mutableStateOf<BottomTab?>(BottomTab.TODAY) }
-
-
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
@@ -257,7 +258,9 @@ fun RootNavigationGraph(onLogout: () -> Unit) {
                         currentTab = newTab
                         navController.popBackStack("main", inclusive = false)
                     },
-                    onAddClick = { /* TODO: Otwórz okno dodawania */ }
+                    onAddClick = { /* TODO: Otwórz okno dodawania */ },
+                    notificationsViewModel = notificationsViewModel
+
                 )
             }
         }
@@ -299,7 +302,9 @@ fun RootNavigationGraph(onLogout: () -> Unit) {
                         navController.navigate("battle_detail/${battle.id}") {
                             launchSingleTop = true
                         }
-                    }
+                    },
+
+                    notificationsViewModel = notificationsViewModel
                 )
             }
 
