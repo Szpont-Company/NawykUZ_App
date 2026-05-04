@@ -42,6 +42,7 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import com.SzpontCompany.check.widgets.updateWidgetAccentColor
 
 
 @Composable
@@ -82,10 +83,25 @@ fun SettingsScreen(
         )
         Spacer(modifier = Modifier.height(24.dp))
 
+        val context = LocalContext.current
         SectionHeader(text = stringResource(R.string.settings_section_accent))
         AccentColorSelector(
             selectedColorName = currentAccentColor,
-            onColorSelected = { viewModel.updateAccentColor(it) }
+            onColorSelected = { selectedColorName ->
+                viewModel.updateAccentColor(selectedColorName)
+                val widgetColor = when (selectedColorName) {
+                    "Mint" -> Mint
+                    "Indigo" -> Indigo
+                    "Coral" -> Coral
+                    "Sky" -> Sky
+                    "Rose" -> Rose
+                    "Cactus" -> Cactus
+                    "Amber" -> Amber
+                    "Crimson" -> Crimson
+                    else -> Mint
+                }
+                updateWidgetAccentColor(context, widgetColor)
+            }
         )
         Spacer(modifier = Modifier.height(24.dp))
 

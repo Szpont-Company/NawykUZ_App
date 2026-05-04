@@ -6,3 +6,7 @@ import androidx.glance.appwidget.GlanceAppWidgetReceiver
 class WidgetReceiver : GlanceAppWidgetReceiver() {
     override val glanceAppWidget : GlanceAppWidget = HabitWidget()
 }
+
+class StepsWidgetReceiver : GlanceAppWidgetReceiver() {
+    override val glanceAppWidget: GlanceAppWidget = StepsWidget()
+}
