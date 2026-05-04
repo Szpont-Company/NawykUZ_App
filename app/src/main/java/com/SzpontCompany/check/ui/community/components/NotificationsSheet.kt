@@ -28,11 +28,18 @@ import com.SzpontCompany.check.data.notifications.Notification
 import com.SzpontCompany.check.data.notifications.NotificationType
 import java.text.SimpleDateFormat
 import java.util.*
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
+import androidx.compose.material3.rememberSwipeToDismissBoxState
+import com.SzpontCompany.check.data.social.NotificationItem
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotificationsSheet(
     onDismiss: () -> Unit,
+    onNotificationClick: (Notification) -> Unit,
     viewModel: NotificationsViewModel = viewModel()
 ) {
     val notifications by viewModel.notifications.collectAsState()
@@ -76,13 +83,52 @@ fun NotificationsSheet(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     items(items = notifications, key = { it.id }) { notification ->
-                        NotificationItem(
-                            notification = notification,
-                            onClick = {
-                                if (!notification.isRead) {
-                                    viewModel.markAsRead(notification.id)
+                        val dismissState = rememberSwipeToDismissBoxState(
+                            confirmValueChange = { dismissValue ->
+                                if (dismissValue == SwipeToDismissBoxValue.EndToStart || dismissValue == SwipeToDismissBoxValue.StartToEnd) {
+                                    viewModel.deleteNotification(notification.id)
+                                    true
+                                } else {
+                                    false
                                 }
-                                // TODO: W przyszłości dodamy tu nawigację, np. do profilu znajomego lub bitwy
+                            }
+                        )
+
+                        SwipeToDismissBox(
+                            state = dismissState,
+                            backgroundContent = {
+                                val color by animateColorAsState(
+                                    targetValue = if (dismissState.targetValue != SwipeToDismissBoxValue.Settled)
+                                        Color(0xFFE24B4A)
+                                    else
+                                        Color.Transparent,
+                                    label = "swipe_color"
+                                )
+                                Box(
+                                    Modifier
+                                        .fillMaxSize()
+                                        .clip(RoundedCornerShape(16.dp))
+                                        .background(color)
+                                        .padding(horizontal = 20.dp),
+                                    contentAlignment = Alignment.CenterEnd
+                                ) {
+                                    Icon(
+                                        Icons.Default.Delete,
+                                        contentDescription = "Usuń",
+                                        tint = Color.White
+                                    )
+                                }
+                            },
+                            content = {
+                                NotificationItem(
+                                    notification = notification,
+                                    onClick = {
+                                        if (!notification.isRead) {
+                                            viewModel.markAsRead(notification.id)
+                                        }
+                                        onNotificationClick(notification)
+                                    }
+                                )
                             }
                         )
                     }
@@ -100,10 +146,13 @@ fun NotificationItem(
     val (icon, tint) = when (notification.type) {
         NotificationType.FRIEND_REQUEST.name, NotificationType.FRIEND_ACCEPTED.name ->
             Icons.Default.PersonAdd to Color(0xFF378ADD)
+
         NotificationType.BATTLE_INVITE.name, NotificationType.BATTLE_RESULT.name ->
             Icons.Default.Bolt to Color(0xFFD85A30)
+
         NotificationType.MESSAGE.name ->
             Icons.Default.Message to Color(0xFF1d9e75)
+
         else ->
             Icons.Default.Notifications to Color(0xFFBA7517)
     }

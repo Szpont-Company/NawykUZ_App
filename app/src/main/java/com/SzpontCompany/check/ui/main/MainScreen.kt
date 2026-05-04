@@ -64,6 +64,7 @@ fun MainScreen(
                 onNotificationsClick = { showNotifications = true },
                 notificationsViewModel = notificationsViewModel
             )
+
             BottomTab.STATS -> StatsScreen()
             BottomTab.MAP -> MapScreen()
             BottomTab.COMMUNITY -> CommunityScreen(
@@ -73,13 +74,31 @@ fun MainScreen(
                 onBattleClick = onBattleClick,
                 notificationsViewModel = notificationsViewModel
             )
+
             BottomTab.ADD -> {}
         }
 
         if (showNotifications) {
             NotificationsSheet(
                 onDismiss = { showNotifications = false },
-                viewModel = notificationsViewModel
+                viewModel = notificationsViewModel,
+                onNotificationClick = { notification ->
+                    showNotifications = false
+
+                    when (notification.type) {
+                        "BATTLE_INVITE" -> {
+                            onTabSelected(BottomTab.COMMUNITY)
+                        }
+
+                        "FRIEND_REQUEST" -> {
+                            onTabSelected(BottomTab.COMMUNITY)
+                        }
+
+                        "MESSAGE" -> {
+                            // TODO: Jeśli mamy ID znajomego w relatedEntityId, możemy odpalić onMessageClick
+                        }
+                    }
+                }
             )
         }
     }

@@ -371,7 +371,22 @@ fun CommunityScreen(
 
     if (showNotifications) {
         NotificationsSheet(
-            onDismiss = { showNotifications = false }
+            onDismiss = { showNotifications = false },
+            viewModel = notificationsViewModel,
+            onNotificationClick = { notification ->
+                showNotifications = false
+
+                when (notification.type) {
+                    "BATTLE_INVITE" -> {
+                        selectedTab = 0
+                    }
+                    "FRIEND_REQUEST" -> {
+                        selectedTab = 3
+                        friendsSubTab = 1
+                    }
+                    // TODO: W przyszłości dla wiadomości itp.
+                }
+            }
         )
     }
 
