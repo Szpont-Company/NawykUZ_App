@@ -339,7 +339,13 @@ fun RootNavigationGraph(onLogout: () -> Unit) {
                         }
                     },
 
-                    notificationsViewModel = notificationsViewModel
+                    notificationsViewModel = notificationsViewModel,
+
+                    onNavigateToBattleDetail = { battleId ->
+                        navController.navigate("battle_detail/$battleId") {
+                            launchSingleTop = true
+                        }
+                    }
                 )
             }
 
@@ -364,8 +370,18 @@ fun RootNavigationGraph(onLogout: () -> Unit) {
                         }
                     },
                     onLogoutClick = {
-                        authViewModel.signOut()
-                        onLogout()
+                        val uid = FirebaseAuth.getInstance().currentUser?.uid
+                        if (uid != null) {
+                            FirebaseFirestore.getInstance().collection("users").document(uid)
+                                .update("fcmToken", com.google.firebase.firestore.FieldValue.delete())
+                                .addOnCompleteListener {
+                                    authViewModel.signOut()
+                                    onLogout()
+                                }
+                        } else {
+                            authViewModel.signOut()
+                            onLogout()
+                        }
                     }
                 )
             }

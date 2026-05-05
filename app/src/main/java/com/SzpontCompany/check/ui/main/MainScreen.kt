@@ -45,7 +45,8 @@ fun MainScreen(
     onFriendProfileClick: () -> Unit = {},
     onMessageClick: (Friend) -> Unit = {},
     onBattleClick: (Battle) -> Unit = {},
-    notificationsViewModel: NotificationsViewModel = viewModel()
+    notificationsViewModel: NotificationsViewModel = viewModel(),
+    onNavigateToBattleDetail: (String) -> Unit = {}
 ) {
     var showNotifications by remember { mutableStateOf(false) }
     var showAddHabit by remember { mutableStateOf(false) }
@@ -89,14 +90,15 @@ fun MainScreen(
                         "BATTLE_INVITE" -> {
                             onTabSelected(BottomTab.COMMUNITY)
                         }
-
-                        "FRIEND_REQUEST" -> {
+                        "BATTLE_RESULT" -> {
+                            notification.relatedEntityId?.let { battleId ->
+                                onNavigateToBattleDetail(battleId)
+                            }
+                        }
+                        "FRIEND_REQUEST", "FRIEND_ACCEPTED" -> {
                             onTabSelected(BottomTab.COMMUNITY)
                         }
-
-                        "MESSAGE" -> {
-                            // TODO: Jeśli mamy ID znajomego w relatedEntityId, możemy odpalić onMessageClick
-                        }
+                        // Kolejne akcje dodamy z czasem
                     }
                 }
             )
