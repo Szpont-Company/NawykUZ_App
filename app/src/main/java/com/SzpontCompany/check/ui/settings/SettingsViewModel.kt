@@ -7,6 +7,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.SzpontCompany.check.data.settings.SettingsRepository
 import com.SzpontCompany.check.data.user.UserRepository
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -43,7 +45,23 @@ class SettingsViewModel(
     }
 
     fun updateLanguage(newLanguage: String) {
-        viewModelScope.launch { repository.saveLanguage(newLanguage) }
+        viewModelScope.launch {
+            repository.saveLanguage(newLanguage)
+
+            val uid = FirebaseAuth.getInstance().currentUser?.uid
+            if (uid != null) {
+                val langCode = when (newLanguage) {
+                    "Polski" -> "pl"
+                    "English" -> "en"
+                    else -> "en"
+                }
+
+                FirebaseFirestore.getInstance()
+                    .collection("users")
+                    .document(uid)
+                    .update("language", langCode)
+            }
+        }
     }
 
     fun deleteAccount(onComplete: (Boolean) -> Unit) {
