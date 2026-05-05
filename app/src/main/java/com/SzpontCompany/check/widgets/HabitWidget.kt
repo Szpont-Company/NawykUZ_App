@@ -44,20 +44,22 @@ import com.SzpontCompany.check.R
 
 
 val widgetAccentColorKey = intPreferencesKey("widget_accent_color")
+val widgetStreakKey = intPreferencesKey("widget_habit_streak")
+val widgetRecordKey = intPreferencesKey("widget_habit_record")
 
 class HabitWidget : GlanceAppWidget() {
 
     override val stateDefinition: GlanceStateDefinition<*> = PreferencesGlanceStateDefinition
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-        val streak = getHabitStreak(context)
-        val record = getHabitRecord(context)
-
         provideContent {
             val prefs = currentState<Preferences>()
 
             val savedColorInt = prefs[widgetAccentColorKey] ?: Color(0xFF857AE6).toArgb()
             val accentColor = Color(savedColorInt)
+
+            val streak = prefs[widgetStreakKey] ?: 0
+            val record = prefs[widgetRecordKey] ?: 0
 
             MyContent(streak, record, accentColor)
         }
@@ -134,12 +136,19 @@ class HabitWidget : GlanceAppWidget() {
     }
 }
 
-fun getHabitStreak(context: Context): Int {
-    return 21
-}
+fun updateHabitWidgetData(context: Context, newStreak: Int, newRecord: Int) {
+    CoroutineScope(Dispatchers.IO).launch {
+        val manager = GlanceAppWidgetManager(context)
+        val ids = manager.getGlanceIds(HabitWidget::class.java)
 
-fun getHabitRecord(context: Context): Int {
-    return 37
+        ids.forEach { glanceId ->
+            updateAppWidgetState(context, glanceId) { prefs ->
+                prefs[widgetStreakKey] = newStreak
+                prefs[widgetRecordKey] = newRecord
+            }
+            HabitWidget().update(context, glanceId)
+        }
+    }
 }
 
 fun updateWidgetAccentColor(context: Context, newColor: Color) {

@@ -1,6 +1,9 @@
 package com.SzpontCompany.check.ui.dashboard
 
 import android.app.Application
+import android.content.Context
+import androidx.compose.ui.platform.LocalContext
+import androidx.glance.appwidget.updateAll
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.SzpontCompany.check.data.user.User
@@ -8,6 +11,10 @@ import com.SzpontCompany.check.data.user.UserRepository
 import com.SzpontCompany.check.data.habit.Habit
 import com.SzpontCompany.check.data.habit.HabitRepository
 import com.SzpontCompany.check.data.social.ChallengeRepository
+import com.SzpontCompany.check.widgets.HabitWidget
+import com.SzpontCompany.check.widgets.updateHabitWidgetData
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -59,8 +66,16 @@ class TodayViewModel(application: Application) : AndroidViewModel(application) {
                                     lastGlobalStreakDate = user.lastGlobalStreakDate
                                 )
                             } catch (e: Exception) {
+                                e.printStackTrace()
                             }
                         }
+                    }
+
+                    try {
+                        val c = getApplication<Application>().applicationContext
+                        updateHabitWidgetData(c, activeUser.currentStreak, activeUser.bestStreak)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
                     }
 
                     val progress = calculateWeeklyProgress(_uiState.value.habits)
@@ -185,6 +200,9 @@ class TodayViewModel(application: Application) : AndroidViewModel(application) {
                         updatedUser.bestStreak,
                         updatedUser.lastGlobalStreakDate
                     )
+
+                    val context = getApplication<Application>().applicationContext
+                    updateHabitWidgetData(context, updatedUser.currentStreak, updatedUser.bestStreak)
                 }
 
                 if (isDone) completeAction("habit_done")
