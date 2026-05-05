@@ -453,4 +453,39 @@
     <string name="friend_status_friend">Friend</string>
     <string name="friend_status_sent">Sent ✔️</string>
     <string name="friend_status_waiting">Waiting for response</string>
+
+    <!-- Challenge Invite & Create Sheet -->
+    <string name="challenge_invite_stranger">Stranger</string>
+    <string name="challenge_invite_subtitle">Challenges you!</string>
+    <string name="challenge_invite_habit_label">Habit</string>
+    <string name="challenge_invite_stake_label">Stake</string>
+    <string name="challenge_invite_coins">%1$d coins</string>
+
+    <string name="challenge_sheet_title">Issue a challenge</string>
+    <string name="challenge_sheet_who_label">Who will take the challenge?</string>
+    <string name="challenge_sheet_no_friends">You don\'t have any friends for a battle yet 😔</string>
+    <string name="challenge_sheet_find_friends">Find friends</string>
+    <string name="challenge_sheet_what_label">What are you fighting for?</string>
+    <string name="challenge_sheet_stake_label">Stake (Check Coins)</string>
+    <string name="challenge_sheet_send_btn">Send challenge</string>
+
+    <!-- Ranking -->
+    <string name="ranking_your_position">Your position</string>
+    <string name="ranking_xp_level">%1$s XP   Level %2$d</string>
+    <string name="ranking_xp_format">%1$s XP</string>
+    <!-- Events & Player VS -->
+    <string name="event_reward_label">Reward: </string>
+    <string name="battle_vs">VS</string>
+    <string name="battle_hp_format">%1$d/100 HP</string>
+
+    <!-- Predefined Challenges & Fallbacks -->
+    <string name="challenge_template_steps_title">Step Kings</string>
+    <string name="challenge_template_steps_desc">Who will take more steps in 3 days?</string>
+    <string name="challenge_template_water_title">Water Duel</string>
+    <string name="challenge_template_water_desc">Drink at least 2L of water for 5 days.</string>
+    <string name="challenge_template_sugar_title">Sugar Detox</string>
+    <string name="challenge_template_sugar_desc">No sweets for a whole week!</string>
+    <string name="challenge_template_early_title">Early Bird</string>
+    <string name="challenge_template_early_desc">Wake up before 7:00 AM for 3 days.</string>
+    <string name="unknown_user">Unknown</string>
 </resources>

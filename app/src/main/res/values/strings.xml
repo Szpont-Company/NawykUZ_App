@@ -458,4 +458,40 @@
     <string name="friend_status_sent">Wysłano ✔️</string>
     <string name="friend_status_waiting">Czeka na odpowiedź</string>
 
+    <!-- Challenge Invite & Create Sheet -->
+    <string name="challenge_invite_stranger">Nieznajomy</string>
+    <string name="challenge_invite_subtitle">Rzuca Ci wyzwanie!</string>
+    <string name="challenge_invite_habit_label">Nawyk</string>
+    <string name="challenge_invite_stake_label">Stawka</string>
+    <string name="challenge_invite_coins">%1$d monet</string>
+
+    <string name="challenge_sheet_title">Rzuć wyzwanie</string>
+    <string name="challenge_sheet_who_label">Kto podejmie rękawicę?</string>
+    <string name="challenge_sheet_no_friends">Nie masz jeszcze znajomych do bitwy 😔</string>
+    <string name="challenge_sheet_find_friends">Znajdź znajomych</string>
+    <string name="challenge_sheet_what_label">O co walczycie?</string>
+    <string name="challenge_sheet_stake_label">Stawka (Check Coins)</string>
+    <string name="challenge_sheet_send_btn">Wyślij wyzwanie</string>
+
+
+    <!-- Ranking -->
+    <string name="ranking_your_position">Twoja pozycja</string>
+    <string name="ranking_xp_level">%1$s XP   Poziom %2$d</string>
+    <string name="ranking_xp_format">%1$s XP</string>
+    <!-- Events & Player VS -->
+    <string name="event_reward_label">Nagroda: </string>
+    <string name="battle_vs">VS</string>
+    <string name="battle_hp_format">%1$d/100 HP</string>
+
+    <!-- Predefined Challenges & Fallbacks -->
+    <string name="challenge_template_steps_title">Królowie Kroków</string>
+    <string name="challenge_template_steps_desc">Kto zrobi więcej kroków w 3 dni?</string>
+    <string name="challenge_template_water_title">Wodny Pojedynek</string>
+    <string name="challenge_template_water_desc">Pij minimum 2L wody przez 5 dni.</string>
+    <string name="challenge_template_sugar_title">Cukrowy Odwyk</string>
+    <string name="challenge_template_sugar_desc">Zero słodyczy przez cały tydzień!</string>
+    <string name="challenge_template_early_title">Ranny Ptaszek</string>
+    <string name="challenge_template_early_desc">Wstawanie przed 7:00 przez 3 dni.</string>
+    <string name="unknown_user">Nieznany</string>
+
 </resources>

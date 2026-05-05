@@ -44,7 +44,7 @@ class FriendRepository(
                 val uid = doc.id
                 if (uid == currentUserId) return@mapNotNull null
 
-                val name = doc.getString("name") ?: "Nieznany"
+                val name = doc.getString("name") ?: ""
                 val initials = name.split(" ").mapNotNull { it.firstOrNull()?.uppercase() }.take(2).joinToString("")
                 val avatar = doc.getString("avatarEmoji") ?: ""
                 val bgColor = doc.getString("bgColor") ?: "Mint"
@@ -68,7 +68,7 @@ class FriendRepository(
         val myId = currentUserId ?: return false
         return try {
             val myDoc = firestore.collection("users").document(myId).get().await()
-            val myName = myDoc.getString("name") ?: "Zalogowany Użytkownik"
+            val myName = myDoc.getString("name") ?: ""
             val myAvatar = myDoc.getString("avatarEmoji") ?: "👤"
             val myBgColor = myDoc.getString("bgColor") ?: "Mint"
 
@@ -149,7 +149,7 @@ class FriendRepository(
 
                 val myData = mapOf(
                     "uid" to myId,
-                    "name" to (myDoc.getString("name") ?: "Nieznany"),
+                    "name" to (myDoc.getString("name") ?: ""),
                     "avatarEmoji" to (myDoc.getString("avatarEmoji") ?: ""),
                     "bgColor" to (myDoc.getString("bgColor") ?: "Mint"),
                     "timestamp" to System.currentTimeMillis()
@@ -157,7 +157,7 @@ class FriendRepository(
 
                 val hisData = mapOf(
                     "uid" to senderId,
-                    "name" to (hisDoc.getString("name") ?: "Nieznany"),
+                    "name" to (hisDoc.getString("name") ?: ""),
                     "avatarEmoji" to (hisDoc.getString("avatarEmoji") ?: ""),
                     "bgColor" to (hisDoc.getString("bgColor") ?: "Mint"),
                     "timestamp" to System.currentTimeMillis()
@@ -205,7 +205,7 @@ class FriendRepository(
             result.documents.mapNotNull { doc ->
                 if (doc.id == myId) return@mapNotNull null
 
-                val name = doc.getString("name") ?: "Nieznany"
+                val name = doc.getString("name") ?: ""
                 val initials = name.split(" ").mapNotNull { it.firstOrNull()?.uppercase() }.take(2).joinToString("")
                 Friend(
                     uid = doc.id,
@@ -240,7 +240,7 @@ class FriendRepository(
                 kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
                     val friendsList = snapshot.documents.mapNotNull { doc ->
                         val uid = doc.id
-                        var name = doc.getString("name") ?: "Nieznany"
+                        var name = doc.getString("name") ?: ""
                         var avatarEmoji = doc.getString("avatarEmoji") ?: ""
                         var bgColor = doc.getString("bgColor") ?: "Mint"
                         var xp = doc.getLong("xp")?.toInt() ?: 0

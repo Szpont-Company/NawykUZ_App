@@ -415,7 +415,9 @@ fun CommunityScreen(
             },
             onSendChallenge = { friend, template, betAmount ->
                 showCreateChallengeSheet = false
-                communityViewModel.sendChallenge(user, friend, template, betAmount)
+                val resolvedTitle = context.getString(template.titleRes)
+
+                communityViewModel.sendChallenge(user, friend, template, resolvedTitle, betAmount)
                 Toast.makeText(
                     context,
                     context.getString(R.string.community_toast_challenge_sent, friend.name),

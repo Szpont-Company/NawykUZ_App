@@ -15,6 +15,8 @@ import androidx.compose.ui.unit.sp
 import com.SzpontCompany.check.data.social.ChallengeInvite
 import androidx.compose.foundation.background
 import com.SzpontCompany.check.ui.theme.getColorByName
+import com.SzpontCompany.check.R
+import androidx.compose.ui.res.stringResource
 
 @Composable
 fun ChallengeInviteCard(
@@ -60,14 +62,14 @@ fun ChallengeInviteCard(
                 Spacer(Modifier.width(12.dp))
                 Column {
                     Text(
-                        text = invite.senderName.ifEmpty { "Nieznajomy" },
+                        text = invite.senderName.ifEmpty { stringResource(R.string.challenge_invite_stranger) },
                         color = MaterialTheme.colorScheme.onBackground,
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp,
                         style = MaterialTheme.typography.titleMedium
                     )
                     Text(
-                        text = "Rzuca Ci wyzwanie!",
+                        text = stringResource(R.string.challenge_invite_subtitle),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 12.sp
                     )
@@ -85,13 +87,13 @@ fun ChallengeInviteCard(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Column {
-                    Text("Nawyk", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 11.sp)
+                    Text(stringResource(R.string.challenge_invite_habit_label), color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 11.sp)
                     Text(invite.habitName, color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
                 }
                 Column(horizontalAlignment = Alignment.End) {
-                    Text("Stawka", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 11.sp)
+                    Text(stringResource(R.string.challenge_invite_stake_label), color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 11.sp)
                     Text(
-                        "${invite.stake} monet",
+                        stringResource(R.string.challenge_invite_coins, invite.stake),
                         color = Color(0xFFBA7517),
                         fontWeight = FontWeight.Bold,
                         fontSize = 14.sp
@@ -113,7 +115,7 @@ fun ChallengeInviteCard(
                     border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE24B4A)),
                     shape = RoundedCornerShape(8.dp)
                 ) {
-                    Text("Odrzuć", fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.decline), fontWeight = FontWeight.Bold)
                 }
                 Button(
                     onClick = onAccept,
@@ -121,7 +123,7 @@ fun ChallengeInviteCard(
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                     shape = RoundedCornerShape(8.dp)
                 ) {
-                    Text("Przyjmij", color = Color.White, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.accept), color = Color.White, fontWeight = FontWeight.Bold)
                 }
             }
         }

@@ -130,7 +130,7 @@ fun BattleCard(
                 Spacer(Modifier.width(10.dp))
 
                 Text(
-                    text = battle.title,
+                    text = getLocalizedHabitName(battle.title),
                     color = MaterialTheme.colorScheme.onBackground,
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     modifier = Modifier.weight(1f)
@@ -295,5 +295,16 @@ fun BattleCard(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun getLocalizedHabitName(title: String): String {
+    return when (title) {
+        "Królowie Kroków", "Step Kings" -> stringResource(R.string.challenge_template_steps_title)
+        "Wodny Pojedynek", "Water Duel" -> stringResource(R.string.challenge_template_water_title)
+        "Cukrowy Odwyk", "Sugar Detox" -> stringResource(R.string.challenge_template_sugar_title)
+        "Ranny Ptaszek", "Early Bird" -> stringResource(R.string.challenge_template_early_title)
+        else -> title
     }
 }
