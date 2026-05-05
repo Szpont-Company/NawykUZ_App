@@ -33,7 +33,9 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.rememberSwipeToDismissBoxState
+import androidx.compose.ui.res.stringResource
 import com.SzpontCompany.check.data.social.NotificationItem
+import com.SzpontCompany.check.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -58,7 +60,7 @@ fun NotificationsSheet(
                 .padding(bottom = 24.dp)
         ) {
             Text(
-                text = "Powiadomienia",
+                text = stringResource(R.string.notifications_title),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground,

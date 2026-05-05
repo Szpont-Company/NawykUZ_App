@@ -15,6 +15,8 @@ import androidx.compose.ui.unit.sp
 import com.SzpontCompany.check.ui.theme.getColorByName
 import com.SzpontCompany.check.ui.theme.Mint
 import com.SzpontCompany.check.ui.theme.Crimson
+import com.SzpontCompany.check.R
+import androidx.compose.ui.res.stringResource
 
 @Composable
 fun PlayerVsRow(
@@ -31,16 +33,19 @@ fun PlayerVsRow(
     opponentCompleted: Boolean,
     modifier: Modifier = Modifier
 ) {
+
+    val myNameStr = stringResource(R.string.you)
+
     Row(
         modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
         // Ty (lewa strona)
         Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
-            SmallAvatar(emoji = myEmoji, bgColorName = myBgColor, initials = "Ty")
+            SmallAvatar(emoji = myEmoji, bgColorName = myBgColor, initials = myNameStr)
             Spacer(Modifier.height(8.dp))
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text("Ty", color = MaterialTheme.colorScheme.onBackground, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                Text(myNameStr, color = MaterialTheme.colorScheme.onBackground, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                 Text("$myDays/$totalDays", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 11.sp)
             }
             Spacer(Modifier.height(4.dp))
@@ -49,7 +54,7 @@ fun PlayerVsRow(
 
         // VS
         Text(
-            text = "VS",
+            text = stringResource(R.string.battle_vs),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontWeight = FontWeight.Black,
             fontSize = 12.sp,
@@ -88,10 +93,11 @@ fun SmallAvatar(emoji: String, bgColorName: String, initials: String) {
             .background(getColorByName(bgColorName)),
         contentAlignment = Alignment.Center
     ) {
+        val displayMyName = stringResource(R.string.you)
         Text(
             text = if (emoji.isEmpty()) initials else emoji,
             color = if (emoji.isEmpty()) Color.White else Color.Unspecified,
-            fontSize = if (emoji.isEmpty()) (if (initials == "Ty") 12.sp else 14.sp) else 18.sp,
+            fontSize = if (emoji.isEmpty()) (if (initials == displayMyName) 12.sp else 14.sp) else 18.sp,
             fontWeight = FontWeight.Bold
         )
     }
@@ -119,7 +125,7 @@ fun HpBar(hp: Int, color: Color, alignEnd: Boolean = false, showValue: Boolean =
         }
         if (showValue) {
             Text(
-                text = "$displayHp/100 HP",
+                text = stringResource(R.string.battle_hp_format, displayHp),
                 fontSize = 9.sp,
                 fontWeight = FontWeight.Bold,
                 color = color.copy(alpha = 0.8f),

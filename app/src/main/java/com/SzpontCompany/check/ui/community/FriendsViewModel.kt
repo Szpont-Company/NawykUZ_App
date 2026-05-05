@@ -114,9 +114,9 @@ class FriendsViewModel(
 
         return users.map { friend ->
             val newStatus = when {
-                friend.uid in friendsIds -> "Znajomy"
-                friend.uid in outgoingIds -> "Wysłano ✓"
-                friend.uid in incomingIds -> "Czeka na odpowiedź"
+                friend.uid in friendsIds -> "STATUS_FRIEND"
+                friend.uid in outgoingIds -> "STATUS_SENT"
+                friend.uid in incomingIds -> "STATUS_WAITING"
                 else -> ""
             }
             friend.copy(status = newStatus)
@@ -134,10 +134,10 @@ class FriendsViewModel(
 
     fun sendFriendRequest(receiverId: String) {
         val updatedSearchResults = _uiState.value.searchResults.map {
-            if (it.uid == receiverId) it.copy(status = "Wysłano ✓") else it
+            if (it.uid == receiverId) it.copy(status = "STATUS_SENT") else it
         }
         val updatedSuggestedResults = _uiState.value.suggestedFriends.map {
-            if (it.uid == receiverId) it.copy(status = "Wysłano ✓") else it
+            if (it.uid == receiverId) it.copy(status = "STATUS_SENT") else it
         }
         _uiState.update { it.copy(
             searchResults = updatedSearchResults,

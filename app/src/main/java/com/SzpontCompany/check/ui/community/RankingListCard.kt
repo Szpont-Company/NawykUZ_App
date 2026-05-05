@@ -15,6 +15,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.SzpontCompany.check.data.social.RankingEntry
 import java.util.Locale
+import com.SzpontCompany.check.R
+import androidx.compose.ui.res.stringResource
 
 @Composable
 fun RankingListCard(
@@ -73,7 +75,7 @@ fun RankingListCard(
 
                     // Imię/nick
                     Text(
-                        text = entry.name,
+                        text = if (entry.isMe) stringResource(R.string.you) else entry.name,
                         color = if (entry.isMe) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground,
                         fontWeight = FontWeight.Bold,
                         fontSize = 15.sp,
@@ -82,7 +84,7 @@ fun RankingListCard(
 
                     // XP (w jednej linii, ze spacją jako separator tysięcy)
                     Text(
-                        text = "$formattedXp XP",
+                        text = stringResource(R.string.ranking_xp_format, formattedXp),
                         color = if (entry.isMe) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Medium

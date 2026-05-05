@@ -216,8 +216,8 @@
     <!-- Community Screen & Tabs -->
     <string name="tab_friends">Znajomi</string>
     <string name="tab_ranking">Ranking</string>
-    <string name="tab_events">Wydarzenia</string>
-    <string name="tab_challenges">Wyzwania</string>
+    <string name="tab_events">Eventy</string>
+    <string name="tab_challenges">Battle</string>
 
     <!-- FriendsCard -->
     <string name="search_in_list">Szukaj na liście...</string>
@@ -360,4 +360,138 @@
     <string name="shop_hero">Zaszalej, należy ci się!</string>
     <string name="shop_hero_desc">Wymień zgromadzone monety na wymarzoną nagrodę.</string>
     <string name="login_unverified">Zweryfikuj adres email, zanim się zalogujesz.</string>
+
+
+    <string name="battle_victory_title">🏆 ZWYCIĘSTWO!</string>
+    <string name="battle_defeat_title">💀 PORAŻKA</string>
+    <string name="battle_victory_message">Rozgromiłeś przeciwnika o imieniu %1$s! Twoja nagroda to %2$d monet.</string>
+    <string name="battle_defeat_message">Tym razem to %1$s okazał się silniejszy. Twój zakład przepada, spróbuj odegrać się w kolejnej bitwie!</string>
+    <string name="battle_claim_reward">Odbierz Nagrodę</string>
+    <string name="battle_understood">Zrozumiałem</string>
+    <string name="battle_status_active">Aktywna</string>
+    <string name="battle_status_surrendered">Poddana</string>
+    <string name="battle_status_completed">Ukończona</string>
+    <string name="battle_days_left">%1$d dni</string>
+    <string name="battle_bet_amount">%1$d monet zakład</string>
+    <string name="battle_losing_warning">Przegrywasz!</string>
+    <string name="battle_ends_on">kończy się %1$s</string>
+    <string name="battle_claim_reward_with_amount">🏆 Odbierz nagrodę (%1$d monet)!</string>
+    <string name="battle_see_summary">📜 Zobacz podsumowanie</string>
+    <string name="battle_done_today">✅ Zrobione dziś</string>
+    <string name="battle_done">🔥 Zrobione!</string>
+    <string name="battle_give_up">Poddaj się</string>
+
+
+    <string name="battle_check_coins">%1$d Check Coins</string>
+    <string name="battle_remaining_label">Pozostało</string>
+    <string name="battle_end_label">Koniec</string>
+    <string name="battle_soon">Wkrótce</string>
+    <string name="battle_surrender_give_coins">Poddaj się (Oddaj monety)</string>
+    <string name="days_label">Dni</string>
+    <string name="battle_details_title">Szczegóły Bitwy</string>
+    <string name="battle_mark_done">Oznacz jako zrobione</string>
+    <string name="battle_done_for_today">Zrobione na dzisiaj!</string>
+
+
+    <!-- Chat & Community -->
+    <string name="chat_type_message">Napisz wiadomość...</string>
+    <string name="chat_quick_reactions">Szybkie reakcje</string>
+    <string name="chat_send">Wyślij</string>
+    <string name="chat_today">Dzisiaj</string>
+    <string name="chat_yesterday">Wczoraj</string>
+
+    <!-- Statusy aktywności -->
+    <string name="chat_active_now">Aktywny(a) teraz</string>
+    <string name="chat_active_ago">Aktywny(a) %1$s</string> <!-- Np. Aktywny(a) 5 minut temu -->
+
+
+    <!-- Community Screen Tabs & Headers -->
+    <string name="community_title">Społeczność</string>
+    <string name="community_notifications_desc">Powiadomienia</string>
+
+    <string name="community_tab_battle">Battle</string>
+    <string name="community_tab_events">Eventy</string>
+    <string name="community_tab_ranking">Ranking</string>
+    <string name="community_tab_friends">Znajomi</string>
+
+    <string name="community_subtab_global">Globalny</string>
+    <string name="community_subtab_friends">Znajomi</string>
+    <string name="community_subtab_weekly">Tygodniowy</string>
+
+    <string name="community_create_challenge">+ Wyzwanie</string>
+    <string name="community_find_players">Znajdź graczy</string>
+
+    <string name="community_pending_invites">OCZEKUJĄCE ZAPROSZENIA (%1$d)</string>
+    <string name="community_active_battles">AKTYWNE BITWY (%1$d)</string>
+    <string name="community_active_events">AKTYWNE EVENTY</string>
+
+    <string name="community_toast_battle_started">Bitwa rozpoczęta! Sprawdź ekran Dzisiaj.</string>
+    <string name="community_toast_challenge_sent">Wyzwanie rzucone: %1$s!</string>
+    <string name="community_trend_up">+%1$d od zeszłego tyg.</string>
+
+
+    <!-- Friends -->
+    <string name="friends_tab_friends_count">Znajomi (%1$d)</string>
+    <string name="friends_tab_invites_count">Zaproszenia (%1$d)</string>
+    <string name="friends_tab_search">Szukaj</string>
+    <string name="friends_loading">Ładowanie znajomych...</string>
+    <string name="friends_pending_invites_header">OCZEKUJĄCE ZAPROSZENIA</string>
+    <string name="friends_search_results_header">WYNIKI WYSZUKIWANIA</string>
+    <string name="friends_clear_search">Wyczyść</string>
+    <string name="friends_status_waiting">Czeka na odpowiedź</string>
+    <string name="friends_invite_link_mock">check.app/invite/marekk</string>
+    <string name="friend_remove_title">Usuwanie znajomego</string>
+    <string name="friend_remove_message">Czy na pewno chcesz usunąć użytkownika %1$s ze znajomych? Tej operacji nie można cofnąć.</string>
+    <string name="friend_remove_confirm">Usuń</string>
+    <string name="friend_wants_to_add">Chce zostać Twoim znajomym</string>
+
+    <!-- Friend List Item -->
+    <string name="friend_online_xp">Online • %1$s XP</string>
+    <string name="friend_mutuals_count">%1$d wspólnych znajomych</string>
+    <string name="friend_from_contacts">Z Twoich kontaktów</string>
+    <string name="friend_options_desc">Opcje</string>
+    <string name="friend_show_profile">Pokaż profil</string>
+    <string name="friend_send_message">Wyślij wiadomość</string>
+    <string name="friend_remove">Usuń ze znajomych</string>
+    <string name="friend_invite_btn">Zaproś</string>
+    <string name="friend_status_friend">Znajomy</string>
+    <string name="friend_status_sent">Wysłano ✔️</string>
+    <string name="friend_status_waiting">Czeka na odpowiedź</string>
+
+    <!-- Challenge Invite & Create Sheet -->
+    <string name="challenge_invite_stranger">Nieznajomy</string>
+    <string name="challenge_invite_subtitle">Rzuca Ci wyzwanie!</string>
+    <string name="challenge_invite_habit_label">Nawyk</string>
+    <string name="challenge_invite_stake_label">Stawka</string>
+    <string name="challenge_invite_coins">%1$d monet</string>
+
+    <string name="challenge_sheet_title">Rzuć wyzwanie</string>
+    <string name="challenge_sheet_who_label">Kto podejmie rękawicę?</string>
+    <string name="challenge_sheet_no_friends">Nie masz jeszcze znajomych do bitwy 😔</string>
+    <string name="challenge_sheet_find_friends">Znajdź znajomych</string>
+    <string name="challenge_sheet_what_label">O co walczycie?</string>
+    <string name="challenge_sheet_stake_label">Stawka (Check Coins)</string>
+    <string name="challenge_sheet_send_btn">Wyślij wyzwanie</string>
+
+
+    <!-- Ranking -->
+    <string name="ranking_your_position">Twoja pozycja</string>
+    <string name="ranking_xp_level">%1$s XP   Poziom %2$d</string>
+    <string name="ranking_xp_format">%1$s XP</string>
+    <!-- Events & Player VS -->
+    <string name="event_reward_label">Nagroda: </string>
+    <string name="battle_vs">VS</string>
+    <string name="battle_hp_format">%1$d/100 HP</string>
+
+    <!-- Predefined Challenges & Fallbacks -->
+    <string name="challenge_template_steps_title">Królowie Kroków</string>
+    <string name="challenge_template_steps_desc">Kto zrobi więcej kroków w 3 dni?</string>
+    <string name="challenge_template_water_title">Wodny Pojedynek</string>
+    <string name="challenge_template_water_desc">Pij minimum 2L wody przez 5 dni.</string>
+    <string name="challenge_template_sugar_title">Cukrowy Odwyk</string>
+    <string name="challenge_template_sugar_desc">Zero słodyczy przez cały tydzień!</string>
+    <string name="challenge_template_early_title">Ranny Ptaszek</string>
+    <string name="challenge_template_early_desc">Wstawanie przed 7:00 przez 3 dni.</string>
+    <string name="unknown_user">Nieznany</string>
+
 </resources>
