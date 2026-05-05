@@ -36,6 +36,12 @@ class SettingsViewModel(
         initialValue = "Polski"
     )
 
+    val battleNotificationsState = repository.battleNotificationsFlow.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = true
+    )
+
     fun updateTheme(newTheme: String) {
         viewModelScope.launch { repository.saveTheme(newTheme) }
     }
@@ -60,6 +66,20 @@ class SettingsViewModel(
                     .collection("users")
                     .document(uid)
                     .update("language", langCode)
+            }
+        }
+    }
+
+    fun updateBattleNotifications(isEnabled: Boolean) {
+        viewModelScope.launch {
+            repository.saveBattleNotifications(isEnabled)
+
+            val uid = FirebaseAuth.getInstance().currentUser?.uid
+            if (uid != null) {
+                FirebaseFirestore.getInstance()
+                    .collection("users")
+                    .document(uid)
+                    .update("battleNotifications", isEnabled)
             }
         }
     }

@@ -57,8 +57,9 @@ fun SettingsScreen(
 ) {
 
     val currentTheme by viewModel.themeState.collectAsState()
-    val currentAccentColor by viewModel.accentColorState.collectAsState()
+    val currentAccent by viewModel.accentColorState.collectAsState()
     val currentLanguage by viewModel.languageState.collectAsState()
+    val battleNotificationsEnabled by viewModel.battleNotificationsState.collectAsState()
 
     var showDeleteDialog by remember { mutableStateOf(false) }
     var isDeleting by remember { mutableStateOf(false) }
@@ -84,7 +85,7 @@ fun SettingsScreen(
 
         SectionHeader(text = stringResource(R.string.settings_section_accent))
         AccentColorSelector(
-            selectedColorName = currentAccentColor,
+            selectedColorName = currentAccent,
             onColorSelected = { viewModel.updateAccentColor(it) }
         )
         Spacer(modifier = Modifier.height(24.dp))
@@ -114,8 +115,8 @@ fun SettingsScreen(
                 title = stringResource(R.string.settings_battle_notifications),
                 icon = Icons.Rounded.FlashOn,
                 baseColor = Coral,
-                isChecked = true,
-                onCheckedChange = { /* TODO */ }
+                isChecked = battleNotificationsEnabled,
+                onCheckedChange = { viewModel.updateBattleNotifications(it) }
             )
             HorizontalDivider(color = MaterialTheme.colorScheme.background, thickness = 2.dp)
             SettingsRowSwitch(
