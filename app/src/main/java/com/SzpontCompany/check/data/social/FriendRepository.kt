@@ -165,7 +165,7 @@ class FriendRepository(
 
                 firestore.runBatch { batch ->
                     val requestRef = firestore.collection("friend_requests").document(requestId)
-                    batch.delete(requestRef)
+                    batch.update(requestRef, "status", "ACCEPTED")
 
                     val myFriendRef = firestore.collection("users").document(myId).collection("friends").document(senderId)
                     batch.set(myFriendRef, hisData)

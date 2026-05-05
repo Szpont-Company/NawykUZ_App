@@ -9,6 +9,7 @@ import com.SzpontCompany.check.ui.theme.Mint
 import com.SzpontCompany.check.ui.theme.getColorName
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
+import com.SzpontCompany.check.notifications.NotificationScheduler
 
 @Composable
 fun AddHabitHost(
@@ -131,7 +132,19 @@ fun AddHabitHost(
                             difficulty = finalDifficulty
                         )
 
-                        viewModel.saveHabit(habit = newHabit) {
+                        viewModel.saveHabit(habit = newHabit) { newId ->
+                            if (finalDailyReminder) {
+                                val parts = finalReminderTime.split(":")
+                                val h = parts.getOrNull(0)?.toIntOrNull() ?: 8
+                                val m = parts.getOrNull(1)?.toIntOrNull() ?: 0
+                                NotificationScheduler(context).scheduleHabitReminder(newId, finalHabitName, finalHabitIcon, h, m, false)
+                            }
+                            if (finalEveningReminder) {
+                                val parts = finalEveningTime.split(":")
+                                val h = parts.getOrNull(0)?.toIntOrNull() ?: 20
+                                val m = parts.getOrNull(1)?.toIntOrNull() ?: 0
+                                NotificationScheduler(context).scheduleHabitReminder(newId, finalHabitName, finalHabitIcon, h, m, true)
+                            }
                             currentStep = 5
                         }
                     }

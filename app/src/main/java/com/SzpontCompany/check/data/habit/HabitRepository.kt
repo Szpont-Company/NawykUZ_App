@@ -13,12 +13,13 @@ class HabitRepository {
     private val firestore = FirebaseFirestore.getInstance()
     private val functions = FirebaseConfig.functions
 
-    suspend fun addHabit(habit: Habit) {
+    suspend fun addHabit(habit: Habit): String {
         val uid = auth.currentUser?.uid ?: throw Exception("Brak zalogowanego użytkownika")
         val docRef = firestore.collection("users").document(uid).collection("habits").document()
         val habitWithId = habit.copy(id = docRef.id)
 
         docRef.set(habitWithId).await()
+        return docRef.id
     }
 
     fun getUserHabits(): Flow<List<Habit>> = callbackFlow {
