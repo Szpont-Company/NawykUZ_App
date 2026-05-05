@@ -1,5 +1,6 @@
 package com.SzpontCompany.check
 
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
@@ -265,6 +266,12 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+    }
+
 }
 
 @Composable
@@ -279,6 +286,30 @@ fun RootNavigationGraph(onLogout: () -> Unit) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
+    val context = LocalContext.current
+    val activity = context as? android.app.Activity
+
+    LaunchedEffect(activity?.intent) {
+        val intent = activity?.intent
+        val type = intent?.extras?.getString("type")
+        val entityId = intent?.extras?.getString("entityId")
+
+        if (type != null) {
+            when (type) {
+                "BATTLE_RESULT" -> {
+                    entityId?.let { navController.navigate("battle_detail/$it") }
+                }
+                "BATTLE_INVITE", "FRIEND_REQUEST" -> {
+                    currentTab = BottomTab.COMMUNITY
+                }
+                "MESSAGE" -> {
+                    currentTab = BottomTab.COMMUNITY
+                }
+            }
+            intent?.removeExtra("type")
+            intent?.removeExtra("entityId")
+        }
+    }
 
     Scaffold(
         bottomBar = {
