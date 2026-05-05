@@ -27,7 +27,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringResource
 import com.SzpontCompany.check.ui.theme.getColorByName
+import com.SzpontCompany.check.R
 
 @Composable
 fun BattleCard(
@@ -70,15 +72,18 @@ fun BattleCard(
             onDismissRequest = { showResultDialog = false },
             title = {
                 Text(
-                    text = if (isWinner) "🎉 ZWYCIĘSTWO!" else "💀 PORAŻKA",
+                    text = if (isWinner) stringResource(R.string.battle_victory_title) else stringResource(R.string.battle_defeat_title),
                     fontWeight = FontWeight.Bold,
                     color = if (isWinner) Color(0xFFD8912A) else Color(0xFFE24B4A)
                 )
             },
             text = {
                 Text(
-                    text = if (isWinner) "Rozgromiłeś przeciwnika o imieniu $opponentName! Twoja nagroda to $rewardAmount 🪙 monet."
-                    else "Tym razem to $opponentName okazał się silniejszy. Twój zakład przepada, spróbuj odegrać się w kolejnej bitwie!"
+                    text = if (isWinner) {
+                        stringResource(R.string.battle_victory_message, opponentName, rewardAmount)
+                    } else {
+                        stringResource(R.string.battle_defeat_message, opponentName)
+                    }
                 )
             },
             confirmButton = {
@@ -89,7 +94,10 @@ fun BattleCard(
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = if (isWinner) Color(0xFFD8912A) else MaterialTheme.colorScheme.primary)
                 ) {
-                    Text(if (isWinner) "Odbierz Nagrodę" else "Zrozumiałem", color = Color.White)
+                    Text(
+                        text = if (isWinner) stringResource(R.string.battle_claim_reward) else stringResource(R.string.battle_understood),
+                        color = Color.White
+                    )
                 }
             }
         )
@@ -137,9 +145,9 @@ fun BattleCard(
                 ) {
                     Text(
                         text = when(battle.status) {
-                            "ACTIVE" -> "Aktywna"
-                            "SURRENDERED" -> "Poddana"
-                            else -> "Ukończona"
+                            "ACTIVE" -> stringResource(R.string.battle_status_active)
+                            "SURRENDERED" -> stringResource(R.string.battle_status_surrendered)
+                            else -> stringResource(R.string.battle_status_completed)
                         },
                         color = when(battle.status) {
                             "ACTIVE" -> MaterialTheme.colorScheme.primary
@@ -152,7 +160,11 @@ fun BattleCard(
                     )
                 }
                 Spacer(Modifier.width(6.dp))
-                Text("${daysLeft} dni", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
+                Text(
+                    text = stringResource(R.string.battle_days_left, daysLeft),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = 12.sp
+                )
             }
 
             Spacer(Modifier.height(12.dp))
@@ -179,7 +191,7 @@ fun BattleCard(
                 Text("🪙", fontSize = 14.sp)
                 Spacer(Modifier.width(4.dp))
                 Text(
-                    "${battle.betAmount} monet · zakład",
+                    text = stringResource(R.string.battle_bet_amount, battle.betAmount),
                     color = Color(0xFFBA7517),
                     style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
                 )
@@ -206,13 +218,17 @@ fun BattleCard(
                     )
 
                     Text(
-                        "Przegrywasz!",
+                        text = stringResource(R.string.battle_losing_warning),
                         color = pulseColor,
                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                         modifier = Modifier.scale(pulseScale)
                     )
                 } else if (battle.endDate != null) {
-                    Text("kończy się ${battle.endDate}", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
+                    Text(
+                        text = stringResource(R.string.battle_ends_on, battle.endDate),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 12.sp
+                    )
                 }
             }
 
@@ -229,7 +245,11 @@ fun BattleCard(
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Text(
-                        if (isWinner) "🏆 Odbierz nagrodę (${battle.betAmount * 2} monet)!" else "💀 Zobacz podsumowanie",
+                        text = if (isWinner) {
+                            stringResource(R.string.battle_claim_reward_with_amount, battle.betAmount * 2)
+                        } else {
+                            stringResource(R.string.battle_see_summary)
+                        },
                         color = Color.White,
                         fontWeight = FontWeight.Bold,
                         fontSize = 14.sp
@@ -249,7 +269,7 @@ fun BattleCard(
                         shape = RoundedCornerShape(8.dp)
                     ) {
                         Text(
-                            if (isDoneToday) "✓ Zrobione dziś" else "✓ Zrobione!",
+                            text = if (isDoneToday) stringResource(R.string.battle_done_today) else stringResource(R.string.battle_done),
                             color = if (isDoneToday) MaterialTheme.colorScheme.onSurfaceVariant else Color.White,
                             fontWeight = FontWeight.Bold,
                             fontSize = 13.sp
@@ -264,7 +284,7 @@ fun BattleCard(
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
                         shape = RoundedCornerShape(8.dp)
                     ) {
-                        val labelText = if (isLosingWarning) "Poddaj się" else "Szczegóły"
+                        val labelText = if (isLosingWarning) stringResource(R.string.battle_give_up) else stringResource(R.string.details)
                         Text(
                             labelText,
                             color = if (isLosingWarning) Color(0xFFE24B4A) else MaterialTheme.colorScheme.onSurfaceVariant,

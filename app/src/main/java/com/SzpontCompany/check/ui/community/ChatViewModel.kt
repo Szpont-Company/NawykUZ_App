@@ -52,7 +52,7 @@ class ChatViewModel(
             if (dateString != lastDateString) {
                 result.add(UiChatMessage(
                     id = "date_$dateString",
-                    text = if (isToday(msg.timestamp)) "Dzisiaj" else if (isYesterday(msg.timestamp)) "Wczoraj" else dateString,
+                    text = if (isToday(msg.timestamp)) "TODAY" else if (isYesterday(msg.timestamp)) "YESTERDAY" else dateString,
                     timestamp = msg.timestamp,
                     type = MessageType.DATE_SEPARATOR
                 ))

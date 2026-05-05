@@ -217,7 +217,7 @@
     <string name="tab_friends">Friends</string>
     <string name="tab_ranking">Ranking</string>
     <string name="tab_events">Events</string>
-    <string name="tab_challenges">Challenges</string>
+    <string name="tab_challenges">Battle</string>
 
     <!-- FriendsCard -->
     <string name="search_in_list">Search in list...</string>
@@ -360,4 +360,44 @@
     <string name="shop_hero">Go ahead, splurge a little!</string>
     <string name="shop_hero_desc">Turn your coins into your dream reward.</string>
     <string name="login_unverified">Verify email before signing in.</string>
+
+    <string name="battle_victory_title">🏆 VICTORY!</string>
+    <string name="battle_defeat_title">💀 DEFEAT</string>
+    <string name="battle_victory_message">You crushed %1$s! Your reward is %2$d coins.</string>
+    <string name="battle_defeat_message">This time %1$s was stronger. Your bet is lost, try to win it back in the next battle!</string>
+    <string name="battle_claim_reward">Claim Reward</string>
+    <string name="battle_understood">Understood</string>
+    <string name="battle_status_active">Active</string>
+    <string name="battle_status_surrendered">Surrendered</string>
+    <string name="battle_status_completed">Completed</string>
+    <string name="battle_days_left">%1$d days</string>
+    <string name="battle_bet_amount">%1$d coins bet</string>
+    <string name="battle_losing_warning">You are losing!</string>
+    <string name="battle_ends_on">ends on %1$s</string>
+    <string name="battle_claim_reward_with_amount">🏆 Claim reward (%1$d coins)!</string>
+    <string name="battle_see_summary">📜 See summary</string>
+    <string name="battle_done_today">✅ Done today</string>
+    <string name="battle_done">🔥 Done!</string>
+    <string name="battle_give_up">Surrender</string>
+
+    <string name="battle_check_coins">%1$d Check Coins</string>
+    <string name="battle_remaining_label">Remaining</string>
+    <string name="battle_end_label">Ends</string>
+    <string name="battle_soon">Soon</string>
+    <string name="battle_surrender_give_coins">Surrender (Give up coins)</string>
+    <string name="days_label">Days</string>
+    <string name="battle_details_title">Battle Details</string>
+    <string name="battle_mark_done">Mark as done</string>
+    <string name="battle_done_for_today">Done for today!”</string>
+
+    <!-- Chat & Community -->
+    <string name="chat_type_message">Type a message...</string>
+    <string name="chat_quick_reactions">Quick reactions</string>
+    <string name="chat_send">Send</string>
+    <string name="chat_today">Today</string>
+    <string name="chat_yesterday">Yesterday</string>
+
+    <!-- Statusy aktywności -->
+    <string name="chat_active_now">Active now</string>
+    <string name="chat_active_ago">Active %1$s ago</string> <!-- Np. Active 5 mins ago -->
 </resources>

@@ -44,9 +44,12 @@ import android.widget.Toast
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import com.SzpontCompany.check.data.social.Battle
 import com.SzpontCompany.check.ui.ads.NativeAdCard
 import com.SzpontCompany.check.ui.community.components.NotificationsViewModel
+import com.SzpontCompany.check.R
+
 
 @Composable
 fun CommunityScreen(
@@ -70,7 +73,12 @@ fun CommunityScreen(
     val events by communityViewModel.events.collectAsState()
     val rankingEntries by communityViewModel.rankingEntries.collectAsState()
 
-    val tabs = listOf("Battle", "Eventy", "Ranking", "Znajomi")
+    val tabs = listOf(
+        stringResource(R.string.tab_challenges),
+        stringResource(R.string.tab_events),
+        stringResource(R.string.tab_ranking),
+        stringResource(R.string.tab_friends)
+    )
     var selectedTab by rememberSaveable { mutableIntStateOf(0) }
     var selectedSubTab by remember { mutableStateOf(0) }
     var friendsSubTab by remember { mutableStateOf(0) }
