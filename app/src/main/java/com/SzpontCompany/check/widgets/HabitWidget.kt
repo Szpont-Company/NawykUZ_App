@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.datastore.preferences.core.intPreferencesKey
@@ -38,7 +37,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import androidx.glance.action.clickable
-import androidx.glance.appwidget.action.actionStartActivity
 import com.SzpontCompany.check.MainActivity
 import com.SzpontCompany.check.R
 
@@ -67,7 +65,7 @@ class HabitWidget : GlanceAppWidget() {
 
     @Composable
     private fun MyContent(streak: Int, record: Int, accentColor: Color) {
-        val context = LocalContext.current;
+        val context = LocalContext.current
 
         val cardBackgroundColor = ColorProvider(day = accentColor, night = accentColor)
         val primaryTextColor = ColorProvider(day = Color.White, night = Color.White)
