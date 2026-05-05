@@ -400,4 +400,57 @@
     <!-- Statusy aktywności -->
     <string name="chat_active_now">Active now</string>
     <string name="chat_active_ago">Active %1$s ago</string> <!-- Np. Active 5 mins ago -->
+
+    <!-- Community Screen Tabs & Headers -->
+    <string name="community_title">Community</string>
+    <string name="community_notifications_desc">Notifications</string>
+
+    <string name="community_tab_battle">Battle</string>
+    <string name="community_tab_events">Events</string>
+    <string name="community_tab_ranking">Ranking</string>
+    <string name="community_tab_friends">Friends</string>
+
+    <string name="community_subtab_global">Global</string>
+    <string name="community_subtab_friends">Friends</string>
+    <string name="community_subtab_weekly">Weekly</string>
+
+    <string name="community_create_challenge">+ Challenge</string>
+    <string name="community_find_players">Find players</string>
+
+    <string name="community_pending_invites">PENDING INVITES (%1$d)</string>
+    <string name="community_active_battles">ACTIVE BATTLES (%1$d)</string>
+    <string name="community_active_events">ACTIVE EVENTS</string>
+
+    <string name="community_toast_battle_started">Battle started! Check the Today screen.</string>
+    <string name="community_toast_challenge_sent">Challenge sent to: %1$s!</string>
+    <string name="community_trend_up">+%1$d since last week</string>
+
+
+    <!-- Friends -->
+    <string name="friends_tab_friends_count">Friends (%1$d)</string>
+    <string name="friends_tab_invites_count">Invites (%1$d)</string>
+    <string name="friends_tab_search">Search</string>
+    <string name="friends_loading">Loading friends...</string>
+    <string name="friends_pending_invites_header">PENDING INVITES</string>
+    <string name="friends_search_results_header">SEARCH RESULTS</string>
+    <string name="friends_clear_search">Clear</string>
+    <string name="friends_status_waiting">Waiting for response</string>
+    <string name="friends_invite_link_mock">check.app/invite/markk</string>
+    <string name="friend_remove_title">Remove Friend</string>
+    <string name="friend_remove_message">Are you sure you want to remove %1$s from your friends? This action cannot be undone.</string>
+    <string name="friend_remove_confirm">Remove</string>
+    <string name="friend_wants_to_add">Wants to be your friend</string>
+
+    <!-- Friend List Item -->
+    <string name="friend_online_xp">Online • %1$s XP</string>
+    <string name="friend_mutuals_count">%1$d mutual friends</string>
+    <string name="friend_from_contacts">From your contacts</string>
+    <string name="friend_options_desc">Options</string>
+    <string name="friend_show_profile">Show profile</string>
+    <string name="friend_send_message">Send message</string>
+    <string name="friend_remove">Remove friend</string>
+    <string name="friend_invite_btn">Invite</string>
+    <string name="friend_status_friend">Friend</string>
+    <string name="friend_status_sent">Sent ✔️</string>
+    <string name="friend_status_waiting">Waiting for response</string>
 </resources>

@@ -403,4 +403,59 @@
     <!-- Statusy aktywności -->
     <string name="chat_active_now">Aktywny(a) teraz</string>
     <string name="chat_active_ago">Aktywny(a) %1$s</string> <!-- Np. Aktywny(a) 5 minut temu -->
+
+
+    <!-- Community Screen Tabs & Headers -->
+    <string name="community_title">Społeczność</string>
+    <string name="community_notifications_desc">Powiadomienia</string>
+
+    <string name="community_tab_battle">Battle</string>
+    <string name="community_tab_events">Eventy</string>
+    <string name="community_tab_ranking">Ranking</string>
+    <string name="community_tab_friends">Znajomi</string>
+
+    <string name="community_subtab_global">Globalny</string>
+    <string name="community_subtab_friends">Znajomi</string>
+    <string name="community_subtab_weekly">Tygodniowy</string>
+
+    <string name="community_create_challenge">+ Wyzwanie</string>
+    <string name="community_find_players">Znajdź graczy</string>
+
+    <string name="community_pending_invites">OCZEKUJĄCE ZAPROSZENIA (%1$d)</string>
+    <string name="community_active_battles">AKTYWNE BITWY (%1$d)</string>
+    <string name="community_active_events">AKTYWNE EVENTY</string>
+
+    <string name="community_toast_battle_started">Bitwa rozpoczęta! Sprawdź ekran Dzisiaj.</string>
+    <string name="community_toast_challenge_sent">Wyzwanie rzucone: %1$s!</string>
+    <string name="community_trend_up">+%1$d od zeszłego tyg.</string>
+
+
+    <!-- Friends -->
+    <string name="friends_tab_friends_count">Znajomi (%1$d)</string>
+    <string name="friends_tab_invites_count">Zaproszenia (%1$d)</string>
+    <string name="friends_tab_search">Szukaj</string>
+    <string name="friends_loading">Ładowanie znajomych...</string>
+    <string name="friends_pending_invites_header">OCZEKUJĄCE ZAPROSZENIA</string>
+    <string name="friends_search_results_header">WYNIKI WYSZUKIWANIA</string>
+    <string name="friends_clear_search">Wyczyść</string>
+    <string name="friends_status_waiting">Czeka na odpowiedź</string>
+    <string name="friends_invite_link_mock">check.app/invite/marekk</string>
+    <string name="friend_remove_title">Usuwanie znajomego</string>
+    <string name="friend_remove_message">Czy na pewno chcesz usunąć użytkownika %1$s ze znajomych? Tej operacji nie można cofnąć.</string>
+    <string name="friend_remove_confirm">Usuń</string>
+    <string name="friend_wants_to_add">Chce zostać Twoim znajomym</string>
+
+    <!-- Friend List Item -->
+    <string name="friend_online_xp">Online • %1$s XP</string>
+    <string name="friend_mutuals_count">%1$d wspólnych znajomych</string>
+    <string name="friend_from_contacts">Z Twoich kontaktów</string>
+    <string name="friend_options_desc">Opcje</string>
+    <string name="friend_show_profile">Pokaż profil</string>
+    <string name="friend_send_message">Wyślij wiadomość</string>
+    <string name="friend_remove">Usuń ze znajomych</string>
+    <string name="friend_invite_btn">Zaproś</string>
+    <string name="friend_status_friend">Znajomy</string>
+    <string name="friend_status_sent">Wysłano ✔️</string>
+    <string name="friend_status_waiting">Czeka na odpowiedź</string>
+
 </resources>
