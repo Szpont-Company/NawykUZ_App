@@ -49,6 +49,7 @@ import com.SzpontCompany.check.data.social.Battle
 import com.SzpontCompany.check.ui.ads.NativeAdCard
 import com.SzpontCompany.check.ui.community.components.NotificationsViewModel
 import com.SzpontCompany.check.R
+import com.SzpontCompany.check.ui.components.UserAvatar
 
 
 @Composable
@@ -150,15 +151,17 @@ fun CommunityScreen(
                 }
 
                 Box(
-                    modifier = Modifier
-                        .size(44.dp)
-                        .clip(CircleShape)
-                        .background(getColorByName(user?.bgColor ?: "Mint"))
-                        .clickable { onProfileClick() },
+                    modifier = Modifier.clickable { onProfileClick() },
                     contentAlignment = Alignment.Center
                 ) {
-                    val displayAvatar = if (user?.avatarEmoji.isNullOrEmpty()) user?.initials ?: "MK" else user?.avatarEmoji ?: ""
-                    Text(displayAvatar, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                    UserAvatar(
+                        avatarEmoji = user?.avatarEmoji ?: "",
+                        initials = user?.initials ?: "MK",
+                        bgColor = user?.bgColor ?: "Mint",
+                        size = 44.dp,
+                        emojiSize = 24f,
+                        initialsSize = 14f
+                    )
                 }
             }
         }

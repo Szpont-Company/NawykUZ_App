@@ -42,6 +42,7 @@ import com.SzpontCompany.check.R
 import com.SzpontCompany.check.data.habit.Habit
 import com.SzpontCompany.check.ui.community.components.NotificationsViewModel
 import com.SzpontCompany.check.ui.components.EmojiExplosionEffect
+import com.SzpontCompany.check.ui.components.UserAvatar
 import com.SzpontCompany.check.ui.theme.getColorByName
 import com.google.android.gms.ads.AdLoader
 import com.google.android.gms.ads.AdRequest
@@ -193,13 +194,19 @@ fun TopSection(
                 .clip(CircleShape)
                 .then(
                     if (state.isLoading) Modifier.shimmerEffect()
-                    else Modifier.background(getColorByName(state.user?.bgColor ?: "Mint"))
+                    else Modifier
                 )
                 .clickable(enabled = !state.isLoading) { onProfileClick() },
             contentAlignment = Alignment.Center
         ) {
-            val displayAvatar = if (state.user?.avatarEmoji.isNullOrEmpty()) state.user?.initials ?: "MK" else state.user?.avatarEmoji ?: ""
-            Text(displayAvatar, color = Color.White, fontWeight = FontWeight.Bold)
+            UserAvatar(
+                avatarEmoji = state.user?.avatarEmoji ?: "",
+                initials = state.user?.initials ?: "MK",
+                bgColor = state.user?.bgColor ?: "Mint",
+                size = 48.dp,
+                emojiSize = 24f,
+                initialsSize = 15f
+            )
         }
         Spacer(modifier = Modifier.width(16.dp))
         Column(modifier = Modifier.weight(1f)) {
