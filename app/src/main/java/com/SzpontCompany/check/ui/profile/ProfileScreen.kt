@@ -55,6 +55,16 @@ import androidx.lifecycle.Lifecycle
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import com.SzpontCompany.check.data.badges.Badge
 import com.SzpontCompany.check.ui.components.UserAvatar
+import android.graphics.Bitmap
+import android.graphics.Picture
+import android.net.Uri
+import androidx.core.content.FileProvider
+import androidx.compose.ui.graphics.drawscope.draw
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.draw.drawWithCache
+import java.io.File
+import java.io.FileOutputStream
 
 @Composable
 fun ProfileScreen(
@@ -94,10 +104,10 @@ fun ProfileScreen(
         LevelAndXpBar()
         Spacer(modifier = Modifier.height(24.dp))
 
-        StatsGridSection()
+        StatsGridSection(uiState = uiState)
         Spacer(modifier = Modifier.height(24.dp))
 
-        BadgesSection()
+        BadgesSection(uiState = uiState)
         Spacer(modifier = Modifier.height(24.dp))
 
         Text(
@@ -130,23 +140,30 @@ fun ProfileScreen(
 
         if (showShareDialog) {
             ShareProfileDialog(
-                user = user,
+                uiState = uiState,
                 onDismiss = { showShareDialog = false },
-                onShareConfirm = {
+                onShareConfirm = { imageUri ->
                     showShareDialog = false
 
+                    val streak = uiState.user?.currentStreak ?: 0
+                    val battles = uiState.battlesWon
+                    val shareText =
+                        "Hej! Mój streak to $streak dni, a na koncie mam $battles wygranych pojedynków. 🔥 Dołącz do mnie w Check. !"
 
                     val sendIntent = Intent(Intent.ACTION_SEND).apply {
-                        type = "text/plain"
-                        putExtra(Intent.EXTRA_TEXT, "Hej! Mam 8 poziom i 21-dniowy streak w Check. 🔥 Dołącz do mnie!")
+                        type = "image/png"
+                        putExtra(Intent.EXTRA_STREAM, imageUri)
+                        putExtra(Intent.EXTRA_TEXT, shareText)
+                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                     }
-                    context.startActivity(Intent.createChooser(sendIntent, "Udostępnij przez"))
+                    context.startActivity(Intent.createChooser(sendIntent, "Udostępnij profil"))
                 }
             )
         }
-
     }
+
 }
+
 
 @Composable
 fun ProfileTopBar(onBackClick: () -> Unit, onShareClick: () -> Unit) {
@@ -238,7 +255,12 @@ fun UserHeaderSection(user: com.SzpontCompany.check.data.user.User?) {
                     .border(2.dp, MaterialTheme.colorScheme.background, RoundedCornerShape(12.dp))
                     .padding(horizontal = 8.dp, vertical = 2.dp)
             ) {
-                Text("Lvl 8", color = MaterialTheme.colorScheme.background, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                Text(
+                    "Lvl 8",
+                    color = MaterialTheme.colorScheme.background,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold
+                )
             }
         }
         Spacer(modifier = Modifier.width(24.dp))
@@ -257,19 +279,38 @@ fun UserHeaderSection(user: com.SzpontCompany.check.data.user.User?) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Box(
                     modifier = Modifier
-                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f), RoundedCornerShape(12.dp))
+                        .background(
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                            RoundedCornerShape(12.dp)
+                        )
                         .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(12.dp))
                         .padding(horizontal = 10.dp, vertical = 4.dp)
                 ) {
-                    Text(text = stringResource(R.string.profile_streak_format, 21), color = MaterialTheme.colorScheme.primary, fontSize = 11.sp, fontWeight = FontWeight.Medium)
+                    Text(
+                        text = stringResource(
+                            R.string.profile_streak_format,
+                            user?.currentStreak ?: 0
+                        ),
+                        color = MaterialTheme.colorScheme.primary,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Medium
+                    )
                 }
                 Box(
                     modifier = Modifier
-                        .background(Color(0xFFBA7517).copy(alpha = 0.15f), RoundedCornerShape(12.dp))
+                        .background(
+                            Color(0xFFBA7517).copy(alpha = 0.15f),
+                            RoundedCornerShape(12.dp)
+                        )
                         .border(1.dp, Color(0xFFBA7517), RoundedCornerShape(12.dp))
                         .padding(horizontal = 10.dp, vertical = 4.dp)
                 ) {
-                    Text("Top 14", color = Color(0xFFBA7517), fontSize = 11.sp, fontWeight = FontWeight.Medium)
+                    Text(
+                        "Top 14",
+                        color = Color(0xFFBA7517),
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Medium
+                    )
                 }
             }
         }
@@ -359,23 +400,23 @@ fun LevelAndXpBar() {
 }
 
 @Composable
-fun StatsGridSection() {
+fun StatsGridSection(uiState: ProfileUiState) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             StatCard(
                 modifier = Modifier.weight(1f),
-                targetValue = 34,
+                targetValue = uiState.habitsCount,
                 label = stringResource(R.string.profile_habits)
             )
             StatCard(
                 modifier = Modifier.weight(1f),
-                targetValue = 21,
+                targetValue = uiState.user?.currentStreak ?: 0,
                 label = stringResource(R.string.profile_streak_days),
                 valueColor = MaterialTheme.colorScheme.primary
             )
             StatCard(
                 modifier = Modifier.weight(1f),
-                targetValue = 850,
+                targetValue = uiState.coins,
                 label = stringResource(R.string.profile_coins),
                 valueColor = Color(0xFFBA7517)
             )
@@ -383,18 +424,18 @@ fun StatsGridSection() {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             StatCard(
                 modifier = Modifier.weight(1f),
-                targetValue = 7,
+                targetValue = uiState.battlesWon,
                 label = stringResource(R.string.profile_battles_won)
             )
             StatCard(
                 modifier = Modifier.weight(1f),
-                targetValue = 78,
+                targetValue = uiState.effectiveness,
                 suffix = "%",
                 label = stringResource(R.string.profile_effectiveness)
             )
             StatCard(
                 modifier = Modifier.weight(1f),
-                targetValue = 12,
+                targetValue = uiState.friendsCount,
                 label = stringResource(R.string.profile_friends)
             )
         }
@@ -429,9 +470,19 @@ fun StatCard(
             .padding(vertical = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = "$animatedValue$suffix", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = valueColor)
+        Text(
+            text = "$animatedValue$suffix",
+            fontSize = 22.sp,
+            fontWeight = FontWeight.Bold,
+            color = valueColor
+        )
         Spacer(modifier = Modifier.height(4.dp))
-        Text(text = label, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Medium)
+        Text(
+            text = label,
+            fontSize = 11.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            fontWeight = FontWeight.Medium
+        )
     }
 }
 
@@ -506,7 +557,12 @@ fun SettingsItem(icon: ImageVector, iconTint: Color, title: String, onClick: () 
                 .background(MaterialTheme.colorScheme.background, RoundedCornerShape(8.dp)),
             contentAlignment = Alignment.Center
         ) {
-            Icon(imageVector = icon, contentDescription = title, tint = iconTint, modifier = Modifier.size(20.dp))
+            Icon(
+                imageVector = icon,
+                contentDescription = title,
+                tint = iconTint,
+                modifier = Modifier.size(20.dp)
+            )
         }
         Spacer(modifier = Modifier.width(16.dp))
         Text(
@@ -525,9 +581,17 @@ fun SettingsItem(icon: ImageVector, iconTint: Color, title: String, onClick: () 
 
 
 @Composable
-fun BadgesSection() {
+fun BadgesSection(uiState: ProfileUiState) {
 
     var selectedBadge by remember { mutableStateOf<Badge?>(null) }
+
+
+    val sortedBadges = remember(uiState) {
+        BadgeProvider.evaluateBadges(
+            bestStreak = uiState.user?.bestStreak ?: 0,
+            battlesWon = uiState.battlesWon
+        )
+    }
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
@@ -536,8 +600,6 @@ fun BadgesSection() {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(bottom = 12.dp)
         )
-
-        val sortedBadges = BadgeProvider.allBadges.sortedByDescending { it.isUnlocked }
 
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -675,10 +737,14 @@ fun LogoutConfirmationDialog(
 
 @Composable
 fun ShareProfileDialog(
-    user: com.SzpontCompany.check.data.user.User?,
+    uiState: ProfileUiState,
     onDismiss: () -> Unit,
-    onShareConfirm: () -> Unit
+    onShareConfirm: (Uri) -> Unit
 ) {
+    val user = uiState.user
+    val context = LocalContext.current
+    val picture = remember { Picture() }
+
     AlertDialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false),
@@ -696,7 +762,33 @@ fun ShareProfileDialog(
         },
         text = {
             Column(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .drawWithCache {
+                        val width = size.width.toInt()
+                        val height = size.height.toInt()
+
+                        onDrawWithContent {
+                            val pictureCanvas = androidx.compose.ui.graphics.Canvas(
+                                picture.beginRecording(width, height)
+                            )
+
+                            draw(
+                                this,
+                                layoutDirection,
+                                pictureCanvas,
+                                size
+                            ) {
+                                this@onDrawWithContent.drawContent()
+                            }
+
+                            picture.endRecording()
+
+                            drawIntoCanvas { canvas ->
+                                canvas.nativeCanvas.drawPicture(picture)
+                            }
+                        }
+                    },
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Box(
@@ -711,11 +803,16 @@ fun ShareProfileDialog(
                             ),
                             shape = RoundedCornerShape(20.dp)
                         )
-                        .border(2.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f), RoundedCornerShape(20.dp))
+                        .border(
+                            2.dp,
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
+                            RoundedCornerShape(20.dp)
+                        )
                         .padding(24.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
+
                         Box(
                             modifier = Modifier
                                 .size(80.dp)
@@ -724,7 +821,7 @@ fun ShareProfileDialog(
                         ) {
                             UserAvatar(
                                 avatarEmoji = user?.avatarEmoji ?: "",
-                                initials = user?.initials ?: "MK",
+                                initials = user?.initials ?: "??",
                                 bgColor = user?.bgColor ?: "Mint",
                                 size = 80.dp,
                                 emojiSize = 32f,
@@ -735,12 +832,17 @@ fun ShareProfileDialog(
                         Spacer(modifier = Modifier.height(12.dp))
 
                         Text(
-                            text = user?.name ?: "Marek Kowalski",
+                            text = user?.name ?: "Nieznany",
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onBackground
                         )
-                        Text(text = if (user?.nickname.isNullOrBlank()) "@marekk" else "@${user?.nickname}", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp)
+
+                        Text(
+                            text = if (user?.nickname.isNullOrBlank()) "@nick" else "@${user?.nickname}",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontSize = 14.sp
+                        )
 
                         Spacer(modifier = Modifier.height(24.dp))
 
@@ -749,8 +851,18 @@ fun ShareProfileDialog(
                             horizontalArrangement = Arrangement.SpaceEvenly
                         ) {
                             ShareStatItem(value = "Lvl 8", label = "Poziom")
-                            ShareStatItem(value = "🔥 21", label = "Streak", valueColor = MaterialTheme.colorScheme.primary)
-                            ShareStatItem(value = "🏆 7", label = "Wygrane", valueColor = Color(0xFFBA7517))
+
+                            ShareStatItem(
+                                value = "🔥 ${user?.currentStreak ?: 0}",
+                                label = "Streak",
+                                valueColor = MaterialTheme.colorScheme.primary
+                            )
+
+                            ShareStatItem(
+                                value = "🏆 ${uiState.battlesWon}",
+                                label = "Wygrane",
+                                valueColor = Color(0xFFBA7517)
+                            )
                         }
 
                         Spacer(modifier = Modifier.height(24.dp))
@@ -767,15 +879,36 @@ fun ShareProfileDialog(
         },
         confirmButton = {
             Button(
-                onClick = onShareConfirm,
+                onClick = {
+                    if (picture.width > 0 && picture.height > 0) {
+                        val bitmap = Bitmap.createBitmap(
+                            picture.width,
+                            picture.height,
+                            Bitmap.Config.ARGB_8888
+                        )
+
+                        val canvas = android.graphics.Canvas(bitmap)
+                        canvas.drawColor(android.graphics.Color.WHITE)
+                        canvas.drawPicture(picture)
+
+                        val uri = saveBitmapAndGetUri(context, bitmap)
+                        uri?.let { onShareConfirm(it) }
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 8.dp, vertical = 4.dp)
                     .height(50.dp),
                 shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                )
             ) {
-                Icon(Icons.Outlined.Share, contentDescription = null, modifier = Modifier.size(20.dp))
+                Icon(
+                    Icons.Outlined.Share,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp)
+                )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Udostępnij", fontWeight = FontWeight.Bold, fontSize = 16.sp)
             }
@@ -785,7 +918,11 @@ fun ShareProfileDialog(
 }
 
 @Composable
-fun ShareStatItem(value: String, label: String, valueColor: Color = MaterialTheme.colorScheme.onBackground) {
+fun ShareStatItem(
+    value: String,
+    label: String,
+    valueColor: Color = MaterialTheme.colorScheme.onBackground
+) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(text = value, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = valueColor)
         Text(text = label, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -847,14 +984,14 @@ fun BadgeDetailsDialog(
             ) {
                 if (badge.isUnlocked) {
                     Text(
-                        text = "🏆 Odblokowana!",
+                        text = stringResource(R.string.rewards_unlocked),
                         color = Color(0xFFBA7517),
                         fontWeight = FontWeight.Bold,
                         fontSize = 14.sp
                     )
                 } else {
                     Text(
-                        text = "🔒 Jeszcze nieodblokowana",
+                        text = stringResource(R.string.rewards_locked),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontWeight = FontWeight.Bold,
                         fontSize = 14.sp
@@ -863,18 +1000,20 @@ fun BadgeDetailsDialog(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                 Text(
-                     text = stringResource(id = badge.requirementResId),
-                     style = MaterialTheme.typography.bodyMedium,
-                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                     textAlign = TextAlign.Center
-                 )
+                Text(
+                    text = stringResource(id = badge.requirementResId),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center
+                )
             }
         },
         confirmButton = {
             Button(
                 onClick = onDismiss,
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
                 shape = RoundedCornerShape(14.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
@@ -884,10 +1023,17 @@ fun BadgeDetailsDialog(
     )
 }
 
-@Preview(showBackground = true)
-@Composable
-fun ProfileScreenPreview() {
-    CheckTheme(darkTheme = true, accent = Mint) {
-        ProfileScreen()
+fun saveBitmapAndGetUri(context: android.content.Context, bitmap: Bitmap): Uri? {
+    return try {
+        val cachePath = File(context.cacheDir, "images")
+        cachePath.mkdirs()
+        val file = File(cachePath, "profile_share.png")
+        val stream = FileOutputStream(file)
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
+        stream.close()
+        FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
     }
 }

@@ -64,7 +64,8 @@ class UserRepository private constructor(
                         bgColor = snapshot.getString("bgColor") ?: "Mint",
                         currentStreak = snapshot.getLong("currentStreak")?.toInt() ?: 0,
                         bestStreak = snapshot.getLong("bestStreak")?.toInt() ?: 0,
-                        lastGlobalStreakDate = snapshot.getString("lastGlobalStreakDate") ?: "",
+                        lastGlobalStreakDate = snapshot.getString("lastGlobalStreakDate") ?: "",                    
+                        unlockedBadges = (snapshot.get("unlockedBadges") as? List<*>)?.mapNotNull { it as? String } ?: emptyList(),
                         coins = snapshot.getLong("coins")?.toInt() ?: 0,
                         xp = snapshot.getLong("xp")?.toInt() ?: 0,
                         level = snapshot.getLong("level")?.toInt() ?: 1,
@@ -128,6 +129,7 @@ class UserRepository private constructor(
             currentStreak = document.getLong("currentStreak")?.toInt() ?: 0,
             bestStreak = document.getLong("bestStreak")?.toInt() ?: 0,
             lastGlobalStreakDate = document.getString("lastGlobalStreakDate") ?: "",
+            unlockedBadges = (document.get("unlockedBadges") as? List<*>)?.mapNotNull { it as? String } ?: emptyList(),
             coins = document.getLong("coins")?.toInt() ?: 0,
             xp = document.getLong("xp")?.toInt() ?: 0,
             level = document.getLong("level")?.toInt() ?: 1,
@@ -300,6 +302,10 @@ class UserRepository private constructor(
         }
     }
 
+    suspend fun claimBadge(uid: String, badgeId: String) {
+        firestore.collection("users").document(uid)
+            .update("unlockedBadges", FieldValue.arrayUnion(badgeId))
+            .await()
     suspend fun addReward(uid: String, addedXp: Int, addedCoins: Int) {
         val userDoc = firestore.collection("users").document(uid)
 

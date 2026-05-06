@@ -373,8 +373,8 @@ fun RootNavigationGraph(onLogout: () -> Unit) {
                             launchSingleTop = true
                         }
                     },
-                    onFriendProfileClick = {
-                        navController.navigate("friend_profile") {
+                    onFriendProfileClick = { friendUid ->
+                        navController.navigate("friend_profile/$friendUid") {
                             launchSingleTop = true
                         }
                     },
@@ -449,11 +449,15 @@ fun RootNavigationGraph(onLogout: () -> Unit) {
                 )
             }
 
-            composable("friend_profile") {
+            composable(
+                route = "friend_profile/{friendUid}",
+                arguments = listOf(navArgument("friendUid") { defaultValue = "" })
+            ) { backStackEntry ->
+                val friendUid = backStackEntry.arguments?.getString("friendUid") ?: ""
+
                 FriendProfileScreen(
-                    onBackClick = { navController.popBackStack() },
-                    onMessageClick = { navController.navigate("chat_screen") },
-                    isInitiallyPrivate = false
+                    friendUid = friendUid,
+                    onBackClick = { navController.popBackStack() }
                 )
             }
 

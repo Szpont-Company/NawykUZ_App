@@ -42,7 +42,7 @@ fun MainScreen(
     onProfileClick: () -> Unit = {},
     onOptionsClick: () -> Unit = {},
     onNotificationsClick: () -> Unit = {},
-    onFriendProfileClick: () -> Unit = {},
+    onFriendProfileClick: (String) -> Unit = {},
     onMessageClick: (Friend) -> Unit = {},
     onBattleClick: (Battle) -> Unit = {},
     notificationsViewModel: NotificationsViewModel = viewModel(),

@@ -11,6 +11,8 @@ data class User(
     val currentStreak: Int = 0,
     val bestStreak: Int = 0,
     val lastGlobalStreakDate: String = "",
+  
+    val unlockedBadges: List<String> = emptyList(),
     val coins: Int = 0,
     val xp: Int = 0,
     val level: Int = 1,

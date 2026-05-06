@@ -182,7 +182,8 @@
     <string name="rewards_total_earned">Total earned</string>
     <string name="rewards_section_badges">BADGES</string>
     <string name="rewards_section_store">REWARD STORE</string>
-    <string name="rewards_unlocked">Unlocked!</string>
+    <string name="rewards_unlocked">🏆 Unlocked!</string>
+    <string name="rewards_locked">🔒 Not yet unlocked</string>
 
     <string name="store_item_accent_title">Accent color — Gold</string>
     <string name="store_item_accent_desc">Premium profile theme</string>
@@ -237,7 +238,6 @@
     <string name="notifications_title">Notifications</string>
     <string name="mark_as_read">Mark as read</string>
     <string name="no_notifications">No notifications</string>
-    <string name="no_new_notifications">You have no new notifications.</string>
 
     <!-- PlayerVsRow / RankingListCard / YourPositionCard -->
     <string name="you">You</string>
@@ -495,4 +495,11 @@
     <string name="map_friend_mins_ago">%1$d mins ago</string>
     <string name="map_friend_hours_ago">%1$d hours ago</string>
     <string name="map_friends_empty">None of your friends are sharing their location right now.</string>
+    <string name="no_new_notifications">No new notifications 😴</string>
+    <string name="player_profile">Player Profile</string>
+    <string name="unknown_player">Unknown Player</string>
+    <string name="public_habits_title">Public Habits</string>
+    <string name="no_habits_empty">This player has no habits yet.</string>
+    <string name="active_habit_subtitle">Active Habit</string>
+    <string name="error_occurred">An error occurred: %1$s</string>
 </resources>

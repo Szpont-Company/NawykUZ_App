@@ -55,7 +55,7 @@ import com.SzpontCompany.check.ui.components.UserAvatar
 @Composable
 fun CommunityScreen(
     onProfileClick: () -> Unit = {},
-    onFriendProfileClick: () -> Unit = {},
+    onFriendProfileClick: (String) -> Unit = {},
     onMessageClick: (Friend) -> Unit = {},
     onBattleClick: (Battle) -> Unit = {},
     viewModel: ProfileViewModel = viewModel(),
@@ -376,7 +376,7 @@ fun CommunityScreen(
                         selectedSubTab = friendsSubTab,
                         onSubTabSelected = { friendsSubTab = it },
                         modifier = Modifier.fillMaxSize(),
-                        onFriendProfileClick = { onFriendProfileClick() },
+                        onFriendProfileClick = { friend -> onFriendProfileClick(friend.uid) },
                         onMessageClick = { friend -> onMessageClick(friend) }
                     )
                 }
