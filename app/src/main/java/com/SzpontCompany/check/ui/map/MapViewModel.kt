@@ -143,43 +143,35 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
     private fun observeFriendsLocations() {
         val currentUserId = auth.currentUser?.uid ?: return
 
-        firestore.collection("users").document(currentUserId)
-            .addSnapshotListener { snapshot, error ->
-                if (error != null || snapshot == null || !snapshot.exists()) return@addSnapshotListener
-
-                val friendIds = snapshot.get("friends") as? List<String> ?: emptyList()
-
-                if (friendIds.isEmpty()) {
-                    _friendsLocations.value = emptyList()
+        firestore.collection("users")
+            .addSnapshotListener { usersSnapshot, usersError ->
+                if (usersError != null || usersSnapshot == null) {
                     return@addSnapshotListener
                 }
 
-                firestore.collection("users")
-                    .whereIn(FieldPath.documentId(), friendIds.take(10))
-                    .addSnapshotListener { usersSnapshot, usersError ->
-                        if (usersError != null || usersSnapshot == null) return@addSnapshotListener
+                val locations = usersSnapshot.documents.mapNotNull { doc ->
+                    if (doc.id == currentUserId) return@mapNotNull null
 
-                        val locations = usersSnapshot.documents.mapNotNull { doc ->
-                            val lat = doc.getDouble("latitude")
-                            val lng = doc.getDouble("longitude")
-                            val lastSeen = doc.getLong("lastSeenMillis")
+                    val lat = doc.getDouble("latitude")
+                    val lng = doc.getDouble("longitude")
+                    val lastSeen = doc.getLong("lastSeenMillis")
 
-                            val showLocation = doc.getBoolean("showLocation") ?: true
+                    val showLocation = doc.getBoolean("showLocation") ?: true
 
-                            if (lat != null && lng != null && lastSeen != null && showLocation) {
-                                FriendLocation(
-                                    id = doc.id,
-                                    name = doc.getString("name") ?: "Nieznany",
-                                    emoji = doc.getString("avatarEmoji") ?: "👤",
-                                    bgColorName = doc.getString("bgColor") ?: "Mint",
-                                    latitude = lat,
-                                    longitude = lng,
-                                    lastSeenMillis = lastSeen
-                                )
-                            } else null
-                        }
-                        _friendsLocations.value = locations
-                    }
+                    if (lat != null && lng != null && lastSeen != null && showLocation) {
+                        FriendLocation(
+                            id = doc.id,
+                            name = doc.getString("name") ?: "Nieznany",
+                            emoji = doc.getString("avatarEmoji") ?: "👤",
+                            bgColorName = doc.getString("bgColor") ?: "Mint",
+                            latitude = lat,
+                            longitude = lng,
+                            lastSeenMillis = lastSeen
+                        )
+                    } else null
+                }
+
+                _friendsLocations.value = locations
             }
     }
 
