@@ -30,6 +30,25 @@ class SettingsViewModel(
         initialValue = "Mint"
     )
 
+    val showLocationState = repository.showLocationFlow.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = true
+    )
+
+    fun updateShowLocation(show: Boolean) {
+        viewModelScope.launch { repository.saveShowLocation(show) }
+
+        val uid = FirebaseAuth.getInstance().currentUser?.uid
+        if (uid != null) {
+            FirebaseFirestore.getInstance().collection("users").document(uid)
+                .update("showLocation", show)
+                .addOnFailureListener { e ->
+                    Log.e("SettingsViewModel", "Błąd aktualizacji prywatności lokalizacji", e)
+                }
+        }
+    }
+
     val languageState = repository.languageFlow.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),

@@ -73,6 +73,10 @@ import com.SzpontCompany.check.ui.community.CommunityViewModel
 import com.SzpontCompany.check.ui.community.components.NotificationsViewModel
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.firestore.FirebaseFirestore
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.core.content.ContextCompat
+import com.google.android.gms.location.LocationServices
 
 enum class AppScreen { SPLASH, LOGIN, DASHBOARD, REGISTER_SUCCESS, RESET_PASSWORD, SET_NICKNAME }
 
@@ -288,6 +292,28 @@ fun RootNavigationGraph(onLogout: () -> Unit) {
 
     val context = LocalContext.current
     val activity = context as? android.app.Activity
+
+    LaunchedEffect(Unit) {
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
+            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                location?.let {
+                    val uid = FirebaseAuth.getInstance().currentUser?.uid
+                    if (uid != null) {
+                        FirebaseFirestore.getInstance().collection("users").document(uid)
+                            .update(
+                                mapOf(
+                                    "latitude" to it.latitude,
+                                    "longitude" to it.longitude,
+                                    "lastSeenMillis" to System.currentTimeMillis()
+                                )
+                            )
+                    }
+                }
+            }
+        }
+    }
+
 
     LaunchedEffect(activity?.intent) {
         val intent = activity?.intent

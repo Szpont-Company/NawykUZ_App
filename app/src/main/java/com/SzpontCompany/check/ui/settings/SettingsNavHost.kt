@@ -1,6 +1,8 @@
 package com.SzpontCompany.check.ui.settings
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -36,7 +38,11 @@ fun SettingsNavHost(
 
         // 3. Privacy Screen
         composable("settings_privacy") {
+            val viewModel: SettingsViewModel = viewModel(
+                factory = SettingsViewModelFactory(LocalContext.current.applicationContext)
+            )
             PrivacyScreen(
+                viewModel = viewModel,
                 onBackClick = { navController.popBackStack() }
             )
         }

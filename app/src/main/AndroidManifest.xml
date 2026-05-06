@@ -10,6 +10,13 @@
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
     <!-- Pozwala po restarcie telefonu ustalić budziki na nowo -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- Lokalizacja usera -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION"/>
 
     <!-- Android 13+ ads-->
     <uses-permission android:name="com.google.android.gms.permission.AD_ID"/>
@@ -25,6 +32,10 @@
         android:theme="@style/Theme.Check"
         android:name=".CheckApp"
         android:localeConfig="@xml/locales_config">
+        <service
+            android:name=".ui.map.LocationTrackingService"
+            android:foregroundServiceType="location"
+            android:exported="false" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -50,6 +61,12 @@
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-2704448217603051~4597075967"/>
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyAMIW3vdYlNA5i3RRlcz359YkTTQLgOQJA" />
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
     </application>
 
 </manifest>

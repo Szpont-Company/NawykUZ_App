@@ -494,4 +494,11 @@
     <string name="challenge_template_early_desc">Wstawanie przed 7:00 przez 3 dni.</string>
     <string name="unknown_user">Nieznany</string>
 
+
+    <!-- Map Friends -->
+    <string name="map_friend_last_seen">Ostatnio widziano: %1$s</string>
+    <string name="map_friend_just_now">Teraz</string>
+    <string name="map_friend_mins_ago">%1$d min temu</string>
+    <string name="map_friend_hours_ago">%1$d godz. temu</string>
+    <string name="map_friends_empty">Żaden ze znajomych nie udostępnia teraz lokalizacji.</string>
 </resources>

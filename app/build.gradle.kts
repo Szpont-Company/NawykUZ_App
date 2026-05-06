@@ -3,6 +3,7 @@ plugins {
     //alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.gms.google.services)
+    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 }
 
 android {
@@ -44,11 +45,13 @@ android {
     buildFeatures {
         compose = true
         viewBinding = true
+        buildConfig = true
     }
 }
 
 dependencies {
     implementation(libs.androidx.compose.foundation)
+    implementation(libs.play.services.location)
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -94,6 +97,14 @@ dependencies {
     implementation("com.google.firebase:firebase-functions")
 
     implementation("com.google.android.gms:play-services-ads:25.2.0")
+
+    // Google Maps Compose
+    implementation("com.google.maps.android:maps-compose:4.3.3")
+    // Google Play Services dla Map
+    implementation("com.google.android.gms:play-services-maps:18.2.0")
+    implementation("com.google.android.gms:play-services-location:21.1.0")
+    implementation("com.google.maps.android:android-maps-utils:3.4.0")
+    implementation("io.coil-kt:coil-compose:2.6.0")
 }
 
 kotlin {
