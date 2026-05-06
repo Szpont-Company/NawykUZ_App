@@ -984,14 +984,14 @@ fun BadgeDetailsDialog(
             ) {
                 if (badge.isUnlocked) {
                     Text(
-                        text = "🏆 Odblokowana!",
+                        text = stringResource(R.string.rewards_unlocked),
                         color = Color(0xFFBA7517),
                         fontWeight = FontWeight.Bold,
                         fontSize = 14.sp
                     )
                 } else {
                     Text(
-                        text = "🔒 Jeszcze nieodblokowana",
+                        text = stringResource(R.string.rewards_locked),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontWeight = FontWeight.Bold,
                         fontSize = 14.sp

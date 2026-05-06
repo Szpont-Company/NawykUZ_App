@@ -182,7 +182,8 @@
     <string name="rewards_total_earned">Łącznie zdobyte</string>
     <string name="rewards_section_badges">ODZNAKI</string>
     <string name="rewards_section_store">SKLEP Z NAGRODAMI</string>
-    <string name="rewards_unlocked">Odblokowana!</string>
+    <string name="rewards_unlocked">🏆 Odblokowana!</string>
+    <string name="rewards_locked">🔒 Jeszcze nieodblokowana</string>
 
     <string name="store_item_accent_title">Kolor akcentu — Złoty</string>
     <string name="store_item_accent_desc">Motyw premium dla profilu</string>
@@ -501,4 +502,11 @@
     <string name="map_friend_hours_ago">%1$d godz. temu</string>
     <string name="map_friends_empty">Żaden ze znajomych nie udostępnia teraz lokalizacji.</string>
     <string name="no_new_notifications">Brak nowych powiadomień 😴</string>
+
+    <string name="player_profile">Profil gracza</string>
+    <string name="unknown_player">Nieznany gracz</string>
+    <string name="public_habits_title">Publiczne Nawyki</string>
+    <string name="no_habits_empty">Ten gracz nie ma jeszcze żadnych nawyków.</string>
+    <string name="active_habit_subtitle">Aktywny nawyk</string>
+    <string name="error_occurred">Wystąpił błąd: %1$s</string>
 </resources>

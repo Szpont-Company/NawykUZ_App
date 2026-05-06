@@ -39,6 +39,8 @@ import androidx.compose.ui.platform.LocalContext
 import com.SzpontCompany.check.data.user.UserRepository
 import com.SzpontCompany.check.ui.components.CheckBackButton
 import com.SzpontCompany.check.ui.theme.*
+import com.SzpontCompany.check.R
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

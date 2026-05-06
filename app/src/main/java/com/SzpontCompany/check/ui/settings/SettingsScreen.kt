@@ -346,7 +346,7 @@ fun SettingsRowSwitch(
             if (subtitle != null) {
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
-                    text = if(isChecked) "Włączone" else "Wyłączone",
+                    text = if(isChecked) stringResource(R.string.settings_state_on) else stringResource(R.string.settings_state_off),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 12.sp
                 )

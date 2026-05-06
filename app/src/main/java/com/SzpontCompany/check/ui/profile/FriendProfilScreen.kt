@@ -26,6 +26,8 @@ import com.SzpontCompany.check.data.badges.BadgeProvider
 import com.SzpontCompany.check.data.user.User
 import com.SzpontCompany.check.ui.components.CheckBackButton
 import com.SzpontCompany.check.ui.components.UserAvatar
+import com.SzpontCompany.check.R
+
 
 @Composable
 fun FriendProfileScreen(
@@ -53,7 +55,7 @@ fun FriendProfileScreen(
             CheckBackButton(onClick = onBackClick)
             Spacer(modifier = Modifier.width(16.dp))
             Text(
-                text = "Profil gracza",
+                text = stringResource(R.string.player_profile),
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
@@ -69,7 +71,7 @@ fun FriendProfileScreen(
         } else if (uiState.error != null) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text(
-                    text = "Wystąpił błąd: ${uiState.error}",
+                    text = stringResource(R.string.error_occurred, uiState.error ?: ""),
                     color = MaterialTheme.colorScheme.error
                 )
             }
@@ -87,18 +89,18 @@ fun FriendProfileScreen(
                     StatCard(
                         modifier = Modifier.weight(1f),
                         targetValue = uiState.habitsCount,
-                        label = "Nawyki"
+                        label = stringResource(R.string.profile_habits)
                     )
                     StatCard(
                         modifier = Modifier.weight(1f),
                         targetValue = uiState.user?.currentStreak ?: 0,
-                        label = "Dni w rzędzie",
+                        label = stringResource(R.string.profile_streak_days),
                         valueColor = MaterialTheme.colorScheme.primary
                     )
                     StatCard(
                         modifier = Modifier.weight(1f),
                         targetValue = uiState.coins,
-                        label = "Monety",
+                        label = stringResource(R.string.profile_coins),
                         valueColor = Color(0xFFBA7517)
                     )
                 }
@@ -106,18 +108,18 @@ fun FriendProfileScreen(
                     StatCard(
                         modifier = Modifier.weight(1f),
                         targetValue = uiState.battlesWon,
-                        label = "Wygrane"
+                        label = stringResource(R.string.profile_battles_won)
                     )
                     StatCard(
                         modifier = Modifier.weight(1f),
                         targetValue = uiState.effectiveness,
                         suffix = "%",
-                        label = "Skuteczność"
+                        label = stringResource(R.string.profile_effectiveness)
                     )
                     StatCard(
                         modifier = Modifier.weight(1f),
                         targetValue = uiState.friendsCount,
-                        label = "Znajomi"
+                        label = stringResource(R.string.profile_friends)
                     )
                 }
             }
@@ -125,13 +127,19 @@ fun FriendProfileScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
-                text = "Zdobyte odznaki",
+                text = stringResource(R.string.profile_badges_header),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(bottom = 12.dp)
             )
 
-            val friendBadges = BadgeProvider.allBadges.take(3).map { it.copy(isUnlocked = true) }
+            // ZMIANA: Dynamiczne wyliczanie odznak znajomego
+            val friendBadges = remember(uiState) {
+                BadgeProvider.evaluateBadges(
+                    bestStreak = uiState.user?.bestStreak ?: 0,
+                    battlesWon = uiState.battlesWon
+                )
+            }
 
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -150,7 +158,7 @@ fun FriendProfileScreen(
             Spacer(modifier = Modifier.height(32.dp))
 
             Text(
-                text = "Publiczne Nawyki",
+                text = stringResource(R.string.public_habits_title),
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
@@ -159,7 +167,7 @@ fun FriendProfileScreen(
 
             if (uiState.habits.isEmpty()) {
                 Text(
-                    "Ten gracz nie ma jeszcze żadnych nawyków.",
+                    text = stringResource(R.string.no_habits_empty),
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             } else {
@@ -167,8 +175,8 @@ fun FriendProfileScreen(
                     FriendHabitCard(
                         emoji = habit.icon,
                         title = habit.name,
-                        subtitle = "Aktywny nawyk",
-                        streak = "${habit.streak} dni"
+                        subtitle = stringResource(R.string.active_habit_subtitle),
+                        streak = stringResource(R.string.profile_streak_format, habit.streak)
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                 }
@@ -210,7 +218,7 @@ fun FriendUserHeaderSection(user: User?) {
                     .padding(horizontal = 8.dp, vertical = 2.dp)
             ) {
                 Text(
-                    "Lvl 6",
+                    text = "${stringResource(R.string.profile_level)} 6",
                     color = MaterialTheme.colorScheme.background,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold
@@ -220,7 +228,7 @@ fun FriendUserHeaderSection(user: User?) {
         Spacer(modifier = Modifier.width(24.dp))
         Column {
             Text(
-                text = user?.name ?: "Nieznany gracz",
+                text = user?.name ?: stringResource(R.string.unknown_player),
                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                 color = MaterialTheme.colorScheme.onBackground
             )
@@ -241,27 +249,27 @@ fun FriendUserHeaderSection(user: User?) {
                         .padding(horizontal = 10.dp, vertical = 4.dp)
                 ) {
                     Text(
-                        text = "🔥 ${user?.currentStreak ?: 0} dni",
+                        text = stringResource(R.string.profile_streak_format, user?.currentStreak ?: 0),
                         color = MaterialTheme.colorScheme.primary,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Medium
                     )
-                }
-                Box(
-                    modifier = Modifier
-                        .background(
-                            Color(0xFFBA7517).copy(alpha = 0.15f),
-                            RoundedCornerShape(12.dp)
+                    Box(
+                        modifier = Modifier
+                            .background(
+                                Color(0xFFBA7517).copy(alpha = 0.15f),
+                                RoundedCornerShape(12.dp)
+                            )
+                            .border(1.dp, Color(0xFFBA7517), RoundedCornerShape(12.dp))
+                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.profile_top_rank, 24),
+                            color = Color(0xFFBA7517),
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Medium
                         )
-                        .border(1.dp, Color(0xFFBA7517), RoundedCornerShape(12.dp))
-                        .padding(horizontal = 10.dp, vertical = 4.dp)
-                ) {
-                    Text(
-                        "Top 24",
-                        color = Color(0xFFBA7517),
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Medium
-                    )
+                    }
                 }
             }
         }
@@ -307,20 +315,20 @@ fun FriendLevelAndXpBar() {
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = "Poziom $currentLevel",
+                    text = "${stringResource(R.string.profile_level)} $currentLevel",
                     color = MaterialTheme.colorScheme.onBackground,
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
-                    text = "$animatedXp / $maxXp PD",
+                    text = stringResource(R.string.profile_xp_format, animatedXp, maxXp),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium
                 )
             }
             Text(
-                text = "Do Lvl ${currentLevel + 1}",
+                text = stringResource(R.string.profile_next_level, currentLevel + 1),
                 color = Color(0xFFBA7517),
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold
@@ -384,7 +392,7 @@ fun FriendHabitCard(emoji: String, title: String, subtitle: String, streak: Stri
         }
         Column(horizontalAlignment = Alignment.End) {
             Text(
-                text = "🔥 $streak",
+                text = "$streak",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary
