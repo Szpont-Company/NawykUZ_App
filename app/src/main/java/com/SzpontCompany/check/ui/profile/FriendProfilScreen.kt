@@ -1,7 +1,6 @@
 package com.SzpontCompany.check.ui.profile
 
 import androidx.compose.animation.core.*
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -11,12 +10,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.PersonAdd
-import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,38 +19,26 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.SzpontCompany.check.data.badges.Badge
 import com.SzpontCompany.check.data.badges.BadgeProvider
+import com.SzpontCompany.check.data.user.User
 import com.SzpontCompany.check.ui.components.CheckBackButton
-import com.SzpontCompany.check.ui.theme.CheckTheme
-import com.SzpontCompany.check.ui.theme.Mint
-import com.SzpontCompany.check.ui.theme.getColorByName
-
-enum class FriendshipStatus {
-    NONE, PENDING, FRIENDS
-}
+import com.SzpontCompany.check.ui.components.UserAvatar
 
 @Composable
 fun FriendProfileScreen(
+    friendUid: String,
     onBackClick: () -> Unit = {},
-    onMessageClick: () -> Unit = {},
-    isInitiallyPrivate: Boolean = false,
-    privacySetting: String = "FRIENDS_ONLY"
+    viewModel: FriendProfileViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
-    var friendshipStatus by remember { mutableStateOf(FriendshipStatus.NONE) }
+    val uiState by viewModel.uiState.collectAsState()
     var selectedBadge by remember { mutableStateOf<Badge?>(null) }
-    var showRemoveFriendDialog by remember { mutableStateOf(false) }
 
-    val isProfileLocked = isInitiallyPrivate && friendshipStatus != FriendshipStatus.FRIENDS
-
-    val friendName = "Anna Nowak"
-    val friendNick = "@annanowak"
-    val friendEmoji = "🦊"
-    val friendBgColor = "Lavender"
+    LaunchedEffect(friendUid) {
+        viewModel.loadFriendProfile(friendUid)
+    }
 
     Column(
         modifier = Modifier
@@ -72,7 +53,7 @@ fun FriendProfileScreen(
             CheckBackButton(onClick = onBackClick)
             Spacer(modifier = Modifier.width(16.dp))
             Text(
-                text = "Profil użytkownika",
+                text = "Profil gracza",
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
@@ -81,118 +62,30 @@ fun FriendProfileScreen(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        FriendUserHeaderSection(
-            friendName = friendName,
-            friendNick = friendNick,
-            friendEmoji = friendEmoji,
-            friendBgColor = friendBgColor
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            val btnText = when(friendshipStatus) {
-                FriendshipStatus.NONE -> "Dodaj"
-                FriendshipStatus.PENDING -> "Wysłano zaproszenie"
-                FriendshipStatus.FRIENDS -> "Znajomi"
+        if (uiState.isLoading) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
             }
-
-            val btnIcon = when(friendshipStatus) {
-                FriendshipStatus.NONE -> Icons.Default.PersonAdd
-                FriendshipStatus.PENDING -> Icons.Outlined.Schedule
-                FriendshipStatus.FRIENDS -> Icons.Default.Person
-            }
-
-            val btnContainerColor = when(friendshipStatus) {
-                FriendshipStatus.NONE -> MaterialTheme.colorScheme.primary
-                FriendshipStatus.PENDING -> MaterialTheme.colorScheme.surfaceVariant
-                FriendshipStatus.FRIENDS -> MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
-            }
-
-            val btnContentColor = when(friendshipStatus) {
-                FriendshipStatus.NONE -> MaterialTheme.colorScheme.onPrimary
-                FriendshipStatus.PENDING -> MaterialTheme.colorScheme.onSurfaceVariant
-                FriendshipStatus.FRIENDS -> MaterialTheme.colorScheme.primary
-            }
-
-            Button(
-                onClick = {
-                    when(friendshipStatus) {
-                        FriendshipStatus.NONE -> friendshipStatus = FriendshipStatus.PENDING
-                        FriendshipStatus.PENDING -> friendshipStatus = FriendshipStatus.FRIENDS
-                        FriendshipStatus.FRIENDS -> showRemoveFriendDialog = true
-                    }
-                },
-                modifier = Modifier
-                    .weight(1f)
-                    .height(54.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = btnContainerColor,
-                    contentColor = btnContentColor
-                ),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Icon(
-                    imageVector = btnIcon,
-                    contentDescription = null,
-                    modifier = Modifier.size(22.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = btnText,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp
-                )
-            }
-
-            Spacer(modifier = Modifier.width(12.dp))
-
-            if (friendshipStatus == FriendshipStatus.FRIENDS) {
-                Button(
-                    onClick = onMessageClick,
-                    modifier = Modifier.size(54.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                    contentPadding = PaddingValues(0.dp)
-                ) {
-                    Icon(imageVector = Icons.Default.Email, contentDescription = "Wiadomość")
-                }
-            } else {
-                OutlinedButton(
-                    onClick = { /* TODO interakcja */ },
-                    modifier = Modifier.size(54.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    contentPadding = PaddingValues(0.dp),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
-                ) {
-                    Text("👋", fontSize = 24.sp)
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        if (isProfileLocked) {
-            PrivateProfilState(isFriendsOnly = privacySetting == "FRIENDS_ONLY")
         } else {
+            FriendUserHeaderSection(user = uiState.user)
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            // Zostawiamy pasek poziomu z mockiem (tak jak prosiłeś, do czasu wdrożenia XP)
             FriendLevelAndXpBar()
 
             Spacer(modifier = Modifier.height(24.dp))
 
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    StatCard(modifier = Modifier.weight(1f), targetValue = 28, label = "Nawyki")
-                    StatCard(modifier = Modifier.weight(1f), targetValue = 12, label = "Dni w rzędzie", valueColor = MaterialTheme.colorScheme.primary)
-                    StatCard(modifier = Modifier.weight(1f), targetValue = 420, label = "Monety", valueColor = Color(0xFFBA7517))
+                    StatCard(modifier = Modifier.weight(1f), targetValue = uiState.habitsCount, label = "Nawyki")
+                    StatCard(modifier = Modifier.weight(1f), targetValue = uiState.user?.currentStreak ?: 0, label = "Dni w rzędzie", valueColor = MaterialTheme.colorScheme.primary)
+                    StatCard(modifier = Modifier.weight(1f), targetValue = uiState.coins, label = "Monety", valueColor = Color(0xFFBA7517))
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    StatCard(modifier = Modifier.weight(1f), targetValue = 7, label = "Wygrane")
-                    StatCard(modifier = Modifier.weight(1f), targetValue = 78, suffix = "%", label = "Skuteczność")
-                    StatCard(modifier = Modifier.weight(1f), targetValue = 12, label = "Znajomi")
+                    StatCard(modifier = Modifier.weight(1f), targetValue = uiState.battlesWon, label = "Wygrane")
+                    StatCard(modifier = Modifier.weight(1f), targetValue = uiState.effectiveness, suffix = "%", label = "Skuteczność")
+                    StatCard(modifier = Modifier.weight(1f), targetValue = uiState.friendsCount, label = "Znajomi")
                 }
             }
 
@@ -205,9 +98,7 @@ fun FriendProfileScreen(
                 modifier = Modifier.padding(bottom = 12.dp)
             )
 
-            val friendBadges = BadgeProvider.allBadges.take(3).map {
-                it.copy(isUnlocked = true)
-            }
+            val friendBadges = BadgeProvider.allBadges.take(3).map { it.copy(isUnlocked = true) } // Narazie mockujemy kilka jako odblokowane
 
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -233,92 +124,47 @@ fun FriendProfileScreen(
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            FriendHabitCard(emoji = "🏃", title = "Bieganie", subtitle = "codziennie", streak = "12 dni")
-            Spacer(modifier = Modifier.height(12.dp))
-            FriendHabitCard(emoji = "📚", title = "Czytam książkę", subtitle = "30 min", streak = "5 dni")
-            Spacer(modifier = Modifier.height(12.dp))
-            FriendHabitCard(emoji = "💧", title = "Piję wodę", subtitle = "2 litry", streak = "24 dni")
+            if (uiState.habits.isEmpty()) {
+                Text("Ten gracz nie ma jeszcze żadnych nawyków.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+            } else {
+                uiState.habits.forEach { habit ->
+                    FriendHabitCard(
+                        emoji = habit.icon,
+                        title = habit.name,
+                        subtitle = "Aktywny nawyk", // Tutaj możesz ewentualnie podpiąć kolor lub dni nawyku
+                        streak = "${habit.streak} dni"
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
+            }
         }
-
         Spacer(modifier = Modifier.height(16.dp))
     }
 
     selectedBadge?.let { badge ->
         BadgeDetailsDialog(badge = badge, onDismiss = { selectedBadge = null })
     }
-
-    if (showRemoveFriendDialog) {
-        AlertDialog(
-            onDismissRequest = { showRemoveFriendDialog = false },
-            modifier = Modifier.fillMaxWidth(0.92f),
-            shape = RoundedCornerShape(26.dp),
-            containerColor = MaterialTheme.colorScheme.surface,
-            title = {
-                Text(
-                    text = "Usuń ze znajomych",
-                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colorScheme.onBackground,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
-            },
-            text = {
-                Text(
-                    text = "Czy na pewno chcesz usunąć użytkownika $friendName ze swoich znajomych? Ta akcja jest nieodwracalna.",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(vertical = 12.dp)
-                )
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        friendshipStatus = FriendshipStatus.NONE
-                        showRemoveFriendDialog = false
-                    },
-                    modifier = Modifier.padding(bottom = 8.dp, end = 4.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE24B4A)),
-                    shape = RoundedCornerShape(14.dp)
-                ) {
-                    Text(
-                        text = "Usuń",
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                    )
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = { showRemoveFriendDialog = false },
-                    modifier = Modifier.padding(bottom = 8.dp),
-                    shape = RoundedCornerShape(14.dp)
-                ) {
-                    Text(
-                        text = "Anuluj",
-                        color = MaterialTheme.colorScheme.onBackground,
-                        fontWeight = FontWeight.Medium,
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                    )
-                }
-            }
-        )
-    }
 }
 
 @Composable
-fun FriendUserHeaderSection(friendName: String, friendNick: String, friendEmoji: String, friendBgColor: String) {
+fun FriendUserHeaderSection(user: User?) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Box(contentAlignment = Alignment.BottomEnd) {
             Box(
                 modifier = Modifier
                     .size(86.dp)
                     .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
-                    .padding(6.dp)
-                    .clip(CircleShape)
-                    .background(getColorByName(friendBgColor)),
+                    .padding(6.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = friendEmoji, color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.Bold)
+                UserAvatar(
+                    avatarEmoji = user?.avatarEmoji ?: "",
+                    initials = user?.initials ?: "??",
+                    bgColor = user?.bgColor ?: "Mint",
+                    size = 74.dp,
+                    emojiSize = 28f,
+                    initialsSize = 28f
+                )
             }
             Box(
                 modifier = Modifier
@@ -333,12 +179,12 @@ fun FriendUserHeaderSection(friendName: String, friendNick: String, friendEmoji:
         Spacer(modifier = Modifier.width(24.dp))
         Column {
             Text(
-                text = friendName,
+                text = user?.name ?: "Nieznany gracz",
                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                 color = MaterialTheme.colorScheme.onBackground
             )
             Text(
-                text = "$friendNick • Check.",
+                text = if (user?.nickname.isNullOrBlank()) "@nick" else "@${user?.nickname} • Check.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -350,7 +196,7 @@ fun FriendUserHeaderSection(friendName: String, friendNick: String, friendEmoji:
                         .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(12.dp))
                         .padding(horizontal = 10.dp, vertical = 4.dp)
                 ) {
-                    Text(text = "🔥 12 dni", color = MaterialTheme.colorScheme.primary, fontSize = 11.sp, fontWeight = FontWeight.Medium)
+                    Text(text = "🔥 ${user?.currentStreak ?: 0} dni", color = MaterialTheme.colorScheme.primary, fontSize = 11.sp, fontWeight = FontWeight.Medium)
                 }
                 Box(
                     modifier = Modifier
@@ -487,64 +333,5 @@ fun FriendHabitCard(emoji: String, title: String, subtitle: String, streak: Stri
                 color = MaterialTheme.colorScheme.primary
             )
         }
-    }
-}
-
-@Composable
-fun PrivateProfilState(
-    modifier: Modifier = Modifier,
-    isFriendsOnly: Boolean = false
-) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(vertical = 48.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Icon(
-            imageVector = Icons.Default.Lock,
-            contentDescription = "Prywatny profil",
-            modifier = Modifier.size(64.dp),
-            tint = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-            text = "Konto jest prywatne",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-            text = if (isFriendsOnly)
-                "Zaproś tego gracza do znajomych, aby zobaczyć jego statystyki i nawyki."
-            else
-                "Ten użytkownik ukrył swoje szczegóły profilu.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(horizontal = 32.dp)
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun FriendProfileScreenPreview() {
-    CheckTheme(darkTheme = true, accent = Mint) {
-        FriendProfileScreen()
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun FriendProfilePrivatePreview() {
-    CheckTheme(darkTheme = true, accent = Mint) {
-        FriendProfileScreen(isInitiallyPrivate = true)
     }
 }
