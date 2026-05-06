@@ -24,46 +24,6 @@ class CommunityViewModel(
 
     private val habitRepository = HabitRepository()
 
-    // symulacja danych z backendu (mocki)
-    private val initialNotifications = listOf(
-        NotificationItem(
-            id = "1",
-            title = "Nowe wyzwanie!",
-            message = "Tomek K. zaprasza Cię do bitwy: Bieganie 30 min.",
-            timeAgo = "5 min temu",
-            type = NotificationType.CHALLENGE,
-            isRead = false,
-            requiresAction = true
-        ),
-        NotificationItem(
-            id = "4",
-            title = "Nowy znajomy",
-            message = "Ania W. chce dodać Cię do znajomych. Możecie teraz rywalizować!",
-            timeAgo = "1 godz. temu",
-            type = NotificationType.FRIEND,
-            isRead = false,
-            requiresAction = true
-        ),
-        NotificationItem(
-            id = "2",
-            title = "Zdobyto dzisiaj odznakę!",
-            message = "Zdobyto odznakę \"Streak 21 dni\" 🔥. Wymóg: Utrzymaj passę 21 dni.",
-            timeAgo = "2 godz. temu",
-            type = NotificationType.REWARD,
-            isRead = true,
-            requiresAction = false
-        ),
-        NotificationItem(
-            id = "3",
-            title = "Globalny event niedługo!",
-            message = "Rozpoczął się nowy Globalny Marsz. Dołącz do reszty społeczności!",
-            timeAgo = "1 dzień temu",
-            type = NotificationType.SYSTEM,
-            isRead = true,
-            requiresAction = false
-        )
-    )
-
     private val initialEvents = listOf(
         Event(
             title = "Globalny Marsz Marca", subtitle = "Łącznie 1 000 000 kroków",
@@ -100,7 +60,7 @@ class CommunityViewModel(
 
     //--- state flow ---
 
-    private val _notifications = MutableStateFlow(initialNotifications)
+    private val _notifications = MutableStateFlow<List<NotificationItem>>(emptyList())
     val notifications: StateFlow<List<NotificationItem>> = _notifications.asStateFlow()
 
     private val _battles = MutableStateFlow<List<Battle>>(emptyList())
@@ -163,7 +123,7 @@ class CommunityViewModel(
         }
     }
 
-    fun sendChallenge(currentUser: User?, friend: Friend, template: ChallengeTemplate, betAmount: Int) {
+    fun sendChallenge(currentUser: User?, friend: Friend, template: ChallengeTemplate,resolvedTitle: String, betAmount: Int) {
         val currentUserId = currentUser?.uid ?: return
 
         val newInvite = ChallengeInvite(
@@ -173,7 +133,7 @@ class CommunityViewModel(
             senderEmoji = currentUser.avatarEmoji,
             senderBgColor = currentUser.bgColor,
             receiverId = friend.uid,
-            habitName = template.title,
+            habitName = resolvedTitle,
             habitColorName = getColorName(template.color),
             challengeType = template.emoji,
             stake = betAmount

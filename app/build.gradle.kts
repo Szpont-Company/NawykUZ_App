@@ -86,6 +86,8 @@ dependencies {
     implementation("androidx.datastore:datastore-preferences:1.0.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
 
+    implementation("com.google.firebase:firebase-messaging-ktx")
+
     // captcha
     implementation("com.google.android.recaptcha:recaptcha:18.8.0")
 

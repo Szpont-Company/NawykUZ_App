@@ -217,7 +217,7 @@
     <string name="tab_friends">Friends</string>
     <string name="tab_ranking">Ranking</string>
     <string name="tab_events">Events</string>
-    <string name="tab_challenges">Challenges</string>
+    <string name="tab_challenges">Battle</string>
 
     <!-- FriendsCard -->
     <string name="search_in_list">Search in list...</string>
@@ -360,6 +360,134 @@
     <string name="shop_hero">Go ahead, splurge a little!</string>
     <string name="shop_hero_desc">Turn your coins into your dream reward.</string>
     <string name="login_unverified">Verify email before signing in.</string>
+
+    <string name="battle_victory_title">🏆 VICTORY!</string>
+    <string name="battle_defeat_title">💀 DEFEAT</string>
+    <string name="battle_victory_message">You crushed %1$s! Your reward is %2$d coins.</string>
+    <string name="battle_defeat_message">This time %1$s was stronger. Your bet is lost, try to win it back in the next battle!</string>
+    <string name="battle_claim_reward">Claim Reward</string>
+    <string name="battle_understood">Understood</string>
+    <string name="battle_status_active">Active</string>
+    <string name="battle_status_surrendered">Surrendered</string>
+    <string name="battle_status_completed">Completed</string>
+    <string name="battle_days_left">%1$d days</string>
+    <string name="battle_bet_amount">%1$d coins bet</string>
+    <string name="battle_losing_warning">You are losing!</string>
+    <string name="battle_ends_on">ends on %1$s</string>
+    <string name="battle_claim_reward_with_amount">🏆 Claim reward (%1$d coins)!</string>
+    <string name="battle_see_summary">📜 See summary</string>
+    <string name="battle_done_today">✅ Done today</string>
+    <string name="battle_done">🔥 Done!</string>
+    <string name="battle_give_up">Surrender</string>
+
+    <string name="battle_check_coins">%1$d Check Coins</string>
+    <string name="battle_remaining_label">Remaining</string>
+    <string name="battle_end_label">Ends</string>
+    <string name="battle_soon">Soon</string>
+    <string name="battle_surrender_give_coins">Surrender (Give up coins)</string>
+    <string name="days_label">Days</string>
+    <string name="battle_details_title">Battle Details</string>
+    <string name="battle_mark_done">Mark as done</string>
+    <string name="battle_done_for_today">Done for today!”</string>
+
+    <!-- Chat & Community -->
+    <string name="chat_type_message">Type a message...</string>
+    <string name="chat_quick_reactions">Quick reactions</string>
+    <string name="chat_send">Send</string>
+    <string name="chat_today">Today</string>
+    <string name="chat_yesterday">Yesterday</string>
+
+    <!-- Statusy aktywności -->
+    <string name="chat_active_now">Active now</string>
+    <string name="chat_active_ago">Active %1$s ago</string> <!-- Np. Active 5 mins ago -->
+
+    <!-- Community Screen Tabs & Headers -->
+    <string name="community_title">Community</string>
+    <string name="community_notifications_desc">Notifications</string>
+
+    <string name="community_tab_battle">Battle</string>
+    <string name="community_tab_events">Events</string>
+    <string name="community_tab_ranking">Ranking</string>
+    <string name="community_tab_friends">Friends</string>
+
+    <string name="community_subtab_global">Global</string>
+    <string name="community_subtab_friends">Friends</string>
+    <string name="community_subtab_weekly">Weekly</string>
+
+    <string name="community_create_challenge">+ Challenge</string>
+    <string name="community_find_players">Find players</string>
+
+    <string name="community_pending_invites">PENDING INVITES (%1$d)</string>
+    <string name="community_active_battles">ACTIVE BATTLES (%1$d)</string>
+    <string name="community_active_events">ACTIVE EVENTS</string>
+
+    <string name="community_toast_battle_started">Battle started! Check the Today screen.</string>
+    <string name="community_toast_challenge_sent">Challenge sent to: %1$s!</string>
+    <string name="community_trend_up">+%1$d since last week</string>
+
+
+    <!-- Friends -->
+    <string name="friends_tab_friends_count">Friends (%1$d)</string>
+    <string name="friends_tab_invites_count">Invites (%1$d)</string>
+    <string name="friends_tab_search">Search</string>
+    <string name="friends_loading">Loading friends...</string>
+    <string name="friends_pending_invites_header">PENDING INVITES</string>
+    <string name="friends_search_results_header">SEARCH RESULTS</string>
+    <string name="friends_clear_search">Clear</string>
+    <string name="friends_status_waiting">Waiting for response</string>
+    <string name="friends_invite_link_mock">check.app/invite/markk</string>
+    <string name="friend_remove_title">Remove Friend</string>
+    <string name="friend_remove_message">Are you sure you want to remove %1$s from your friends? This action cannot be undone.</string>
+    <string name="friend_remove_confirm">Remove</string>
+    <string name="friend_wants_to_add">Wants to be your friend</string>
+
+    <!-- Friend List Item -->
+    <string name="friend_online_xp">Online • %1$s XP</string>
+    <string name="friend_mutuals_count">%1$d mutual friends</string>
+    <string name="friend_from_contacts">From your contacts</string>
+    <string name="friend_options_desc">Options</string>
+    <string name="friend_show_profile">Show profile</string>
+    <string name="friend_send_message">Send message</string>
+    <string name="friend_remove">Remove friend</string>
+    <string name="friend_invite_btn">Invite</string>
+    <string name="friend_status_friend">Friend</string>
+    <string name="friend_status_sent">Sent ✔️</string>
+    <string name="friend_status_waiting">Waiting for response</string>
+
+    <!-- Challenge Invite & Create Sheet -->
+    <string name="challenge_invite_stranger">Stranger</string>
+    <string name="challenge_invite_subtitle">Challenges you!</string>
+    <string name="challenge_invite_habit_label">Habit</string>
+    <string name="challenge_invite_stake_label">Stake</string>
+    <string name="challenge_invite_coins">%1$d coins</string>
+
+    <string name="challenge_sheet_title">Issue a challenge</string>
+    <string name="challenge_sheet_who_label">Who will take the challenge?</string>
+    <string name="challenge_sheet_no_friends">You don\'t have any friends for a battle yet 😔</string>
+    <string name="challenge_sheet_find_friends">Find friends</string>
+    <string name="challenge_sheet_what_label">What are you fighting for?</string>
+    <string name="challenge_sheet_stake_label">Stake (Check Coins)</string>
+    <string name="challenge_sheet_send_btn">Send challenge</string>
+
+    <!-- Ranking -->
+    <string name="ranking_your_position">Your position</string>
+    <string name="ranking_xp_level">%1$s XP   Level %2$d</string>
+    <string name="ranking_xp_format">%1$s XP</string>
+    <!-- Events & Player VS -->
+    <string name="event_reward_label">Reward: </string>
+    <string name="battle_vs">VS</string>
+    <string name="battle_hp_format">%1$d/100 HP</string>
+
+    <!-- Predefined Challenges & Fallbacks -->
+    <string name="challenge_template_steps_title">Step Kings</string>
+    <string name="challenge_template_steps_desc">Who will take more steps in 3 days?</string>
+    <string name="challenge_template_water_title">Water Duel</string>
+    <string name="challenge_template_water_desc">Drink at least 2L of water for 5 days.</string>
+    <string name="challenge_template_sugar_title">Sugar Detox</string>
+    <string name="challenge_template_sugar_desc">No sweets for a whole week!</string>
+    <string name="challenge_template_early_title">Early Bird</string>
+    <string name="challenge_template_early_desc">Wake up before 7:00 AM for 3 days.</string>
+    <string name="unknown_user">Unknown</string>
 
     <!-- Map Friends -->
     <string name="map_friend_last_seen">Last seen: %1$s</string>
