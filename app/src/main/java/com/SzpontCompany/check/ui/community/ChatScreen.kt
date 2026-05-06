@@ -32,6 +32,7 @@ import com.SzpontCompany.check.ui.theme.CheckTheme
 import com.SzpontCompany.check.ui.theme.Mint
 import com.SzpontCompany.check.ui.theme.Rose
 import com.SzpontCompany.check.ui.theme.getColorByName
+import com.SzpontCompany.check.ui.components.UserAvatar
 import androidx.lifecycle.viewmodel.compose.viewModel
 import java.text.SimpleDateFormat
 import java.util.*
@@ -144,15 +145,19 @@ fun ChatTopBar(
             Spacer(modifier = Modifier.width(16.dp))
 
             // Avatar
-            Box(
-                modifier = Modifier
-                    .size(44.dp)
-                    .clip(CircleShape)
-                    .background(getColorByName(friendBgColor)),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(text = friendEmoji, fontSize = 20.sp)
-            }
+            val friendInitials = friendName.trim().split("\\s+".toRegex())
+                .mapNotNull { it.firstOrNull()?.uppercase() }
+                .take(2).joinToString("")
+                .ifEmpty { "??" }
+
+            UserAvatar(
+                avatarEmoji = friendEmoji,
+                initials = friendInitials,
+                bgColor = friendBgColor,
+                size = 44.dp,
+                emojiSize = 22f,
+                initialsSize = 18f
+            )
             Spacer(modifier = Modifier.width(12.dp))
 
             // Name and Status
@@ -239,7 +244,12 @@ fun ChatMessageItem(message: UiChatMessage) {
                     modifier = Modifier.widthIn(max = 280.dp)
                 ) {
                     Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
-                        Text(text = message.text, fontSize = 15.sp, color = MaterialTheme.colorScheme.onSecondaryContainer)
+                        Text(
+                            text = message.text,
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontSize = 15.sp,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
                         Text(
                             text = timeString,
                             fontSize = 10.sp,
@@ -258,7 +268,12 @@ fun ChatMessageItem(message: UiChatMessage) {
                     modifier = Modifier.widthIn(max = 280.dp)
                 ) {
                     Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
-                        Text(text = message.text, fontSize = 15.sp, color = MaterialTheme.colorScheme.onPrimary)
+                        Text(
+                            text = message.text,
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontSize = 15.sp,
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
                         Row(modifier = Modifier.align(Alignment.End).padding(top = 2.dp), verticalAlignment = Alignment.CenterVertically) {
                             Text(text = timeString, fontSize = 10.sp, color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f))
                             Spacer(modifier = Modifier.width(4.dp))

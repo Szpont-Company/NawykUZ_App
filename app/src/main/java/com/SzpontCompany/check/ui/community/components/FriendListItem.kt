@@ -31,6 +31,7 @@ import java.util.Locale
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.res.stringResource
+import com.SzpontCompany.check.ui.components.UserAvatar
 
 @Composable
 fun FriendListItem(
@@ -60,16 +61,14 @@ fun FriendListItem(
             modifier = Modifier.fillMaxWidth().padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
-                modifier = Modifier.size(40.dp).background(avatarBgColor, CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                if (friend.avatarEmoji.isNotEmpty()) {
-                    Text(friend.avatarEmoji, fontSize = 24.sp)
-                } else {
-                    Text(friend.initials, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 15.sp)
-                }
-            }
+            UserAvatar(
+                avatarEmoji = friend.avatarEmoji,
+                initials = friend.initials,
+                bgColor = friend.bgColor,
+                size = 40.dp,
+                emojiSize = 24f,
+                initialsSize = 15f
+            )
 
             Spacer(Modifier.width(12.dp))
 

@@ -381,7 +381,7 @@ fun RootNavigationGraph(onLogout: () -> Unit) {
                     onMessageClick = { friend ->
                         val encodedName = java.net.URLEncoder.encode(friend.name, "UTF-8")
                         val encodedEmoji = java.net.URLEncoder.encode(
-                            friend.avatarEmoji.ifEmpty { friend.initials },
+                            friend.avatarEmoji,
                             "UTF-8"
                         )
                         val route =

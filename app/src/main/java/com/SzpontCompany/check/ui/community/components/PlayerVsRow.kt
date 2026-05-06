@@ -12,11 +12,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.SzpontCompany.check.ui.theme.getColorByName
-import com.SzpontCompany.check.ui.theme.Mint
 import com.SzpontCompany.check.ui.theme.Crimson
 import com.SzpontCompany.check.R
 import androidx.compose.ui.res.stringResource
+import com.SzpontCompany.check.ui.components.UserAvatar
 
 @Composable
 fun PlayerVsRow(
@@ -42,7 +41,14 @@ fun PlayerVsRow(
     ) {
         // Ty (lewa strona)
         Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
-            SmallAvatar(emoji = myEmoji, bgColorName = myBgColor, initials = myNameStr)
+            UserAvatar(
+                avatarEmoji = myEmoji,
+                initials = myNameStr,
+                bgColor = myBgColor,
+                size = 36.dp,
+                emojiSize = 18f,
+                initialsSize = 14f
+            )
             Spacer(Modifier.height(8.dp))
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text(myNameStr, color = MaterialTheme.colorScheme.onBackground, fontSize = 12.sp, fontWeight = FontWeight.Bold)
@@ -68,7 +74,14 @@ fun PlayerVsRow(
                 .take(2).joinToString("")
                 .ifEmpty { "??" }
 
-            SmallAvatar(emoji = opponentEmoji, bgColorName = opponentBgColor, initials = opponentInitials)
+            UserAvatar(
+                avatarEmoji = opponentEmoji,
+                initials = opponentInitials,
+                bgColor = opponentBgColor,
+                size = 36.dp,
+                emojiSize = 18f,
+                initialsSize = 14f
+            )
             Spacer(Modifier.height(8.dp))
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text(opponentName, color = MaterialTheme.colorScheme.onBackground, fontSize = 12.sp, fontWeight = FontWeight.Bold, maxLines = 1)
@@ -81,25 +94,6 @@ fun PlayerVsRow(
             Spacer(Modifier.height(4.dp))
             HpBar(hp = opponentHp, color = Crimson, alignEnd = true, showValue = true)
         }
-    }
-}
-
-@Composable
-fun SmallAvatar(emoji: String, bgColorName: String, initials: String) {
-    Box(
-        modifier = Modifier
-            .size(36.dp)
-            .clip(CircleShape)
-            .background(getColorByName(bgColorName)),
-        contentAlignment = Alignment.Center
-    ) {
-        val displayMyName = stringResource(R.string.you)
-        Text(
-            text = if (emoji.isEmpty()) initials else emoji,
-            color = if (emoji.isEmpty()) Color.White else Color.Unspecified,
-            fontSize = if (emoji.isEmpty()) (if (initials == displayMyName) 12.sp else 14.sp) else 18.sp,
-            fontWeight = FontWeight.Bold
-        )
     }
 }
 

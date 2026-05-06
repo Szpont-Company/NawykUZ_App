@@ -30,6 +30,7 @@ import com.SzpontCompany.check.data.social.Friend
 import com.SzpontCompany.check.ui.theme.*
 import com.SzpontCompany.check.data.social.ChallengeTemplate
 import com.SzpontCompany.check.data.social.PredefinedChallenges
+import com.SzpontCompany.check.ui.components.UserAvatar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -202,22 +203,17 @@ fun SelectableFriendItem(friend: Friend, isSelected: Boolean, onClick: () -> Uni
     ) {
         Box(
             modifier = Modifier
-                .size(60.dp)
-                .clip(CircleShape)
-                .background(friendColor)
                 .border(2.dp, borderColor, CircleShape),
             contentAlignment = Alignment.Center
         ) {
-            if (friend.avatarEmoji.isNotEmpty()) {
-                Text(text = friend.avatarEmoji, fontSize = 28.sp)
-            } else {
-                Text(
-                    text = friend.initials,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-                )
-            }
+            UserAvatar(
+                avatarEmoji = friend.avatarEmoji,
+                initials = friend.initials,
+                bgColor = friend.bgColor,
+                size = 60.dp,
+                emojiSize = 28f,
+                initialsSize = 20f
+            )
         }
         Spacer(modifier = Modifier.height(8.dp))
         Text(

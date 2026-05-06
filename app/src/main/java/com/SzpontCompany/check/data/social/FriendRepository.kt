@@ -69,7 +69,7 @@ class FriendRepository(
         return try {
             val myDoc = firestore.collection("users").document(myId).get().await()
             val myName = myDoc.getString("name") ?: ""
-            val myAvatar = myDoc.getString("avatarEmoji") ?: "👤"
+            val myAvatar = myDoc.getString("avatarEmoji") ?: ""
             val myBgColor = myDoc.getString("bgColor") ?: "Mint"
 
             val requestRef = firestore.collection("friend_requests").document()
@@ -109,8 +109,29 @@ class FriendRepository(
                 }
 
                 if (snapshot != null) {
-                    val requests = snapshot.documents.mapNotNull { it.toObject(FriendRequest::class.java) }
-                    trySend(requests)
+                    kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+                        val requests = snapshot.documents.mapNotNull { doc ->
+                            val req = doc.toObject(FriendRequest::class.java) ?: return@mapNotNull null
+
+                            try {
+                                val userDoc = firestore.collection("users").document(req.senderId).get().await()
+                                if (userDoc.exists()) {
+                                    val currentName = userDoc.getString("name") ?: req.senderName
+                                    val currentAvatar = userDoc.getString("avatarEmoji") ?: req.senderAvatar
+                                    val currentBgColor = userDoc.getString("bgColor") ?: req.senderBgColor
+
+                                    req.copy(
+                                        senderName = currentName,
+                                        senderAvatar = currentAvatar,
+                                        senderBgColor = currentBgColor
+                                    )
+                                } else req
+                            } catch (e: Exception) {
+                                req
+                            }
+                        }
+                        trySend(requests)
+                    }
                 }
             }
 

@@ -28,6 +28,7 @@ import androidx.compose.ui.res.stringResource
 import com.SzpontCompany.check.ui.theme.getColorByName
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.SzpontCompany.check.data.social.FriendRequest
+import com.SzpontCompany.check.ui.components.UserAvatar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -409,22 +410,14 @@ fun FriendsInvitesSection(
                 ) {
                     Column(Modifier.padding(16.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Box(
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .background(getColorByName(friendMock.bgColor), CircleShape),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                if (friendMock.avatarEmoji.isNotEmpty()) {
-                                    Text(friendMock.avatarEmoji, fontSize = 24.sp)
-                                } else {
-                                    Text(
-                                        friendMock.initials,
-                                        color = Color.White,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                }
-                            }
+                            UserAvatar(
+                                avatarEmoji = friendMock.avatarEmoji,
+                                initials = friendMock.initials,
+                                bgColor = friendMock.bgColor,
+                                size = 40.dp,
+                                emojiSize = 24f,
+                                initialsSize = 15f
+                            )
                             Spacer(Modifier.width(12.dp))
                             Column {
                                 Text(

@@ -54,6 +54,7 @@ import com.SzpontCompany.check.ui.components.CheckBackButton
 import androidx.lifecycle.Lifecycle
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import com.SzpontCompany.check.data.badges.Badge
+import com.SzpontCompany.check.ui.components.UserAvatar
 
 @Composable
 fun ProfileScreen(
@@ -218,13 +219,17 @@ fun UserHeaderSection(user: com.SzpontCompany.check.data.user.User?) {
                 modifier = Modifier
                     .size(86.dp)
                     .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
-                    .padding(6.dp)
-                    .clip(CircleShape)
-                    .background(getColorByName(user?.bgColor ?: "Mint")),
+                    .padding(6.dp),
                 contentAlignment = Alignment.Center
             ) {
-                val displayAvatar = if (user?.avatarEmoji.isNullOrEmpty()) user?.initials ?: "MK" else user?.avatarEmoji ?: ""
-                Text(text = displayAvatar, color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.Bold)
+                UserAvatar(
+                    avatarEmoji = user?.avatarEmoji ?: "",
+                    initials = user?.initials ?: "MK",
+                    bgColor = user?.bgColor ?: "Mint",
+                    size = 74.dp,
+                    emojiSize = 28f,
+                    initialsSize = 28f
+                )
             }
             Box(
                 modifier = Modifier
@@ -714,12 +719,17 @@ fun ShareProfileDialog(
                         Box(
                             modifier = Modifier
                                 .size(80.dp)
-                                .clip(CircleShape)
-                                .background(getColorByName(user?.bgColor ?: "Mint")),
+                                .clip(CircleShape),
                             contentAlignment = Alignment.Center
                         ) {
-                            val displayAvatar = if (user?.avatarEmoji.isNullOrEmpty()) user?.initials ?: "MK" else user?.avatarEmoji ?: ""
-                            Text(displayAvatar, color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.Bold)
+                            UserAvatar(
+                                avatarEmoji = user?.avatarEmoji ?: "",
+                                initials = user?.initials ?: "MK",
+                                bgColor = user?.bgColor ?: "Mint",
+                                size = 80.dp,
+                                emojiSize = 32f,
+                                initialsSize = 32f
+                            )
                         }
 
                         Spacer(modifier = Modifier.height(12.dp))
