@@ -130,26 +130,28 @@ fun ProfileScreen(
 
         if (showShareDialog) {
             ShareProfileDialog(
-                user = user,
+                uiState = uiState,
                 onDismiss = { showShareDialog = false },
                 onShareConfirm = {
                     showShareDialog = false
 
+                    val streak = uiState.user?.currentStreak ?: 0
+                    val battles = uiState.battlesWon
+                    val shareText =
+                        "Hej! Mój streak to $streak dni, a na koncie mam $battles wygranych pojedynków w aplikacji Check. 🔥 Dołącz do mnie i wygrywaj każdy dzień!"
 
                     val sendIntent = Intent(Intent.ACTION_SEND).apply {
                         type = "text/plain"
-                        putExtra(
-                            Intent.EXTRA_TEXT,
-                            "Hej! Mam 8 poziom i 21-dniowy streak w Check. 🔥 Dołącz do mnie!"
-                        )
+                        putExtra(Intent.EXTRA_TEXT, shareText)
                     }
-                    context.startActivity(Intent.createChooser(sendIntent, "Udostępnij przez"))
+                    context.startActivity(Intent.createChooser(sendIntent, "Udostępnij profil"))
                 }
             )
         }
-
     }
+
 }
+
 
 @Composable
 fun ProfileTopBar(onBackClick: () -> Unit, onShareClick: () -> Unit) {
@@ -273,7 +275,10 @@ fun UserHeaderSection(user: com.SzpontCompany.check.data.user.User?) {
                         .padding(horizontal = 10.dp, vertical = 4.dp)
                 ) {
                     Text(
-                        text = stringResource(R.string.profile_streak_format, user?.currentStreak ?: 0),
+                        text = stringResource(
+                            R.string.profile_streak_format,
+                            user?.currentStreak ?: 0
+                        ),
                         color = MaterialTheme.colorScheme.primary,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Medium
@@ -714,10 +719,12 @@ fun LogoutConfirmationDialog(
 
 @Composable
 fun ShareProfileDialog(
-    user: com.SzpontCompany.check.data.user.User?,
+    uiState: ProfileUiState,
     onDismiss: () -> Unit,
     onShareConfirm: () -> Unit
 ) {
+    val user = uiState.user
+
     AlertDialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false),
@@ -767,7 +774,7 @@ fun ShareProfileDialog(
                         ) {
                             UserAvatar(
                                 avatarEmoji = user?.avatarEmoji ?: "",
-                                initials = user?.initials ?: "MK",
+                                initials = user?.initials ?: "??",
                                 bgColor = user?.bgColor ?: "Mint",
                                 size = 80.dp,
                                 emojiSize = 32f,
@@ -778,13 +785,13 @@ fun ShareProfileDialog(
                         Spacer(modifier = Modifier.height(12.dp))
 
                         Text(
-                            text = user?.name ?: "Marek Kowalski",
+                            text = user?.name ?: "Nieznany",
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onBackground
                         )
                         Text(
-                            text = if (user?.nickname.isNullOrBlank()) "@marekk" else "@${user?.nickname}",
+                            text = if (user?.nickname.isNullOrBlank()) "@nick" else "@${user?.nickname}",
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontSize = 14.sp
                         )
@@ -797,12 +804,12 @@ fun ShareProfileDialog(
                         ) {
                             ShareStatItem(value = "Lvl 8", label = "Poziom")
                             ShareStatItem(
-                                value = "🔥 21",
+                                value = "🔥 ${user?.currentStreak ?: 0}",
                                 label = "Streak",
                                 valueColor = MaterialTheme.colorScheme.primary
                             )
                             ShareStatItem(
-                                value = "🏆 7",
+                                value = "🏆 ${uiState.battlesWon}",
                                 label = "Wygrane",
                                 valueColor = Color(0xFFBA7517)
                             )
