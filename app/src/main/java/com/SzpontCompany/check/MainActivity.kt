@@ -1,5 +1,6 @@
 package com.SzpontCompany.check
 
+import android.annotation.SuppressLint
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
@@ -18,7 +19,10 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
@@ -68,12 +72,15 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.SzpontCompany.check.ui.community.BattleDetailScreen
 import com.SzpontCompany.check.ui.community.CommunityViewModel
+import com.google.firebase.Firebase
 
 enum class AppScreen { SPLASH, LOGIN, DASHBOARD, REGISTER_SUCCESS, RESET_PASSWORD, SET_NICKNAME }
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
         CoroutineScope(Dispatchers.IO).launch {
             Log.e("MainActivity", "Initializing Mobile Ads SDK")
@@ -123,111 +130,113 @@ class MainActivity : AppCompatActivity() {
             var currentScreen by remember { mutableStateOf(AppScreen.SPLASH) }
 
             CheckTheme(darkTheme = darkTheme, accent = accentColor) {
-                AnimatedContent(
-                    targetState = currentScreen,
-                    transitionSpec = {
-                        when (targetState) {
-                            AppScreen.DASHBOARD ->
-                                (slideInHorizontally { it } + fadeIn(tween(400))) togetherWith
-                                        (slideOutHorizontally { -it } + fadeOut(tween(300)))
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    AnimatedContent(
+                        targetState = currentScreen,
+                        transitionSpec = {
+                            when (targetState) {
+                                AppScreen.DASHBOARD ->
+                                    (slideInHorizontally { it } + fadeIn(tween(400))) togetherWith
+                                            (slideOutHorizontally { -it } + fadeOut(tween(300)))
 
-                            AppScreen.LOGIN -> {
-                                if (initialState == AppScreen.REGISTER_SUCCESS || initialState == AppScreen.RESET_PASSWORD) {
-                                    (slideInHorizontally { -it } + fadeIn(tween(400))) togetherWith
-                                            (slideOutHorizontally { it } + fadeOut(tween(300)))
-                                } else {
-                                    fadeIn(tween(500)) togetherWith fadeOut(tween(300))
+                                AppScreen.LOGIN -> {
+                                    if (initialState == AppScreen.REGISTER_SUCCESS || initialState == AppScreen.RESET_PASSWORD) {
+                                        (slideInHorizontally { -it } + fadeIn(tween(400))) togetherWith
+                                                (slideOutHorizontally { it } + fadeOut(tween(300)))
+                                    } else {
+                                        fadeIn(tween(500)) togetherWith fadeOut(tween(300))
+                                    }
                                 }
+
+                                AppScreen.SET_NICKNAME ->
+                                    (slideInHorizontally { it } + fadeIn(tween(400))) togetherWith
+                                            (slideOutHorizontally { -it } + fadeOut(tween(300)))
+
+                                AppScreen.SPLASH ->
+                                    fadeIn() togetherWith fadeOut()
+
+                                AppScreen.REGISTER_SUCCESS, AppScreen.RESET_PASSWORD ->
+                                    (slideInHorizontally { it } + fadeIn(tween(400))) togetherWith
+                                            (slideOutHorizontally { -it } + fadeOut(tween(300)))
+
+                                else -> fadeIn() togetherWith fadeOut()
+                            }
+                        },
+                        label = "app_screen_transition"
+                    ) { targetScreen ->
+                        when (targetScreen) {
+                            AppScreen.SPLASH -> {
+                                AnimatedSplashScreen(
+                                    onSplashFinished = {
+                                        scope.launch {
+                                            val user = FirebaseAuth.getInstance().currentUser
+                                            if (user == null) {
+                                                currentScreen = AppScreen.LOGIN
+                                            } else {
+                                                val hasNickname = authViewModel.isNicknameSet(user.uid)
+                                                currentScreen = if (hasNickname) {
+                                                    AppScreen.DASHBOARD
+                                                } else {
+                                                    AppScreen.SET_NICKNAME
+                                                }
+                                            }
+                                        }
+                                    }
+                                )
                             }
 
-                            AppScreen.SET_NICKNAME ->
-                                (slideInHorizontally { it } + fadeIn(tween(400))) togetherWith
-                                        (slideOutHorizontally { -it } + fadeOut(tween(300)))
-
-                            AppScreen.SPLASH ->
-                                fadeIn() togetherWith fadeOut()
-
-                            AppScreen.REGISTER_SUCCESS, AppScreen.RESET_PASSWORD ->
-                                (slideInHorizontally { it } + fadeIn(tween(400))) togetherWith
-                                        (slideOutHorizontally { -it } + fadeOut(tween(300)))
-
-                            else -> fadeIn() togetherWith fadeOut()
-                        }
-                    },
-                    label = "app_screen_transition"
-                ) { targetScreen ->
-                    when (targetScreen) {
-                        AppScreen.SPLASH -> {
-                            AnimatedSplashScreen(
-                                onSplashFinished = {
-                                    if(!authViewModel.isLoggedIn) {
-                                        currentScreen = AppScreen.LOGIN
-                                    } else {
+                            AppScreen.LOGIN -> {
+                                LoginScreen(
+                                    onLoginSuccess = {
                                         scope.launch {
-                                            val uid = authViewModel.currentUser.value?.uid
-                                            currentScreen = if (uid != null && authViewModel.isNicknameSet(uid)) {
+                                            val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return@launch
+                                            val hasNickname = authViewModel.isNicknameSet(uid)
+
+                                            currentScreen = if (hasNickname) {
                                                 AppScreen.DASHBOARD
                                             } else {
                                                 AppScreen.SET_NICKNAME
                                             }
                                         }
+                                    },
+                                    onRegisterSuccess = { currentScreen = AppScreen.REGISTER_SUCCESS },
+                                    onForgotPasswordClick = { currentScreen = AppScreen.RESET_PASSWORD }
+                                )
+                            }
+
+                            AppScreen.SET_NICKNAME -> OnboardingScreen(
+                                onOnboardingComplete = {currentScreen = AppScreen.DASHBOARD},
+                            )
+
+                            AppScreen.DASHBOARD -> {
+                                RootNavigationGraph(
+                                    onLogout = { currentScreen = AppScreen.LOGIN }
+                                )
+                            }
+
+                            AppScreen.REGISTER_SUCCESS -> RegisterSuccessScreen(
+                                onBack = { currentScreen = AppScreen.LOGIN },
+                                onSuccess = { currentScreen = AppScreen.LOGIN },
+                                accent = MaterialTheme.colorScheme.primary
+                            )
+
+                            AppScreen.RESET_PASSWORD -> ResetPasswordScreen(
+                                onBack = { currentScreen = AppScreen.LOGIN },
+                                accent = MaterialTheme.colorScheme.primary,
+                                onPasswordReset = { authViewModel.resetPassword { result ->
+                                    if (result.isSuccess) {
+                                        currentScreen = AppScreen.LOGIN
+                                    } else {
+                                        Log.e("ResetPassword", "Error resetting password: ${result.exceptionOrNull()?.message}")
                                     }
-                                }
+                                } },
+                                email = authViewModel.email,
+                                onEmailChange = { authViewModel.onEmailChange(it)}
                             )
                         }
-
-                        AppScreen.LOGIN -> {
-                            LoginScreen(
-                                onLoginSuccess = {
-                                    scope.launch {
-                                        val uid = FirebaseAuth.getInstance().currentUser?.uid
-                                                    ?: run {
-                                                        delay(300)
-                                                        FirebaseAuth.getInstance().currentUser?.uid
-                                                    }
-                                                            ?: return@launch
-
-                                        currentScreen = if (authViewModel.isNicknameSet(uid)) {
-                                            AppScreen.DASHBOARD
-                                        } else {
-                                            AppScreen.SET_NICKNAME
-                                        }
-                                    }
-                                },
-                                onRegisterSuccess = { currentScreen = AppScreen.REGISTER_SUCCESS },
-                                onForgotPasswordClick = { currentScreen = AppScreen.RESET_PASSWORD }
-                            )
-                        }
-
-                        AppScreen.SET_NICKNAME -> OnboardingScreen(
-                            onOnboardingComplete = {currentScreen = AppScreen.DASHBOARD},
-                        )
-
-                        AppScreen.DASHBOARD -> {
-                            RootNavigationGraph(
-                                onLogout = { currentScreen = AppScreen.LOGIN }
-                            )
-                        }
-
-                        AppScreen.REGISTER_SUCCESS -> RegisterSuccessScreen(
-                            onBack = { currentScreen = AppScreen.LOGIN },
-                            onSuccess = { currentScreen = AppScreen.LOGIN },
-                            accent = MaterialTheme.colorScheme.primary
-                        )
-
-                        AppScreen.RESET_PASSWORD -> ResetPasswordScreen(
-                            onBack = { currentScreen = AppScreen.LOGIN },
-                            accent = MaterialTheme.colorScheme.primary,
-                            onPasswordReset = { authViewModel.resetPassword { result ->
-                                if (result.isSuccess) {
-                                    currentScreen = AppScreen.LOGIN
-                                } else {
-                                    Log.e("ResetPassword", "Error resetting password: ${result.exceptionOrNull()?.message}")
-                                }
-                            } },
-                            email = authViewModel.email,
-                            onEmailChange = { authViewModel.onEmailChange(it)}
-                        )
                     }
                 }
             }
