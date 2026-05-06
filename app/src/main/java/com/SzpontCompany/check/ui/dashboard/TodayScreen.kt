@@ -284,9 +284,11 @@ fun TopSection(
         }
     }
 }
-
 @Composable
 fun HeroCard(currentStreak: Int, bestStreak: Int, weeklyProgress: List<Float>) {
+    val multiplier = (1.0f + (currentStreak * 0.05f)).coerceIn(1.0f, 2.5f)
+    val multiplierText = String.format("%.2f", multiplier)
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
@@ -300,17 +302,26 @@ fun HeroCard(currentStreak: Int, bestStreak: Int, weeklyProgress: List<Float>) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column {
-                Text(
-                    "Aktualny streak",
-                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
-                    fontSize = 14.sp
-                )
-                Text(
-                    "$currentStreak dni",
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    fontSize = 32.sp,
-                    fontWeight = FontWeight.Bold
-                )
+                Text("Aktualny streak", color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f), fontSize = 14.sp)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("$currentStreak dni", color = MaterialTheme.colorScheme.onPrimary, fontSize = 32.sp, fontWeight = FontWeight.Bold)
+
+                    if (multiplier > 1.0f) {
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Surface(
+                            color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.2f),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Text(
+                                text = "x$multiplierText",
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     "Rekord: $bestStreak dni",
@@ -325,7 +336,6 @@ fun HeroCard(currentStreak: Int, bestStreak: Int, weeklyProgress: List<Float>) {
         }
     }
 }
-
 @Composable
 fun MiniBarChart(color: Color, weeklyProgress: List<Float>) {
     val heights = if (weeklyProgress.size == 7) weeklyProgress else List(7) { 0f }
