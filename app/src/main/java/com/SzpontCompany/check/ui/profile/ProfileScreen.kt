@@ -55,6 +55,16 @@ import androidx.lifecycle.Lifecycle
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import com.SzpontCompany.check.data.badges.Badge
 import com.SzpontCompany.check.ui.components.UserAvatar
+import android.graphics.Bitmap
+import android.graphics.Picture
+import android.net.Uri
+import androidx.core.content.FileProvider
+import androidx.compose.ui.graphics.drawscope.draw
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.draw.drawWithCache
+import java.io.File
+import java.io.FileOutputStream
 
 @Composable
 fun ProfileScreen(
@@ -132,17 +142,18 @@ fun ProfileScreen(
             ShareProfileDialog(
                 uiState = uiState,
                 onDismiss = { showShareDialog = false },
-                onShareConfirm = {
+                onShareConfirm = { imageUri ->
                     showShareDialog = false
 
                     val streak = uiState.user?.currentStreak ?: 0
                     val battles = uiState.battlesWon
-                    val shareText =
-                        "Hej! Mój streak to $streak dni, a na koncie mam $battles wygranych pojedynków w aplikacji Check. 🔥 Dołącz do mnie i wygrywaj każdy dzień!"
+                    val shareText = "Hej! Mój streak to $streak dni, a na koncie mam $battles wygranych pojedynków. 🔥 Dołącz do mnie w Check. !"
 
                     val sendIntent = Intent(Intent.ACTION_SEND).apply {
-                        type = "text/plain"
+                        type = "image/png"
+                        putExtra(Intent.EXTRA_STREAM, imageUri)
                         putExtra(Intent.EXTRA_TEXT, shareText)
+                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                     }
                     context.startActivity(Intent.createChooser(sendIntent, "Udostępnij profil"))
                 }
@@ -721,9 +732,11 @@ fun LogoutConfirmationDialog(
 fun ShareProfileDialog(
     uiState: ProfileUiState,
     onDismiss: () -> Unit,
-    onShareConfirm: () -> Unit
+    onShareConfirm: (Uri) -> Unit
 ) {
     val user = uiState.user
+    val context = LocalContext.current
+    val picture = remember { Picture() }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -742,7 +755,33 @@ fun ShareProfileDialog(
         },
         text = {
             Column(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .drawWithCache {
+                        val width = size.width.toInt()
+                        val height = size.height.toInt()
+
+                        onDrawWithContent {
+                            val pictureCanvas = androidx.compose.ui.graphics.Canvas(
+                                picture.beginRecording(width, height)
+                            )
+
+                            draw(
+                                this,
+                                layoutDirection,
+                                pictureCanvas,
+                                size
+                            ) {
+                                this@onDrawWithContent.drawContent()
+                            }
+
+                            picture.endRecording()
+
+                            drawIntoCanvas { canvas ->
+                                canvas.nativeCanvas.drawPicture(picture)
+                            }
+                        }
+                    },
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Box(
@@ -766,6 +805,7 @@ fun ShareProfileDialog(
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
+
                         Box(
                             modifier = Modifier
                                 .size(80.dp)
@@ -790,6 +830,7 @@ fun ShareProfileDialog(
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onBackground
                         )
+
                         Text(
                             text = if (user?.nickname.isNullOrBlank()) "@nick" else "@${user?.nickname}",
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -803,11 +844,13 @@ fun ShareProfileDialog(
                             horizontalArrangement = Arrangement.SpaceEvenly
                         ) {
                             ShareStatItem(value = "Lvl 8", label = "Poziom")
+
                             ShareStatItem(
                                 value = "🔥 ${user?.currentStreak ?: 0}",
                                 label = "Streak",
                                 valueColor = MaterialTheme.colorScheme.primary
                             )
+
                             ShareStatItem(
                                 value = "🏆 ${uiState.battlesWon}",
                                 label = "Wygrane",
@@ -829,13 +872,30 @@ fun ShareProfileDialog(
         },
         confirmButton = {
             Button(
-                onClick = onShareConfirm,
+                onClick = {
+                    if (picture.width > 0 && picture.height > 0) {
+                        val bitmap = Bitmap.createBitmap(
+                            picture.width,
+                            picture.height,
+                            Bitmap.Config.ARGB_8888
+                        )
+
+                        val canvas = android.graphics.Canvas(bitmap)
+                        canvas.drawColor(android.graphics.Color.WHITE)
+                        canvas.drawPicture(picture)
+
+                        val uri = saveBitmapAndGetUri(context, bitmap)
+                        uri?.let { onShareConfirm(it) }
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 8.dp, vertical = 4.dp)
                     .height(50.dp),
                 shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                )
             ) {
                 Icon(
                     Icons.Outlined.Share,
@@ -956,10 +1016,17 @@ fun BadgeDetailsDialog(
     )
 }
 
-@Preview(showBackground = true)
-@Composable
-fun ProfileScreenPreview() {
-    CheckTheme(darkTheme = true, accent = Mint) {
-        ProfileScreen()
+fun saveBitmapAndGetUri(context: android.content.Context, bitmap: Bitmap): Uri? {
+    return try {
+        val cachePath = File(context.cacheDir, "images")
+        cachePath.mkdirs()
+        val file = File(cachePath, "profile_share.png")
+        val stream = FileOutputStream(file)
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
+        stream.close()
+        FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
     }
 }
