@@ -1,592 +1,598 @@
 package com.SzpontCompany.check.ui.map
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Canvas
+import android.Manifest
+import android.content.pm.PackageManager
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.outlined.LocationOn
-import androidx.compose.material.icons.outlined.People
-import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
+import com.SzpontCompany.check.R
+import com.SzpontCompany.check.data.map.FriendLocation
+import com.SzpontCompany.check.data.map.Route
+import com.SzpontCompany.check.ui.theme.getColorByName
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.maps.android.compose.*
+import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.*
+import com.SzpontCompany.check.ui.map.createAvatarMarker
 
-enum class MapTab { TODAY, ROUTES, FRIENDS }
+enum class MapTab { ROUTES, FRIENDS }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MapScreen() {
-    var selectedTab by remember { mutableStateOf(MapTab.TODAY) }
+fun MapScreen(
+    viewModel: MapViewModel = viewModel()
+) {
+    val context = LocalContext.current
+    var selectedTab by remember { mutableStateOf(MapTab.ROUTES) }
+    val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
 
-    val configuration = LocalConfiguration.current
-    val screenHeight = configuration.screenHeightDp.dp
+    val cameraPositionState = rememberCameraPositionState {
+        position = CameraPosition.fromLatLngZoom(LatLng(52.23, 21.01), 6f)
+    }
+
+    val pathPoints by viewModel.pathPoints.collectAsState()
+    val isTracking by viewModel.isTracking.collectAsState()
+    val distanceKm by viewModel.distanceKm.collectAsState()
+    val durationMs by viewModel.durationMs.collectAsState()
+    val routesHistory by viewModel.routesHistory.collectAsState()
+    val friendsLocations by viewModel.friendsLocations.collectAsState() // Pobieranie danych o znajomych
+    val stepsCount by viewModel.stepsCount.collectAsState()
+    val scope = rememberCoroutineScope()
+
+    var locationPermissionGranted by remember {
+        mutableStateOf(
+            ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        )
+    }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        locationPermissionGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+                permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+    }
+
+    LaunchedEffect(locationPermissionGranted) {
+        if (locationPermissionGranted) {
+            try {
+                fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                    if (location != null) {
+
+                        val uid = FirebaseAuth.getInstance().currentUser?.uid
+                        if (uid != null) {
+                            FirebaseFirestore.getInstance().collection("users").document(uid)
+                                .update(
+                                    mapOf(
+                                        "latitude" to location.latitude,
+                                        "longitude" to location.longitude,
+                                        "lastSeenMillis" to System.currentTimeMillis()
+                                    )
+                                )
+                        }
+
+                        scope.launch {
+                            cameraPositionState.animate(
+                                CameraUpdateFactory.newLatLngZoom(LatLng(location.latitude, location.longitude), 16f)
+                            )
+                        }
+                    } else {
+                        fusedLocationClient.getCurrentLocation(
+                            com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY,
+                            null
+                        ).addOnSuccessListener { currentLocation ->
+                            currentLocation?.let {
+                                scope.launch {
+                                    cameraPositionState.animate(
+                                        CameraUpdateFactory.newLatLngZoom(LatLng(it.latitude, it.longitude), 16f)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (e: SecurityException) {
+            }
+        } else {
+            permissionLauncher.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.POST_NOTIFICATIONS,
+                    Manifest.permission.ACTIVITY_RECOGNITION
+                )
+            )
+        }
+    }
+
+    LaunchedEffect(pathPoints) {
+        if (isTracking && pathPoints.isNotEmpty()) {
+            cameraPositionState.animate(CameraUpdateFactory.newLatLng(pathPoints.last()))
+        }
+    }
 
     val scaffoldState = rememberBottomSheetScaffoldState(
         bottomSheetState = rememberStandardBottomSheetState(
-            initialValue = SheetValue.PartiallyExpanded,
-            skipHiddenState = false
+            initialValue = SheetValue.PartiallyExpanded
         )
     )
 
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
         sheetContainerColor = MaterialTheme.colorScheme.surface,
-        sheetPeekHeight = 125.dp,
+        sheetPeekHeight = 160.dp,
         sheetShape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
-        sheetDragHandle = {
-            BottomSheetDefaults.DragHandle(
-                color = MaterialTheme.colorScheme.outline,
-                modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
-            )
-        },
+        sheetDragHandle = { BottomSheetDefaults.DragHandle() },
         sheetContent = {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize() // ZMIANA: Zdejmujemy limit 0.65f, pasek rozwija się na pełny ekran!
-            ) {
-                // 1. Pasek statystyk na górze panelu
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(9.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.error)
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    StatCell(value = "5057", label = "kroków", isHighlight = true)
-                    Spacer(Modifier.weight(1f))
-                    StatDivider()
-                    Spacer(Modifier.weight(1f))
-                    StatCell(value = "3.8", label = "km")
-                    Spacer(Modifier.weight(1f))
-                    StatDivider()
-                    Spacer(Modifier.weight(1f))
-                    StatCell(value = "182", label = "kcal")
-                    Spacer(Modifier.weight(1f))
-                    StatDivider()
-                    Spacer(Modifier.weight(1f))
-                    StatCell(value = "32:23", label = "czas")
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // 2. Zakładki
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                ) {
-                    MapTabItem("Dziś",    selectedTab == MapTab.TODAY)   { selectedTab = MapTab.TODAY }
-                    MapTabItem("Trasy",   selectedTab == MapTab.ROUTES)  { selectedTab = MapTab.ROUTES }
-                    MapTabItem("Znajomi", selectedTab == MapTab.FRIENDS) { selectedTab = MapTab.FRIENDS }
-                }
-
-                // 3. Treść wybranej zakładki
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.background)
-                ) {
-                    when (selectedTab) {
-                        MapTab.TODAY   -> TodayTab()
-                        MapTab.ROUTES  -> RoutesTab()
-                        MapTab.FRIENDS -> FriendsTab()
+            MapSheetContent(
+                selectedTab = selectedTab,
+                onTabSelected = { selectedTab = it },
+                isTracking = isTracking,
+                distance = String.format(Locale.US, "%.2f", distanceKm),
+                duration = viewModel.formatDuration(durationMs),
+                calories = viewModel.calories.toString(),
+                steps = stepsCount.toString(),
+                onToggleTracking = {
+                    if (locationPermissionGranted) {
+                        viewModel.toggleTracking(context)
+                    } else {
+                        Toast.makeText(context, "Brak uprawnień do lokalizacji!", Toast.LENGTH_SHORT).show()
                     }
-                }
-            }
+                },
+                routesHistory = routesHistory,
+                friendsLocations = friendsLocations,
+                formatDuration = viewModel::formatDuration,
+                onFriendClick = { friend ->
+                    scope.launch {
+                        cameraPositionState.animate(
+                            CameraUpdateFactory.newLatLngZoom(LatLng(friend.latitude, friend.longitude), 14f)
+                        )
+                        scaffoldState.bottomSheetState.partialExpand()
+                    }
+                },
+                getTimeAgoString = viewModel::getTimeAgoString
+            )
         },
         content = {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background)
-            ) {
-                MapPlaceholder(modifier = Modifier.fillMaxSize())
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 10.dp)
-                        .statusBarsPadding(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
+            Box(modifier = Modifier.fillMaxSize()) {
+                GoogleMap(
+                    modifier = Modifier.fillMaxSize(),
+                    cameraPositionState = cameraPositionState,
+                    properties = MapProperties(isMyLocationEnabled = locationPermissionGranted),
+                    uiSettings = MapUiSettings(zoomControlsEnabled = false, myLocationButtonEnabled = false)
                 ) {
-                    MapChip(
-                        icon = { Icon(Icons.Outlined.LocationOn, contentDescription = null, modifier = Modifier.size(14.dp)) },
-                        label = "Eksploracja"
-                    )
-                    MapChip(
-                        icon = { Icon(Icons.Outlined.People, contentDescription = null, modifier = Modifier.size(14.dp)) },
-                        label = "Znajomi"
-                    )
-                    Spacer(Modifier.weight(1f))
-                    Box(
-                        modifier = Modifier
-                            .size(36.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.85f))
-                            .clickable { },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(Icons.Outlined.Settings, contentDescription = null, tint = MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(16.dp))
+                    if (pathPoints.isNotEmpty()) {
+                        Polyline(
+                            points = pathPoints,
+                            color = MaterialTheme.colorScheme.primary,
+                            width = 12f
+                        )
+                    }
+
+                    if (selectedTab == MapTab.FRIENDS) {
+                        friendsLocations.forEach { friend ->
+                            val avatarIcon = remember(friend.id, friend.name, friend.emoji, friend.bgColorName) {
+                                createAvatarMarker(
+                                    context = context,
+                                    name = friend.name,
+                                    emoji = friend.emoji,
+                                    bgColorName = friend.bgColorName
+                                )
+                            }
+
+                            Marker(
+                                state = MarkerState(position = LatLng(friend.latitude, friend.longitude)),
+                                title = friend.name,
+                                icon = avatarIcon,
+                                snippet = "Check."
+                            )
+                        }
                     }
                 }
-
-                Column(
-                    modifier = Modifier
-                        .align(Alignment.CenterEnd)
-                        .padding(end = 10.dp)
-                        .offset(y = (-40).dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    ZoomButton("+")
-                    ZoomButton("−")
-                }
-            }
-        }
-    )
-}
-
-@Composable
-private fun TodayTab() {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .navigationBarsPadding(),
-        // ZMIANA: Usunięty verticalScroll, żeby karta mogła rozepchnąć się na wysokość
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        // GŁÓWNA KARTA – dzięki weight(1f) wypełnia calutką dostępną wysokość
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(24.dp))
-                .background(MaterialTheme.colorScheme.surface)
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceEvenly
-        ) {
-            // DUŻY WYKRES - zajmuje max przestrzeni, zachowując proporcje koła
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .aspectRatio(1f),
-                contentAlignment = Alignment.Center
-            ) {
-                StepsRing(
-                    current = 5057,
-                    goal    = 8000,
-                    modifier = Modifier.fillMaxSize()
+                MapOverlays(
+                    onSettingsClick = {},
+                    onZoomIn = {
+                        scope.launch { cameraPositionState.animate(CameraUpdateFactory.zoomIn()) }
+                    },
+                    onZoomOut = {
+                        scope.launch { cameraPositionState.animate(CameraUpdateFactory.zoomOut()) }
+                    },
+                    onLocationClick = {
+                        if (locationPermissionGranted) {
+                            try {
+                                fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                                    location?.let {
+                                        scope.launch {
+                                            cameraPositionState.animate(
+                                                CameraUpdateFactory.newLatLngZoom(LatLng(it.latitude, it.longitude), 16f)
+                                            )
+                                        }
+                                    }
+                                }
+                            } catch (e: SecurityException) {}
+                        }
+                    }
                 )
             }
+        }
+    )
+}
 
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // STATYSTYKI POD WYKRESEM
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+@Composable
+fun MapOverlays(
+    onSettingsClick: () -> Unit,
+    onZoomIn: () -> Unit,
+    onZoomOut: () -> Unit,
+    onLocationClick: () -> Unit
+) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .padding(end = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            ZoomButton("+", onClick = onZoomIn)
+            ZoomButton("−", onClick = onZoomOut)
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(MaterialTheme.colorScheme.surface)
+                    .clickable { onLocationClick() },
+                contentAlignment = Alignment.Center
             ) {
-                // Wiersz: Dystans + Kcal
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Column {
-                        Text("Dystans", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp)
-                        Text("3.8 km", color = MaterialTheme.colorScheme.onBackground, fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
-                    }
-                    Column(horizontalAlignment = Alignment.End) {
-                        Text("Kcal", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp)
-                        Text("182", color = MaterialTheme.colorScheme.onBackground, fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+                Icon(Icons.Outlined.LocationOn, "GPS", tint = MaterialTheme.colorScheme.primary)
+            }
+        }
+    }
+}
+
+@Composable
+fun MapSheetContent(
+    selectedTab: MapTab,
+    onTabSelected: (MapTab) -> Unit,
+    isTracking: Boolean,
+    distance: String,
+    duration: String,
+    calories: String,
+    steps: String,
+    onToggleTracking: () -> Unit,
+    routesHistory: List<Route>,
+    friendsLocations: List<FriendLocation>,
+    formatDuration: (Long) -> String,
+    onFriendClick: (FriendLocation) -> Unit,
+    getTimeAgoString: (Long) -> Int
+) {
+    val context = LocalContext.current
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .defaultMinSize(minHeight = 450.dp)
+            .padding(bottom = 16.dp)
+    ) {
+        Row(Modifier.padding(horizontal = 16.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+            StatCell(duration, "czas", true)
+            Spacer(Modifier.weight(1f))
+            StatCell(distance, "km")
+            Spacer(Modifier.weight(1f))
+            StatCell(steps, "kroki")
+            Spacer(Modifier.weight(1f))
+            StatCell(calories, "kcal")
+        }
+
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Button(
+                onClick = {
+                    Toast.makeText(
+                        context,
+                        if (isTracking) "Zapisywanie trasy..." else "Rozpoczęto śledzenie trasy!",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    onToggleTracking()
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (isTracking) Color(0xFFE24B4A) else MaterialTheme.colorScheme.primary
+                ),
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier.fillMaxWidth().height(48.dp)
+            ) {
+                Text(
+                    text = if (isTracking) "Zakończ i Zapisz" else "Rozpocznij Trening",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    color = Color.White
+                )
+            }
+        }
+
+        Row(Modifier.padding(horizontal = 16.dp)) {
+            MapTabItem("Moje Trasy", selectedTab == MapTab.ROUTES) { onTabSelected(MapTab.ROUTES) }
+            MapTabItem("Znajomi", selectedTab == MapTab.FRIENDS) { onTabSelected(MapTab.FRIENDS) }
+        }
+
+        if (selectedTab == MapTab.ROUTES) {
+            var selectedImageUrl by remember { mutableStateOf<String?>(null) }
+            Spacer(modifier = Modifier.height(8.dp))
+            if (routesHistory.isEmpty()) {
+                Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+                    Text("Brak zapisanych tras.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentPadding = PaddingValues(horizontal = 16.dp)
+                ) {
+                    items(routesHistory) { route ->
+                        val dateFormat = SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault())
+                        val dateStr = if (route.startTime > 0) dateFormat.format(Date(route.startTime)) else "Nieznana data"
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha=0.5f))
+                        ) {
+                            Column {
+                                if (route.mapImageUrl.isNotEmpty()) {
+                                    AsyncImage(
+                                        model = route.mapImageUrl,
+                                        contentDescription = "Mapa przebytej trasy",
+                                        contentScale = ContentScale.Crop,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(140.dp)
+                                            .background(MaterialTheme.colorScheme.surfaceVariant)
+                                            .clickable { selectedImageUrl = route.mapImageUrl }
+                                    )
+                                }
+                                Column(Modifier.padding(16.dp)) {
+                                    Text(dateStr, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
+                                    Spacer(Modifier.height(8.dp))
+                                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                        Column {
+                                            Text("Dystans", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                            Text("${String.format(Locale.US, "%.2f", route.distanceKm)} km", fontSize=15.sp, fontWeight = FontWeight.Bold)
+                                        }
+                                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                            Text("Czas", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                            Text(formatDuration(route.durationMs), fontSize=15.sp, fontWeight = FontWeight.Bold)
+                                        }
+                                        Column(horizontalAlignment = Alignment.End) {
+                                            Text("Kroki", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                            Text("${route.steps}", fontSize=15.sp, fontWeight = FontWeight.Bold)
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
+            }
 
-                Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)))
-
-                TempoRow(tempo = "5 min/km", percent = 63)
-
-                Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
+            if (selectedImageUrl != null) {
+                Dialog(
+                    onDismissRequest = { selectedImageUrl = null },
+                    properties = DialogProperties(
+                        usePlatformDefaultWidth = false,
+                        dismissOnBackPress = true,
+                        dismissOnClickOutside = true
+                    )
                 ) {
-                    Text("Streak kroków", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp)
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            "14 dni z rzędu ",
-                            color = MaterialTheme.colorScheme.primary,
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.SemiBold
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = 0.9f))
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null,
+                                onClick = { selectedImageUrl = null }
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        AsyncImage(
+                            model = selectedImageUrl,
+                            contentDescription = "Powiększona mapa",
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier.fillMaxSize()
                         )
-                        Text("🔥", fontSize = 16.sp)
+                        IconButton(
+                            onClick = { selectedImageUrl = null },
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .statusBarsPadding()
+                                .padding(16.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Zamknij",
+                                tint = Color.White,
+                                modifier = Modifier.size(32.dp)
+                            )
+                        }
                     }
                 }
             }
         }
 
-        // PRZYCISK – Zawsze twardo przyklejony na dole
-        Button(
-            onClick = { },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
-            shape = RoundedCornerShape(16.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-        ) {
-            Icon(Icons.Default.PlayArrow, contentDescription = null, tint = MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(20.dp))
-            Spacer(Modifier.width(8.dp))
-            Text("Rozpocznij trasę", color = MaterialTheme.colorScheme.onBackground, fontSize = 16.sp, fontWeight = FontWeight.Medium)
+        if (selectedTab == MapTab.FRIENDS) {
+            Spacer(modifier = Modifier.height(8.dp))
+            if (friendsLocations.isEmpty()) {
+                Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+                    Text(stringResource(R.string.map_friends_empty), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentPadding = PaddingValues(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(friendsLocations) { friend ->
+                        FriendLocationCard(
+                            friend = friend,
+                            minutesAgo = getTimeAgoString(friend.lastSeenMillis),
+                            onClick = { onFriendClick(friend) }
+                        )
+                    }
+                }
+            }
         }
     }
 }
 
 @Composable
-private fun RoutesTab() {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp)
-            .navigationBarsPadding(),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        Text("Historia tras", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
-        repeat(3) { i ->
-            RouteHistoryCard(
-                name     = listOf("Poranny spacer", "Bieg wieczorny", "Wycieczka do parku")[i],
-                date     = listOf("Dziś, 07:15", "Wczoraj, 18:42", "Wt, 09:00")[i],
-                distance = listOf("3.8 km", "6.2 km", "2.1 km")[i],
-                duration = listOf("32:23", "38:15", "22:40")[i],
-                kcal     = listOf("182", "310", "98")[i]
-            )
-        }
+fun FriendLocationCard(
+    friend: FriendLocation,
+    minutesAgo: Int,
+    onClick: () -> Unit
+) {
+    val timeAgoText = when {
+        minutesAgo < 1 -> stringResource(R.string.map_friend_just_now)
+        minutesAgo < 60 -> stringResource(R.string.map_friend_mins_ago, minutesAgo)
+        else -> stringResource(R.string.map_friend_hours_ago, minutesAgo / 60)
     }
-}
 
-@Composable
-private fun FriendsTab() {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp)
-            .navigationBarsPadding(),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        Text("Aktywni dziś", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
-        listOf(
-            Triple("Kacper M.", "8 204 kroków", "#1"),
-            Triple("Zuzia K.",  "6 731 kroków", "#2"),
-            Triple("Bartek T.", "5 057 kroków", "#3 (Ty)")
-        ).forEachIndexed { idx, (name, steps, rank) ->
-            FriendRow(name = name, steps = steps, rank = rank, isMe = idx == 2)
-        }
+    // 1. Obliczanie inicjałów z nazwy (identycznie jak w innych częściach aplikacji)
+    val initials = remember(friend.name) {
+        friend.name.trim().split("\\s+".toRegex())
+            .mapNotNull { it.firstOrNull()?.uppercase() }
+            .take(2)
+            .joinToString("")
     }
-}
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Komponenty pomocnicze
-// ─────────────────────────────────────────────────────────────────────────────
+    // 2. Sprawdzenie, czy użytkownik ma ustawione własne emoji
+    val isEmojiValid = friend.emoji.isNotEmpty() && friend.emoji != "👤"
 
-@Composable
-private fun MapPlaceholder(modifier: Modifier = Modifier) {
-    val mapBgColor = MaterialTheme.colorScheme.surfaceVariant
-    val mapRoadColor = MaterialTheme.colorScheme.outlineVariant
-    val mapParkColor = MaterialTheme.colorScheme.secondaryContainer
-    val accentColor = MaterialTheme.colorScheme.primary
-
-    Canvas(modifier = modifier) {
-        drawRect(color = mapBgColor)
-
-        val roadW = 14f
-        for (y in listOf(size.height * 0.2f, size.height * 0.4f, size.height * 0.6f, size.height * 0.8f)) {
-            drawLine(mapRoadColor, Offset(0f, y), Offset(size.width, y), strokeWidth = roadW)
-        }
-        for (x in listOf(size.width * 0.2f, size.width * 0.45f, size.width * 0.7f, size.width * 0.88f)) {
-            drawLine(mapRoadColor, Offset(x, 0f), Offset(x, size.height), strokeWidth = roadW)
-        }
-
-        drawRect(
-            color = mapParkColor,
-            topLeft = Offset(size.width * 0.22f, size.height * 0.18f),
-            size = Size(size.width * 0.22f, size.height * 0.20f)
-        )
-
-        val pathPoints = listOf(
-            Offset(size.width * 0.38f, size.height * 0.50f),
-            Offset(size.width * 0.38f, size.height * 0.45f),
-            Offset(size.width * 0.33f, size.height * 0.30f),
-            Offset(size.width * 0.33f, size.height * 0.20f),
-            Offset(size.width * 0.45f, size.height * 0.12f)
-        )
-        val routePath = Path().apply {
-            moveTo(pathPoints[0].x, pathPoints[0].y)
-            pathPoints.drop(1).forEach { lineTo(it.x, it.y) }
-        }
-        drawPath(
-            path = routePath,
-            color = accentColor,
-            style = Stroke(
-                width = 5f,
-                cap = StrokeCap.Round,
-                pathEffect = PathEffect.dashPathEffect(floatArrayOf(14f, 10f))
-            )
-        )
-
-        drawCircle(color = accentColor, radius = 14f, center = pathPoints.last())
-        drawCircle(color = mapBgColor,  radius = 8f,  center = pathPoints.last())
-
-        drawCircle(color = accentColor, radius = 18f, center = pathPoints.first())
-        drawCircle(color = mapBgColor,  radius = 10f, center = pathPoints.first())
-        drawCircle(color = accentColor, radius = 5f,  center = pathPoints.first())
-    }
-}
-
-@Composable
-private fun MapChip(icon: @Composable () -> Unit, label: String) {
     Row(
         modifier = Modifier
-            .clip(RoundedCornerShape(20.dp))
-            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.90f))
-            .clickable { }
-            .padding(horizontal = 12.dp, vertical = 7.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(5.dp)
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+            .clickable { onClick() }
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onBackground) { icon() }
-        Text(label, color = MaterialTheme.colorScheme.onBackground, fontSize = 13.sp, fontWeight = FontWeight.Medium)
+        // 3. Kontener awatara z dynamiczną zawartością
+        Box(
+            modifier = Modifier
+                .size(48.dp)
+                .clip(CircleShape)
+                .background(getColorByName(friend.bgColorName)) // Tło w kolorze użytkownika
+                .border(2.dp, MaterialTheme.colorScheme.background, CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            if (isEmojiValid) {
+                // Wyświetlamy emoji, jeśli jest ustawione
+                Text(text = friend.emoji, fontSize = 24.sp)
+            } else {
+                // Wyświetlamy białe, pogrubione inicjały w przeciwnym razie
+                Text(
+                    text = initials,
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.width(16.dp))
+
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = friend.name,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            Text(
+                text = stringResource(R.string.map_friend_last_seen, timeAgoText),
+                fontSize = 13.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                .size(36.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.LocationOn,
+                contentDescription = "Pokaż na mapie",
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(20.dp)
+            )
+        }
     }
 }
 
 @Composable
-private fun ZoomButton(symbol: String) {
+private fun ZoomButton(symbol: String, onClick: () -> Unit) {
     Box(
-        modifier = Modifier
-            .size(32.dp)
-            .clip(RoundedCornerShape(8.dp))
-            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.85f))
-            .clickable { },
+        modifier = Modifier.size(40.dp).clip(RoundedCornerShape(8.dp)).background(MaterialTheme.colorScheme.surface).clickable { onClick() },
         contentAlignment = Alignment.Center
     ) {
-        Text(symbol, color = MaterialTheme.colorScheme.onBackground, fontSize = 18.sp, fontWeight = FontWeight.Light)
+        Text(symbol, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
     }
 }
 
 @Composable
-private fun StatCell(value: String, label: String, isHighlight: Boolean = false) {
+private fun StatCell(value: String, label: String, highlight: Boolean = false) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(
-            text = value,
-            color = MaterialTheme.colorScheme.onBackground,
-            fontSize = if (isHighlight) 22.sp else 16.sp,
-            fontWeight = if (isHighlight) FontWeight.ExtraBold else FontWeight.SemiBold,
-            letterSpacing = if (isHighlight) (-0.5).sp else 0.sp
-        )
-        Text(
-            text = label,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            fontSize = 10.sp,
-            letterSpacing = 0.sp
-        )
+        Text(value, fontSize = if (highlight) 20.sp else 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
+        Text(label, fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
-}
-
-@Composable
-private fun StatDivider() {
-    Box(
-        modifier = Modifier
-            .width(1.dp)
-            .height(28.dp)
-            .background(MaterialTheme.colorScheme.outline)
-    )
 }
 
 @Composable
 private fun MapTabItem(label: String, selected: Boolean, onClick: () -> Unit) {
-    val underlineColor by animateColorAsState(
-        targetValue = if (selected) MaterialTheme.colorScheme.primary else Color.Transparent,
-        animationSpec = tween(200), label = "tab_underline"
-    )
     Column(
-        modifier = Modifier
-            .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 0.dp),
+        modifier = Modifier.clickable { onClick() }.padding(12.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = label,
-            color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-            fontSize = 14.sp,
-            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
-            modifier = Modifier.padding(vertical = 12.dp)
-        )
-        Box(
-            modifier = Modifier
-                .height(2.dp)
-                .width(40.dp)
-                .clip(RoundedCornerShape(1.dp))
-                .background(underlineColor)
-        )
-    }
-}
-
-@Composable
-private fun StepsRing(current: Int, goal: Int, modifier: Modifier = Modifier) {
-    val progress = (current.toFloat() / goal).coerceIn(0f, 1f)
-
-    val trackColor = MaterialTheme.colorScheme.surfaceVariant
-    val primaryColor = MaterialTheme.colorScheme.primary
-    val textColor = MaterialTheme.colorScheme.onBackground
-    val secondaryTextColor = MaterialTheme.colorScheme.onSurfaceVariant
-
-    Box(modifier = modifier, contentAlignment = Alignment.Center) {
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            val stroke = 12.dp.toPx() // Zwiększona grubość linii dla dużego ringu
-            val radius = (size.minDimension - stroke) / 2f
-            val center = Offset(size.width / 2f, size.height / 2f)
-
-            drawCircle(color = trackColor, radius = radius, center = center, style = Stroke(stroke))
-
-            drawArc(
-                color = primaryColor,
-                startAngle = -90f,
-                sweepAngle = 360f * progress,
-                useCenter = false,
-                style = Stroke(stroke, cap = StrokeCap.Round),
-                topLeft = Offset(center.x - radius, center.y - radius),
-                size = Size(radius * 2, radius * 2)
-            )
+        Text(label, color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium)
+        if (selected) {
+            Spacer(modifier = Modifier.height(4.dp))
+            Box(Modifier.height(3.dp).width(20.dp).clip(RoundedCornerShape(1.5.dp)).background(MaterialTheme.colorScheme.primary))
         }
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(
-                text = current.toString(),
-                color = textColor,
-                fontSize = 32.sp, // ZMIANA: Zwiększona czcionka wewnątrz ringu (bo wykres będzie potężny!)
-                fontWeight = FontWeight.Bold,
-                letterSpacing = (-1).sp
-            )
-            Text(text = "/ ${goal / 1000}k", color = secondaryTextColor, fontSize = 16.sp)
-        }
-    }
-}
-
-@Composable
-private fun TempoRow(tempo: String, percent: Int) {
-    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text("Tempo", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp)
-            Text("$percent%", color = MaterialTheme.colorScheme.primary, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
-        }
-        Text(tempo, color = MaterialTheme.colorScheme.onBackground, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(4.dp)
-                .clip(RoundedCornerShape(2.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant)
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth(percent / 100f)
-                    .fillMaxHeight()
-                    .clip(RoundedCornerShape(2.dp))
-                    .background(MaterialTheme.colorScheme.primary)
-            )
-        }
-    }
-}
-
-@Composable
-private fun RouteHistoryCard(name: String, date: String, distance: String, duration: String, kcal: String) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .background(MaterialTheme.colorScheme.surface)
-            .padding(14.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .size(52.dp)
-                .clip(RoundedCornerShape(10.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant),
-            contentAlignment = Alignment.Center
-        ) {
-            Text("🗺️", fontSize = 22.sp)
-        }
-        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(name, color = MaterialTheme.colorScheme.onBackground, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-            Text(date, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text("$distance  ·  $duration  ·  $kcal kcal", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 11.sp)
-            }
-        }
-    }
-}
-
-@Composable
-private fun FriendRow(name: String, steps: String, rank: String, isMe: Boolean) {
-    val bgColor = if (isMe) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface
-    val borderColor = if (isMe) MaterialTheme.colorScheme.primary.copy(alpha = 0.4f) else Color.Transparent
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .background(bgColor)
-            .border(
-                width = if (isMe) 1.dp else 0.dp,
-                color = borderColor,
-                shape = RoundedCornerShape(14.dp)
-            )
-            .padding(14.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .size(40.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.surfaceVariant),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(name.first().toString(), color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
-        }
-        Column(modifier = Modifier.weight(1f)) {
-            Text(name,  color = MaterialTheme.colorScheme.onBackground,   fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-            Text(steps, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
-        }
-        Text(rank, color = if (isMe) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp, fontWeight = FontWeight.Bold)
     }
 }
