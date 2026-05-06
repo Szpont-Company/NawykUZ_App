@@ -231,7 +231,7 @@ fun OnboardingScreen(
                                     isLoading = true
                                     val stepsInt = dailySteps.toIntOrNull() ?: 8000
 
-                                    val result = authViewModel.saveFirstHabit(stepsInt)
+                                    val result = authViewModel.saveFirstHabit(stepsInt, context)
 
                                     if (result.isSuccess) {
                                         onOnboardingComplete(stepsInt)

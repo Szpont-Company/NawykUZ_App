@@ -3,6 +3,7 @@ package com.SzpontCompany.check.ui.auth
 import android.app.Application
 import android.content.Context
 import android.util.Log
+import com.SzpontCompany.check.R
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -257,16 +258,16 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    suspend fun saveFirstHabit(dailySteps: Int): Result<Unit> {
+    suspend fun saveFirstHabit(dailySteps: Int, context: Context): Result<Unit> {
         return try {
             val stepHabit = Habit(
-                name = "Kroki",
+                name = context.getString(R.string.habit_steps_name),
                 icon = "🚶",
                 colorName = "Mint",
                 frequency = "Daily",
                 dailyGoal = dailySteps,
-                unit = "kroków",
-                difficulty = "Łatwy",
+                unit = context.getString(R.string.habit_steps_unit),
+                difficulty = context.getString(R.string.habit_steps_difficulty),
                 isActive = true
             )
 

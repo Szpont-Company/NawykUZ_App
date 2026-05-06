@@ -368,4 +368,8 @@
     <string name="onboarding_first_habit">Your first habit 👣</string>
     <string name="onboarding_hero">Keep fit! Set your daily steps goal to build a habit.</string>
     <string name="onboarding_begin">Begin</string>
+
+    <string name="habit_steps_name">Steps</string>
+    <string name="habit_steps_unit">steps</string>
+    <string name="habit_steps_difficulty">Easy</string>
 </resources>

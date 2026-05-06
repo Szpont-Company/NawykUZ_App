@@ -8,6 +8,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.LocalContext
@@ -30,20 +32,30 @@ import androidx.glance.unit.ColorProvider
 import com.SzpontCompany.check.MainActivity
 import com.SzpontCompany.check.R
 
+val widgetStepsKey = intPreferencesKey("widget_steps")
+val widgetGoalKey = intPreferencesKey("widget_goal")
+val widgetHabitDoneKey = booleanPreferencesKey("widget_habit_done_today")
+
 class StepsWidget : GlanceAppWidget() {
 
     override val sizeMode = SizeMode.Exact
     override val stateDefinition: GlanceStateDefinition<*> = PreferencesGlanceStateDefinition
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-        val steps = getStepCount(context)
-        val goal = getStepGoal(context)
-        val progress = (steps.toFloat() / goal.toFloat()).coerceIn(0f, 1f)
 
         provideContent {
             val prefs = currentState<Preferences>()
             val savedColorInt = prefs[widgetAccentColorKey] ?: Color(0xFF857AE6).toArgb()
             val accentColor = Color(savedColorInt)
+
+            val steps = prefs[widgetStepsKey] ?: 0
+            val goal = prefs[widgetGoalKey] ?: 8000
+
+            val progress = if (goal > 0) {
+                (steps.toFloat() / goal.toFloat()).coerceIn(0f, 1f)
+            } else {
+                0f
+            }
 
             StepsWidgetContent(steps, goal, progress, accentColor)
         }
@@ -141,12 +153,4 @@ class StepsWidget : GlanceAppWidget() {
             }
         }
     }
-}
-
-fun getStepCount(context: Context): Int {
-    return 6420 // Mock
-}
-
-fun getStepGoal(context: Context): Int {
-    return 8000 // Mock
 }

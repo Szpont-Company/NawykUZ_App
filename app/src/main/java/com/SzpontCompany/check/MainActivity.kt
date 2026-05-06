@@ -1,6 +1,5 @@
 package com.SzpontCompany.check
 
-import android.annotation.SuppressLint
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
@@ -22,7 +21,6 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
@@ -68,11 +66,9 @@ import com.google.android.gms.ads.MobileAds
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.SzpontCompany.check.ui.community.BattleDetailScreen
 import com.SzpontCompany.check.ui.community.CommunityViewModel
-import com.google.firebase.Firebase
 
 enum class AppScreen { SPLASH, LOGIN, DASHBOARD, REGISTER_SUCCESS, RESET_PASSWORD, SET_NICKNAME }
 
