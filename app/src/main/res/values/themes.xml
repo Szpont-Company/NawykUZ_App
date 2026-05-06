@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <style name="Theme.Check.Light" parent="Theme.AppCompat.Light.NoActionBar">
+    <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
     <style name="Theme.Check" parent="Theme.AppCompat.NoActionBar">
         <item name="android:windowBackground">@color/splash_background</item>
         <item name="android:windowIsTranslucent">true</item>
