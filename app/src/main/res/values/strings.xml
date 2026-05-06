@@ -360,4 +360,11 @@
     <string name="shop_hero">Zaszalej, należy ci się!</string>
     <string name="shop_hero_desc">Wymień zgromadzone monety na wymarzoną nagrodę.</string>
     <string name="login_unverified">Zweryfikuj adres email, zanim się zalogujesz.</string>
+
+    <!-- Map Friends -->
+    <string name="map_friend_last_seen">Ostatnio widziano: %1$s</string>
+    <string name="map_friend_just_now">Teraz</string>
+    <string name="map_friend_mins_ago">%1$d min temu</string>
+    <string name="map_friend_hours_ago">%1$d godz. temu</string>
+    <string name="map_friends_empty">Żaden ze znajomych nie udostępnia teraz lokalizacji.</string>
 </resources>

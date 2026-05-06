@@ -7,6 +7,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.SzpontCompany.check.data.settings.SettingsRepository
 import com.SzpontCompany.check.data.user.UserRepository
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -27,6 +29,25 @@ class SettingsViewModel(
         started = SharingStarted.WhileSubscribed(500),
         initialValue = "Mint"
     )
+
+    val showLocationState = repository.showLocationFlow.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = true
+    )
+
+    fun updateShowLocation(show: Boolean) {
+        viewModelScope.launch { repository.saveShowLocation(show) }
+
+        val uid = FirebaseAuth.getInstance().currentUser?.uid
+        if (uid != null) {
+            FirebaseFirestore.getInstance().collection("users").document(uid)
+                .update("showLocation", show)
+                .addOnFailureListener { e ->
+                    Log.e("SettingsViewModel", "Błąd aktualizacji prywatności lokalizacji", e)
+                }
+        }
+    }
 
     val languageState = repository.languageFlow.stateIn(
         scope = viewModelScope,

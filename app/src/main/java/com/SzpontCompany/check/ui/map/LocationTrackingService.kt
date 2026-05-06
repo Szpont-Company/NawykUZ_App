@@ -19,6 +19,8 @@ import com.SzpontCompany.check.MainActivity
 import com.SzpontCompany.check.R
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.model.LatLng
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 class LocationTrackingService : Service(), SensorEventListener {
 
@@ -26,7 +28,8 @@ class LocationTrackingService : Service(), SensorEventListener {
     private lateinit var locationCallback: LocationCallback
     private lateinit var sensorManager: SensorManager
     private var stepSensor: Sensor? = null
-
+    private val firestore = FirebaseFirestore.getInstance()
+    private val auth = FirebaseAuth.getInstance()
     companion object {
         const val ACTION_START = "ACTION_START"
         const val ACTION_STOP = "ACTION_STOP"
@@ -37,7 +40,6 @@ class LocationTrackingService : Service(), SensorEventListener {
     override fun onCreate() {
         super.onCreate()
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         stepSensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR)
 
@@ -47,9 +49,26 @@ class LocationTrackingService : Service(), SensorEventListener {
                 for (location in result.locations) {
                     val latLng = LatLng(location.latitude, location.longitude)
                     TrackingManager.addPoint(latLng)
+
+                    updateLocationInFirestore(location.latitude, location.longitude)
                 }
             }
         }
+    }
+
+    private fun updateLocationInFirestore(lat: Double, lng: Double) {
+        val uid = auth.currentUser?.uid ?: return
+
+        val locationData = mapOf(
+            "latitude" to lat,
+            "longitude" to lng,
+            "lastSeenMillis" to System.currentTimeMillis()
+        )
+
+        firestore.collection("users").document(uid)
+            .update(locationData)
+            .addOnFailureListener {
+            }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {

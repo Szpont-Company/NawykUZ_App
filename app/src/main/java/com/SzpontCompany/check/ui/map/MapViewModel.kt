@@ -10,12 +10,19 @@ import com.SzpontCompany.check.data.map.Route
 import com.SzpontCompany.check.data.map.RouteRepository
 import com.google.android.gms.maps.model.LatLng
 import com.SzpontCompany.check.BuildConfig
+import com.SzpontCompany.check.data.map.FriendLocation
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldPath
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import com.google.maps.android.PolyUtil
 class MapViewModel(application: Application) : AndroidViewModel(application) {
     private val repository = RouteRepository()
+    private val firestore = FirebaseFirestore.getInstance()
+    private val auth = FirebaseAuth.getInstance()
+
     val isTracking = TrackingManager.isTracking
     val pathPoints = TrackingManager.pathPoints
     val stepsCount = TrackingManager.steps
@@ -24,6 +31,8 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
     val distanceKm: StateFlow<Double> = _distanceKm.asStateFlow()
     private val _durationMs = MutableStateFlow(0L)
     val durationMs: StateFlow<Long> = _durationMs.asStateFlow()
+    private val _friendsLocations = MutableStateFlow<List<FriendLocation>>(emptyList())
+    val friendsLocations: StateFlow<List<FriendLocation>> = _friendsLocations.asStateFlow()
 
     val calories: Int
         get() = (_distanceKm.value * 60).toInt()
@@ -43,6 +52,7 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
                 delay(1000L)
             }
         }
+        observeFriendsLocations()
     }
 
     fun toggleTracking(context: android.content.Context) {
@@ -128,5 +138,53 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
         } else {
             String.format("%02d:%02d", minutes, seconds)
         }
+    }
+
+    private fun observeFriendsLocations() {
+        val currentUserId = auth.currentUser?.uid ?: return
+
+        firestore.collection("users").document(currentUserId)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null || snapshot == null || !snapshot.exists()) return@addSnapshotListener
+
+                val friendIds = snapshot.get("friends") as? List<String> ?: emptyList()
+
+                if (friendIds.isEmpty()) {
+                    _friendsLocations.value = emptyList()
+                    return@addSnapshotListener
+                }
+
+                firestore.collection("users")
+                    .whereIn(FieldPath.documentId(), friendIds.take(10))
+                    .addSnapshotListener { usersSnapshot, usersError ->
+                        if (usersError != null || usersSnapshot == null) return@addSnapshotListener
+
+                        val locations = usersSnapshot.documents.mapNotNull { doc ->
+                            val lat = doc.getDouble("latitude")
+                            val lng = doc.getDouble("longitude")
+                            val lastSeen = doc.getLong("lastSeenMillis")
+
+                            val showLocation = doc.getBoolean("showLocation") ?: true
+
+                            if (lat != null && lng != null && lastSeen != null && showLocation) {
+                                FriendLocation(
+                                    id = doc.id,
+                                    name = doc.getString("name") ?: "Nieznany",
+                                    emoji = doc.getString("avatarEmoji") ?: "👤",
+                                    bgColorName = doc.getString("bgColor") ?: "Mint",
+                                    latitude = lat,
+                                    longitude = lng,
+                                    lastSeenMillis = lastSeen
+                                )
+                            } else null
+                        }
+                        _friendsLocations.value = locations
+                    }
+            }
+    }
+
+    fun getTimeAgoString(lastSeenMillis: Long): Int {
+        val diffMinutes = ((System.currentTimeMillis() - lastSeenMillis) / (1000 * 60)).toInt()
+        return diffMinutes
     }
 }

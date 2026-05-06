@@ -68,6 +68,12 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.SzpontCompany.check.ui.community.BattleDetailScreen
 import com.SzpontCompany.check.ui.community.CommunityViewModel
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.compose.runtime.LaunchedEffect
+import androidx.core.content.ContextCompat
+import com.google.android.gms.location.LocationServices
+import com.google.firebase.firestore.FirebaseFirestore
 
 enum class AppScreen { SPLASH, LOGIN, DASHBOARD, REGISTER_SUCCESS, RESET_PASSWORD, SET_NICKNAME }
 
@@ -240,13 +246,32 @@ fun RootNavigationGraph(onLogout: () -> Unit) {
     val navController = rememberNavController()
     val authViewModel: AuthViewModel = viewModel()
     val communityViewModel: CommunityViewModel = viewModel()
-
     var currentTab by remember { mutableStateOf<BottomTab?>(BottomTab.TODAY) }
-
-
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
+    val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
+            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                location?.let {
+                    val uid = FirebaseAuth.getInstance().currentUser?.uid
+                    if (uid != null) {
+                        FirebaseFirestore.getInstance().collection("users").document(uid)
+                            .update(
+                                mapOf(
+                                    "latitude" to it.latitude,
+                                    "longitude" to it.longitude,
+                                    "lastSeenMillis" to System.currentTimeMillis()
+                                )
+                            )
+                    }
+                }
+            }
+        }
+    }
 
     Scaffold(
         bottomBar = {

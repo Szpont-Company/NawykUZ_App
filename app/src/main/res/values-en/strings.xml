@@ -360,4 +360,11 @@
     <string name="shop_hero">Go ahead, splurge a little!</string>
     <string name="shop_hero_desc">Turn your coins into your dream reward.</string>
     <string name="login_unverified">Verify email before signing in.</string>
+
+    <!-- Map Friends -->
+    <string name="map_friend_last_seen">Last seen: %1$s</string>
+    <string name="map_friend_just_now">Just now</string>
+    <string name="map_friend_mins_ago">%1$d mins ago</string>
+    <string name="map_friend_hours_ago">%1$d hours ago</string>
+    <string name="map_friends_empty">None of your friends are sharing their location right now.</string>
 </resources>
