@@ -43,23 +43,14 @@ class TodayViewModel(application: Application) : AndroidViewModel(application) {
                 if (user != null) {
                     val todayString = LocalDate.now().toString()
                     val yesterdayString = LocalDate.now().minusDays(1).toString()
-
                     var activeUser = user
 
                     if (user.currentStreak > 0 && user.lastGlobalStreakDate != todayString && user.lastGlobalStreakDate != yesterdayString) {
-
                         activeUser = user.copy(currentStreak = 0)
-
                         viewModelScope.launch {
                             try {
-                                userRepo.updateUserStreaks(
-                                    uid = user.uid,
-                                    currentStreak = 0,
-                                    bestStreak = user.bestStreak,
-                                    lastGlobalStreakDate = user.lastGlobalStreakDate
-                                )
-                            } catch (e: Exception) {
-                            }
+                                userRepo.updateUserStreaks(user.uid, 0, user.bestStreak, user.lastGlobalStreakDate)
+                            } catch (e: Exception) {}
                         }
                     }
 
@@ -81,27 +72,18 @@ class TodayViewModel(application: Application) : AndroidViewModel(application) {
 
                 val processedHabits = fetchedHabits.map { habit ->
                     if (habit.streak > 0 && !habit.completedDates.contains(todayString) && !habit.completedDates.contains(yesterdayString)) {
-
                         viewModelScope.launch {
                             try {
                                 habitRepo.updateHabitCompletionAndStreak(habit.id, habit.completedDates, 0)
-                            } catch (e: Exception) {
-                            }
+                            } catch (e: Exception) {}
                         }
-
                         habit.copy(streak = 0)
-                    } else {
-                        habit
-                    }
+                    } else habit
                 }
 
                 val progress = calculateWeeklyProgress(processedHabits)
                 val userWithProgress = _uiState.value.user?.copy(weeklyProgress = progress)
-
-                _uiState.value = _uiState.value.copy(
-                    habits = processedHabits,
-                    user = userWithProgress
-                )
+                _uiState.value = _uiState.value.copy(habits = processedHabits, user = userWithProgress)
             }
         }
     }
@@ -116,108 +98,69 @@ class TodayViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun calculateWeeklyProgress(habits: List<Habit>): List<Float> {
         val today = LocalDate.now()
-        val totalHabits = habits.size
-
-        if (totalHabits == 0) return listOf(0f, 0f, 0f, 0f, 0f, 0f, 0f)
-
+        if (habits.isEmpty()) return listOf(0f, 0f, 0f, 0f, 0f, 0f, 0f)
         return (6 downTo 0).map { daysAgo ->
             val dateString = today.minusDays(daysAgo.toLong()).toString()
-            val completedCount = habits.count { it.completedDates.contains(dateString) }
-            completedCount.toFloat() / totalHabits.toFloat()
+            habits.count { it.completedDates.contains(dateString) }.toFloat() / habits.size.toFloat()
         }
     }
 
     fun toggleHabitCompletion(habitId: String, isDone: Boolean) {
         val todayString = LocalDate.now().toString()
         val yesterdayString = LocalDate.now().minusDays(1).toString()
+        val habit = _uiState.value.habits.find { it.id == habitId } ?: return
 
-        val currentHabits = _uiState.value.habits
-        val habit = currentHabits.find { it.id == habitId } ?: return
+        val wasDoneAlready = habit.completedDates.contains(todayString)
 
-        val newDates = if (isDone) {
-            (habit.completedDates + todayString).distinct()
-        } else {
-            habit.completedDates.filter { it != todayString }
-        }
+        val newDates = if (isDone) (habit.completedDates + todayString).distinct() else habit.completedDates.filter { it != todayString }
         val newHabitStreak = if (isDone) habit.streak + 1 else maxOf(0, habit.streak - 1)
 
-        val updatedHabits = currentHabits.map {
-            if (it.id == habitId) it.copy(completedDates = newDates, streak = newHabitStreak) else it
-        }
-
+        val updatedHabits = _uiState.value.habits.map { if (it.id == habitId) it.copy(completedDates = newDates, streak = newHabitStreak) else it }
         val allDoneToday = updatedHabits.isNotEmpty() && updatedHabits.all { it.completedDates.contains(todayString) }
-
         val currentUser = _uiState.value.user
         var updatedUser = currentUser
 
-        if (currentUser != null) {
-            val newProgress = calculateWeeklyProgress(updatedHabits)
+        val multiplier = currentUser?.getRewardMultiplier(todayString) ?: 1.0f
+        val xpToAward = (15 * multiplier).toInt()
+        val coinsToAward = (5 * multiplier).toInt()
 
-            updatedUser = currentUser.calculateNewStreak(allDoneToday, todayString, yesterdayString).copy(
-                weeklyProgress = newProgress
-            )
+        if (currentUser != null) {
+            updatedUser = currentUser.calculateNewStreak(allDoneToday, todayString, yesterdayString).copy(weeklyProgress = calculateWeeklyProgress(updatedHabits))
         }
 
-        _uiState.value = _uiState.value.copy(
-            habits = updatedHabits,
-            user = updatedUser
-        )
+        _uiState.value = _uiState.value.copy(habits = updatedHabits, user = updatedUser)
 
         viewModelScope.launch {
             try {
                 if (habit.battleId != null && currentUser != null) {
-                    challengeRepository.updateBattleProgress(
-                        battleId = habit.battleId,
-                        currentUserId = currentUser.uid,
-                        isDone = isDone,
-                        habitId = habitId,
-                        newDates = newDates,
-                        newHabitStreak = newHabitStreak
-                    )
-                } else {
-                    habitRepo.updateHabitCompletionAndStreak(habitId, newDates, newHabitStreak)
-                }
+                    challengeRepository.updateBattleProgress(habit.battleId, currentUser.uid, isDone, habitId, newDates, newHabitStreak)
+                } else habitRepo.updateHabitCompletionAndStreak(habitId, newDates, newHabitStreak)
 
                 if (updatedUser != null && currentUser != updatedUser) {
-                    userRepo.updateUserStreaks(
-                        updatedUser.uid,
-                        updatedUser.currentStreak,
-                        updatedUser.bestStreak,
-                        updatedUser.lastGlobalStreakDate
-                    )
+                    userRepo.updateUserStreaks(updatedUser.uid, updatedUser.currentStreak, updatedUser.bestStreak, updatedUser.lastGlobalStreakDate)
                 }
 
-                if (isDone) completeAction("habit_done")
+                if (isDone && !wasDoneAlready) {
+                    currentUser?.let { userRepo.addReward(it.uid, xpToAward, coinsToAward) }
+                    completeAction("habit_done")
+                } else if (!isDone && wasDoneAlready) {
+                    currentUser?.let { userRepo.addReward(it.uid, -xpToAward, -coinsToAward) }
+                }
             } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(errorMessage = "Błąd zapisu: ${e.message}")
+                _uiState.value = _uiState.value.copy(errorMessage = "Błąd: ${e.message}")
             }
         }
     }
 
     fun updateHabitDailyNote(habitId: String, dateString: String, newNote: String) {
-        val currentHabits = _uiState.value.habits
-        val updatedHabits = currentHabits.map { habit ->
+        val updatedHabits = _uiState.value.habits.map { habit ->
             if (habit.id == habitId) {
-                val newNotesMap = habit.dailyNotes.toMutableMap()
-                if (newNote.isBlank()) {
-                    newNotesMap.remove(dateString)
-                } else {
-                    newNotesMap[dateString] = newNote
-                }
-                habit.copy(dailyNotes = newNotesMap)
-            } else {
-                habit
-            }
+                val newNotes = habit.dailyNotes.toMutableMap()
+                if (newNote.isBlank()) newNotes.remove(dateString) else newNotes[dateString] = newNote
+                habit.copy(dailyNotes = newNotes)
+            } else habit
         }
-
         _uiState.value = _uiState.value.copy(habits = updatedHabits)
-
-        viewModelScope.launch {
-            try {
-                habitRepo.updateHabitDailyNote(habitId, dateString, newNote)
-            } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(errorMessage = "Błąd zapisu notatki: ${e.message}")
-            }
-        }
+        viewModelScope.launch { habitRepo.updateHabitDailyNote(habitId, dateString, newNote) }
     }
 }

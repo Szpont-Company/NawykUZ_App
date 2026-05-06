@@ -65,6 +65,9 @@ class UserRepository private constructor(
                         currentStreak = snapshot.getLong("currentStreak")?.toInt() ?: 0,
                         bestStreak = snapshot.getLong("bestStreak")?.toInt() ?: 0,
                         lastGlobalStreakDate = snapshot.getString("lastGlobalStreakDate") ?: "",
+                        coins = snapshot.getLong("coins")?.toInt() ?: 0,
+                        xp = snapshot.getLong("xp")?.toInt() ?: 0,
+                        level = snapshot.getLong("level")?.toInt() ?: 1,
                         weeklyProgress = (snapshot.get("weeklyProgress") as? List<*>)?.map { (it as? Number)?.toFloat() ?: 0f } ?: listOf(0f, 0f, 0f, 0f, 0f, 0f, 0f)
                     )
                     _userFlow.value = user
@@ -125,6 +128,9 @@ class UserRepository private constructor(
             currentStreak = document.getLong("currentStreak")?.toInt() ?: 0,
             bestStreak = document.getLong("bestStreak")?.toInt() ?: 0,
             lastGlobalStreakDate = document.getString("lastGlobalStreakDate") ?: "",
+            coins = document.getLong("coins")?.toInt() ?: 0,
+            xp = document.getLong("xp")?.toInt() ?: 0,
+            level = document.getLong("level")?.toInt() ?: 1,
             weeklyProgress = (document.get("weeklyProgress") as? List<*>)?.map { (it as? Number)?.toFloat() ?: 0f } ?: listOf(0f, 0f, 0f, 0f, 0f, 0f, 0f)
         )
 
@@ -151,6 +157,9 @@ class UserRepository private constructor(
             "currentStreak" to 0,
             "bestStreak" to 0,
             "lastGlobalStreakDate" to "",
+            "coins" to 0,
+            "xp" to 0,
+            "level" to 1,
             "weeklyProgress" to listOf(0f, 0f, 0f, 0f, 0f, 0f, 0f)
         )
         firestore
@@ -169,7 +178,10 @@ class UserRepository private constructor(
             bgColor = "Mint",
             currentStreak = 0,
             bestStreak = 0,
-            lastGlobalStreakDate = ""
+            lastGlobalStreakDate = "",
+            coins = 0,
+            xp = 0,
+            level = 1
         )
         cache.save(updatedUser)
         _userFlow.value = updatedUser
@@ -286,5 +298,42 @@ class UserRepository private constructor(
             _userFlow.value = updatedUser
             cache.save(updatedUser)
         }
+    }
+
+    suspend fun addReward(uid: String, addedXp: Int, addedCoins: Int) {
+        val userDoc = firestore.collection("users").document(uid)
+
+        val snapshot = userDoc.get().await()
+        var currentXp = snapshot.getLong("xp")?.toInt() ?: 0
+        var currentLevel = snapshot.getLong("level")?.toInt() ?: 1
+        var currentCoins = snapshot.getLong("coins")?.toInt() ?: 0
+
+        currentXp += addedXp
+        currentCoins = maxOf(0, currentCoins + addedCoins)
+
+        var threshold = currentLevel * 100
+        while (currentXp >= threshold) {
+            currentXp -= threshold
+            currentLevel++
+            threshold = currentLevel * 100
+            Log.d("UserRepository", "LEVEL UP! Nowy poziom: $currentLevel")
+        }
+
+        while (currentXp < 0 && currentLevel > 1) {
+            currentLevel--
+            val prevThreshold = currentLevel * 100
+            currentXp += prevThreshold
+            Log.d("UserRepository", "LEVEL DOWN! Spadek na poziom: $currentLevel")
+        }
+
+        currentXp = maxOf(0, currentXp)
+
+        userDoc.update(
+            mapOf(
+                "xp" to currentXp,
+                "coins" to currentCoins,
+                "level" to currentLevel
+            )
+        ).await()
     }
 }
