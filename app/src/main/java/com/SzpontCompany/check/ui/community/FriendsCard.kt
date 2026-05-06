@@ -189,7 +189,7 @@ fun FriendsListSection(
             )
         }
 
-        items(filteredActive.size, key = { "active_${filteredActive[it].name}" }) { i ->
+        items(filteredActive.size, key = { "active_${filteredActive[it].uid}" }) { i ->
             Box(Modifier.animateItem()) {
                 FriendListItem(
                     friend = filteredActive[i],
@@ -210,7 +210,7 @@ fun FriendsListSection(
             )
         }
 
-        items(filteredOffline.size, key = { "offline_${filteredOffline[it].name}" }) { i ->
+        items(filteredOffline.size, key = { "offline_${filteredOffline[it].uid}" }) { i ->
             Box(Modifier.animateItem()) {
                 FriendListItem(
                     friend = filteredOffline[i],
@@ -520,7 +520,7 @@ fun FriendsSearchSection(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            items(suggestedFriends.size, key = { "suggested_${suggestedFriends[it].name}" }) { i ->
+            items(suggestedFriends.size, key = { "suggested_${suggestedFriends[it].uid}" }) { i ->
                 Box(Modifier.animateItem()) {
                     FriendListItem(
                         friend = suggestedFriends[i],
