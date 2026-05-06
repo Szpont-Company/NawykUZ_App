@@ -94,7 +94,7 @@ fun ProfileScreen(
         LevelAndXpBar()
         Spacer(modifier = Modifier.height(24.dp))
 
-        StatsGridSection()
+        StatsGridSection(uiState = uiState)
         Spacer(modifier = Modifier.height(24.dp))
 
         BadgesSection()
@@ -138,7 +138,10 @@ fun ProfileScreen(
 
                     val sendIntent = Intent(Intent.ACTION_SEND).apply {
                         type = "text/plain"
-                        putExtra(Intent.EXTRA_TEXT, "Hej! Mam 8 poziom i 21-dniowy streak w Check. 🔥 Dołącz do mnie!")
+                        putExtra(
+                            Intent.EXTRA_TEXT,
+                            "Hej! Mam 8 poziom i 21-dniowy streak w Check. 🔥 Dołącz do mnie!"
+                        )
                     }
                     context.startActivity(Intent.createChooser(sendIntent, "Udostępnij przez"))
                 }
@@ -238,7 +241,12 @@ fun UserHeaderSection(user: com.SzpontCompany.check.data.user.User?) {
                     .border(2.dp, MaterialTheme.colorScheme.background, RoundedCornerShape(12.dp))
                     .padding(horizontal = 8.dp, vertical = 2.dp)
             ) {
-                Text("Lvl 8", color = MaterialTheme.colorScheme.background, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                Text(
+                    "Lvl 8",
+                    color = MaterialTheme.colorScheme.background,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold
+                )
             }
         }
         Spacer(modifier = Modifier.width(24.dp))
@@ -257,19 +265,35 @@ fun UserHeaderSection(user: com.SzpontCompany.check.data.user.User?) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Box(
                     modifier = Modifier
-                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f), RoundedCornerShape(12.dp))
+                        .background(
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                            RoundedCornerShape(12.dp)
+                        )
                         .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(12.dp))
                         .padding(horizontal = 10.dp, vertical = 4.dp)
                 ) {
-                    Text(text = stringResource(R.string.profile_streak_format, 21), color = MaterialTheme.colorScheme.primary, fontSize = 11.sp, fontWeight = FontWeight.Medium)
+                    Text(
+                        text = stringResource(R.string.profile_streak_format, user?.currentStreak ?: 0),
+                        color = MaterialTheme.colorScheme.primary,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Medium
+                    )
                 }
                 Box(
                     modifier = Modifier
-                        .background(Color(0xFFBA7517).copy(alpha = 0.15f), RoundedCornerShape(12.dp))
+                        .background(
+                            Color(0xFFBA7517).copy(alpha = 0.15f),
+                            RoundedCornerShape(12.dp)
+                        )
                         .border(1.dp, Color(0xFFBA7517), RoundedCornerShape(12.dp))
                         .padding(horizontal = 10.dp, vertical = 4.dp)
                 ) {
-                    Text("Top 14", color = Color(0xFFBA7517), fontSize = 11.sp, fontWeight = FontWeight.Medium)
+                    Text(
+                        "Top 14",
+                        color = Color(0xFFBA7517),
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Medium
+                    )
                 }
             }
         }
@@ -359,23 +383,23 @@ fun LevelAndXpBar() {
 }
 
 @Composable
-fun StatsGridSection() {
+fun StatsGridSection(uiState: ProfileUiState) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             StatCard(
                 modifier = Modifier.weight(1f),
-                targetValue = 34,
+                targetValue = uiState.habitsCount,
                 label = stringResource(R.string.profile_habits)
             )
             StatCard(
                 modifier = Modifier.weight(1f),
-                targetValue = 21,
+                targetValue = uiState.user?.currentStreak ?: 0,
                 label = stringResource(R.string.profile_streak_days),
                 valueColor = MaterialTheme.colorScheme.primary
             )
             StatCard(
                 modifier = Modifier.weight(1f),
-                targetValue = 850,
+                targetValue = uiState.coins,
                 label = stringResource(R.string.profile_coins),
                 valueColor = Color(0xFFBA7517)
             )
@@ -383,18 +407,18 @@ fun StatsGridSection() {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             StatCard(
                 modifier = Modifier.weight(1f),
-                targetValue = 7,
+                targetValue = uiState.battlesWon,
                 label = stringResource(R.string.profile_battles_won)
             )
             StatCard(
                 modifier = Modifier.weight(1f),
-                targetValue = 78,
+                targetValue = uiState.effectiveness,
                 suffix = "%",
                 label = stringResource(R.string.profile_effectiveness)
             )
             StatCard(
                 modifier = Modifier.weight(1f),
-                targetValue = 12,
+                targetValue = uiState.friendsCount,
                 label = stringResource(R.string.profile_friends)
             )
         }
@@ -429,9 +453,19 @@ fun StatCard(
             .padding(vertical = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = "$animatedValue$suffix", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = valueColor)
+        Text(
+            text = "$animatedValue$suffix",
+            fontSize = 22.sp,
+            fontWeight = FontWeight.Bold,
+            color = valueColor
+        )
         Spacer(modifier = Modifier.height(4.dp))
-        Text(text = label, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Medium)
+        Text(
+            text = label,
+            fontSize = 11.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            fontWeight = FontWeight.Medium
+        )
     }
 }
 
@@ -506,7 +540,12 @@ fun SettingsItem(icon: ImageVector, iconTint: Color, title: String, onClick: () 
                 .background(MaterialTheme.colorScheme.background, RoundedCornerShape(8.dp)),
             contentAlignment = Alignment.Center
         ) {
-            Icon(imageVector = icon, contentDescription = title, tint = iconTint, modifier = Modifier.size(20.dp))
+            Icon(
+                imageVector = icon,
+                contentDescription = title,
+                tint = iconTint,
+                modifier = Modifier.size(20.dp)
+            )
         }
         Spacer(modifier = Modifier.width(16.dp))
         Text(
@@ -711,7 +750,11 @@ fun ShareProfileDialog(
                             ),
                             shape = RoundedCornerShape(20.dp)
                         )
-                        .border(2.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f), RoundedCornerShape(20.dp))
+                        .border(
+                            2.dp,
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
+                            RoundedCornerShape(20.dp)
+                        )
                         .padding(24.dp),
                     contentAlignment = Alignment.Center
                 ) {
@@ -740,7 +783,11 @@ fun ShareProfileDialog(
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onBackground
                         )
-                        Text(text = if (user?.nickname.isNullOrBlank()) "@marekk" else "@${user?.nickname}", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp)
+                        Text(
+                            text = if (user?.nickname.isNullOrBlank()) "@marekk" else "@${user?.nickname}",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontSize = 14.sp
+                        )
 
                         Spacer(modifier = Modifier.height(24.dp))
 
@@ -749,8 +796,16 @@ fun ShareProfileDialog(
                             horizontalArrangement = Arrangement.SpaceEvenly
                         ) {
                             ShareStatItem(value = "Lvl 8", label = "Poziom")
-                            ShareStatItem(value = "🔥 21", label = "Streak", valueColor = MaterialTheme.colorScheme.primary)
-                            ShareStatItem(value = "🏆 7", label = "Wygrane", valueColor = Color(0xFFBA7517))
+                            ShareStatItem(
+                                value = "🔥 21",
+                                label = "Streak",
+                                valueColor = MaterialTheme.colorScheme.primary
+                            )
+                            ShareStatItem(
+                                value = "🏆 7",
+                                label = "Wygrane",
+                                valueColor = Color(0xFFBA7517)
+                            )
                         }
 
                         Spacer(modifier = Modifier.height(24.dp))
@@ -775,7 +830,11 @@ fun ShareProfileDialog(
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
-                Icon(Icons.Outlined.Share, contentDescription = null, modifier = Modifier.size(20.dp))
+                Icon(
+                    Icons.Outlined.Share,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp)
+                )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Udostępnij", fontWeight = FontWeight.Bold, fontSize = 16.sp)
             }
@@ -785,7 +844,11 @@ fun ShareProfileDialog(
 }
 
 @Composable
-fun ShareStatItem(value: String, label: String, valueColor: Color = MaterialTheme.colorScheme.onBackground) {
+fun ShareStatItem(
+    value: String,
+    label: String,
+    valueColor: Color = MaterialTheme.colorScheme.onBackground
+) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(text = value, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = valueColor)
         Text(text = label, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -863,18 +926,20 @@ fun BadgeDetailsDialog(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                 Text(
-                     text = stringResource(id = badge.requirementResId),
-                     style = MaterialTheme.typography.bodyMedium,
-                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                     textAlign = TextAlign.Center
-                 )
+                Text(
+                    text = stringResource(id = badge.requirementResId),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center
+                )
             }
         },
         confirmButton = {
             Button(
                 onClick = onDismiss,
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
                 shape = RoundedCornerShape(14.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
