@@ -65,7 +65,8 @@ class UserRepository private constructor(
                         currentStreak = snapshot.getLong("currentStreak")?.toInt() ?: 0,
                         bestStreak = snapshot.getLong("bestStreak")?.toInt() ?: 0,
                         lastGlobalStreakDate = snapshot.getString("lastGlobalStreakDate") ?: "",
-                        weeklyProgress = (snapshot.get("weeklyProgress") as? List<*>)?.map { (it as? Number)?.toFloat() ?: 0f } ?: listOf(0f, 0f, 0f, 0f, 0f, 0f, 0f)
+                        weeklyProgress = (snapshot.get("weeklyProgress") as? List<*>)?.map { (it as? Number)?.toFloat() ?: 0f } ?: listOf(0f, 0f, 0f, 0f, 0f, 0f, 0f),
+                        unlockedBadges = (snapshot.get("unlockedBadges") as? List<*>)?.mapNotNull { it as? String } ?: emptyList()
                     )
                     _userFlow.value = user
                     cache.save(user)
@@ -125,7 +126,8 @@ class UserRepository private constructor(
             currentStreak = document.getLong("currentStreak")?.toInt() ?: 0,
             bestStreak = document.getLong("bestStreak")?.toInt() ?: 0,
             lastGlobalStreakDate = document.getString("lastGlobalStreakDate") ?: "",
-            weeklyProgress = (document.get("weeklyProgress") as? List<*>)?.map { (it as? Number)?.toFloat() ?: 0f } ?: listOf(0f, 0f, 0f, 0f, 0f, 0f, 0f)
+            weeklyProgress = (document.get("weeklyProgress") as? List<*>)?.map { (it as? Number)?.toFloat() ?: 0f } ?: listOf(0f, 0f, 0f, 0f, 0f, 0f, 0f),
+            unlockedBadges = (document.get("unlockedBadges") as? List<*>)?.mapNotNull { it as? String } ?: emptyList()
         )
 
         cache.save(user)
@@ -286,5 +288,11 @@ class UserRepository private constructor(
             _userFlow.value = updatedUser
             cache.save(updatedUser)
         }
+    }
+
+    suspend fun claimBadge(uid: String, badgeId: String) {
+        firestore.collection("users").document(uid)
+            .update("unlockedBadges", FieldValue.arrayUnion(badgeId))
+            .await()
     }
 }

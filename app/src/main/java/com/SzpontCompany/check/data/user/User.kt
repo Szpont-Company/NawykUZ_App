@@ -12,7 +12,8 @@ data class User(
     val bestStreak: Int = 0,
     val lastGlobalStreakDate: String = "",
 
-    val weeklyProgress: List<Float> = listOf(0f, 0f, 0f, 0f, 0f, 0f, 0f)
+    val weeklyProgress: List<Float> = listOf(0f, 0f, 0f, 0f, 0f, 0f, 0f),
+    val unlockedBadges: List<String> = emptyList()
 ) {
     fun calculateNewStreak(allDoneToday: Boolean, todayString: String, yesterdayString: String): User {
         var newGlobalStreak = currentStreak

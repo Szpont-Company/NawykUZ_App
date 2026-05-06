@@ -3,6 +3,8 @@ package com.SzpontCompany.check.ui.dashboard
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.SzpontCompany.check.data.badges.Badge
+import com.SzpontCompany.check.data.badges.BadgeProvider
 import com.SzpontCompany.check.data.user.User
 import com.SzpontCompany.check.data.user.UserRepository
 import com.SzpontCompany.check.data.habit.Habit
@@ -11,6 +13,7 @@ import com.SzpontCompany.check.data.social.ChallengeRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
@@ -27,6 +30,9 @@ class TodayViewModel(application: Application) : AndroidViewModel(application) {
     private val habitRepo = HabitRepository()
     private val challengeRepository = ChallengeRepository(com.google.firebase.firestore.FirebaseFirestore.getInstance())
 
+
+    private val _badgeToUnlock = MutableStateFlow<Badge?>(null)
+    val badgeToUnlock: StateFlow<Badge?> = _badgeToUnlock.asStateFlow()
     private val _uiState = MutableStateFlow(TodayUiState())
     val uiState: StateFlow<TodayUiState> = _uiState.asStateFlow()
 
@@ -66,6 +72,14 @@ class TodayViewModel(application: Application) : AndroidViewModel(application) {
                     val progress = calculateWeeklyProgress(_uiState.value.habits)
                     val userWithProgress = activeUser.copy(weeklyProgress = progress)
                     _uiState.value = _uiState.value.copy(user = userWithProgress, isLoading = false)
+                    viewModelScope.launch {
+                        try {
+                            val battles = challengeRepository.getWonBattlesCount(userWithProgress.uid).first()
+                            checkForNewBadges(userWithProgress, battles)
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+                    }
                 } else {
                     _uiState.value = _uiState.value.copy(user = null, isLoading = false)
                 }
@@ -217,6 +231,35 @@ class TodayViewModel(application: Application) : AndroidViewModel(application) {
                 habitRepo.updateHabitDailyNote(habitId, dateString, newNote)
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(errorMessage = "Błąd zapisu notatki: ${e.message}")
+            }
+        }
+    }
+
+    fun checkForNewBadges(user: User, battlesWon: Int) {
+        val earnedBadges = BadgeProvider.evaluateBadges(
+            bestStreak = user.bestStreak,
+            battlesWon = battlesWon
+        ).filter { it.isUnlocked }
+
+        val newBadge = earnedBadges.firstOrNull { badge ->
+            !user.unlockedBadges.contains(badge.id)
+        }
+
+        if (newBadge != null) {
+            _badgeToUnlock.value = newBadge
+        }
+    }
+
+    fun claimBadgeReward(badge: Badge) {
+        val currentUser = userRepo.userFlow.value ?: return
+        viewModelScope.launch {
+            _badgeToUnlock.value = null
+
+            try {
+                userRepo.claimBadge(currentUser.uid, badge.id)
+                habitRepo.earnCoinsCloud("badge_unlocked", 50)
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
     }
