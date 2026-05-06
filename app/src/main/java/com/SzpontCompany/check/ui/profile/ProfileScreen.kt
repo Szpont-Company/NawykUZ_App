@@ -107,7 +107,7 @@ fun ProfileScreen(
         StatsGridSection(uiState = uiState)
         Spacer(modifier = Modifier.height(24.dp))
 
-        BadgesSection()
+        BadgesSection(uiState = uiState)
         Spacer(modifier = Modifier.height(24.dp))
 
         Text(
@@ -147,7 +147,8 @@ fun ProfileScreen(
 
                     val streak = uiState.user?.currentStreak ?: 0
                     val battles = uiState.battlesWon
-                    val shareText = "Hej! Mój streak to $streak dni, a na koncie mam $battles wygranych pojedynków. 🔥 Dołącz do mnie w Check. !"
+                    val shareText =
+                        "Hej! Mój streak to $streak dni, a na koncie mam $battles wygranych pojedynków. 🔥 Dołącz do mnie w Check. !"
 
                     val sendIntent = Intent(Intent.ACTION_SEND).apply {
                         type = "image/png"
@@ -580,9 +581,17 @@ fun SettingsItem(icon: ImageVector, iconTint: Color, title: String, onClick: () 
 
 
 @Composable
-fun BadgesSection() {
+fun BadgesSection(uiState: ProfileUiState) {
 
     var selectedBadge by remember { mutableStateOf<Badge?>(null) }
+
+
+    val sortedBadges = remember(uiState) {
+        BadgeProvider.evaluateBadges(
+            bestStreak = uiState.user?.bestStreak ?: 0,
+            battlesWon = uiState.battlesWon
+        )
+    }
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
@@ -591,8 +600,6 @@ fun BadgesSection() {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(bottom = 12.dp)
         )
-
-        val sortedBadges = BadgeProvider.allBadges.sortedByDescending { it.isUnlocked }
 
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
