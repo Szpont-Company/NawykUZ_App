@@ -1,5 +1,8 @@
 package com.SzpontCompany.check.ui.stats
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -9,9 +12,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.FilterAlt
-import androidx.compose.material.icons.outlined.History
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -24,7 +24,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.SzpontCompany.check.data.habit.Habit
-import kotlin.random.Random
+import java.time.LocalDate
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
 @Composable
 fun StatsScreen(
@@ -49,6 +52,14 @@ fun StatsScreen(
         item { StatsTopSection() }
 
         item {
+            HabitFilterChips(
+                habits = uiState.habits,
+                selectedHabitId = uiState.selectedHabitId,
+                onSelect = { viewModel.setHabitFilter(it) }
+            )
+        }
+
+        item {
             TimeRangeSelector(
                 selectedIndex = uiState.selectedTimeRangeIndex,
                 onSelect = { viewModel.setTimeRange(it) }
@@ -66,10 +77,9 @@ fun StatsScreen(
         }
 
         item {
-            HabitFilterChips(
-                habits = uiState.habits,
-                selectedHabitId = uiState.selectedHabitId,
-                onSelect = { viewModel.setHabitFilter(it) }
+            HabitDetailsSection(
+                habits = uiState.filteredHabits,
+                timeRangeIndex = uiState.selectedTimeRangeIndex
             )
         }
 
@@ -80,11 +90,15 @@ fun StatsScreen(
             )
         }
 
-        item { HeatmapSection() }
-
-        item { HabitDetailsSection(habits = uiState.filteredHabits) }
-
-        item { StreakCalendarSection() }
+        if (uiState.selectedHabitId == null) {
+            item {
+                HeatmapSection(habits = uiState.filteredHabits)
+            }
+        } else {
+            item {
+                StreakCalendarSection(habits = uiState.filteredHabits)
+            }
+        }
     }
 }
 
@@ -101,20 +115,6 @@ fun StatsTopSection() {
             color = MaterialTheme.colorScheme.onBackground,
             fontWeight = FontWeight.Bold
         )
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            IconButton(
-                onClick = { },
-                modifier = Modifier.background(MaterialTheme.colorScheme.surface, RoundedCornerShape(12.dp))
-            ) {
-                Icon(Icons.Outlined.FilterAlt, contentDescription = "Filtruj", tint = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-            IconButton(
-                onClick = { },
-                modifier = Modifier.background(MaterialTheme.colorScheme.surface, RoundedCornerShape(12.dp))
-            ) {
-                Icon(Icons.Outlined.History, contentDescription = "Historia", tint = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-        }
     }
 }
 
@@ -193,7 +193,7 @@ fun MetricsGrid(
                 modifier = Modifier.weight(1f),
                 title = "Monety (XP)",
                 value = coins.toString(),
-                subtext = "Na walkę Habit Battle", subtextColor = MaterialTheme.colorScheme.primary
+                subtext = "Na walki Habit Battle", subtextColor = MaterialTheme.colorScheme.primary
             )
         }
     }
@@ -230,6 +230,7 @@ fun HabitFilterChips(
     onSelect: (String?) -> Unit
 ) {
     val scrollState = rememberScrollState()
+
     Row(
         modifier = Modifier.horizontalScroll(scrollState),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -239,7 +240,6 @@ fun HabitFilterChips(
             isSelected = selectedHabitId == null,
             onClick = { onSelect(null) }
         )
-
         habits.forEach { habit ->
             FilterChip(
                 text = "${habit.icon.ifEmpty { "🎯" }} ${habit.name}",
@@ -286,10 +286,9 @@ fun WeeklyActivityChart(
     ) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(text = "Aktywność tygodniowa", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
-            Text(text = "śr. $averagePercentage% / dzień", fontSize = 12.sp, color = MaterialTheme.colorScheme.primary)
+            Text(text = "Śr. $averagePercentage% / dzień", fontSize = 12.sp, color = MaterialTheme.colorScheme.primary)
         }
         Spacer(modifier = Modifier.height(16.dp))
-
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -322,7 +321,6 @@ fun WeeklyActivityChart(
                                 .background(if (isToday) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary.copy(alpha = 0.6f))
                         )
                     }
-
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(text = dayLabel, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
@@ -332,7 +330,9 @@ fun WeeklyActivityChart(
 }
 
 @Composable
-fun HeatmapSection() {
+fun HeatmapSection(habits: List<Habit>) {
+    val today = remember { LocalDate.now() }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -350,11 +350,9 @@ fun HeatmapSection() {
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
             )
-
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(text = "0", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Spacer(modifier = Modifier.width(4.dp))
-
                 val legendColors = listOf(
                     MaterialTheme.colorScheme.surfaceVariant,
                     MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
@@ -362,7 +360,6 @@ fun HeatmapSection() {
                     MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
                     MaterialTheme.colorScheme.primary
                 )
-
                 Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
                     legendColors.forEach { color ->
                         Box(
@@ -373,18 +370,16 @@ fun HeatmapSection() {
                         )
                     }
                 }
-
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(text = "5+", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
-
         Spacer(modifier = Modifier.height(16.dp))
 
         val daysOfWeek = listOf("Pn", "Wt", "Śr", "Cz", "Pt", "So", "Nd")
 
         Column(verticalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.fillMaxWidth()) {
-            daysOfWeek.forEachIndexed { index, dayLabel ->
+            daysOfWeek.forEachIndexed { dayIndex, dayLabel ->
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
@@ -395,20 +390,30 @@ fun HeatmapSection() {
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.width(32.dp)
                     )
-
                     Row(
                         modifier = Modifier.weight(1f),
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         for (week in 0 until 10) {
-                            val intensity = Random.nextFloat()
+                            val daysToSubtract = ((9 - week) * 7) + (today.dayOfWeek.value - 1) - dayIndex
+                            val cellDate = today.minusDays(daysToSubtract.toLong())
+                            val isFuture = cellDate.isAfter(today)
+
+                            val completedCount = if (isFuture) {
+                                0
+                            } else {
+                                habits.count { it.completedDates.contains(cellDate.toString()) }
+                            }
+
                             val color = when {
-                                intensity < 0.2f -> MaterialTheme.colorScheme.surfaceVariant
-                                intensity < 0.4f -> MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
-                                intensity < 0.6f -> MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
-                                intensity < 0.8f -> MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                                isFuture -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f)
+                                completedCount == 0 -> MaterialTheme.colorScheme.surfaceVariant
+                                completedCount == 1 -> MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+                                completedCount in 2..3 -> MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
+                                completedCount == 4 -> MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
                                 else -> MaterialTheme.colorScheme.primary
                             }
+
                             Box(
                                 modifier = Modifier
                                     .weight(1f)
@@ -430,14 +435,19 @@ fun HeatmapSection() {
 }
 
 @Composable
-fun HabitDetailsSection(habits: List<Habit>) {
+fun HabitDetailsSection(habits: List<Habit>, timeRangeIndex: Int) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
-            text = "Nawyki — szczegóły",
+            text = "Nawyki - szczegóły",
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.padding(bottom = 12.dp)
+        )
+        Text(
+            text = "Skuteczność (Win Rate) nawyków w wybranym okresie.",
+            fontSize = 12.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(bottom = 12.dp, top = 2.dp)
         )
 
         Column(
@@ -453,24 +463,57 @@ fun HabitDetailsSection(habits: List<Habit>) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             } else {
-                val colors = listOf(
+                val colorsList = listOf(
                     MaterialTheme.colorScheme.primary,
                     Color(0xFF7F77DD),
                     Color(0xFF378ADD),
                     Color(0xFFE24B4A)
                 )
 
+                val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                val cutoffDate = Calendar.getInstance().apply {
+                    when (timeRangeIndex) {
+                        0 -> add(Calendar.DAY_OF_YEAR, -7)
+                        1 -> add(Calendar.DAY_OF_YEAR, -30)
+                        2 -> add(Calendar.DAY_OF_YEAR, -90)
+                    }
+                }.time
+                val cutoffString = dateFormat.format(cutoffDate)
+
                 habits.forEachIndexed { index, habit ->
-                    val streak = habit.streak
-                    val isHabitActive = streak > 0
+                    val completedInWindow = habit.completedDates.count { dateStr ->
+                        if (timeRangeIndex == 3) true else dateStr >= cutoffString
+                    }
+
+                    val todayMs = System.currentTimeMillis()
+                    val daysSinceCreation = habit.createdAt?.let {
+                        val diff = todayMs - it.time
+                        (diff / (1000 * 60 * 60 * 24)).toInt().coerceAtLeast(1)
+                    } ?: habit.completedDates.size.coerceAtLeast(1)
+
+                    val windowDays = when(timeRangeIndex) {
+                        0 -> 7
+                        1 -> 30
+                        2 -> 90
+                        else -> daysSinceCreation
+                    }
+
+                    val possibleDays = minOf(windowDays, daysSinceCreation)
+
+                    val realProgress = if (possibleDays > 0) {
+                        (completedInWindow.toFloat() / possibleDays.toFloat()).coerceIn(0f, 1f)
+                    } else 0f
+
+                    val percentString = "${(realProgress * 100).toInt()}%"
+                    val habitColor = colorsList[index % colorsList.size]
 
                     HabitDetailItem(
                         emoji = habit.icon.ifEmpty { "🎯" },
                         name = habit.name.ifEmpty { "Nieznany nawyk" },
-                        percent = if(isHabitActive) "Aktywny" else "Wstrzymany",
-                        streak = "$streak dni streak",
-                        progress = if(isHabitActive) 0.7f else 0.2f,
-                        color = colors[index % colors.size]
+                        percent = percentString,
+                        streak = "${habit.streak} dni streak",
+                        progress = realProgress,
+                        color = habitColor
                     )
                 }
             }
@@ -480,13 +523,18 @@ fun HabitDetailsSection(habits: List<Habit>) {
 
 @Composable
 fun HabitDetailItem(emoji: String, name: String, percent: String, streak: String, progress: Float, color: Color) {
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+    val animatedProgress by animateFloatAsState(
+        targetValue = progress,
+        animationSpec = tween(durationMillis = 1000, easing = FastOutSlowInEasing),
+        label = "progressAnim"
+    )
 
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
         Box(
             modifier = Modifier
                 .size(36.dp)
                 .clip(RoundedCornerShape(8.dp))
-                .background(color),
+                .background(color.copy(alpha = 0.2f)),
             contentAlignment = Alignment.Center
         ) {
             Text(
@@ -494,9 +542,7 @@ fun HabitDetailItem(emoji: String, name: String, percent: String, streak: String
                 fontSize = 18.sp
             )
         }
-
         Spacer(modifier = Modifier.width(12.dp))
-
         Column(modifier = Modifier.weight(1f)) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text(text = name, fontSize = 13.sp, color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Medium)
@@ -505,7 +551,7 @@ fun HabitDetailItem(emoji: String, name: String, percent: String, streak: String
             Spacer(modifier = Modifier.height(6.dp))
             Canvas(modifier = Modifier.fillMaxWidth().height(4.dp)) {
                 drawRoundRect(color = color.copy(alpha = 0.2f), cornerRadius = CornerRadius(2.dp.toPx()))
-                drawRoundRect(color = color, size = size.copy(width = size.width * progress), cornerRadius = CornerRadius(2.dp.toPx()))
+                drawRoundRect(color = color, size = size.copy(width = size.width * animatedProgress), cornerRadius = CornerRadius(2.dp.toPx()))
             }
         }
         Spacer(modifier = Modifier.width(12.dp))
@@ -514,17 +560,26 @@ fun HabitDetailItem(emoji: String, name: String, percent: String, streak: String
 }
 
 @Composable
-fun StreakCalendarSection() {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Text(text = "Streak kalendarz", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground, modifier = Modifier.padding(bottom = 12.dp))
+fun StreakCalendarSection(habits: List<Habit>) {
+    val today = remember { LocalDate.now() }
 
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = "Streak kalendarz",
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onBackground,
+            modifier = Modifier.padding(bottom = 12.dp)
+        )
         Column(
-            modifier = Modifier.background(MaterialTheme.colorScheme.surface, RoundedCornerShape(16.dp)).padding(16.dp)
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(16.dp))
+                .padding(16.dp)
         ) {
             val daysOfWeek = listOf("Pn", "Wt", "Śr", "Cz", "Pt", "So", "Nd")
 
             Column(verticalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.fillMaxWidth()) {
-                daysOfWeek.forEachIndexed { index, dayLabel ->
+                daysOfWeek.forEachIndexed { dayIndex, dayLabel ->
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
@@ -535,18 +590,27 @@ fun StreakCalendarSection() {
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.width(28.dp)
                         )
-
                         Row(
                             modifier = Modifier.weight(1f),
                             horizontalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
                             for (week in 0 until 5) {
-                                val status = Random.nextInt(10)
-                                val color = when {
-                                    status < 2 -> Color(0xFFE24B4A)
-                                    status < 3 -> MaterialTheme.colorScheme.surfaceVariant
-                                    else -> MaterialTheme.colorScheme.primary
+                                val daysToSubtract = ((4 - week) * 7) + (today.dayOfWeek.value - 1) - dayIndex
+                                val cellDate = today.minusDays(daysToSubtract.toLong())
+                                val isFuture = cellDate.isAfter(today)
+                                val dateStr = cellDate.toString()
+
+                                val color = if (isFuture) {
+                                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f)
+                                } else {
+                                    val anyCompleted = habits.any { it.completedDates.contains(dateStr) }
+                                    when {
+                                        anyCompleted -> MaterialTheme.colorScheme.primary
+                                        habits.isNotEmpty() -> Color(0xFFE24B4A)
+                                        else -> MaterialTheme.colorScheme.surfaceVariant
+                                    }
                                 }
+
                                 Box(
                                     modifier = Modifier
                                         .weight(1f)
