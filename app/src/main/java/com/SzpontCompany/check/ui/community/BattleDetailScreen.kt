@@ -30,6 +30,7 @@ import com.SzpontCompany.check.ui.theme.Mint
 import com.SzpontCompany.check.ui.theme.getColorByName
 import com.SzpontCompany.check.ui.components.CheckBackButton
 import com.SzpontCompany.check.R
+import com.SzpontCompany.check.ui.components.UserAvatar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -282,26 +283,19 @@ fun PlayerDetailColumn(
     val initials = if (name == myNameStr) myNameStr else {
         name.trim().split("\\s+".toRegex()).mapNotNull { it.firstOrNull()?.uppercase() }.take(2).joinToString("")
     }
-    val displayAvatar = if (avatarEmoji.isEmpty()) initials else avatarEmoji
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
     ) {
-        Box(
-            modifier = Modifier
-                .size(64.dp)
-                .clip(CircleShape)
-                .background(getColorByName(bgColorName)),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = displayAvatar,
-                color = if (avatarEmoji.isEmpty()) Color.White else Color.Unspecified,
-                fontSize = if (avatarEmoji.isEmpty()) (if (initials == myNameStr) 20.sp else 24.sp) else 32.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
+        UserAvatar(
+            avatarEmoji = avatarEmoji,
+            initials = initials,
+            bgColor = bgColorName,
+            size = 64.dp,
+            emojiSize = 32f,
+            initialsSize = 24f
+        )
 
         Spacer(modifier = Modifier.height(12.dp))
 

@@ -32,6 +32,7 @@ import com.SzpontCompany.check.ui.theme.CheckTheme
 import com.SzpontCompany.check.ui.theme.Mint
 import com.SzpontCompany.check.ui.theme.Rose
 import com.SzpontCompany.check.ui.theme.getColorByName
+import com.SzpontCompany.check.ui.components.UserAvatar
 import androidx.lifecycle.viewmodel.compose.viewModel
 import java.text.SimpleDateFormat
 import java.util.*
@@ -144,15 +145,19 @@ fun ChatTopBar(
             Spacer(modifier = Modifier.width(16.dp))
 
             // Avatar
-            Box(
-                modifier = Modifier
-                    .size(44.dp)
-                    .clip(CircleShape)
-                    .background(getColorByName(friendBgColor)),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(text = friendEmoji, fontSize = 20.sp)
-            }
+            val friendInitials = friendName.trim().split("\\s+".toRegex())
+                .mapNotNull { it.firstOrNull()?.uppercase() }
+                .take(2).joinToString("")
+                .ifEmpty { "??" }
+
+            UserAvatar(
+                avatarEmoji = friendEmoji,
+                initials = friendInitials,
+                bgColor = friendBgColor,
+                size = 44.dp,
+                emojiSize = 20f,
+                initialsSize = 16f
+            )
             Spacer(modifier = Modifier.width(12.dp))
 
             // Name and Status
