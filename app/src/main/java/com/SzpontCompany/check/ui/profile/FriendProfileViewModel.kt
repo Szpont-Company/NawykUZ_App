@@ -57,8 +57,30 @@ class FriendProfileViewModel : ViewModel() {
                 )
 
                 val habitsSnapshot = firestore.collection("users").document(friendUid).collection("habits").get().await()
-                val habits = habitsSnapshot.documents.mapNotNull { doc ->
-                    doc.toObject(Habit::class.java)?.copy(id = doc.id)
+                val habits = habitsSnapshot.documents.map { doc ->
+                    Habit(
+                        id = doc.id,
+                        name = doc.getString("name") ?: "",
+                        icon = doc.getString("icon") ?: "🎯",
+                        colorName = doc.getString("colorName") ?: "Mint",
+                        frequency = doc.getString("frequency") ?: "",
+                        selectedDays = (doc.get("selectedDays") as? List<*>)?.mapNotNull { it as? String } ?: emptyList(),
+                        timesPerWeek = doc.getLong("timesPerWeek")?.toInt() ?: 0,
+                        dailyGoal = doc.getLong("dailyGoal")?.toInt() ?: 0,
+                        unit = doc.getString("unit") ?: "",
+                        dailyReminder = doc.getBoolean("dailyReminder") ?: false,
+                        reminderTime = doc.getString("reminderTime") ?: "",
+                        eveningReminder = doc.getBoolean("eveningReminder") ?: false,
+                        eveningTime = doc.getString("eveningTime") ?: "",
+                        difficulty = doc.getString("difficulty") ?: "",
+                        isActive = doc.getBoolean("isActive") ?: true,
+                        battleId = doc.getString("battleId"),
+                        opponentName = doc.getString("opponentName"),
+                        streak = doc.getLong("streak")?.toInt() ?: 0,
+                        monthlyCompletionRate = doc.getLong("monthlyCompletionRate")?.toInt() ?: 0,
+                        completedDates = (doc.get("completedDates") as? List<*>)?.mapNotNull { it as? String } ?: emptyList(),
+                        createdAt = doc.getDate("createdAt")
+                    )
                 }
 
                 var totalPossible = 0

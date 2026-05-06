@@ -133,7 +133,6 @@ fun FriendProfileScreen(
                 modifier = Modifier.padding(bottom = 12.dp)
             )
 
-            // ZMIANA: Dynamiczne wyliczanie odznak znajomego
             val friendBadges = remember(uiState) {
                 BadgeProvider.evaluateBadges(
                     bestStreak = uiState.user?.bestStreak ?: 0,
@@ -239,6 +238,7 @@ fun FriendUserHeaderSection(user: User?) {
             )
             Spacer(modifier = Modifier.height(10.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+
                 Box(
                     modifier = Modifier
                         .background(
@@ -254,22 +254,23 @@ fun FriendUserHeaderSection(user: User?) {
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Medium
                     )
-                    Box(
-                        modifier = Modifier
-                            .background(
-                                Color(0xFFBA7517).copy(alpha = 0.15f),
-                                RoundedCornerShape(12.dp)
-                            )
-                            .border(1.dp, Color(0xFFBA7517), RoundedCornerShape(12.dp))
-                            .padding(horizontal = 10.dp, vertical = 4.dp)
-                    ) {
-                        Text(
-                            text = stringResource(R.string.profile_top_rank, 24),
-                            color = Color(0xFFBA7517),
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Medium
+                }
+
+                Box(
+                    modifier = Modifier
+                        .background(
+                            Color(0xFFBA7517).copy(alpha = 0.15f),
+                            RoundedCornerShape(12.dp)
                         )
-                    }
+                        .border(1.dp, Color(0xFFBA7517), RoundedCornerShape(12.dp))
+                        .padding(horizontal = 10.dp, vertical = 4.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.profile_top_rank, 24),
+                        color = Color(0xFFBA7517),
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Medium
+                    )
                 }
             }
         }
