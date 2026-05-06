@@ -18,13 +18,13 @@ class AddHabitViewModel : ViewModel() {
     var errorMessage by mutableStateOf<String?>(null)
         private set
 
-    fun saveHabit(habit: Habit, onSuccess: () -> Unit) {
+    fun saveHabit(habit: Habit, onSuccess: (String) -> Unit) {
         viewModelScope.launch {
             isLoading = true
             errorMessage = null
             try {
-                repository.addHabit(habit)
-                onSuccess()
+                val newId = repository.addHabit(habit)
+                onSuccess(newId)
             } catch (e: Exception) {
                 errorMessage = e.localizedMessage
             } finally {

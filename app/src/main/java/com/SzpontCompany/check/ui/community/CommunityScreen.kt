@@ -16,10 +16,6 @@ import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import com.SzpontCompany.check.ui.community.components.ChallengeInviteCard
 import com.SzpontCompany.check.ui.community.components.YourPositionCard
 import com.SzpontCompany.check.ui.community.components.NotificationsSheet
-import com.SzpontCompany.check.data.social.Battle
-import com.SzpontCompany.check.data.social.ChallengeInvite
-import com.SzpontCompany.check.data.social.Event
-import com.SzpontCompany.check.data.social.RankingEntry
 import com.SzpontCompany.check.ui.theme.CheckTheme
 import com.SzpontCompany.check.ui.theme.Mint
 import com.SzpontCompany.check.ui.theme.getColorByName
@@ -41,93 +37,67 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.SzpontCompany.check.data.social.Friend
-import com.SzpontCompany.check.ui.ads.NativeAdCard
+import com.SzpontCompany.check.ui.community.components.CreateChallengeSheet
 import com.SzpontCompany.check.ui.profile.ProfileViewModel
+import kotlinx.coroutines.coroutineScope
+import android.widget.Toast
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import com.SzpontCompany.check.data.social.Battle
+import com.SzpontCompany.check.ui.ads.NativeAdCard
+import com.SzpontCompany.check.ui.community.components.NotificationsViewModel
+import com.SzpontCompany.check.R
+
 
 @Composable
 fun CommunityScreen(
     onProfileClick: () -> Unit = {},
     onFriendProfileClick: () -> Unit = {},
     onMessageClick: (Friend) -> Unit = {},
-    viewModel: ProfileViewModel = viewModel()
+    onBattleClick: (Battle) -> Unit = {},
+    viewModel: ProfileViewModel = viewModel(),
+    friendsViewModel: FriendsViewModel = viewModel(),
+    communityViewModel: CommunityViewModel = viewModel(),
+    notificationsViewModel: NotificationsViewModel = viewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
+
+    val unreadNotificationsCount by notificationsViewModel.unreadCount.collectAsState()
+
     val user = state.user
 
-    val tabs = listOf("Battle", "Eventy", "Ranking", "Znajomi")
+    val battles by communityViewModel.battles.collectAsState()
+    val incomingInvites by communityViewModel.incomingInvites.collectAsState()
+    val events by communityViewModel.events.collectAsState()
+    val rankingEntries by communityViewModel.rankingEntries.collectAsState()
+
+    val tabs = listOf(
+        stringResource(R.string.tab_challenges),
+        stringResource(R.string.tab_events),
+        stringResource(R.string.tab_ranking),
+        stringResource(R.string.tab_friends)
+    )
     var selectedTab by rememberSaveable { mutableIntStateOf(0) }
     var selectedSubTab by remember { mutableStateOf(0) }
+    var friendsSubTab by remember { mutableStateOf(0) }
     var showNotifications by remember { mutableStateOf(false) }
-    val subTabs = listOf("Globalny", "Znajomi", "Tygodniowy")
+    val subTabs = listOf(
+        stringResource(R.string.community_subtab_global),
+        stringResource(R.string.community_subtab_friends),
+        stringResource(R.string.community_subtab_weekly)
+    )
     val haptic = LocalHapticFeedback.current
 
-    // --- Przykładowe dane ---
-    val battles = listOf(
-        Battle(
-            title = "Codzienny spacer", daysLeft = 3,
-            myDays = 6, totalDays = 7, myHp = 95,
-            opponentName = "Kacper M.", opponentDays = 5, opponentHp = 60,
-            opponentCompleted = false, betAmount = 50, endDate = "23 mar",
-            isLosingWarning = false, isDoneToday = true
-        ),
-        Battle(
-            title = "Czytanie 20 min", daysLeft = 5,
-            myDays = 4, totalDays = 7, myHp = 55,
-            opponentName = "Ania W.", opponentDays = 7, opponentHp = 100,
-            opponentCompleted = true, betAmount = 100, endDate = null,
-            isLosingWarning = true, isDoneToday = false
-        )
-    )
+    var showCreateChallengeSheet by remember { mutableStateOf(false) }
 
-    val invites = listOf(
-        ChallengeInvite(
-            senderName = "Tomek K.",
-            activityName = "Bieganie",
-            durationMinutes = 30,
-            days = 30,
-            betAmount = 200
-        )
-    )
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val dynamicRankingEntries = rankingEntries.map {
+        if (it.isMe) it.copy(avatarColor = primaryColor) else it
+    }
 
-    val events = listOf(
-        Event(
-            title = "Globalny Marsz Marca",
-            subtitle = "Łącznie 1 000 000 kroków",
-            badgeText = "Global",
-            themeColor = Color(0xFF00BFA5),
-            progress = 0.67f,
-            progressText = "672 450 / 1 000 000 kroków",
-            timeText = "12 dni",
-            participantsCount = "8 431 uczestników",
-            buttonText = "Dołącz"
-        ),
-        Event(
-            title = "Tydzień Czytania",
-            subtitle = "7 dni z rzędu min. 20 min",
-            badgeText = "Społeczność",
-            themeColor = Color(0xFF8C9EFF),
-            progress = 0.43f,
-            progressText = "3 / 7 dni ukończono",
-            timeText = "4 dni",
-            rewardHighlight = "Odznaka \"Bookworm\" + 300 monet"
-        ),
-        Event(
-            title = "Wiosenny Sprint",
-            subtitle = "Rusza za 3 dni!",
-            isSubtitleColored = true,
-            badgeText = "Wkrótce",
-            themeColor = Color(0xFFF57C00),
-            description = "30-dniowe wyzwanie aktywności fizycznej.\nNagroda: ekskluzywna odznaka + 500 monet.",
-            buttonText = "Przypomnij mi"
-        )
-    )
-
-    val rankingEntries = listOf(
-        RankingEntry(rank = 1, name = "Piotr K.", initials = "PK", xp = 4200, avatarColor = Color(0xFFD8912A)),
-        RankingEntry(rank = 2, name = "Ania S.", initials = "AS", xp = 3800, avatarColor = Color(0xFF5E35B1)),
-        RankingEntry(rank = 3, name = "Marek J.", initials = "MJ", xp = 3100, avatarColor = Color(0xFFE24B4A)),
-        RankingEntry(rank = 14, name = "Ty", initials = "TY", xp = 1240, avatarColor = MaterialTheme.colorScheme.primary, isMe = true)
-    )
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier
@@ -144,7 +114,7 @@ fun CommunityScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Społeczność",
+                text = stringResource(R.string.community_title),
                 style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
                 color = MaterialTheme.colorScheme.onBackground
             )
@@ -163,11 +133,11 @@ fun CommunityScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.Notifications,
-                        contentDescription = "Powiadomienia",
+                        contentDescription = stringResource(R.string.community_notifications_desc),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    // Czerwona kropka jeśli są zaproszenia
-                    if (invites.isNotEmpty()) {
+
+                    if (unreadNotificationsCount > 0) {
                         Box(
                             modifier = Modifier
                                 .align(Alignment.TopEnd)
@@ -176,6 +146,7 @@ fun CommunityScreen(
                                 .background(MaterialTheme.colorScheme.primary, CircleShape)
                         )
                     }
+
                 }
 
                 Box(
@@ -242,36 +213,44 @@ fun CommunityScreen(
                         item {
                             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                                 Button(
-                                    onClick = { haptic.performHapticFeedback(HapticFeedbackType.LongPress) },
+                                    onClick = {
+                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        showCreateChallengeSheet = true
+                                    },
                                     modifier = Modifier.weight(1f).height(54.dp),
                                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                                     shape = RoundedCornerShape(16.dp)
-                                ) { Text("+ Wyzwanie", fontWeight = FontWeight.Bold, fontSize = 15.sp) }
+                                ) { Text(stringResource(R.string.community_create_challenge), fontWeight = FontWeight.Bold, fontSize = 15.sp) }
 
                                 Button(
                                     onClick = { haptic.performHapticFeedback(HapticFeedbackType.LongPress) },
                                     modifier = Modifier.weight(1f).height(54.dp),
                                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
                                     shape = RoundedCornerShape(16.dp)
-                                ) { Text("Znajdź graczy", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground, fontSize = 15.sp) }
+                                ) { Text(stringResource(R.string.community_find_players), fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground, fontSize = 15.sp) }
                             }
                         }
 
-                        // Sekcja zaproszeń WYNIESIONA NA POCZĄTEK
-                        if (invites.isNotEmpty()) {
+                        // Sekcja zaproszeń
+                        if (incomingInvites.isNotEmpty()) {
                             item {
                                 Text(
-                                    "OCZEKUJĄCE ZAPROSZENIA (${invites.size})",
+                                    stringResource(R.string.community_pending_invites, incomingInvites.size),
                                     style = MaterialTheme.typography.labelMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
                                 )
                             }
-                            items(invites.size) { i ->
+                            items(incomingInvites.size) { i ->
                                 ChallengeInviteCard(
-                                    invite = invites[i],
-                                    onAccept = {},
-                                    onReject = {}
+                                    invite = incomingInvites[i],
+                                    onAccept = {
+                                        communityViewModel.acceptInvite(incomingInvites[i], user)
+                                        Toast.makeText(context, R.string.community_toast_battle_started, Toast.LENGTH_SHORT).show()
+                                    },
+                                    onReject = {
+                                        communityViewModel.rejectInvite(incomingInvites[i])
+                                    }
                                 )
                             }
                         }
@@ -279,22 +258,32 @@ fun CommunityScreen(
                         // Sekcja aktywnych bitew
                         item {
                             Text(
-                                "AKTYWNE BITWY (${battles.size})",
+                                stringResource(R.string.community_active_battles, battles.size),
                                 style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
                             )
                         }
 
-
-                        items(battles.size) { i ->
+                        itemsIndexed(
+                            items = battles,
+                            key = { _, battle -> battle.id }
+                        ) { index, battle ->
                             BattleCard(
-                                battle = battles[i],
-                                onDoneClick = {},
-                                onDetailsOrSurrenderClick = {}
+                                battle = battle,
+                                currentUserId = user?.uid ?: "",
+                                onDoneClick = { isNowDone ->
+                                    communityViewModel.toggleBattleDone(battle, isNowDone)
+                                },
+                                onDetailsOrSurrenderClick = {
+                                    onBattleClick(battle)
+                                },
+                                onAcknowledgeClick = {
+                                    communityViewModel.acknowledgeBattle(battle)
+                                }
                             )
 
-                            if(i == 0) {
+                            if (index == 0) {
                                 Spacer(modifier = Modifier.height(16.dp))
                                 NativeAdCard()
                             }
@@ -309,7 +298,7 @@ fun CommunityScreen(
                     ) {
                         item {
                             Text(
-                                "AKTYWNE EVENTY",
+                                stringResource(R.string.community_active_events),
                                 style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
@@ -366,21 +355,23 @@ fun CommunityScreen(
                                 rank = 14,
                                 xp = 1240,
                                 level = 8,
-                                trendText = "+3 od zeszłego tyg."
+                                trendText = stringResource(R.string.community_trend_up, 3)
                             )
                         }
 
                         item {
-                            RankingListCard(entries = rankingEntries)
+                            RankingListCard(entries = dynamicRankingEntries)
                         }
+
                         item {
                             NativeAdCard()
                         }
                     }
-
                 }
                 3 -> { // Zakładka Znajomi
                     FriendsCard(
+                        selectedSubTab = friendsSubTab,
+                        onSubTabSelected = { friendsSubTab = it },
                         modifier = Modifier.fillMaxSize(),
                         onFriendProfileClick = { onFriendProfileClick() },
                         onMessageClick = { friend -> onMessageClick(friend) }
@@ -392,7 +383,47 @@ fun CommunityScreen(
 
     if (showNotifications) {
         NotificationsSheet(
-            onDismiss = { showNotifications = false }
+            onDismiss = { showNotifications = false },
+            viewModel = notificationsViewModel,
+            onNotificationClick = { notification ->
+                showNotifications = false
+
+                when (notification.type) {
+                    "BATTLE_INVITE" -> {
+                        selectedTab = 0
+                    }
+                    "FRIEND_REQUEST" -> {
+                        selectedTab = 3
+                        friendsSubTab = 1
+                    }
+                    // TODO: W przyszłości dla wiadomości itp.
+                }
+            }
+        )
+    }
+
+    if (showCreateChallengeSheet) {
+        val friendsState by friendsViewModel.uiState.collectAsState()
+        val friendsList = friendsState.activeFriends + friendsState.offlineFriends
+
+        CreateChallengeSheet(
+            friendsList = friendsList,
+            onDismiss = { showCreateChallengeSheet = false },
+            onAddFriendClick = {
+                selectedTab = 3
+                friendsSubTab = 2
+            },
+            onSendChallenge = { friend, template, betAmount ->
+                showCreateChallengeSheet = false
+                val resolvedTitle = context.getString(template.titleRes)
+
+                communityViewModel.sendChallenge(user, friend, template, resolvedTitle, betAmount)
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.community_toast_challenge_sent, friend.name),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
         )
     }
 }

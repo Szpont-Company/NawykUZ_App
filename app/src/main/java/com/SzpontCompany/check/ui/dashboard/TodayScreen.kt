@@ -40,6 +40,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.SzpontCompany.check.R
 import com.SzpontCompany.check.data.habit.Habit
+import com.SzpontCompany.check.ui.community.components.NotificationsViewModel
 import com.SzpontCompany.check.ui.components.EmojiExplosionEffect
 import com.SzpontCompany.check.ui.theme.getColorByName
 import com.google.android.gms.ads.AdLoader
@@ -58,9 +59,11 @@ fun TodayScreen(
     onProfileClick: () -> Unit = {},
     onOptionsClick: () -> Unit = {},
     onNotificationsClick: () -> Unit = {},
-    viewModel: TodayViewModel = viewModel()
+    viewModel: TodayViewModel = viewModel(),
+    notificationsViewModel: NotificationsViewModel = viewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
+    val unreadNotificationsCount by notificationsViewModel.unreadCount.collectAsState()
     val explosions = remember { mutableStateListOf<ExplosionData>() }
     val haptic = LocalHapticFeedback.current
     val coroutineScope = rememberCoroutineScope()
@@ -77,7 +80,8 @@ fun TodayScreen(
                     onProfileClick = onProfileClick,
                     onOptionsClick = onOptionsClick,
                     onNotificationsClick = onNotificationsClick,
-                    state = state
+                    state = state,
+                    unreadCount = unreadNotificationsCount
                 )
                 Spacer(modifier = Modifier.height(24.dp))
 
@@ -171,7 +175,8 @@ fun TopSection(
     onProfileClick: () -> Unit,
     onOptionsClick: () -> Unit,
     onNotificationsClick: () -> Unit,
-    state: TodayUiState
+    state: TodayUiState,
+    unreadCount: Int
 ) {
     val currentHour = remember { java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY) }
 
@@ -226,8 +231,7 @@ fun TopSection(
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
-                val hasUnreadNotifications = true
-                if (hasUnreadNotifications) {
+                if (unreadCount > 0) {
                     Box(
                         modifier = Modifier
                             .align(Alignment.TopEnd)
@@ -413,8 +417,39 @@ fun HabitCard(
                 Spacer(modifier = Modifier.width(12.dp))
 
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(habit.name, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onBackground)
-                    Text(habit.frequency, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(
+                        habit.name,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+
+                    if (habit.battleId != null) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .padding(top = 4.dp)
+                                .background(
+                                    color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.8f),
+                                    shape = RoundedCornerShape(8.dp)
+                                )
+                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                        ) {
+                            Text(text = "⚔️", fontSize = 12.sp)
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = "Bitwa z: ${habit.opponentName ?: "Nieznajomy"}",
+                                color = MaterialTheme.colorScheme.onErrorContainer,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+
+                    Text(
+                        habit.frequency,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
 
                 IconButton(

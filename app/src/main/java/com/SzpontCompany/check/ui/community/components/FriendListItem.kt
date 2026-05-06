@@ -21,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import com.SzpontCompany.check.R
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -29,6 +30,7 @@ import com.SzpontCompany.check.ui.theme.getColorByName
 import java.util.Locale
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.res.stringResource
 
 @Composable
 fun FriendListItem(
@@ -43,8 +45,6 @@ fun FriendListItem(
     val haptic = LocalHapticFeedback.current
 
     val avatarBgColor = getColorByName(friend.bgColor)
-    val initialsColor = MaterialTheme.colorScheme.surface
-
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -67,26 +67,38 @@ fun FriendListItem(
                 if (friend.avatarEmoji.isNotEmpty()) {
                     Text(friend.avatarEmoji, fontSize = 24.sp)
                 } else {
-                    Text(friend.initials, color = initialsColor, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                    Text(friend.initials, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 15.sp)
                 }
             }
 
             Spacer(Modifier.width(12.dp))
 
             Column(modifier = Modifier.weight(1f)) {
-                Text(friend.name, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
+                val displayName = friend.name.ifEmpty { stringResource(R.string.unknown_user) }
+                Text(displayName, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
                 Spacer(Modifier.height(2.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     if (friend.online) {
                         Box(modifier = Modifier.size(8.dp).background(MaterialTheme.colorScheme.primary, CircleShape))
                         Spacer(Modifier.width(4.dp))
-                        Text("Online • $formattedXp XP", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(
+                            stringResource(R.string.friend_online_xp, formattedXp),
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     } else if (friend.lastActive.isNotEmpty()) {
                         Box(modifier = Modifier.size(8.dp).background(Color.Gray.copy(alpha = 0.5f), CircleShape))
                         Spacer(Modifier.width(4.dp))
                         Text(friend.lastActive, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     } else if (isSuggested) {
-                        Text(if (friend.mutuals > 0) "${friend.mutuals} wspólnych znajomych" else "Z Twoich kontaktów", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(
+                            if (friend.mutuals > 0)
+                                stringResource(R.string.friend_mutuals_count, friend.mutuals)
+                            else
+                                stringResource(R.string.friend_from_contacts),
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
                 }
             }
@@ -115,7 +127,7 @@ fun FriendListItem(
                             .clickable { expanded = true },
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(Icons.Default.MoreVert, contentDescription = "Opcje", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.friend_options_desc), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
 
                     DropdownMenu(
@@ -128,7 +140,7 @@ fun FriendListItem(
                         shape = RoundedCornerShape(12.dp)
                     ) {
                         DropdownMenuItem(
-                            text = { Text("Pokaż profil", fontWeight = FontWeight.Medium, fontSize = 14.sp) },
+                            text = { Text(stringResource(R.string.friend_show_profile), fontWeight = FontWeight.Medium, fontSize = 14.sp) },
                             leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
                             onClick = {
                                 expanded = false
@@ -136,7 +148,7 @@ fun FriendListItem(
                             }
                         )
                         DropdownMenuItem(
-                            text = { Text("Wyślij wiadomość", fontWeight = FontWeight.Medium, fontSize = 14.sp) },
+                            text = { Text(stringResource(R.string.friend_send_message), fontWeight = FontWeight.Medium, fontSize = 14.sp) },
                             leadingIcon = { Icon(Icons.Default.Email, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
                             onClick = {
                                 expanded = false
@@ -148,7 +160,7 @@ fun FriendListItem(
                             color = MaterialTheme.colorScheme.surfaceVariant
                         )
                         DropdownMenuItem(
-                            text = { Text("Usuń ze znajomych", fontWeight = FontWeight.Medium, fontSize = 14.sp, color = Color(0xFFFF5252)) },
+                            text = { Text(stringResource(R.string.friend_remove), fontWeight = FontWeight.Medium, fontSize = 14.sp, color = Color(0xFFFF5252)) },
                             leadingIcon = { Icon(Icons.Default.Delete, contentDescription = null, tint = Color(0xFFFF5252)) },
                             onClick = { 
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -160,12 +172,20 @@ fun FriendListItem(
                 }
             } else {
                 if (friend.status.isNotEmpty()) {
+                    val displayStatus = when (friend.status) {
+                        "STATUS_FRIEND" -> stringResource(R.string.friend_status_friend)
+                        "STATUS_SENT" -> stringResource(R.string.friend_status_sent)
+                        "STATUS_WAITING" -> stringResource(R.string.friend_status_waiting)
+                        else -> friend.status
+                    }
                     OutlinedButton(
                         onClick = {},
                         shape = RoundedCornerShape(8.dp),
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurfaceVariant),
                         modifier = Modifier.height(36.dp)
-                    ) { Text(friend.status, fontSize = 12.sp) }
+                    ) {
+                        Text(displayStatus, fontSize = 12.sp)
+                    }
                 } else {
                     Button(
                         onClick = { 
@@ -175,7 +195,7 @@ fun FriendListItem(
                         shape = RoundedCornerShape(8.dp),
                         modifier = Modifier.height(36.dp),
                         contentPadding = PaddingValues(horizontal = 16.dp)
-                    ) { Text("Zaproś", fontSize = 12.sp, fontWeight = FontWeight.Bold) }
+                    ) { Text(stringResource(R.string.friend_invite_btn), fontSize = 12.sp, fontWeight = FontWeight.Bold) }
                 }
             }
         }

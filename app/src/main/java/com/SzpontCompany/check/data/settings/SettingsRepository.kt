@@ -15,11 +15,13 @@ class SettingsRepository(private val context: Context) {
         val THEME_KEY = stringPreferencesKey("app_theme")
         val ACCENT_COLOR_KEY = stringPreferencesKey("app_accent_color")
         val LANGUAGE_KEY = stringPreferencesKey("app_language")
+        val BATTLE_NOTIFICATIONS_KEY = androidx.datastore.preferences.core.booleanPreferencesKey("battle_notifications")
     }
 
     val themeFlow: Flow<String> = context.dataStore.data.map { it[THEME_KEY] ?: "Auto" }
     val accentColorFlow: Flow<String> = context.dataStore.data.map { it[ACCENT_COLOR_KEY] ?: "Mint" }
     val languageFlow: Flow<String> = context.dataStore.data.map { it[LANGUAGE_KEY] ?: "Polski" }
+    val battleNotificationsFlow: Flow<Boolean> = context.dataStore.data.map { it[BATTLE_NOTIFICATIONS_KEY] ?: true }
 
     suspend fun saveTheme(theme: String) {
         context.dataStore.edit { it[THEME_KEY] = theme }
@@ -31,5 +33,9 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun saveLanguage(language: String) {
         context.dataStore.edit { it[LANGUAGE_KEY] = language }
+    }
+
+    suspend fun saveBattleNotifications(isEnabled: Boolean) {
+        context.dataStore.edit { it[BATTLE_NOTIFICATIONS_KEY] = isEnabled }
     }
 }

@@ -20,6 +20,9 @@ data class Habit(
     val difficulty: String = "",
     val isActive: Boolean = true,
 
+    val battleId: String? = null,
+    val opponentName: String? = null,
+
     val streak: Int = 0,
     val monthlyCompletionRate: Int = 0,
     val completedDates: List<String> = emptyList(),

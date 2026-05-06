@@ -20,13 +20,16 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.SzpontCompany.check.ui.addhabit.AddHabitHost
 import com.SzpontCompany.check.data.social.Friend
+import com.SzpontCompany.check.data.social.Battle
 import com.SzpontCompany.check.ui.dashboard.TodayScreen
 import com.SzpontCompany.check.ui.stats.StatsScreen
 import com.SzpontCompany.check.ui.map.MapScreen
 import com.SzpontCompany.check.ui.community.CommunityScreen
 import com.SzpontCompany.check.ui.community.components.NotificationsSheet
+import com.SzpontCompany.check.ui.community.components.NotificationsViewModel
 
 enum class BottomTab {
     TODAY, STATS, MAP, COMMUNITY, ADD
@@ -40,7 +43,10 @@ fun MainScreen(
     onOptionsClick: () -> Unit = {},
     onNotificationsClick: () -> Unit = {},
     onFriendProfileClick: () -> Unit = {},
-    onMessageClick: (Friend) -> Unit = {}
+    onMessageClick: (Friend) -> Unit = {},
+    onBattleClick: (Battle) -> Unit = {},
+    notificationsViewModel: NotificationsViewModel = viewModel(),
+    onNavigateToBattleDetail: (String) -> Unit = {}
 ) {
     var showNotifications by remember { mutableStateOf(false) }
     var showAddHabit by remember { mutableStateOf(false) }
@@ -56,21 +62,45 @@ fun MainScreen(
             BottomTab.TODAY -> TodayScreen(
                 onProfileClick = onProfileClick,
                 onOptionsClick = onOptionsClick,
-                onNotificationsClick = { showNotifications = true }
+                onNotificationsClick = { showNotifications = true },
+                notificationsViewModel = notificationsViewModel
             )
+
             BottomTab.STATS -> StatsScreen()
             BottomTab.MAP -> MapScreen()
             BottomTab.COMMUNITY -> CommunityScreen(
                 onProfileClick = onProfileClick,
                 onFriendProfileClick = onFriendProfileClick,
-                onMessageClick = onMessageClick
+                onMessageClick = onMessageClick,
+                onBattleClick = onBattleClick,
+                notificationsViewModel = notificationsViewModel
             )
+
             BottomTab.ADD -> {}
         }
 
         if (showNotifications) {
             NotificationsSheet(
-                onDismiss = { showNotifications = false }
+                onDismiss = { showNotifications = false },
+                viewModel = notificationsViewModel,
+                onNotificationClick = { notification ->
+                    showNotifications = false
+
+                    when (notification.type) {
+                        "BATTLE_INVITE" -> {
+                            onTabSelected(BottomTab.COMMUNITY)
+                        }
+                        "BATTLE_RESULT" -> {
+                            notification.relatedEntityId?.let { battleId ->
+                                onNavigateToBattleDetail(battleId)
+                            }
+                        }
+                        "FRIEND_REQUEST", "FRIEND_ACCEPTED" -> {
+                            onTabSelected(BottomTab.COMMUNITY)
+                        }
+                        // Kolejne akcje dodamy z czasem
+                    }
+                }
             )
         }
     }
@@ -100,8 +130,12 @@ fun MainScreen(
 fun CheckBottomNavigationBar(
     currentTab: BottomTab?,
     onTabSelected: (BottomTab) -> Unit,
-    onAddClick: () -> Unit
+    onAddClick: () -> Unit,
+    notificationsViewModel: NotificationsViewModel = viewModel()
 ) {
+
+    val unreadCount by notificationsViewModel.unreadCount.collectAsState()
+
     val navItemColors = NavigationBarItemDefaults.colors(
         selectedIconColor = MaterialTheme.colorScheme.primary,
         selectedTextColor = MaterialTheme.colorScheme.primary,
@@ -166,7 +200,18 @@ fun CheckBottomNavigationBar(
         NavigationBarItem(
             selected = currentTab == BottomTab.COMMUNITY,
             onClick = { onTabSelected(BottomTab.COMMUNITY) },
-            icon = { Icon(Icons.Default.People, contentDescription = null) },
+            icon = {
+                BadgedBox(
+                    badge = {
+                        if (unreadCount > 0) {
+                            Badge(containerColor = MaterialTheme.colorScheme.primary) {
+                            }
+                        }
+                    }
+                ) {
+                    Icon(Icons.Default.People, contentDescription = null)
+                }
+            },
             label = { Text("Społeczność") },
             colors = navItemColors
         )

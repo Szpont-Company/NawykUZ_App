@@ -7,6 +7,7 @@ import com.SzpontCompany.check.data.user.User
 import com.SzpontCompany.check.data.user.UserRepository
 import com.SzpontCompany.check.data.habit.Habit
 import com.SzpontCompany.check.data.habit.HabitRepository
+import com.SzpontCompany.check.data.social.ChallengeRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,6 +25,7 @@ class TodayViewModel(application: Application) : AndroidViewModel(application) {
 
     private val userRepo = UserRepository.getInstance(application.applicationContext)
     private val habitRepo = HabitRepository()
+    private val challengeRepository = ChallengeRepository(com.google.firebase.firestore.FirebaseFirestore.getInstance())
 
     private val _uiState = MutableStateFlow(TodayUiState())
     val uiState: StateFlow<TodayUiState> = _uiState.asStateFlow()
@@ -149,28 +151,9 @@ class TodayViewModel(application: Application) : AndroidViewModel(application) {
         var updatedUser = currentUser
 
         if (currentUser != null) {
-            var newGlobalStreak = currentUser.currentStreak
-            var newLastDate = currentUser.lastGlobalStreakDate
-
-            if (allDoneToday) {
-                if (currentUser.lastGlobalStreakDate != todayString) {
-                    newGlobalStreak += 1
-                    newLastDate = todayString
-                }
-            } else {
-                if (currentUser.lastGlobalStreakDate == todayString) {
-                    newGlobalStreak = maxOf(0, newGlobalStreak - 1)
-                    newLastDate = yesterdayString
-                }
-            }
-
-            val newBestStreak = maxOf(currentUser.bestStreak, newGlobalStreak)
             val newProgress = calculateWeeklyProgress(updatedHabits)
 
-            updatedUser = currentUser.copy(
-                currentStreak = newGlobalStreak,
-                bestStreak = newBestStreak,
-                lastGlobalStreakDate = newLastDate,
+            updatedUser = currentUser.calculateNewStreak(allDoneToday, todayString, yesterdayString).copy(
                 weeklyProgress = newProgress
             )
         }
@@ -182,7 +165,18 @@ class TodayViewModel(application: Application) : AndroidViewModel(application) {
 
         viewModelScope.launch {
             try {
-                habitRepo.updateHabitCompletionAndStreak(habitId, newDates, newHabitStreak)
+                if (habit.battleId != null && currentUser != null) {
+                    challengeRepository.updateBattleProgress(
+                        battleId = habit.battleId,
+                        currentUserId = currentUser.uid,
+                        isDone = isDone,
+                        habitId = habitId,
+                        newDates = newDates,
+                        newHabitStreak = newHabitStreak
+                    )
+                } else {
+                    habitRepo.updateHabitCompletionAndStreak(habitId, newDates, newHabitStreak)
+                }
 
                 if (updatedUser != null && currentUser != updatedUser) {
                     userRepo.updateUserStreaks(
