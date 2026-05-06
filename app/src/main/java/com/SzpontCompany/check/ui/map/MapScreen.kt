@@ -48,6 +48,7 @@ import com.google.maps.android.compose.*
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
+import com.SzpontCompany.check.ui.map.createAvatarMarker
 
 enum class MapTab { ROUTES, FRIENDS }
 
@@ -173,10 +174,9 @@ fun MapScreen(
                     }
                 },
                 routesHistory = routesHistory,
-                friendsLocations = friendsLocations, // Przekazanie listy
+                friendsLocations = friendsLocations,
                 formatDuration = viewModel::formatDuration,
                 onFriendClick = { friend ->
-                    // Przesuń kamerę po kliknięciu na znajomego
                     scope.launch {
                         cameraPositionState.animate(
                             CameraUpdateFactory.newLatLngZoom(LatLng(friend.latitude, friend.longitude), 14f)
@@ -202,12 +202,23 @@ fun MapScreen(
                             width = 12f
                         )
                     }
+
                     if (selectedTab == MapTab.FRIENDS) {
                         friendsLocations.forEach { friend ->
+                            val avatarIcon = remember(friend.id, friend.name, friend.emoji, friend.bgColorName) {
+                                createAvatarMarker(
+                                    context = context,
+                                    name = friend.name,
+                                    emoji = friend.emoji,
+                                    bgColorName = friend.bgColorName
+                                )
+                            }
+
                             Marker(
                                 state = MarkerState(position = LatLng(friend.latitude, friend.longitude)),
                                 title = friend.name,
-                                snippet = "Check." // Krótki dymek systemowy nad pinezką
+                                icon = avatarIcon,
+                                snippet = "Check."
                             )
                         }
                     }
@@ -478,6 +489,17 @@ fun FriendLocationCard(
         else -> stringResource(R.string.map_friend_hours_ago, minutesAgo / 60)
     }
 
+    // 1. Obliczanie inicjałów z nazwy (identycznie jak w innych częściach aplikacji)
+    val initials = remember(friend.name) {
+        friend.name.trim().split("\\s+".toRegex())
+            .mapNotNull { it.firstOrNull()?.uppercase() }
+            .take(2)
+            .joinToString("")
+    }
+
+    // 2. Sprawdzenie, czy użytkownik ma ustawione własne emoji
+    val isEmojiValid = friend.emoji.isNotEmpty() && friend.emoji != "👤"
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -487,15 +509,27 @@ fun FriendLocationCard(
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        // 3. Kontener awatara z dynamiczną zawartością
         Box(
             modifier = Modifier
                 .size(48.dp)
                 .clip(CircleShape)
-                .background(getColorByName(friend.bgColorName))
+                .background(getColorByName(friend.bgColorName)) // Tło w kolorze użytkownika
                 .border(2.dp, MaterialTheme.colorScheme.background, CircleShape),
             contentAlignment = Alignment.Center
         ) {
-            Text(text = friend.emoji, fontSize = 24.sp)
+            if (isEmojiValid) {
+                // Wyświetlamy emoji, jeśli jest ustawione
+                Text(text = friend.emoji, fontSize = 24.sp)
+            } else {
+                // Wyświetlamy białe, pogrubione inicjały w przeciwnym razie
+                Text(
+                    text = initials,
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp
+                )
+            }
         }
 
         Spacer(modifier = Modifier.width(16.dp))
