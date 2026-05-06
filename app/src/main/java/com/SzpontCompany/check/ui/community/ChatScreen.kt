@@ -155,8 +155,8 @@ fun ChatTopBar(
                 initials = friendInitials,
                 bgColor = friendBgColor,
                 size = 44.dp,
-                emojiSize = 20f,
-                initialsSize = 16f
+                emojiSize = 22f,
+                initialsSize = 18f
             )
             Spacer(modifier = Modifier.width(12.dp))
 
@@ -244,7 +244,12 @@ fun ChatMessageItem(message: UiChatMessage) {
                     modifier = Modifier.widthIn(max = 280.dp)
                 ) {
                     Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
-                        Text(text = message.text, fontSize = 15.sp, color = MaterialTheme.colorScheme.onSecondaryContainer)
+                        Text(
+                            text = message.text,
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontSize = 15.sp,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
                         Text(
                             text = timeString,
                             fontSize = 10.sp,
@@ -263,7 +268,12 @@ fun ChatMessageItem(message: UiChatMessage) {
                     modifier = Modifier.widthIn(max = 280.dp)
                 ) {
                     Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
-                        Text(text = message.text, fontSize = 15.sp, color = MaterialTheme.colorScheme.onPrimary)
+                        Text(
+                            text = message.text,
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontSize = 15.sp,
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
                         Row(modifier = Modifier.align(Alignment.End).padding(top = 2.dp), verticalAlignment = Alignment.CenterVertically) {
                             Text(text = timeString, fontSize = 10.sp, color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f))
                             Spacer(modifier = Modifier.width(4.dp))
