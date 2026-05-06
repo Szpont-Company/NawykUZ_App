@@ -92,8 +92,7 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
         }
 
         viewModelScope.launch {
-            challengeRepository.getActiveBattlesForUser(currentUserId).collect { battles ->
-                val wonBattles = battles.count { it.winnerId == currentUserId }
+            challengeRepository.getWonBattlesCount(currentUserId).collect { wonBattles ->
                 _uiState.update { it.copy(battlesWon = wonBattles) }
             }
         }

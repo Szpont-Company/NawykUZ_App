@@ -237,7 +237,6 @@
     <string name="notifications_title">Notifications</string>
     <string name="mark_as_read">Mark as read</string>
     <string name="no_notifications">No notifications</string>
-    <string name="no_new_notifications">You have no new notifications.</string>
 
     <!-- PlayerVsRow / RankingListCard / YourPositionCard -->
     <string name="you">You</string>
@@ -495,4 +494,5 @@
     <string name="map_friend_mins_ago">%1$d mins ago</string>
     <string name="map_friend_hours_ago">%1$d hours ago</string>
     <string name="map_friends_empty">None of your friends are sharing their location right now.</string>
+    <string name="no_new_notifications">No new notifications 😴</string>
 </resources>

@@ -75,7 +75,7 @@ fun NotificationsSheet(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "Brak nowych powiadomień \uD83D\uDE34",
+                        text = stringResource(R.string.no_new_notifications),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 16.sp
                     )
