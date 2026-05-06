@@ -34,12 +34,31 @@ class FriendProfileViewModel : ViewModel() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
-                val userDoc = firestore.collection("users").document(friendUid).get().await()
-                val user = userDoc.toObject(User::class.java)
+                val document = firestore.collection("users").document(friendUid).get().await()
+
+                if (!document.exists()) {
+                    _uiState.update { it.copy(isLoading = false, error = "Użytkownik nie istnieje") }
+                    return@launch
+                }
+
+                val friendUser = User(
+                    uid = friendUid,
+                    name = document.getString("name") ?: "",
+                    email = document.getString("email") ?: "",
+                    nickname = document.getString("nickname") ?: "",
+                    isAdmin = document.getBoolean("isAdmin") ?: false,
+                    avatarEmoji = document.getString("avatarEmoji") ?: "",
+                    bgColor = document.getString("bgColor") ?: "Mint",
+                    currentStreak = document.getLong("currentStreak")?.toInt() ?: 0,
+                    bestStreak = document.getLong("bestStreak")?.toInt() ?: 0,
+                    lastGlobalStreakDate = document.getString("lastGlobalStreakDate") ?: "",
+                    weeklyProgress = (document.get("weeklyProgress") as? List<*>)?.map { (it as? Number)?.toFloat() ?: 0f }
+                        ?: listOf(0f, 0f, 0f, 0f, 0f, 0f, 0f)
+                )
 
                 val habitsSnapshot = firestore.collection("users").document(friendUid).collection("habits").get().await()
-                val habits = habitsSnapshot.documents.mapNotNull {
-                    it.toObject(Habit::class.java)?.copy(id = it.id)
+                val habits = habitsSnapshot.documents.mapNotNull { doc ->
+                    doc.toObject(Habit::class.java)?.copy(id = doc.id)
                 }
 
                 var totalPossible = 0
@@ -49,12 +68,9 @@ class FriendProfileViewModel : ViewModel() {
                 habits.forEach { habit ->
                     val actual = habit.completedDates.size
                     totalActual += actual
-
                     val daysSinceCreation = habit.createdAt?.let {
-                        val diff = todayMs - it.time
-                        (diff / (1000 * 60 * 60 * 24)).toInt().coerceAtLeast(1)
+                        ((todayMs - it.time) / (1000 * 60 * 60 * 24)).toInt().coerceAtLeast(1)
                     } ?: actual.coerceAtLeast(1)
-
                     totalPossible += daysSinceCreation
                 }
 
@@ -62,24 +78,19 @@ class FriendProfileViewModel : ViewModel() {
                     ((totalActual.toFloat() / totalPossible) * 100).toInt().coerceAtMost(100)
                 } else 0
 
-                val coins = userDoc.getLong("coins")?.toInt() ?: 0
-
-                val battlesSnapshot = firestore.collection("battles").whereEqualTo("winnerId", friendUid).get().await()
-                val battlesWon = battlesSnapshot.size()
-
+                val wonBattlesSnapshot = firestore.collection("battles").whereEqualTo("winnerId", friendUid).get().await()
                 val friendsSnapshot = firestore.collection("users").document(friendUid).collection("friends").get().await()
-                val friendsCount = friendsSnapshot.size()
 
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        user = user,
+                        user = friendUser,
                         habits = habits,
                         habitsCount = habits.size,
-                        coins = coins,
-                        battlesWon = battlesWon,
+                        coins = document.getLong("coins")?.toInt() ?: 0,
+                        battlesWon = wonBattlesSnapshot.size(),
                         effectiveness = effectiveness,
-                        friendsCount = friendsCount
+                        friendsCount = friendsSnapshot.size()
                     )
                 }
             } catch (e: Exception) {

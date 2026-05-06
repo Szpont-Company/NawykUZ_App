@@ -66,26 +66,59 @@ fun FriendProfileScreen(
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
             }
+        } else if (uiState.error != null) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text(
+                    text = "Wystąpił błąd: ${uiState.error}",
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
         } else {
             FriendUserHeaderSection(user = uiState.user)
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Zostawiamy pasek poziomu z mockiem (tak jak prosiłeś, do czasu wdrożenia XP)
             FriendLevelAndXpBar()
 
             Spacer(modifier = Modifier.height(24.dp))
 
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    StatCard(modifier = Modifier.weight(1f), targetValue = uiState.habitsCount, label = "Nawyki")
-                    StatCard(modifier = Modifier.weight(1f), targetValue = uiState.user?.currentStreak ?: 0, label = "Dni w rzędzie", valueColor = MaterialTheme.colorScheme.primary)
-                    StatCard(modifier = Modifier.weight(1f), targetValue = uiState.coins, label = "Monety", valueColor = Color(0xFFBA7517))
+                    StatCard(
+                        modifier = Modifier.weight(1f),
+                        targetValue = uiState.habitsCount,
+                        label = "Nawyki"
+                    )
+                    StatCard(
+                        modifier = Modifier.weight(1f),
+                        targetValue = uiState.user?.currentStreak ?: 0,
+                        label = "Dni w rzędzie",
+                        valueColor = MaterialTheme.colorScheme.primary
+                    )
+                    StatCard(
+                        modifier = Modifier.weight(1f),
+                        targetValue = uiState.coins,
+                        label = "Monety",
+                        valueColor = Color(0xFFBA7517)
+                    )
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    StatCard(modifier = Modifier.weight(1f), targetValue = uiState.battlesWon, label = "Wygrane")
-                    StatCard(modifier = Modifier.weight(1f), targetValue = uiState.effectiveness, suffix = "%", label = "Skuteczność")
-                    StatCard(modifier = Modifier.weight(1f), targetValue = uiState.friendsCount, label = "Znajomi")
+                    StatCard(
+                        modifier = Modifier.weight(1f),
+                        targetValue = uiState.battlesWon,
+                        label = "Wygrane"
+                    )
+                    StatCard(
+                        modifier = Modifier.weight(1f),
+                        targetValue = uiState.effectiveness,
+                        suffix = "%",
+                        label = "Skuteczność"
+                    )
+                    StatCard(
+                        modifier = Modifier.weight(1f),
+                        targetValue = uiState.friendsCount,
+                        label = "Znajomi"
+                    )
                 }
             }
 
@@ -98,7 +131,7 @@ fun FriendProfileScreen(
                 modifier = Modifier.padding(bottom = 12.dp)
             )
 
-            val friendBadges = BadgeProvider.allBadges.take(3).map { it.copy(isUnlocked = true) } // Narazie mockujemy kilka jako odblokowane
+            val friendBadges = BadgeProvider.allBadges.take(3).map { it.copy(isUnlocked = true) }
 
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -125,13 +158,16 @@ fun FriendProfileScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             if (uiState.habits.isEmpty()) {
-                Text("Ten gracz nie ma jeszcze żadnych nawyków.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(
+                    "Ten gracz nie ma jeszcze żadnych nawyków.",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             } else {
                 uiState.habits.forEach { habit ->
                     FriendHabitCard(
                         emoji = habit.icon,
                         title = habit.name,
-                        subtitle = "Aktywny nawyk", // Tutaj możesz ewentualnie podpiąć kolor lub dni nawyku
+                        subtitle = "Aktywny nawyk",
                         streak = "${habit.streak} dni"
                     )
                     Spacer(modifier = Modifier.height(12.dp))
@@ -173,7 +209,12 @@ fun FriendUserHeaderSection(user: User?) {
                     .border(2.dp, MaterialTheme.colorScheme.background, RoundedCornerShape(12.dp))
                     .padding(horizontal = 8.dp, vertical = 2.dp)
             ) {
-                Text("Lvl 6", color = MaterialTheme.colorScheme.background, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                Text(
+                    "Lvl 6",
+                    color = MaterialTheme.colorScheme.background,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold
+                )
             }
         }
         Spacer(modifier = Modifier.width(24.dp))
@@ -192,19 +233,35 @@ fun FriendUserHeaderSection(user: User?) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Box(
                     modifier = Modifier
-                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f), RoundedCornerShape(12.dp))
+                        .background(
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                            RoundedCornerShape(12.dp)
+                        )
                         .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(12.dp))
                         .padding(horizontal = 10.dp, vertical = 4.dp)
                 ) {
-                    Text(text = "🔥 ${user?.currentStreak ?: 0} dni", color = MaterialTheme.colorScheme.primary, fontSize = 11.sp, fontWeight = FontWeight.Medium)
+                    Text(
+                        text = "🔥 ${user?.currentStreak ?: 0} dni",
+                        color = MaterialTheme.colorScheme.primary,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Medium
+                    )
                 }
                 Box(
                     modifier = Modifier
-                        .background(Color(0xFFBA7517).copy(alpha = 0.15f), RoundedCornerShape(12.dp))
+                        .background(
+                            Color(0xFFBA7517).copy(alpha = 0.15f),
+                            RoundedCornerShape(12.dp)
+                        )
                         .border(1.dp, Color(0xFFBA7517), RoundedCornerShape(12.dp))
                         .padding(horizontal = 10.dp, vertical = 4.dp)
                 ) {
-                    Text("Top 24", color = Color(0xFFBA7517), fontSize = 11.sp, fontWeight = FontWeight.Medium)
+                    Text(
+                        "Top 24",
+                        color = Color(0xFFBA7517),
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Medium
+                    )
                 }
             }
         }
