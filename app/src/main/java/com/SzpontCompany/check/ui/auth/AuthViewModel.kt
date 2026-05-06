@@ -10,6 +10,8 @@ import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.SzpontCompany.check.data.habit.Habit
+import com.SzpontCompany.check.data.habit.HabitRepository
 import com.SzpontCompany.check.data.user.UserRepository
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
@@ -35,6 +37,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
    private val auth by lazy { FirebaseAuth.getInstance() }
    val recaptcha = RecaptchaManager(application, viewModelScope)
    private val userRepository by lazy { UserRepository.getInstance(application.applicationContext) }
+   private val habitRepository by lazy { HabitRepository() }
 
     var email by mutableStateOf("")
         private set
@@ -250,6 +253,27 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
         } catch (e: Exception) {
             e.printStackTrace()
+            Result.failure(e)
+        }
+    }
+
+    suspend fun saveFirstHabit(dailySteps: Int): Result<Unit> {
+        return try {
+            val stepHabit = Habit(
+                name = "Kroki",
+                icon = "🚶",
+                colorName = "Mint",
+                frequency = "Daily",
+                dailyGoal = dailySteps,
+                unit = "kroków",
+                difficulty = "Łatwy",
+                isActive = true
+            )
+
+            habitRepository.addHabit(stepHabit)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error saving first habit: ${e.message}")
             Result.failure(e)
         }
     }

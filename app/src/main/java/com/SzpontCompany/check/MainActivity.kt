@@ -200,7 +200,7 @@ class MainActivity : AppCompatActivity() {
                         }
 
                         AppScreen.SET_NICKNAME -> OnboardingScreen(
-                            onNicknameSaved = {currentScreen = AppScreen.DASHBOARD},
+                            onOnboardingComplete = {currentScreen = AppScreen.DASHBOARD},
                         )
 
                         AppScreen.DASHBOARD -> {
