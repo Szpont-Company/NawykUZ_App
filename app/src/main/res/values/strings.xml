@@ -365,4 +365,7 @@
     <string name="habit_widget_personal_best">Rekord:</string>
     <string name="widget_steps_steps">KROKI</string>
     <string name="widget_steps_goal">cel: %1$d</string>
+    <string name="onboarding_first_habit">Twój pierwszy nawyk 👣</string>
+    <string name="onboarding_hero">Ruch to zdrowie! Ustaw swój dzienny cel kroków, aby zacząć budować dobrą rutynę.</string>
+    <string name="onboarding_begin">Rozpocznij</string>
 </resources>

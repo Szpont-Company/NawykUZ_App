@@ -147,7 +147,6 @@ fun OnboardingScreen(
                                     isLoading = true
                                     val result = authViewModel.saveNickname(nickname)
                                     if (result.isSuccess) {
-                                        // ZAMIAST kończyć, przechodzimy do kolejnego kroku!
                                         currentStep = OnboardingStep.FIRST_HABIT
                                     } else {
                                         val msg = result.exceptionOrNull()?.message
@@ -186,7 +185,7 @@ fun OnboardingScreen(
                 OnboardingStep.FIRST_HABIT -> {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            text = "Twój pierwszy nawyk \uD83D\uDC63", // Zastąp to docelowo stringResource()
+                            text = stringResource(R.string.onboarding_first_habit), // Zastąp to docelowo stringResource()
                             style = MaterialTheme.typography.headlineLarge,
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center,
@@ -194,7 +193,7 @@ fun OnboardingScreen(
                         )
                         Spacer(Modifier.height(8.dp))
                         Text(
-                            text = "Ruch to zdrowie! Ustaw swój dzienny cel kroków, aby zacząć budować dobrą rutynę.", // Zastąp to docelowo stringResource()
+                            text = stringResource(R.string.onboarding_hero), // Zastąp to docelowo stringResource()
                             style = MaterialTheme.typography.bodyLarge,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.padding(horizontal = 16.dp),
@@ -205,7 +204,6 @@ fun OnboardingScreen(
                         OutlinedTextField(
                             value = dailySteps,
                             onValueChange = { newValue ->
-                                // Pozwalamy tylko na wpisywanie cyfr i blokujemy zbyt długie liczby (np. max 6 cyfr)
                                 if (newValue.all { it.isDigit() } && newValue.length <= 6) {
                                     dailySteps = newValue
                                 }
@@ -230,17 +228,14 @@ fun OnboardingScreen(
                         Button(
                             onClick = {
                                 scope.launch {
-                                    isLoading = true // Używamy tego samego stanu co przy nicku
+                                    isLoading = true
                                     val stepsInt = dailySteps.toIntOrNull() ?: 8000
 
-                                    // Wywołujemy nową funkcję z ViewModelu
                                     val result = authViewModel.saveFirstHabit(stepsInt)
 
                                     if (result.isSuccess) {
-                                        // Sukces! Przekazujemy info wyżej, żeby wyjść z Onboardingu
                                         onOnboardingComplete(stepsInt)
                                     } else {
-                                        // Obsługa błędu zapisu (opcjonalnie)
                                         Toast.makeText(context, "Nie udało się zapisać nawyku", Toast.LENGTH_SHORT).show()
                                     }
                                     isLoading = false
@@ -255,7 +250,7 @@ fun OnboardingScreen(
                             if (isLoading) {
                                 CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
                             } else {
-                                Text("Rozpocznij", fontWeight = FontWeight.Medium)
+                                Text(stringResource(R.string.onboarding_begin), fontWeight = FontWeight.Medium)
                             }
                         }
                     }
