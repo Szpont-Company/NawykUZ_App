@@ -166,8 +166,6 @@ class MainActivity : AppCompatActivity() {
                                 AppScreen.REGISTER_SUCCESS, AppScreen.RESET_PASSWORD ->
                                     (slideInHorizontally { it } + fadeIn(tween(400))) togetherWith
                                             (slideOutHorizontally { -it } + fadeOut(tween(300)))
-
-                                else -> fadeIn() togetherWith fadeOut()
                             }
                         },
                         label = "app_screen_transition"
@@ -192,42 +190,7 @@ class MainActivity : AppCompatActivity() {
                                     }
                                 )
                             }
-                            else -> fadeIn() togetherWith fadeOut()
-                        }
-                    },
-                    label = "app_screen_transition"
-                ) { targetScreen ->
-                    when (targetScreen) {
-                        AppScreen.SPLASH -> {
-                            AnimatedSplashScreen(
-                                onSplashFinished = {
-                                    if (!authViewModel.isLoggedIn) {
-                                        currentScreen = AppScreen.LOGIN
-                                    } else {
-                                        scope.launch {
-                                            val uid = authViewModel.currentUser.value?.uid
-                                            currentScreen =
-                                                if (uid != null && authViewModel.isNicknameSet(uid)) {
-                                                    AppScreen.DASHBOARD
-                                                } else {
-                                                    AppScreen.SET_NICKNAME
-                                                }
-                                        }
-                                    }
-                                }
-                            )
-                        }
 
-                        AppScreen.LOGIN -> {
-                            LoginScreen(
-                                onLoginSuccess = {
-                                    scope.launch {
-                                        val uid = FirebaseAuth.getInstance().currentUser?.uid
-                                            ?: run {
-                                                delay(300)
-                                                FirebaseAuth.getInstance().currentUser?.uid
-                                            }
-                                            ?: return@launch
                             AppScreen.LOGIN -> {
                                 LoginScreen(
                                     onLoginSuccess = {
@@ -247,45 +210,37 @@ class MainActivity : AppCompatActivity() {
                                 )
                             }
 
-                        AppScreen.SET_NICKNAME -> OnboardingScreen(
-                            onNicknameSaved = { currentScreen = AppScreen.DASHBOARD },
-                        )
                             AppScreen.SET_NICKNAME -> OnboardingScreen(
-                                onOnboardingComplete = {currentScreen = AppScreen.DASHBOARD},
+                                onOnboardingComplete = { currentScreen = AppScreen.DASHBOARD }
                             )
 
                             AppScreen.DASHBOARD -> {
+                                LaunchedEffect(Unit) {
+                                    val currentUser = FirebaseAuth.getInstance().currentUser
+                                    if (currentUser != null) {
+                                        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+                                            if (!task.isSuccessful) {
+                                                Log.w(
+                                                    "FCM",
+                                                    "Fetching FCM registration token failed",
+                                                    task.exception
+                                                )
+                                                return@addOnCompleteListener
+                                            }
+                                            val token = task.result
+                                            Log.d("FCM", "FCM Token: $token")
+
+                                            FirebaseFirestore.getInstance().collection("users")
+                                                .document(currentUser.uid)
+                                                .update("fcmToken", token)
+                                        }
+                                    }
+                                }
+
                                 RootNavigationGraph(
                                     onLogout = { currentScreen = AppScreen.LOGIN }
                                 )
                             }
-                        AppScreen.DASHBOARD -> {
-                            LaunchedEffect(Unit) {
-                                val currentUser = FirebaseAuth.getInstance().currentUser
-                                if (currentUser != null) {
-                                    FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
-                                        if (!task.isSuccessful) {
-                                            Log.w(
-                                                "FCM",
-                                                "Fetching FCM registration token failed",
-                                                task.exception
-                                            )
-                                            return@addOnCompleteListener
-                                        }
-                                        val token = task.result
-                                        Log.d("FCM", "FCM Token: $token")
-
-                                        FirebaseFirestore.getInstance().collection("users")
-                                            .document(currentUser.uid)
-                                            .update("fcmToken", token)
-                                    }
-                                }
-                            }
-
-                            RootNavigationGraph(
-                                onLogout = { currentScreen = AppScreen.LOGIN }
-                            )
-                        }
 
                             AppScreen.REGISTER_SUCCESS -> RegisterSuccessScreen(
                                 onBack = { currentScreen = AppScreen.LOGIN },
@@ -296,35 +251,22 @@ class MainActivity : AppCompatActivity() {
                             AppScreen.RESET_PASSWORD -> ResetPasswordScreen(
                                 onBack = { currentScreen = AppScreen.LOGIN },
                                 accent = MaterialTheme.colorScheme.primary,
-                                onPasswordReset = { authViewModel.resetPassword { result ->
-                                    if (result.isSuccess) {
-                                        currentScreen = AppScreen.LOGIN
-                                    } else {
-                                        Log.e("ResetPassword", "Error resetting password: ${result.exceptionOrNull()?.message}")
+                                onPasswordReset = {
+                                    authViewModel.resetPassword { result ->
+                                        if (result.isSuccess) {
+                                            currentScreen = AppScreen.LOGIN
+                                        } else {
+                                            Log.e(
+                                                "ResetPassword",
+                                                "Error resetting password: ${result.exceptionOrNull()?.message}"
+                                            )
+                                        }
                                     }
-                                } },
+                                },
                                 email = authViewModel.email,
-                                onEmailChange = { authViewModel.onEmailChange(it)}
+                                onEmailChange = { authViewModel.onEmailChange(it) }
                             )
                         }
-                        AppScreen.RESET_PASSWORD -> ResetPasswordScreen(
-                            onBack = { currentScreen = AppScreen.LOGIN },
-                            accent = MaterialTheme.colorScheme.primary,
-                            onPasswordReset = {
-                                authViewModel.resetPassword { result ->
-                                    if (result.isSuccess) {
-                                        currentScreen = AppScreen.LOGIN
-                                    } else {
-                                        Log.e(
-                                            "ResetPassword",
-                                            "Error resetting password: ${result.exceptionOrNull()?.message}"
-                                        )
-                                    }
-                                }
-                            },
-                            email = authViewModel.email,
-                            onEmailChange = { authViewModel.onEmailChange(it) }
-                        )
                     }
                 }
             }
@@ -392,8 +334,8 @@ fun RootNavigationGraph(onLogout: () -> Unit) {
                     currentTab = BottomTab.COMMUNITY
                 }
             }
-            intent?.removeExtra("type")
-            intent?.removeExtra("entityId")
+            intent.removeExtra("type")
+            intent.removeExtra("entityId")
         }
     }
 

@@ -87,7 +87,7 @@ fun SettingsScreen(
         val context = LocalContext.current
         SectionHeader(text = stringResource(R.string.settings_section_accent))
         AccentColorSelector(
-            selectedColorName = currentAccentColor,
+            selectedColorName = currentAccent,
             onColorSelected = { selectedColorName ->
                 viewModel.updateAccentColor(selectedColorName)
                 val widgetColor = when (selectedColorName) {
@@ -103,8 +103,6 @@ fun SettingsScreen(
                 }
                 updateWidgetAccentColor(context, widgetColor)
             }
-            selectedColorName = currentAccent,
-            onColorSelected = { viewModel.updateAccentColor(it) }
         )
         Spacer(modifier = Modifier.height(24.dp))
 

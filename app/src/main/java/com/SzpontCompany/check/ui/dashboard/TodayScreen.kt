@@ -41,9 +41,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.SzpontCompany.check.R
 import com.SzpontCompany.check.data.habit.Habit
 import com.SzpontCompany.check.ui.community.components.NotificationsViewModel
-import com.SzpontCompany.check.ui.components.EmojiExplosionEffect
 import com.SzpontCompany.check.ui.components.UserAvatar
-import com.SzpontCompany.check.ui.profile.BadgeDetailsDialog
 import com.SzpontCompany.check.ui.rewards.BadgeUnlockDialog
 import com.SzpontCompany.check.ui.theme.getColorByName
 import com.google.android.gms.ads.AdLoader
@@ -54,6 +52,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.util.UUID
+import java.util.Locale
 
 data class ExplosionData(val id: Long, val emoji: String)
 
@@ -287,7 +286,7 @@ fun TopSection(
 @Composable
 fun HeroCard(currentStreak: Int, bestStreak: Int, weeklyProgress: List<Float>) {
     val multiplier = (1.0f + (currentStreak * 0.05f)).coerceIn(1.0f, 2.5f)
-    val multiplierText = String.format("%.2f", multiplier)
+    val multiplierText = String.format(Locale.US, "%.2f", multiplier)
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -671,7 +670,7 @@ fun HabitHeatmap(
     val completedDates = habit.completedDates.mapNotNull { dateString ->
         try {
             LocalDate.parse(dateString)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             null
         }
     }
@@ -776,7 +775,7 @@ fun NativeAdCard(modifier: Modifier = Modifier) {
                 factory = { ctx ->
                     val inflater = LayoutInflater.from(ctx)
                     val adView =
-                        inflater.inflate(R.layout.native_ad_habit_card, null) as NativeAdView
+                        inflater.inflate(R.layout.native_ad_habit_card, null, false) as NativeAdView
 
                     val headlineView = adView.findViewById<TextView>(R.id.ad_headline)
                     val bodyView = adView.findViewById<TextView>(R.id.ad_body)

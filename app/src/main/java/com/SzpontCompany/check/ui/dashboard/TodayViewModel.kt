@@ -73,9 +73,6 @@ class TodayViewModel(application: Application) : AndroidViewModel(application) {
                         updateHabitWidgetData(c, activeUser.currentStreak, activeUser.bestStreak)
                     } catch (e: Exception) {
                         e.printStackTrace()
-                                userRepo.updateUserStreaks(user.uid, 0, user.bestStreak, user.lastGlobalStreakDate)
-                            } catch (e: Exception) {}
-                        }
                     }
 
                     val progress = calculateWeeklyProgress(_uiState.value.habits)
