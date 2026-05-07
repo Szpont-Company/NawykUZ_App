@@ -9,6 +9,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.Checklist
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Message
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.PersonAdd
@@ -29,7 +32,8 @@ import com.SzpontCompany.check.data.notifications.NotificationType
 import java.text.SimpleDateFormat
 import java.util.*
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.material.icons.filled.Delete
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.ui.draw.scale
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.rememberSwipeToDismissBoxState
@@ -59,13 +63,44 @@ fun NotificationsSheet(
                 .padding(horizontal = 24.dp)
                 .padding(bottom = 24.dp)
         ) {
-            Text(
-                text = stringResource(R.string.notifications_title),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = stringResource(R.string.notifications_title),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+
+                if (notifications.isNotEmpty()) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        if (notifications.any { !it.isRead }) {
+                            IconButton(onClick = { viewModel.markAllAsRead() }) {
+                                Icon(
+                                    imageVector = Icons.Default.Checklist,
+                                    contentDescription = "Zaznacz wszystko jako odczytane",
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        }
+                        IconButton(onClick = { viewModel.deleteAllNotifications() }) {
+                            Icon(
+                                imageVector = Icons.Default.DeleteOutline,
+                                contentDescription = "Usuń wszystko",
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    }
+                }
+            }
 
             if (notifications.isEmpty()) {
                 Box(
@@ -106,19 +141,40 @@ fun NotificationsSheet(
                                         Color.Transparent,
                                     label = "swipe_color"
                                 )
+                                val scale by animateFloatAsState(
+                                    targetValue = if (dismissState.targetValue != SwipeToDismissBoxValue.Settled) 1.2f else 0.5f,
+                                    label = "swipe_scale"
+                                )
+                                val iconAlpha by animateFloatAsState(
+                                    targetValue = if (dismissState.targetValue != SwipeToDismissBoxValue.Settled) 1f else 0f,
+                                    label = "swipe_alpha"
+                                )
                                 Box(
                                     Modifier
                                         .fillMaxSize()
                                         .clip(RoundedCornerShape(16.dp))
                                         .background(color)
-                                        .padding(horizontal = 20.dp),
-                                    contentAlignment = Alignment.CenterEnd
+                                        .padding(horizontal = 24.dp),
+                                    contentAlignment = Alignment.Center
                                 ) {
-                                    Icon(
-                                        Icons.Default.Delete,
-                                        contentDescription = "Usuń",
-                                        tint = Color.White
-                                    )
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            Icons.Default.DeleteOutline,
+                                            contentDescription = "Usuń",
+                                            tint = Color.White.copy(alpha = iconAlpha),
+                                            modifier = Modifier.scale(scale)
+                                        )
+                                        Icon(
+                                            Icons.Default.DeleteOutline,
+                                            contentDescription = "Usuń",
+                                            tint = Color.White.copy(alpha = iconAlpha),
+                                            modifier = Modifier.scale(scale)
+                                        )
+                                    }
                                 }
                             },
                             content = {
@@ -222,10 +278,18 @@ fun NotificationItem(
             Spacer(modifier = Modifier.width(8.dp))
             Box(
                 modifier = Modifier
-                    .size(10.dp)
+                    .size(14.dp)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary)
-            )
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(8.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primary)
+                )
+            }
         }
     }
 }

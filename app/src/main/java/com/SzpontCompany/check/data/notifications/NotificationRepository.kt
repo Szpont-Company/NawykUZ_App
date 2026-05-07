@@ -63,4 +63,39 @@ class NotificationRepository {
             Log.e("NotificationRepo", "Error deleting notification", e)
         }
     }
+
+    suspend fun markAllAsRead() {
+        val userId = auth.currentUser?.uid ?: return
+        try {
+            val batch = firestore.batch()
+            val snapshot = firestore.collection("users").document(userId)
+                .collection("notifications")
+                .whereEqualTo("isRead", false)
+                .get().await()
+
+            for (doc in snapshot.documents) {
+                batch.update(doc.reference, "isRead", true)
+            }
+            batch.commit().await()
+        } catch (e: Exception) {
+            Log.e("NotificationRepo", "Error marking all as read", e)
+        }
+    }
+
+    suspend fun deleteAllNotifications() {
+        val userId = auth.currentUser?.uid ?: return
+        try {
+            val batch = firestore.batch()
+            val snapshot = firestore.collection("users").document(userId)
+                .collection("notifications")
+                .get().await()
+
+            for (doc in snapshot.documents) {
+                batch.delete(doc.reference)
+            }
+            batch.commit().await()
+        } catch (e: Exception) {
+            Log.e("NotificationRepo", "Error deleting all notifications", e)
+        }
+    }
 }

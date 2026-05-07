@@ -41,5 +41,17 @@ class NotificationsViewModel(
         }
     }
 
+    fun markAllAsRead() {
+        viewModelScope.launch {
+            repository.markAllAsRead()
+        }
+    }
+
+    fun deleteAllNotifications() {
+        viewModelScope.launch {
+            repository.deleteAllNotifications()
+        }
+    }
+
     // pozniej dodamy funkcje jak acceptfriendrequest itp
 }
