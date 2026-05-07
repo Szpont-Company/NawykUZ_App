@@ -72,7 +72,7 @@ class StepsWidget : GlanceAppWidget() {
                 .fillMaxSize()
                 .background(containerColor)
                 .cornerRadius(24.dp)
-                .padding(16.dp)
+                .padding(8.dp)
                 .clickable(actionStartActivity<MainActivity>()),
             contentAlignment = Alignment.Center
         ) {
@@ -84,18 +84,18 @@ class StepsWidget : GlanceAppWidget() {
                     text = context.getString((R.string.widget_steps_steps)),
                     style = TextStyle(
                         color = grayColorProvider,
-                        fontSize = 11.sp,
+                        fontSize = 8.sp,
                         fontWeight = FontWeight.Bold
                     )
                 )
 
-                Spacer(modifier = GlanceModifier.height(8.dp))
+                Spacer(modifier = GlanceModifier.height(2.dp))
 
                 Text(
                     text = String.format(Locale.getDefault(), "%,d", steps).replace(',', ' '),
                     style = TextStyle(
                         color = whiteColorProvider,
-                        fontSize = 24.sp,
+                        fontSize = 18.sp,
                         fontWeight = FontWeight.Bold
                     )
                 )
@@ -104,22 +104,22 @@ class StepsWidget : GlanceAppWidget() {
                     text = "$progressPercent%",
                     style = TextStyle(
                         color = accentColorProvider,
-                        fontSize = 16.sp,
+                        fontSize = 12.sp,
                         fontWeight = FontWeight.Medium
                     )
                 )
 
-                Spacer(modifier = GlanceModifier.height(12.dp))
+                Spacer(modifier = GlanceModifier.height(4.dp))
 
                 ProgressBar(progress, accentColorProvider)
 
-                Spacer(modifier = GlanceModifier.height(4.dp))
+                Spacer(modifier = GlanceModifier.height(2.dp))
 
                 Text(
                     text = context.getString((R.string.widget_steps_goal), goal),
                     style = TextStyle(
                         color = grayColorProvider,
-                        fontSize = 10.sp
+                        fontSize = 8.sp
                     )
                 )
             }
@@ -131,8 +131,8 @@ class StepsWidget : GlanceAppWidget() {
         Row(
             modifier = GlanceModifier
                 .fillMaxWidth()
-                .height(6.dp)
-                .cornerRadius(3.dp)
+                .height(4.dp)
+                .cornerRadius(2.dp)
         ) {
             val segments = 20
             val filledSegments = (progress * segments).toInt()
