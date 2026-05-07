@@ -40,7 +40,11 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.SzpontCompany.check.R
 import com.SzpontCompany.check.data.habit.Habit
+import com.SzpontCompany.check.ui.community.components.NotificationsViewModel
 import com.SzpontCompany.check.ui.components.EmojiExplosionEffect
+import com.SzpontCompany.check.ui.components.UserAvatar
+import com.SzpontCompany.check.ui.profile.BadgeDetailsDialog
+import com.SzpontCompany.check.ui.rewards.BadgeUnlockDialog
 import com.SzpontCompany.check.ui.theme.getColorByName
 import com.google.android.gms.ads.AdLoader
 import com.google.android.gms.ads.AdRequest
@@ -58,9 +62,12 @@ fun TodayScreen(
     onProfileClick: () -> Unit = {},
     onOptionsClick: () -> Unit = {},
     onNotificationsClick: () -> Unit = {},
-    viewModel: TodayViewModel = viewModel()
+    viewModel: TodayViewModel = viewModel(),
+    notificationsViewModel: NotificationsViewModel = viewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
+    val badgeToUnlock by viewModel.badgeToUnlock.collectAsState()
+    val unreadNotificationsCount by notificationsViewModel.unreadCount.collectAsState()
     val explosions = remember { mutableStateListOf<ExplosionData>() }
     val haptic = LocalHapticFeedback.current
     val coroutineScope = rememberCoroutineScope()
@@ -77,13 +84,15 @@ fun TodayScreen(
                     onProfileClick = onProfileClick,
                     onOptionsClick = onOptionsClick,
                     onNotificationsClick = onNotificationsClick,
-                    state = state
+                    state = state,
+                    unreadCount = unreadNotificationsCount
                 )
                 Spacer(modifier = Modifier.height(24.dp))
 
                 val currentStreak = state.user?.currentStreak ?: 0
                 val bestStreak = state.user?.bestStreak ?: 0
-                val weeklyProgress = state.user?.weeklyProgress ?: listOf(0f, 0f, 0f, 0f, 0f, 0f, 0f)
+                val weeklyProgress =
+                    state.user?.weeklyProgress ?: listOf(0f, 0f, 0f, 0f, 0f, 0f, 0f)
 
                 HeroCard(
                     currentStreak = currentStreak,
@@ -113,7 +122,12 @@ fun TodayScreen(
 
             if (state.habits.isEmpty() && !state.isLoading) {
                 item {
-                    Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(32.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
                         Text(
                             text = "Brak aktywnych nawyków. Dodaj coś!",
                             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -129,7 +143,7 @@ fun TodayScreen(
                         if (isNowDone) {
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             val id = UUID.randomUUID().mostSignificantBits
-                            val iconToExplode = if(habit.icon.isNotEmpty()) habit.icon else "🔥"
+                            val iconToExplode = if (habit.icon.isNotEmpty()) habit.icon else "🔥"
                             val newExplosion = ExplosionData(id, iconToExplode)
 
                             explosions.add(newExplosion)
@@ -154,14 +168,13 @@ fun TodayScreen(
             }
         }
 
-        explosions.forEach { explosion ->
-            key(explosion.id) {
-                EmojiExplosionEffect(
-                    modifier = Modifier.fillMaxSize(),
-                    emoji = explosion.emoji,
-                    triggerId = explosion.id
-                )
-            }
+        badgeToUnlock?.let { badge ->
+            BadgeUnlockDialog(
+                badge = badge,
+                onDismiss = {
+                    viewModel.claimBadgeReward(badge)
+                }
+            )
         }
     }
 }
@@ -171,9 +184,11 @@ fun TopSection(
     onProfileClick: () -> Unit,
     onOptionsClick: () -> Unit,
     onNotificationsClick: () -> Unit,
-    state: TodayUiState
+    state: TodayUiState,
+    unreadCount: Int
 ) {
-    val currentHour = remember { java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY) }
+    val currentHour =
+        remember { java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY) }
 
     val greeting = when (currentHour) {
         in 0..11 -> R.string.greeting_morning
@@ -188,27 +203,43 @@ fun TopSection(
                 .clip(CircleShape)
                 .then(
                     if (state.isLoading) Modifier.shimmerEffect()
-                    else Modifier.background(getColorByName(state.user?.bgColor ?: "Mint"))
+                    else Modifier
                 )
                 .clickable(enabled = !state.isLoading) { onProfileClick() },
             contentAlignment = Alignment.Center
         ) {
-            val displayAvatar = if (state.user?.avatarEmoji.isNullOrEmpty()) state.user?.initials ?: "MK" else state.user?.avatarEmoji ?: ""
-            Text(displayAvatar, color = Color.White, fontWeight = FontWeight.Bold)
+            UserAvatar(
+                avatarEmoji = state.user?.avatarEmoji ?: "",
+                initials = state.user?.initials ?: "MK",
+                bgColor = state.user?.bgColor ?: "Mint",
+                size = 48.dp,
+                emojiSize = 24f,
+                initialsSize = 15f
+            )
         }
         Spacer(modifier = Modifier.width(16.dp))
         Column(modifier = Modifier.weight(1f)) {
-            Text(stringResource(id = greeting), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            if(state.isLoading) {
-                Box(modifier = Modifier
-                    .padding(top = 4.dp)
-                    .fillMaxWidth(0.6f)
-                    .height(28.dp)
-                    .clip(RoundedCornerShape(4.dp))
-                    .shimmerEffect()
+            Text(
+                stringResource(id = greeting),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            if (state.isLoading) {
+                Box(
+                    modifier = Modifier
+                        .padding(top = 4.dp)
+                        .fillMaxWidth(0.6f)
+                        .height(28.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                        .shimmerEffect()
                 )
             } else {
-                Text(state.user?.name ?: "Użytkownik", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Bold)
+                Text(
+                    state.user?.name ?: "Użytkownik",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontWeight = FontWeight.Bold
+                )
             }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -226,8 +257,7 @@ fun TopSection(
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
-                val hasUnreadNotifications = true
-                if (hasUnreadNotifications) {
+                if (unreadCount > 0) {
                     Box(
                         modifier = Modifier
                             .align(Alignment.TopEnd)
@@ -254,9 +284,11 @@ fun TopSection(
         }
     }
 }
-
 @Composable
 fun HeroCard(currentStreak: Int, bestStreak: Int, weeklyProgress: List<Float>) {
+    val multiplier = (1.0f + (currentStreak * 0.05f)).coerceIn(1.0f, 2.5f)
+    val multiplierText = String.format("%.2f", multiplier)
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
@@ -271,9 +303,31 @@ fun HeroCard(currentStreak: Int, bestStreak: Int, weeklyProgress: List<Float>) {
         ) {
             Column {
                 Text("Aktualny streak", color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f), fontSize = 14.sp)
-                Text("$currentStreak dni", color = MaterialTheme.colorScheme.onPrimary, fontSize = 32.sp, fontWeight = FontWeight.Bold)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("$currentStreak dni", color = MaterialTheme.colorScheme.onPrimary, fontSize = 32.sp, fontWeight = FontWeight.Bold)
+
+                    if (multiplier > 1.0f) {
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Surface(
+                            color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.2f),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Text(
+                                text = "x$multiplierText",
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
                 Spacer(modifier = Modifier.height(4.dp))
-                Text("Rekord: $bestStreak dni", color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f), fontSize = 12.sp)
+                Text(
+                    "Rekord: $bestStreak dni",
+                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
+                    fontSize = 12.sp
+                )
             }
             MiniBarChart(
                 color = MaterialTheme.colorScheme.onPrimary,
@@ -282,7 +336,6 @@ fun HeroCard(currentStreak: Int, bestStreak: Int, weeklyProgress: List<Float>) {
         }
     }
 }
-
 @Composable
 fun MiniBarChart(color: Color, weeklyProgress: List<Float>) {
     val heights = if (weeklyProgress.size == 7) weeklyProgress else List(7) { 0f }
@@ -292,19 +345,29 @@ fun MiniBarChart(color: Color, weeklyProgress: List<Float>) {
         animationPlayed = true
     }
 
-    Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.Bottom, modifier = Modifier.height(48.dp)) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalAlignment = Alignment.Bottom,
+        modifier = Modifier.height(48.dp)
+    ) {
         heights.forEachIndexed { index, fraction ->
             val safeFraction = fraction.coerceIn(0f, 1f)
             val animatedFraction by animateFloatAsState(
                 targetValue = if (animationPlayed) safeFraction else 0.01f,
-                animationSpec = tween(durationMillis = 800, delayMillis = index * 100, easing = FastOutSlowInEasing),
+                animationSpec = tween(
+                    durationMillis = 800,
+                    delayMillis = index * 100,
+                    easing = FastOutSlowInEasing
+                ),
                 label = "bar_anim_$index"
             )
-            Box(modifier = Modifier
-                .width(6.dp)
-                .fillMaxHeight(animatedFraction)
-                .clip(RoundedCornerShape(3.dp))
-                .background(color))
+            Box(
+                modifier = Modifier
+                    .width(6.dp)
+                    .fillMaxHeight(animatedFraction)
+                    .clip(RoundedCornerShape(3.dp))
+                    .background(color)
+            )
         }
     }
 }
@@ -330,8 +393,17 @@ fun HabitCard(
             habit.selectedDays.isNotEmpty() -> {
                 last30Dates.filter { date ->
                     val dayNameEn = date.dayOfWeek.name
-                    val dayNameShortPl = listOf("Pn", "Wt", "Śr", "Cz", "Pt", "So", "Nd")[date.dayOfWeek.value - 1]
-                    val dayNameLongPl = listOf("poniedziałek", "wtorek", "środa", "czwartek", "piątek", "sobota", "niedziela")[date.dayOfWeek.value - 1]
+                    val dayNameShortPl =
+                        listOf("Pn", "Wt", "Śr", "Cz", "Pt", "So", "Nd")[date.dayOfWeek.value - 1]
+                    val dayNameLongPl = listOf(
+                        "poniedziałek",
+                        "wtorek",
+                        "środa",
+                        "czwartek",
+                        "piątek",
+                        "sobota",
+                        "niedziela"
+                    )[date.dayOfWeek.value - 1]
                     val dayValueStr = date.dayOfWeek.value.toString()
 
                     habit.selectedDays.any { selectedDay ->
@@ -342,6 +414,7 @@ fun HabitCard(
                     }
                 }
             }
+
             else -> last30Dates
         }
     }
@@ -356,8 +429,10 @@ fun HabitCard(
                 val expectedDatesStr = expectedDatesInLast30.map { it.toString() }
                 val completedExpectedCount = habit.completedDates.count { it in expectedDatesStr }
 
-                ((completedExpectedCount.toFloat() / expectedDatesStr.size) * 100).toInt().coerceIn(0, 100)
+                ((completedExpectedCount.toFloat() / expectedDatesStr.size) * 100).toInt()
+                    .coerceIn(0, 100)
             }
+
             habit.timesPerWeek > 0 -> {
                 val expectedTotal = (habit.timesPerWeek * (30.0 / 7.0)).toInt()
                 if (expectedTotal <= 0) return@remember 0
@@ -365,6 +440,7 @@ fun HabitCard(
                 val completedCount = habit.completedDates.count { it in last30DaysStr }
                 ((completedCount.toFloat() / expectedTotal) * 100).toInt().coerceIn(0, 100)
             }
+
             else -> {
                 val completedCount = habit.completedDates.count { it in last30DaysStr }
                 ((completedCount.toFloat() / 30f) * 100).toInt().coerceIn(0, 100)
@@ -406,7 +482,7 @@ fun HabitCard(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = if(habit.icon.isNotEmpty()) habit.icon else "🔥",
+                        text = if (habit.icon.isNotEmpty()) habit.icon else "🔥",
                         fontSize = 20.sp
                     )
                 }
@@ -455,17 +531,32 @@ fun HabitCard(
                     modifier = Modifier.size(32.dp)
                 ) {
                     if (isDoneToday) {
-                        Icon(Icons.Default.CheckCircle, contentDescription = "Zrobione", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(26.dp))
+                        Icon(
+                            Icons.Default.CheckCircle,
+                            contentDescription = "Zrobione",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(26.dp)
+                        )
                     } else {
-                        Box(modifier = Modifier
-                            .size(22.dp)
-                            .border(2.dp, MaterialTheme.colorScheme.onSurfaceVariant, CircleShape))
+                        Box(
+                            modifier = Modifier
+                                .size(22.dp)
+                                .border(
+                                    2.dp,
+                                    MaterialTheme.colorScheme.onSurfaceVariant,
+                                    CircleShape
+                                )
+                        )
                     }
                 }
 
                 Spacer(modifier = Modifier.width(4.dp))
 
-                Text(if (isDoneToday) "100%" else "0%", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+                Text(
+                    if (isDoneToday) "100%" else "0%",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
 
                 IconButton(onClick = { expanded = !expanded }, modifier = Modifier.size(32.dp)) {
                     Icon(
@@ -479,10 +570,24 @@ fun HabitCard(
             if (expanded) {
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    StatBox(modifier = Modifier.weight(1f), value = habit.dailyGoal.toString(), label = habit.unit.ifEmpty { "Cel" })
-                    StatBox(modifier = Modifier.weight(1f), value = habit.streak.toString(), label = "streak")
-                    StatBox(modifier = Modifier.weight(1f), value = "${monthlyPercentage}%", label = "30 dni")
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    StatBox(
+                        modifier = Modifier.weight(1f),
+                        value = habit.dailyGoal.toString(),
+                        label = habit.unit.ifEmpty { "Cel" })
+                    StatBox(
+                        modifier = Modifier.weight(1f),
+                        value = habit.streak.toString(),
+                        label = "streak"
+                    )
+                    StatBox(
+                        modifier = Modifier.weight(1f),
+                        value = "${monthlyPercentage}%",
+                        label = "30 dni"
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -511,9 +616,16 @@ fun HabitCard(
                         ),
                         shape = RoundedCornerShape(12.dp)
                     ) {
-                        Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Icon(
+                            Icons.Default.Check,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(if (isDoneToday) "Zrobione" else "Zaznacz", fontWeight = FontWeight.Bold)
+                        Text(
+                            if (isDoneToday) "Zrobione" else "Zaznacz",
+                            fontWeight = FontWeight.Bold
+                        )
                     }
 
                     OutlinedButton(
@@ -585,7 +697,8 @@ fun HabitHeatmap(
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     for (week in 0 until 8) {
-                        val daysToSubtract = ((7 - week) * 7) + (today.dayOfWeek.value - 1) - dayIndex
+                        val daysToSubtract =
+                            ((7 - week) * 7) + (today.dayOfWeek.value - 1) - dayIndex
                         val cellDate = today.minusDays(daysToSubtract.toLong())
                         val dateString = cellDate.toString()
 
@@ -662,7 +775,8 @@ fun NativeAdCard(modifier: Modifier = Modifier) {
                 modifier = Modifier.fillMaxWidth(),
                 factory = { ctx ->
                     val inflater = LayoutInflater.from(ctx)
-                    val adView = inflater.inflate(R.layout.native_ad_habit_card, null) as NativeAdView
+                    val adView =
+                        inflater.inflate(R.layout.native_ad_habit_card, null) as NativeAdView
 
                     val headlineView = adView.findViewById<TextView>(R.id.ad_headline)
                     val bodyView = adView.findViewById<TextView>(R.id.ad_body)
@@ -673,9 +787,11 @@ fun NativeAdCard(modifier: Modifier = Modifier) {
                     headlineView.setTextColor(titleColor)
                     bodyView.setTextColor(bodyColor)
                     badgeView.setTextColor(badgeTextColor)
-                    badgeView.backgroundTintList = android.content.res.ColorStateList.valueOf(badgeBgColor)
+                    badgeView.backgroundTintList =
+                        android.content.res.ColorStateList.valueOf(badgeBgColor)
                     ctaView.setTextColor(onPrimaryColor)
-                    ctaView.backgroundTintList = android.content.res.ColorStateList.valueOf(primaryColor)
+                    ctaView.backgroundTintList =
+                        android.content.res.ColorStateList.valueOf(primaryColor)
 
                     headlineView.text = nativeAd?.headline
                     adView.headlineView = headlineView
@@ -737,8 +853,17 @@ fun StatBox(modifier: Modifier = Modifier, value: String, label: String) {
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(value, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Bold)
-            Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(
+                value,
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onBackground,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                label,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }

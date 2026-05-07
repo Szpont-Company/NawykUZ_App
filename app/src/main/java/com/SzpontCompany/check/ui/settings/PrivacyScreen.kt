@@ -27,9 +27,12 @@ import com.SzpontCompany.check.R
 import com.SzpontCompany.check.ui.components.CheckBackButton
 
 @Composable
-fun PrivacyScreen(onBackClick: () -> Unit = {}) {
+fun PrivacyScreen(
+    onBackClick: () -> Unit = {},
+    viewModel: SettingsViewModel
+) {
     var selectedPrivacy by remember { mutableStateOf("public") }
-    var locationToggle by remember { mutableStateOf(true) }
+    val locationToggle by viewModel.showLocationState.collectAsState()
     var historyToggle by remember { mutableStateOf(true) }
 
     Column(
@@ -88,7 +91,7 @@ fun PrivacyScreen(onBackClick: () -> Unit = {}) {
                 title = stringResource(R.string.privacy_location_show),
                 description = stringResource(R.string.privacy_location_show_desc),
                 isToggled = locationToggle,
-                onToggle = { locationToggle = it }
+                onToggle = { viewModel.updateShowLocation(it) }
             )
 
             ToggleOption(
@@ -279,6 +282,9 @@ private fun DataOption(
 @Composable
 fun PrivacyScreenPreview() {
     CheckTheme(darkTheme = true, accent = Mint) {
-        PrivacyScreen()
+        PrivacyScreen(
+            onBackClick = TODO(),
+            viewModel = TODO()
+        )
     }
 }

@@ -65,7 +65,14 @@ class UserRepository private constructor(
                         currentStreak = snapshot.getLong("currentStreak")?.toInt() ?: 0,
                         bestStreak = snapshot.getLong("bestStreak")?.toInt() ?: 0,
                         lastGlobalStreakDate = snapshot.getString("lastGlobalStreakDate") ?: "",
-                        weeklyProgress = (snapshot.get("weeklyProgress") as? List<*>)?.map { (it as? Number)?.toFloat() ?: 0f } ?: listOf(0f, 0f, 0f, 0f, 0f, 0f, 0f)
+                        unlockedBadges = (snapshot.get("unlockedBadges") as? List<*>)?.mapNotNull { it as? String }
+                            ?: emptyList(),
+                        coins = snapshot.getLong("coins")?.toInt() ?: 0,
+                        xp = snapshot.getLong("xp")?.toInt() ?: 0,
+                        level = snapshot.getLong("level")?.toInt() ?: 1,
+                        weeklyProgress = (snapshot.get("weeklyProgress") as? List<*>)?.map {
+                            (it as? Number)?.toFloat() ?: 0f
+                        } ?: listOf(0f, 0f, 0f, 0f, 0f, 0f, 0f)
                     )
                     _userFlow.value = user
                     cache.save(user)
@@ -81,11 +88,11 @@ class UserRepository private constructor(
     suspend fun getUser(forceRefresh: Boolean = false): User {
         val firebaseUser = auth.currentUser
 
-        if(firebaseUser == null) {
+        if (firebaseUser == null) {
             val cachedUid = cache.getLastUid()
             val cached = cachedUid?.let { cache.get(it) }
 
-            if(cached != null) {
+            if (cached != null) {
                 if (_userFlow.value == null) {
                     _userFlow.value = cached
                 }
@@ -97,9 +104,9 @@ class UserRepository private constructor(
 
         val uid = firebaseUser.uid
 
-        if(!forceRefresh) {
+        if (!forceRefresh) {
             val cached = cache.get(uid)
-            if(cached != null && cache.isValid()) {
+            if (cached != null && cache.isValid()) {
                 Log.i("UserRepository", "Using cached user data for UID: $uid")
                 if (userListener == null) {
                     _userFlow.value = cached
@@ -125,7 +132,14 @@ class UserRepository private constructor(
             currentStreak = document.getLong("currentStreak")?.toInt() ?: 0,
             bestStreak = document.getLong("bestStreak")?.toInt() ?: 0,
             lastGlobalStreakDate = document.getString("lastGlobalStreakDate") ?: "",
-            weeklyProgress = (document.get("weeklyProgress") as? List<*>)?.map { (it as? Number)?.toFloat() ?: 0f } ?: listOf(0f, 0f, 0f, 0f, 0f, 0f, 0f)
+            unlockedBadges = (document.get("unlockedBadges") as? List<*>)?.mapNotNull { it as? String }
+                ?: emptyList(),
+            coins = document.getLong("coins")?.toInt() ?: 0,
+            xp = document.getLong("xp")?.toInt() ?: 0,
+            level = document.getLong("level")?.toInt() ?: 1,
+            weeklyProgress = (document.get("weeklyProgress") as? List<*>)?.map {
+                (it as? Number)?.toFloat() ?: 0f
+            } ?: listOf(0f, 0f, 0f, 0f, 0f, 0f, 0f)
         )
 
         cache.save(user)
@@ -151,6 +165,9 @@ class UserRepository private constructor(
             "currentStreak" to 0,
             "bestStreak" to 0,
             "lastGlobalStreakDate" to "",
+            "coins" to 0,
+            "xp" to 0,
+            "level" to 1,
             "weeklyProgress" to listOf(0f, 0f, 0f, 0f, 0f, 0f, 0f)
         )
         firestore
@@ -159,7 +176,7 @@ class UserRepository private constructor(
             .set(userData, SetOptions.merge())
             .await()
 
-        val updatedUser  = User(
+        val updatedUser = User(
             uid = uid,
             name = name,
             email = email,
@@ -169,7 +186,10 @@ class UserRepository private constructor(
             bgColor = "Mint",
             currentStreak = 0,
             bestStreak = 0,
-            lastGlobalStreakDate = ""
+            lastGlobalStreakDate = "",
+            coins = 0,
+            xp = 0,
+            level = 1
         )
         cache.save(updatedUser)
         _userFlow.value = updatedUser
@@ -186,7 +206,12 @@ class UserRepository private constructor(
         return snapshot.documents.any { it.id != myUid }
     }
 
-    suspend fun updateProfileViaFunctions(name: String, nickname: String, avatarEmoji: String, bgColor: String) {
+    suspend fun updateProfileViaFunctions(
+        name: String,
+        nickname: String,
+        avatarEmoji: String,
+        bgColor: String
+    ) {
         val data = hashMapOf(
             "name" to name,
             "nickname" to nickname,
@@ -209,7 +234,8 @@ class UserRepository private constructor(
 
             try {
                 val myId = updatedUser.uid
-                val myFriendsSnapshot = firestore.collection("users").document(myId).collection("friends").get().await()
+                val myFriendsSnapshot =
+                    firestore.collection("users").document(myId).collection("friends").get().await()
                 if (!myFriendsSnapshot.isEmpty) {
                     firestore.runBatch { batch ->
                         val friendData = mapOf(
@@ -219,7 +245,8 @@ class UserRepository private constructor(
                         )
                         for (doc in myFriendsSnapshot.documents) {
                             val friendId = doc.id
-                            val theirFriendRef = firestore.collection("users").document(friendId).collection("friends").document(myId)
+                            val theirFriendRef = firestore.collection("users").document(friendId)
+                                .collection("friends").document(myId)
                             batch.update(theirFriendRef, friendData)
                         }
                     }.await()
@@ -241,10 +268,10 @@ class UserRepository private constructor(
         _userFlow.value = null
     }
 
-    fun getUserCoins() : Flow<Int> = callbackFlow {
+    fun getUserCoins(): Flow<Int> = callbackFlow {
         val uid = auth.currentUser?.uid
 
-        if(uid == null) {
+        if (uid == null) {
             trySend(0)
             close(Exception("No user"))
             return@callbackFlow
@@ -252,11 +279,11 @@ class UserRepository private constructor(
 
         val listener = firestore.collection("users").document(uid)
             .addSnapshotListener { snapshot, exception ->
-                if(exception != null) {
+                if (exception != null) {
                     return@addSnapshotListener
                 }
 
-                if(snapshot != null && snapshot.exists()) {
+                if (snapshot != null && snapshot.exists()) {
                     val coins = snapshot.getLong("coins")?.toInt() ?: 0
                     trySend(coins)
                 } else {
@@ -266,7 +293,12 @@ class UserRepository private constructor(
         awaitClose { listener.remove() }
     }
 
-    suspend fun updateUserStreaks(uid: String, currentStreak: Int, bestStreak: Int, lastGlobalStreakDate: String) {
+    suspend fun updateUserStreaks(
+        uid: String,
+        currentStreak: Int,
+        bestStreak: Int,
+        lastGlobalStreakDate: String
+    ) {
         firestore.collection("users").document(uid)
             .update(
                 mapOf(
@@ -286,5 +318,48 @@ class UserRepository private constructor(
             _userFlow.value = updatedUser
             cache.save(updatedUser)
         }
+    }
+
+    suspend fun claimBadge(uid: String, badgeId: String) {
+        firestore.collection("users").document(uid)
+            .update("unlockedBadges", FieldValue.arrayUnion(badgeId))
+            .await()
+    }
+
+    suspend fun addReward(uid: String, addedXp: Int, addedCoins: Int) {
+        val userDoc = firestore.collection("users").document(uid)
+
+        val snapshot = userDoc.get().await()
+        var currentXp = snapshot.getLong("xp")?.toInt() ?: 0
+        var currentLevel = snapshot.getLong("level")?.toInt() ?: 1
+        var currentCoins = snapshot.getLong("coins")?.toInt() ?: 0
+
+        currentXp += addedXp
+        currentCoins = maxOf(0, currentCoins + addedCoins)
+
+        var threshold = currentLevel * 100
+        while (currentXp >= threshold) {
+            currentXp -= threshold
+            currentLevel++
+            threshold = currentLevel * 100
+            Log.d("UserRepository", "LEVEL UP! Nowy poziom: $currentLevel")
+        }
+
+        while (currentXp < 0 && currentLevel > 1) {
+            currentLevel--
+            val prevThreshold = currentLevel * 100
+            currentXp += prevThreshold
+            Log.d("UserRepository", "LEVEL DOWN! Spadek na poziom: $currentLevel")
+        }
+
+        currentXp = maxOf(0, currentXp)
+
+        userDoc.update(
+            mapOf(
+                "xp" to currentXp,
+                "coins" to currentCoins,
+                "level" to currentLevel
+            )
+        ).await()
     }
 }

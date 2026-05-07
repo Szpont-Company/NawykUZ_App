@@ -160,4 +160,19 @@ class ChallengeRepository(private val db: FirebaseFirestore) {
         }
     }
 
+    fun getWonBattlesCount(userId: String): Flow<Int> = callbackFlow {
+        val listener = battlesCollection
+            .whereEqualTo("winnerId", userId)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    trySend(0)
+                    return@addSnapshotListener
+                }
+                val count = snapshot?.size() ?: 0
+                trySend(count)
+            }
+        awaitClose { listener.remove() }
+    }
+
+
 }

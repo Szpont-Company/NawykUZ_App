@@ -58,8 +58,9 @@ fun SettingsScreen(
 ) {
 
     val currentTheme by viewModel.themeState.collectAsState()
-    val currentAccentColor by viewModel.accentColorState.collectAsState()
+    val currentAccent by viewModel.accentColorState.collectAsState()
     val currentLanguage by viewModel.languageState.collectAsState()
+    val battleNotificationsEnabled by viewModel.battleNotificationsState.collectAsState()
 
     var showDeleteDialog by remember { mutableStateOf(false) }
     var isDeleting by remember { mutableStateOf(false) }
@@ -102,6 +103,8 @@ fun SettingsScreen(
                 }
                 updateWidgetAccentColor(context, widgetColor)
             }
+            selectedColorName = currentAccent,
+            onColorSelected = { viewModel.updateAccentColor(it) }
         )
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -130,8 +133,8 @@ fun SettingsScreen(
                 title = stringResource(R.string.settings_battle_notifications),
                 icon = Icons.Rounded.FlashOn,
                 baseColor = Coral,
-                isChecked = true,
-                onCheckedChange = { /* TODO */ }
+                isChecked = battleNotificationsEnabled,
+                onCheckedChange = { viewModel.updateBattleNotifications(it) }
             )
             HorizontalDivider(color = MaterialTheme.colorScheme.background, thickness = 2.dp)
             SettingsRowSwitch(
@@ -361,7 +364,7 @@ fun SettingsRowSwitch(
             if (subtitle != null) {
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
-                    text = if(isChecked) "Włączone" else "Wyłączone",
+                    text = if(isChecked) stringResource(R.string.settings_state_on) else stringResource(R.string.settings_state_off),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 12.sp
                 )

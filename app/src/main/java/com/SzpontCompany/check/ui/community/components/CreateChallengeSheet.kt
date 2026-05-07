@@ -19,8 +19,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import com.SzpontCompany.check.R
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -28,6 +30,7 @@ import com.SzpontCompany.check.data.social.Friend
 import com.SzpontCompany.check.ui.theme.*
 import com.SzpontCompany.check.data.social.ChallengeTemplate
 import com.SzpontCompany.check.data.social.PredefinedChallenges
+import com.SzpontCompany.check.ui.components.UserAvatar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,14 +62,14 @@ fun CreateChallengeSheet(
                 .padding(bottom = 24.dp)
         ) {
             Text(
-                text = "Rzuć wyzwanie",
+                text = stringResource(R.string.challenge_sheet_title),
                 style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
                 color = MaterialTheme.colorScheme.onBackground
             )
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
-                text = "Kto podejmie rękawicę?",
+                text = stringResource(R.string.challenge_sheet_who_label),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.labelMedium
             )
@@ -81,7 +84,7 @@ fun CreateChallengeSheet(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "Nie masz jeszcze znajomych do bitwy 😔",
+                        text = stringResource(R.string.challenge_sheet_no_friends),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Medium
@@ -97,7 +100,7 @@ fun CreateChallengeSheet(
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.height(40.dp)
                     ) {
-                        Text("Znajdź znajomych", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                        Text(stringResource(R.string.challenge_sheet_find_friends), fontWeight = FontWeight.Bold, fontSize = 13.sp)
                     }
                 }
             } else {
@@ -118,7 +121,7 @@ fun CreateChallengeSheet(
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
-                text = "O co walczycie?",
+                text = stringResource(R.string.challenge_sheet_what_label),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.labelMedium
             )
@@ -136,7 +139,7 @@ fun CreateChallengeSheet(
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
-                text = "Stawka (Check Coins)",
+                text = stringResource(R.string.challenge_sheet_stake_label),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.labelMedium
             )
@@ -175,7 +178,7 @@ fun CreateChallengeSheet(
                 )
             ) {
                 Text(
-                    text = "Wyślij wyzwanie",
+                    text = stringResource(R.string.challenge_sheet_send_btn),
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White
@@ -200,22 +203,17 @@ fun SelectableFriendItem(friend: Friend, isSelected: Boolean, onClick: () -> Uni
     ) {
         Box(
             modifier = Modifier
-                .size(60.dp)
-                .clip(CircleShape)
-                .background(friendColor)
                 .border(2.dp, borderColor, CircleShape),
             contentAlignment = Alignment.Center
         ) {
-            if (friend.avatarEmoji.isNotEmpty()) {
-                Text(text = friend.avatarEmoji, fontSize = 28.sp)
-            } else {
-                Text(
-                    text = friend.initials,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-                )
-            }
+            UserAvatar(
+                avatarEmoji = friend.avatarEmoji,
+                initials = friend.initials,
+                bgColor = friend.bgColor,
+                size = 60.dp,
+                emojiSize = 28f,
+                initialsSize = 20f
+            )
         }
         Spacer(modifier = Modifier.height(8.dp))
         Text(
@@ -256,13 +254,13 @@ fun ChallengeTemplateCard(template: ChallengeTemplate, isSelected: Boolean, onCl
         Spacer(modifier = Modifier.width(16.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = template.title,
+                text = stringResource(template.titleRes),
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
             )
             Spacer(modifier = Modifier.height(2.dp))
             Text(
-                text = template.description,
+                text = stringResource(template.descRes),
                 fontSize = 12.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

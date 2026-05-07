@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -28,6 +29,8 @@ import com.SzpontCompany.check.ui.theme.Crimson
 import com.SzpontCompany.check.ui.theme.Mint
 import com.SzpontCompany.check.ui.theme.getColorByName
 import com.SzpontCompany.check.ui.components.CheckBackButton
+import com.SzpontCompany.check.R
+import com.SzpontCompany.check.ui.components.UserAvatar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,7 +65,7 @@ fun BattleDetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Szczegóły Bitwy", fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.battle_details_title), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     CheckBackButton(
                         onClick = onBackClick,
@@ -88,7 +91,7 @@ fun BattleDetailScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = battle.title,
+                    text = getLocalizedHabitName(battle.title),
                     style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
                     color = MaterialTheme.colorScheme.onBackground,
                     textAlign = TextAlign.Center
@@ -107,7 +110,7 @@ fun BattleDetailScreen(
                     Text(text = "🪙", fontSize = 16.sp)
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = "${battle.betAmount} Check Coins",
+                        text = stringResource(R.string.battle_check_coins, battle.betAmount),
                         color = Amber,
                         fontWeight = FontWeight.Bold,
                         fontSize = 14.sp
@@ -130,7 +133,7 @@ fun BattleDetailScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         PlayerDetailColumn(
-                            name = "Ty",
+                            name = stringResource(R.string.you),
                             avatarEmoji = myEmoji,
                             bgColorName = myBgColor,
                             hp = myHp,
@@ -171,10 +174,12 @@ fun BattleDetailScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceAround
                 ) {
-                    InfoBadge(title = "Pozostało", value = "$daysLeft dni")
+                    InfoBadge(title = stringResource(R.string.battle_remaining_label),
+                        value = stringResource(R.string.battle_days_left, daysLeft)
+                    )
                     InfoBadge(
-                        title = "Koniec",
-                        value = battle.endDate ?: "Wkrótce",
+                        title = stringResource(R.string.battle_end_label),
+                        value = battle.endDate ?: stringResource(R.string.battle_soon),
                         valueColor = if (daysLeft <= 1) Crimson else MaterialTheme.colorScheme.onBackground
                     )
                 }
@@ -193,7 +198,7 @@ fun BattleDetailScreen(
                         ) {
                             Icon(Icons.Rounded.CheckCircle, contentDescription = null, tint = Color.White)
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("Oznacz jako zrobione", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                            Text(stringResource(R.string.battle_mark_done), fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
                         }
                     } else {
                         Box(
@@ -207,7 +212,7 @@ fun BattleDetailScreen(
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(Icons.Rounded.CheckCircle, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text("Zrobione na dzisiaj!", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                                Text(stringResource(R.string.battle_done_for_today), fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
                             }
                         }
                     }
@@ -221,14 +226,14 @@ fun BattleDetailScreen(
                     ) {
                         Icon(Icons.Rounded.Warning, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Poddaj się (Oddaj monety)", fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.battle_surrender_give_coins), fontWeight = FontWeight.Bold)
                     }
                 } else {
                     val resultColor = if (isWinner) Color(0xFFD8912A) else Crimson
-                    val resultTitle = if (isWinner) "🎉 ZWYCIĘSTWO!" else "💀 PORAŻKA"
-                    val resultMessage = if (isWinner) 
-                        "Rozgromiłeś przeciwnika o imieniu $opponentName! Twoja nagroda to ${battle.betAmount * 2} 🪙 monet."
-                        else "Tym razem to $opponentName okazał się silniejszy. Twój zakład przepada."
+                    val resultTitle = if (isWinner) stringResource(R.string.battle_victory_title) else stringResource(R.string.battle_defeat_title)
+                    val resultMessage = if (isWinner)
+                        stringResource(R.string.battle_victory_message, opponentName, battle.betAmount * 2)
+                        else stringResource(R.string.battle_defeat_message, opponentName)
 
                     Column(
                         modifier = Modifier
@@ -248,7 +253,11 @@ fun BattleDetailScreen(
                             colors = ButtonDefaults.buttonColors(containerColor = resultColor),
                             shape = RoundedCornerShape(12.dp)
                         ) {
-                            Text(if (isWinner) "Odbierz Nagrodę" else "Zrozumiałem", color = Color.White, fontWeight = FontWeight.Bold)
+                            Text(
+                                if (isWinner) stringResource(R.string.battle_claim_reward) else stringResource(R.string.battle_understood),
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold
+                            )
                         }
                     }
                 }
@@ -270,29 +279,23 @@ fun PlayerDetailColumn(
     hpColor: Color,
     modifier: Modifier = Modifier
 ) {
-    val initials = if (name == "Ty") "Ty" else {
+    val myNameStr = stringResource(R.string.you)
+    val initials = if (name == myNameStr) myNameStr else {
         name.trim().split("\\s+".toRegex()).mapNotNull { it.firstOrNull()?.uppercase() }.take(2).joinToString("")
     }
-    val displayAvatar = if (avatarEmoji.isEmpty()) initials else avatarEmoji
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
     ) {
-        Box(
-            modifier = Modifier
-                .size(64.dp)
-                .clip(CircleShape)
-                .background(getColorByName(bgColorName)),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = displayAvatar,
-                color = if (avatarEmoji.isEmpty()) Color.White else Color.Unspecified,
-                fontSize = if (avatarEmoji.isEmpty()) (if (initials == "Ty") 20.sp else 24.sp) else 32.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
+        UserAvatar(
+            avatarEmoji = avatarEmoji,
+            initials = initials,
+            bgColor = bgColorName,
+            size = 64.dp,
+            emojiSize = 32f,
+            initialsSize = 24f
+        )
 
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -328,7 +331,7 @@ fun PlayerDetailColumn(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(text = "Dni", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(text = stringResource(R.string.days_label), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Text(
             text = "$days / $totalDays",
             fontWeight = FontWeight.Black,

@@ -20,6 +20,8 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.SzpontCompany.check.data.social.Event
+import com.SzpontCompany.check.R
+import androidx.compose.ui.res.stringResource
 
 @Composable
 fun EventCard(
@@ -154,9 +156,10 @@ fun EventCard(
                             .background(MaterialTheme.colorScheme.background, RoundedCornerShape(8.dp))
                             .padding(12.dp)
                     ) {
+                        val rewardLabel = stringResource(R.string.event_reward_label)
                         val rewardText = buildAnnotatedString {
                             withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.onSurfaceVariant)) {
-                                append("Nagroda: ")
+                                append(rewardLabel)
                             }
                             withStyle(style = SpanStyle(color = Color(0xFFBA7517), fontWeight = FontWeight.Medium)) {
                                 append(event.rewardHighlight)

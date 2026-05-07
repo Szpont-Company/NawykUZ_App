@@ -11,6 +11,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.util.Locale
+import com.SzpontCompany.check.R
+import androidx.compose.ui.res.stringResource
 
 @Composable
 fun YourPositionCard(
@@ -44,14 +46,14 @@ fun YourPositionCard(
             Spacer(Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Twoja pozycja",
+                    text = stringResource(R.string.ranking_your_position),
                     color = MaterialTheme.colorScheme.onBackground,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 14.sp
                 )
                 Spacer(Modifier.height(2.dp))
                 Text(
-                    text = "$formattedXp XP · Poziom $level",
+                    text = stringResource(R.string.ranking_xp_level, formattedXp, level),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium
