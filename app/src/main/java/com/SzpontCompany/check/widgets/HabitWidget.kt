@@ -76,7 +76,7 @@ class HabitWidget : GlanceAppWidget() {
                 .fillMaxSize()
                 .background(cardBackgroundColor)
                 .cornerRadius(24.dp)
-                .padding(20.dp)
+                .padding(16.dp)
                 .clickable(actionStartActivity<MainActivity>()),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -87,28 +87,28 @@ class HabitWidget : GlanceAppWidget() {
                     text = context.getString(R.string.habit_widget_streak),
                     style = TextStyle(
                         color = secondaryTextColor,
-                        fontSize = 14.sp
+                        fontSize = 12.sp
                     )
                 )
 
-                Spacer(modifier = GlanceModifier.height(4.dp))
+                Spacer(modifier = GlanceModifier.height(2.dp))
 
                 Text(
-                    text = context.getString(R.string.habit_widget_days, streak),
+                    text = "$streak ${context.getString(R.string.habit_widget_days_unit)}",
                     style = TextStyle(
                         color = primaryTextColor,
-                        fontSize = 32.sp,
+                        fontSize = 28.sp,
                         fontWeight = FontWeight.Bold
                     )
                 )
 
-                Spacer(modifier = GlanceModifier.height(4.dp))
+                Spacer(modifier = GlanceModifier.height(2.dp))
 
                 Text(
-                    text = "${context.getString(R.string.habit_widget_personal_best)} $record ${context.getString(R.string.habit_widget_days)}",
+                    text = "${context.getString(R.string.habit_widget_personal_best)} $record ${context.getString(R.string.habit_widget_days_unit)}",
                     style = TextStyle(
                         color = secondaryTextColor,
-                        fontSize = 12.sp
+                        fontSize = 10.sp
                     )
                 )
             }

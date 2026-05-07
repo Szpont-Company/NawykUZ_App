@@ -7,7 +7,6 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
@@ -15,7 +14,6 @@ import androidx.glance.LocalContext
 import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
-import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
 import androidx.glance.background
@@ -30,14 +28,13 @@ import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.SzpontCompany.check.MainActivity
 import com.SzpontCompany.check.R
+import java.util.Locale
 
 val widgetStepsKey = intPreferencesKey("widget_steps")
 val widgetGoalKey = intPreferencesKey("widget_goal")
-val widgetHabitDoneKey = booleanPreferencesKey("widget_habit_done_today")
 
 class StepsWidget : GlanceAppWidget() {
 
-    override val sizeMode = SizeMode.Exact
     override val stateDefinition: GlanceStateDefinition<*> = PreferencesGlanceStateDefinition
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
@@ -95,7 +92,7 @@ class StepsWidget : GlanceAppWidget() {
                 Spacer(modifier = GlanceModifier.height(8.dp))
 
                 Text(
-                    text = String.format("%,d", steps).replace(',', ' '),
+                    text = String.format(Locale.getDefault(), "%,d", steps).replace(',', ' '),
                     style = TextStyle(
                         color = whiteColorProvider,
                         fontSize = 24.sp,
