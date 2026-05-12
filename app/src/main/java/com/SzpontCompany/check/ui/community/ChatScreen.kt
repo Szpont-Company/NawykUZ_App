@@ -36,6 +36,8 @@ import com.SzpontCompany.check.ui.components.UserAvatar
 import androidx.lifecycle.viewmodel.compose.viewModel
 import java.text.SimpleDateFormat
 import java.util.*
+import android.text.format.DateUtils
+import androidx.compose.ui.platform.LocalContext
 
 enum class MessageType {
     SENT, RECEIVED, SYSTEM_HABIT, DATE_SEPARATOR
@@ -57,9 +59,27 @@ fun ChatScreen(
     friendName: String = "Anna Nowak",
     friendEmoji: String = "👩",
     friendBgColor: String = "Lavender",
-    friendStatusText: String? = null,
+    friendIsOnline: Boolean = false,
+    friendLastActive: Long = 0L,
     viewModel: ChatViewModel = viewModel()
 ) {
+    val context = LocalContext.current
+
+    val statusText = remember(friendIsOnline, friendLastActive) {
+        if (friendIsOnline) {
+            context.getString(R.string.chat_active_now)
+        } else if (friendLastActive > 0L) {
+            val relativeTime = DateUtils.getRelativeTimeSpanString(
+                friendLastActive,
+                System.currentTimeMillis(),
+                DateUtils.MINUTE_IN_MILLIS
+            ).toString()
+            context.getString(R.string.chat_active_ago, relativeTime)
+        } else {
+            ""
+        }
+    }
+
     LaunchedEffect(friendId) {
         if (friendId.isNotEmpty()) {
             viewModel.startChat(friendId)
@@ -78,7 +98,8 @@ fun ChatScreen(
                 friendName = friendName,
                 friendEmoji = friendEmoji,
                 friendBgColor = friendBgColor,
-                statusText = friendStatusText ?: stringResource(R.string.chat_active_now)
+                statusText = statusText,
+                isOnline = friendIsOnline
             )
         },
         bottomBar = {
@@ -128,7 +149,8 @@ fun ChatTopBar(
     friendName: String,
     friendEmoji: String,
     friendBgColor: String,
-    statusText: String
+    statusText: String,
+    isOnline: Boolean
 ) {
     Surface(
         color = MaterialTheme.colorScheme.background,
@@ -169,7 +191,7 @@ fun ChatTopBar(
                     color = MaterialTheme.colorScheme.onBackground
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    if (statusText == stringResource(R.string.chat_active_now)) {
+                    if (isOnline) {
                         Box(
                             modifier = Modifier
                                 .size(8.dp)
@@ -178,11 +200,13 @@ fun ChatTopBar(
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                     }
-                    Text(
-                        text = statusText,
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    if (statusText.isNotEmpty()) {
+                        Text(
+                            text = statusText,
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             }
         }
@@ -217,8 +241,14 @@ fun ChatMessageItem(message: UiChatMessage) {
                 }
             }
         }
+
         MessageType.SYSTEM_HABIT -> {
-            Box(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp), contentAlignment = Alignment.Center) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                contentAlignment = Alignment.Center
+            ) {
                 Surface(
                     color = MaterialTheme.colorScheme.surface,
                     shape = RoundedCornerShape(12.dp),
@@ -236,11 +266,17 @@ fun ChatMessageItem(message: UiChatMessage) {
                 }
             }
         }
+
         MessageType.RECEIVED -> {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
                 Surface(
                     color = MaterialTheme.colorScheme.secondaryContainer,
-                    shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp, bottomEnd = 16.dp, bottomStart = 4.dp),
+                    shape = RoundedCornerShape(
+                        topStart = 16.dp,
+                        topEnd = 16.dp,
+                        bottomEnd = 16.dp,
+                        bottomStart = 4.dp
+                    ),
                     modifier = Modifier.widthIn(max = 280.dp)
                 ) {
                     Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
@@ -254,17 +290,25 @@ fun ChatMessageItem(message: UiChatMessage) {
                             text = timeString,
                             fontSize = 10.sp,
                             color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f),
-                            modifier = Modifier.align(Alignment.End).padding(top = 2.dp)
+                            modifier = Modifier
+                                .align(Alignment.End)
+                                .padding(top = 2.dp)
                         )
                     }
                 }
             }
         }
+
         MessageType.SENT -> {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                 Surface(
                     color = MaterialTheme.colorScheme.primary,
-                    shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp, bottomEnd = 4.dp, bottomStart = 16.dp),
+                    shape = RoundedCornerShape(
+                        topStart = 16.dp,
+                        topEnd = 16.dp,
+                        bottomEnd = 4.dp,
+                        bottomStart = 16.dp
+                    ),
                     modifier = Modifier.widthIn(max = 280.dp)
                 ) {
                     Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
@@ -274,13 +318,31 @@ fun ChatMessageItem(message: UiChatMessage) {
                             fontSize = 15.sp,
                             color = MaterialTheme.colorScheme.onPrimary
                         )
-                        Row(modifier = Modifier.align(Alignment.End).padding(top = 2.dp), verticalAlignment = Alignment.CenterVertically) {
-                            Text(text = timeString, fontSize = 10.sp, color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f))
+                        Row(
+                            modifier = Modifier
+                                .align(Alignment.End)
+                                .padding(top = 2.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = timeString,
+                                fontSize = 10.sp,
+                                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f)
+                            )
                             Spacer(modifier = Modifier.width(4.dp))
                             if (message.isRead) {
-                                Text(text = "✓✓", fontSize = 10.sp, color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Bold)
+                                Text(
+                                    text = "✓✓",
+                                    fontSize = 10.sp,
+                                    color = MaterialTheme.colorScheme.onPrimary,
+                                    fontWeight = FontWeight.Bold
+                                )
                             } else {
-                                Text(text = "✓", fontSize = 10.sp, color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f))
+                                Text(
+                                    text = "✓",
+                                    fontSize = 10.sp,
+                                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f)
+                                )
                             }
                         }
                     }
@@ -363,7 +425,12 @@ fun ChatInputBar(
             modifier = Modifier
                 .weight(1f)
                 .defaultMinSize(minHeight = 48.dp),
-            placeholder = { Text(stringResource(R.string.chat_type_message), color = MaterialTheme.colorScheme.onSurfaceVariant) },
+            placeholder = {
+                Text(
+                    stringResource(R.string.chat_type_message),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            },
             shape = RoundedCornerShape(24.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = MaterialTheme.colorScheme.surface,

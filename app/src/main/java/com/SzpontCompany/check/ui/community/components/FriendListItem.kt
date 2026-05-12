@@ -32,6 +32,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.res.stringResource
 import com.SzpontCompany.check.ui.components.UserAvatar
+import android.text.format.DateUtils
 
 @Composable
 fun FriendListItem(
@@ -85,10 +86,20 @@ fun FriendListItem(
                             fontSize = 12.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                    } else if (friend.lastActive.isNotEmpty()) {
+                    } else if (friend.lastActive > 0L) {
+                        val relativeTime = DateUtils.getRelativeTimeSpanString(
+                            friend.lastActive,
+                            System.currentTimeMillis(),
+                            DateUtils.MINUTE_IN_MILLIS
+                        ).toString()
+
                         Box(modifier = Modifier.size(8.dp).background(Color.Gray.copy(alpha = 0.5f), CircleShape))
                         Spacer(Modifier.width(4.dp))
-                        Text(friend.lastActive, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(
+                            stringResource(R.string.chat_active_ago, relativeTime),
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     } else if (isSuggested) {
                         Text(
                             if (friend.mutuals > 0)

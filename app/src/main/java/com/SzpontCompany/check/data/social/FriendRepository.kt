@@ -266,11 +266,14 @@ class FriendRepository(
                         var bgColor = doc.getString("bgColor") ?: "Mint"
                         var xp = doc.getLong("xp")?.toInt() ?: 0
                         var isOnline = false
+                        var lastActiveMs = 0L
+
 
                         try {
                             val userDoc = firestore.collection("users").document(uid).get().await()
                             if (userDoc.exists()) {
                                 isOnline = userDoc.getBoolean("isOnline") ?: false
+                                userDoc.getLong("lastActive")?.let { lastActiveMs = it }
                                 userDoc.getString("name")?.let { name = it }
                                 userDoc.getString("avatarEmoji")?.let { avatarEmoji = it }
                                 userDoc.getString("bgColor")?.let { bgColor = it }
@@ -287,7 +290,8 @@ class FriendRepository(
                             xp = xp,
                             avatarEmoji = avatarEmoji,
                             bgColor = bgColor,
-                            online = isOnline
+                            online = isOnline,
+                            lastActive = lastActiveMs
                         )
                     }
                     trySend(friendsList)
