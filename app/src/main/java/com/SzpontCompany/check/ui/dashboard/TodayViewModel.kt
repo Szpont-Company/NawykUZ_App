@@ -27,6 +27,7 @@ data class TodayUiState(
 class TodayViewModel(application: Application) : AndroidViewModel(application) {
 
     private val userRepo = UserRepository.getInstance(application.applicationContext)
+    val user = userRepo.userFlow
     private val habitRepo = HabitRepository()
     private val challengeRepository = ChallengeRepository(com.google.firebase.firestore.FirebaseFirestore.getInstance())
 
