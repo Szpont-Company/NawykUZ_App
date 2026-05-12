@@ -78,8 +78,18 @@ class FriendsViewModel(
 
         viewModelScope.launch {
             repository.getMyFriends().collect { friends ->
-                val online = friends.filter { it.online }
-                val offline = friends.filter { !it.online }
+
+                val currentTime = System.currentTimeMillis()
+                val timeoutMs = 10 * 60 * 1000L
+
+                val verifiedFriends = friends.map { friend ->
+                    val isReallyOnline = friend.online && (friend.lastActive > 0L) && (currentTime - friend.lastActive < timeoutMs)
+                    friend.copy(online = isReallyOnline)
+                }
+
+                val online = verifiedFriends.filter { it.online }
+                val offline = verifiedFriends.filter { !it.online }.sortedByDescending { it.lastActive }
+
                 _uiState.update { it.copy(activeFriends = online, offlineFriends = offline, isLoading = false) }
 
                 val currentResults = _uiState.value.searchResults

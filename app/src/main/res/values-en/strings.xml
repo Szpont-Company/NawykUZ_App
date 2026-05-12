@@ -399,7 +399,7 @@
 
     <!-- Statusy aktywności -->
     <string name="chat_active_now">Active now</string>
-    <string name="chat_active_ago">Active %1$s ago</string> <!-- Np. Active 5 mins ago -->
+    <string name="chat_active_ago">Active %1$s</string> <!-- Np. Active 5 mins ago -->
 
     <!-- Community Screen Tabs & Headers -->
     <string name="community_title">Community</string>
