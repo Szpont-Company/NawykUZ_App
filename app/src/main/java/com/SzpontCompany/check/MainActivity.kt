@@ -89,13 +89,21 @@ class MainActivity : AppCompatActivity() {
         val permissionsToRequest = mutableListOf<String>()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACTIVITY_RECOGNITION) != PackageManager.PERMISSION_GRANTED) {
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACTIVITY_RECOGNITION
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
                 permissionsToRequest.add(Manifest.permission.ACTIVITY_RECOGNITION)
             }
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
                 permissionsToRequest.add(Manifest.permission.POST_NOTIFICATIONS)
             }
         }
@@ -107,7 +115,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == 100) {
             startStepCounterService()
@@ -320,7 +332,7 @@ class MainActivity : AppCompatActivity() {
             startService(serviceIntent)
         }
     }
-}
+
     override fun onStart() {
         super.onStart()
         updatePresence(true)
@@ -358,7 +370,11 @@ class MainActivity : AppCompatActivity() {
         val activity = context as? android.app.Activity
 
         LaunchedEffect(Unit) {
-            if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            if (ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
                 val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
                 fusedLocationClient.lastLocation.addOnSuccessListener { location ->
                     location?.let {
@@ -378,19 +394,21 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-    LaunchedEffect(activity?.intent) {
-        val intent = activity?.intent
-        val type = intent?.extras?.getString("type")
-        val entityId = intent?.extras?.getString("entityId")
+        LaunchedEffect(activity?.intent) {
+            val intent = activity?.intent
+            val type = intent?.extras?.getString("type")
+            val entityId = intent?.extras?.getString("entityId")
 
             if (type != null) {
                 when (type) {
                     "BATTLE_RESULT" -> {
                         entityId?.let { navController.navigate("battle_detail/$it") }
                     }
+
                     "BATTLE_INVITE", "FRIEND_REQUEST" -> {
                         currentTab = BottomTab.COMMUNITY
                     }
+
                     "MESSAGE" -> {
                         currentTab = BottomTab.COMMUNITY
                     }
@@ -400,26 +418,26 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-    Scaffold(
-        bottomBar = {
-            if (currentRoute == "main") {
-                CheckBottomNavigationBar(
-                    currentTab = currentTab ?: BottomTab.TODAY,
-                    onTabSelected = { newTab ->
-                        currentTab = newTab
-                        navController.popBackStack("main", inclusive = false)
-                    },
-                    onAddClick = { /* TODO: Otwórz okno dodawania */ },
-                    notificationsViewModel = notificationsViewModel
-                )
+        Scaffold(
+            bottomBar = {
+                if (currentRoute == "main") {
+                    CheckBottomNavigationBar(
+                        currentTab = currentTab ?: BottomTab.TODAY,
+                        onTabSelected = { newTab ->
+                            currentTab = newTab
+                            navController.popBackStack("main", inclusive = false)
+                        },
+                        onAddClick = { /* TODO: Otwórz okno dodawania */ },
+                        notificationsViewModel = notificationsViewModel
+                    )
+                }
             }
-        }
-    ) { paddingValues ->
-        NavHost(
-            navController = navController,
-            startDestination = "main",
-            modifier = Modifier.padding(paddingValues)
-        ) {
+        ) { paddingValues ->
+            NavHost(
+                navController = navController,
+                startDestination = "main",
+                modifier = Modifier.padding(paddingValues)
+            ) {
 
                 composable("main") {
                     MainScreen(
@@ -492,7 +510,10 @@ class MainActivity : AppCompatActivity() {
                             val uid = FirebaseAuth.getInstance().currentUser?.uid
                             if (uid != null) {
                                 FirebaseFirestore.getInstance().collection("users").document(uid)
-                                    .update("fcmToken", com.google.firebase.firestore.FieldValue.delete())
+                                    .update(
+                                        "fcmToken",
+                                        com.google.firebase.firestore.FieldValue.delete()
+                                    )
                                     .addOnCompleteListener {
                                         authViewModel.signOut()
                                         onLogout()
@@ -538,7 +559,8 @@ class MainActivity : AppCompatActivity() {
 
                     val friendName = java.net.URLDecoder.decode(rawName, "UTF-8")
                     val friendEmoji = java.net.URLDecoder.decode(rawEmoji, "UTF-8")
-                    val friendBgColor = backStackEntry.arguments?.getString("friendBgColor") ?: "Mint"
+                    val friendBgColor =
+                        backStackEntry.arguments?.getString("friendBgColor") ?: "Mint"
 
                     ChatScreen(
                         friendId = friendId,
