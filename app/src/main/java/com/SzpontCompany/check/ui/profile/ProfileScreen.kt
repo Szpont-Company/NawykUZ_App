@@ -58,11 +58,13 @@ import com.SzpontCompany.check.ui.components.UserAvatar
 import android.graphics.Bitmap
 import android.graphics.Picture
 import android.net.Uri
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.core.content.FileProvider
 import androidx.compose.ui.graphics.drawscope.draw
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.draw.drawWithCache
+import com.SzpontCompany.check.data.user.User
 import java.io.File
 import java.io.FileOutputStream
 
@@ -78,6 +80,21 @@ fun ProfileScreen(
 
     val uiState by viewModel.uiState.collectAsState()
     val user = uiState.user
+
+    var previousLevel by remember { mutableStateOf<Int?>(null) }
+    var showLevelUpDialog by remember { mutableStateOf(false) }
+    var newLevelToDisplay by remember { mutableIntStateOf(0) }
+
+    LaunchedEffect(user?.level) {
+        val currentLevel = user?.level
+        if (currentLevel != null) {
+            if (previousLevel != null && currentLevel > previousLevel!!) {
+                newLevelToDisplay = currentLevel
+                showLevelUpDialog = true
+            }
+            previousLevel = currentLevel
+        }
+    }
 
     var showLogoutDialog by remember { mutableStateOf(false) }
     var showShareDialog by remember { mutableStateOf(false) }
@@ -101,7 +118,7 @@ fun ProfileScreen(
         UserHeaderSection(user = user)
         Spacer(modifier = Modifier.height(24.dp))
 
-        LevelAndXpBar()
+        LevelAndXpBar(user = user)
         Spacer(modifier = Modifier.height(24.dp))
 
         StatsGridSection(uiState = uiState)
@@ -160,6 +177,14 @@ fun ProfileScreen(
                 }
             )
         }
+
+        if (showLevelUpDialog) {
+            LevelUpDialog(
+                newLevel = newLevelToDisplay,
+                onDismiss = { showLevelUpDialog = false }
+            )
+        }
+
     }
 
 }
@@ -256,7 +281,7 @@ fun UserHeaderSection(user: com.SzpontCompany.check.data.user.User?) {
                     .padding(horizontal = 8.dp, vertical = 2.dp)
             ) {
                 Text(
-                    "Lvl 8",
+                    text = "Lvl ${user?.level ?: 1}",
                     color = MaterialTheme.colorScheme.background,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold
@@ -318,14 +343,14 @@ fun UserHeaderSection(user: com.SzpontCompany.check.data.user.User?) {
 }
 
 @Composable
-fun LevelAndXpBar() {
+fun LevelAndXpBar(user: User?) {
 
     var animationPlayed by remember { mutableStateOf(false) }
 
-    val currentLevel = 8
-    val targetXp = 1240
-    val maxXp = 1600
-    val targetProgress = targetXp.toFloat() / maxXp.toFloat()
+    val currentLevel = user?.level ?: 1
+    val targetXp = user?.xp ?: 0
+    val maxXp = user?.getXpThreshold() ?: 100
+    val targetProgress = if (maxXp > 0) targetXp.toFloat() / maxXp.toFloat() else 0f
 
     val animatedProgress by animateFloatAsState(
         targetValue = if (animationPlayed) targetProgress else 0f,
@@ -357,7 +382,7 @@ fun LevelAndXpBar() {
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = "${stringResource(R.string.profile_level)} 8",
+                    text = "${stringResource(R.string.profile_level)} $currentLevel",
                     color = MaterialTheme.colorScheme.onBackground,
                     fontWeight = FontWeight.Bold
                 )
@@ -370,7 +395,7 @@ fun LevelAndXpBar() {
                 )
             }
             Text(
-                text = stringResource(R.string.profile_next_level, 9),
+                text = stringResource(R.string.profile_next_level, currentLevel + 1),
                 color = Color(0xFFBA7517),
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold
@@ -850,7 +875,7 @@ fun ShareProfileDialog(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceEvenly
                         ) {
-                            ShareStatItem(value = "Lvl 8", label = "Poziom")
+                            ShareStatItem(value = "Lvl ${user?.level ?: 1}", label = "Poziom")
 
                             ShareStatItem(
                                 value = "🔥 ${user?.currentStreak ?: 0}",

@@ -502,4 +502,8 @@
     <string name="no_habits_empty">This player has no habits yet.</string>
     <string name="active_habit_subtitle">Active Habit</string>
     <string name="error_occurred">An error occurred: %1$s</string>
+
+    <string name="level_up_dialog_title">Level Up!</string>
+    <string name="level_up_dialog_message">Congratulations!\nYou\'ve reached level %1$d!</string>
+    <string name="level_up_dialog_button">Awesome!</string>
 </resources>
