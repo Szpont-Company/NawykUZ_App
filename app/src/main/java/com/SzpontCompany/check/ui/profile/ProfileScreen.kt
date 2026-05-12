@@ -81,20 +81,6 @@ fun ProfileScreen(
     val uiState by viewModel.uiState.collectAsState()
     val user = uiState.user
 
-    var previousLevel by remember { mutableStateOf<Int?>(null) }
-    var showLevelUpDialog by remember { mutableStateOf(false) }
-    var newLevelToDisplay by remember { mutableIntStateOf(0) }
-
-    LaunchedEffect(user?.level) {
-        val currentLevel = user?.level
-        if (currentLevel != null) {
-            if (previousLevel != null && currentLevel > previousLevel!!) {
-                newLevelToDisplay = currentLevel
-                showLevelUpDialog = true
-            }
-            previousLevel = currentLevel
-        }
-    }
 
     var showLogoutDialog by remember { mutableStateOf(false) }
     var showShareDialog by remember { mutableStateOf(false) }
@@ -175,13 +161,6 @@ fun ProfileScreen(
                     }
                     context.startActivity(Intent.createChooser(sendIntent, "Udostępnij profil"))
                 }
-            )
-        }
-
-        if (showLevelUpDialog) {
-            LevelUpDialog(
-                newLevel = newLevelToDisplay,
-                onDismiss = { showLevelUpDialog = false }
             )
         }
 
