@@ -4,6 +4,7 @@ import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
@@ -75,14 +76,61 @@ import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.firestore.FirebaseFirestore
 import android.Manifest
 import android.content.pm.PackageManager
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.SzpontCompany.check.data.steps.StepCounterService
 import com.google.android.gms.location.LocationServices
 
 enum class AppScreen { SPLASH, LOGIN, DASHBOARD, REGISTER_SUCCESS, RESET_PASSWORD, SET_NICKNAME }
 
 class MainActivity : AppCompatActivity() {
+
+    private fun checkAndRequestPermissions() {
+        val permissionsToRequest = mutableListOf<String>()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACTIVITY_RECOGNITION
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                permissionsToRequest.add(Manifest.permission.ACTIVITY_RECOGNITION)
+            }
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                permissionsToRequest.add(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+
+        if (permissionsToRequest.isNotEmpty()) {
+            ActivityCompat.requestPermissions(this, permissionsToRequest.toTypedArray(), 100)
+        } else {
+            startStepCounterService()
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 100) {
+            startStepCounterService()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+
+        checkAndRequestPermissions()
 
         CoroutineScope(Dispatchers.IO).launch {
             Log.e("MainActivity", "Initializing Mobile Ads SDK")
@@ -276,6 +324,15 @@ class MainActivity : AppCompatActivity() {
         setIntent(intent)
     }
 
+    private fun startStepCounterService() {
+        val serviceIntent = Intent(this, StepCounterService::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(serviceIntent)
+        } else {
+            startService(serviceIntent)
+        }
+    }
+
     override fun onStart() {
         super.onStart()
         updatePresence(true)
@@ -313,7 +370,11 @@ class MainActivity : AppCompatActivity() {
         val activity = context as? android.app.Activity
 
         LaunchedEffect(Unit) {
-            if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            if (ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
                 val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
                 fusedLocationClient.lastLocation.addOnSuccessListener { location ->
                     location?.let {
@@ -333,7 +394,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-
         LaunchedEffect(activity?.intent) {
             val intent = activity?.intent
             val type = intent?.extras?.getString("type")
@@ -344,9 +404,11 @@ class MainActivity : AppCompatActivity() {
                     "BATTLE_RESULT" -> {
                         entityId?.let { navController.navigate("battle_detail/$it") }
                     }
+
                     "BATTLE_INVITE", "FRIEND_REQUEST" -> {
                         currentTab = BottomTab.COMMUNITY
                     }
+
                     "MESSAGE" -> {
                         currentTab = BottomTab.COMMUNITY
                     }
@@ -367,7 +429,6 @@ class MainActivity : AppCompatActivity() {
                         },
                         onAddClick = { /* TODO: Otwórz okno dodawania */ },
                         notificationsViewModel = notificationsViewModel
-
                     )
                 }
             }
@@ -449,7 +510,10 @@ class MainActivity : AppCompatActivity() {
                             val uid = FirebaseAuth.getInstance().currentUser?.uid
                             if (uid != null) {
                                 FirebaseFirestore.getInstance().collection("users").document(uid)
-                                    .update("fcmToken", com.google.firebase.firestore.FieldValue.delete())
+                                    .update(
+                                        "fcmToken",
+                                        com.google.firebase.firestore.FieldValue.delete()
+                                    )
                                     .addOnCompleteListener {
                                         authViewModel.signOut()
                                         onLogout()
@@ -495,7 +559,8 @@ class MainActivity : AppCompatActivity() {
 
                     val friendName = java.net.URLDecoder.decode(rawName, "UTF-8")
                     val friendEmoji = java.net.URLDecoder.decode(rawEmoji, "UTF-8")
-                    val friendBgColor = backStackEntry.arguments?.getString("friendBgColor") ?: "Mint"
+                    val friendBgColor =
+                        backStackEntry.arguments?.getString("friendBgColor") ?: "Mint"
 
                     ChatScreen(
                         friendId = friendId,

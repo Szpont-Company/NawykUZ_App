@@ -18,11 +18,13 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_HEALTH" />
 
     <!-- Android 13+ ads-->
     <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
 
     <application
+
         android:name=".CheckApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -33,6 +35,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Check">
+        <service
+                android:name=".data.steps.StepCounterService"
+                android:exported="false"
+                android:foregroundServiceType="health" />
         <service
             android:name=".ui.map.LocationTrackingService"
             android:exported="false"
@@ -79,5 +85,6 @@
                 android:resource="@xml/file_paths" />
         </provider>
     </application>
+
 
 </manifest>
