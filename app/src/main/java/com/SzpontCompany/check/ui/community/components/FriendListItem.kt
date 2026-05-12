@@ -43,7 +43,7 @@ fun FriendListItem(
     onMessageClick: () -> Unit = {},
     onRemoveClick: () -> Unit = {}
 ) {
-    val formattedXp = if (friend.xp > 0) String.format(Locale.US, "%,d", friend.xp).replace(',', ' ') else ""
+    val formattedXp = String.format(Locale.US, "%,d", friend.xp).replace(',', ' ')
     val haptic = LocalHapticFeedback.current
 
     val avatarBgColor = getColorByName(friend.bgColor)
@@ -86,7 +86,7 @@ fun FriendListItem(
                             fontSize = 12.sp,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                    } else if (friend.lastActive > 0L) {
+                    } else if (friend.lastActive > 1000000000000L) {
                         val relativeTime = DateUtils.getRelativeTimeSpanString(
                             friend.lastActive,
                             System.currentTimeMillis(),

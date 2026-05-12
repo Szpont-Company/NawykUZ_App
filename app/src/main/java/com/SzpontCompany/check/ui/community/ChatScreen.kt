@@ -63,21 +63,29 @@ fun ChatScreen(
     friendLastActive: Long = 0L,
     viewModel: ChatViewModel = viewModel()
 ) {
-    val context = LocalContext.current
+    val state by viewModel.uiState.collectAsState()
+    val friend = state.friend
 
-    val statusText = remember(friendIsOnline, friendLastActive) {
-        if (friendIsOnline) {
-            context.getString(R.string.chat_active_now)
-        } else if (friendLastActive > 0L) {
-            val relativeTime = DateUtils.getRelativeTimeSpanString(
-                friendLastActive,
+    val name = friend?.name ?: friendName
+    val isOnline = friend?.online ?: friendIsOnline
+    val lastActive = friend?.lastActive ?: friendLastActive
+
+    val relativeTime = remember(lastActive) {
+        if (lastActive > 1000000000000L) {
+            DateUtils.getRelativeTimeSpanString(
+                lastActive,
                 System.currentTimeMillis(),
                 DateUtils.MINUTE_IN_MILLIS
             ).toString()
-            context.getString(R.string.chat_active_ago, relativeTime)
         } else {
             ""
         }
+    }
+
+    val statusText = when {
+        isOnline -> stringResource(R.string.chat_active_now)
+        relativeTime.isNotEmpty() -> stringResource(R.string.chat_active_ago, relativeTime)
+        else -> ""
     }
 
     LaunchedEffect(friendId) {
@@ -95,11 +103,11 @@ fun ChatScreen(
         topBar = {
             ChatTopBar(
                 onBackClick = onBackClick,
-                friendName = friendName,
+                friendName = name,
                 friendEmoji = friendEmoji,
                 friendBgColor = friendBgColor,
                 statusText = statusText,
-                isOnline = friendIsOnline
+                isOnline = isOnline
             )
         },
         bottomBar = {
