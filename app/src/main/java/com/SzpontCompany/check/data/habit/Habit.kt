@@ -23,6 +23,8 @@ data class Habit(
     val battleId: String? = null,
     val opponentName: String? = null,
 
+    val isStepsHabit: Boolean = false,
+
     val streak: Int = 0,
     val monthlyCompletionRate: Int = 0,
     val completedDates: List<String> = emptyList(),

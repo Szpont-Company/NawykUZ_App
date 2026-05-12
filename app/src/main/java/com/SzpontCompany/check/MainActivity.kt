@@ -4,6 +4,7 @@ import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
@@ -75,14 +76,49 @@ import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.firestore.FirebaseFirestore
 import android.Manifest
 import android.content.pm.PackageManager
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.SzpontCompany.check.data.steps.StepCounterService
 import com.google.android.gms.location.LocationServices
 
 enum class AppScreen { SPLASH, LOGIN, DASHBOARD, REGISTER_SUCCESS, RESET_PASSWORD, SET_NICKNAME }
 
 class MainActivity : AppCompatActivity() {
+
+    private fun checkAndRequestPermissions() {
+        val permissionsToRequest = mutableListOf<String>()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACTIVITY_RECOGNITION) != PackageManager.PERMISSION_GRANTED) {
+                permissionsToRequest.add(Manifest.permission.ACTIVITY_RECOGNITION)
+            }
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                permissionsToRequest.add(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+
+        if (permissionsToRequest.isNotEmpty()) {
+            ActivityCompat.requestPermissions(this, permissionsToRequest.toTypedArray(), 100)
+        } else {
+            startStepCounterService()
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 100) {
+            startStepCounterService()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+
+        checkAndRequestPermissions()
 
         CoroutineScope(Dispatchers.IO).launch {
             Log.e("MainActivity", "Initializing Mobile Ads SDK")
@@ -276,6 +312,14 @@ class MainActivity : AppCompatActivity() {
         setIntent(intent)
     }
 
+    private fun startStepCounterService() {
+        val serviceIntent = Intent(this, StepCounterService::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(serviceIntent)
+        } else {
+            startService(serviceIntent)
+        }
+    }
 }
 
 @Composable
@@ -314,7 +358,6 @@ fun RootNavigationGraph(onLogout: () -> Unit) {
         }
     }
 
-
     LaunchedEffect(activity?.intent) {
         val intent = activity?.intent
         val type = intent?.extras?.getString("type")
@@ -348,7 +391,6 @@ fun RootNavigationGraph(onLogout: () -> Unit) {
                     },
                     onAddClick = { /* TODO: Otwórz okno dodawania */ },
                     notificationsViewModel = notificationsViewModel
-
                 )
             }
         }

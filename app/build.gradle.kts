@@ -50,6 +50,7 @@ android {
 }
 
 dependencies {
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
     implementation(libs.androidx.compose.foundation)
     implementation(libs.play.services.location)
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")

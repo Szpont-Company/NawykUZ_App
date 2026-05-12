@@ -10,6 +10,7 @@ import com.SzpontCompany.check.data.user.UserRepository
 import com.SzpontCompany.check.data.habit.Habit
 import com.SzpontCompany.check.data.habit.HabitRepository
 import com.SzpontCompany.check.data.social.ChallengeRepository
+import com.SzpontCompany.check.data.steps.StepRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,7 +22,8 @@ data class TodayUiState(
     val isLoading: Boolean = true,
     val user: User? = null,
     val habits: List<Habit> = emptyList(),
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val todaySteps: Int = 0
 )
 
 class TodayViewModel(application: Application) : AndroidViewModel(application) {
@@ -30,6 +32,7 @@ class TodayViewModel(application: Application) : AndroidViewModel(application) {
     private val habitRepo = HabitRepository()
     private val challengeRepository = ChallengeRepository(com.google.firebase.firestore.FirebaseFirestore.getInstance())
 
+    private val stepRepository = StepRepository(application.applicationContext)
 
     private val _badgeToUnlock = MutableStateFlow<Badge?>(null)
     val badgeToUnlock: StateFlow<Badge?> = _badgeToUnlock.asStateFlow()
@@ -40,6 +43,15 @@ class TodayViewModel(application: Application) : AndroidViewModel(application) {
         userRepo.startUserObservation()
         loadUser()
         observeHabits()
+        observeSteps()
+    }
+
+    private fun observeSteps() {
+        viewModelScope.launch {
+            stepRepository.todayStepsFlow.collect { steps ->
+                _uiState.value = _uiState.value.copy(todaySteps = steps)
+            }
+        }
     }
 
     private fun loadUser() {
