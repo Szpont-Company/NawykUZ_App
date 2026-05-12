@@ -52,6 +52,8 @@ class FriendProfileViewModel : ViewModel() {
                     currentStreak = document.getLong("currentStreak")?.toInt() ?: 0,
                     bestStreak = document.getLong("bestStreak")?.toInt() ?: 0,
                     lastGlobalStreakDate = document.getString("lastGlobalStreakDate") ?: "",
+                    xp = document.getLong("xp")?.toInt() ?: 0,
+                    level = document.getLong("level")?.toInt() ?: 1,
                     weeklyProgress = (document.get("weeklyProgress") as? List<*>)?.map { (it as? Number)?.toFloat() ?: 0f }
                         ?: listOf(0f, 0f, 0f, 0f, 0f, 0f, 0f)
                 )

@@ -509,4 +509,8 @@
     <string name="no_habits_empty">Ten gracz nie ma jeszcze żadnych nawyków.</string>
     <string name="active_habit_subtitle">Aktywny nawyk</string>
     <string name="error_occurred">Wystąpił błąd: %1$s</string>
+
+    <string name="level_up_dialog_title">Nowy poziom!</string>
+    <string name="level_up_dialog_message">Gratulacje!\nOsiągnięto poziom %1$d!</string>
+    <string name="level_up_dialog_button">Super!</string>
 </resources>

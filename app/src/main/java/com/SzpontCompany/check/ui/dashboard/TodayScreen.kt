@@ -44,6 +44,7 @@ import com.SzpontCompany.check.ui.community.components.NotificationsViewModel
 import com.SzpontCompany.check.ui.components.EmojiExplosionEffect
 import com.SzpontCompany.check.ui.components.UserAvatar
 import com.SzpontCompany.check.ui.profile.BadgeDetailsDialog
+import com.SzpontCompany.check.ui.profile.LevelUpDialog
 import com.SzpontCompany.check.ui.rewards.BadgeUnlockDialog
 import com.SzpontCompany.check.ui.theme.getColorByName
 import com.google.android.gms.ads.AdLoader
@@ -74,6 +75,23 @@ fun TodayScreen(
 
     val stepsHabit = state.habits.find { it.isStepsHabit } ?: Habit(id = "test_steps", name = "Dzienne Kroki", isStepsHabit = true)
     val regularHabits = state.habits.filter { !it.isStepsHabit }
+
+    val user by viewModel.user.collectAsState()
+
+    var previousLevel by remember { mutableStateOf<Int?>(null) }
+    var showLevelUpDialog by remember { mutableStateOf(false) }
+    var newLevelToDisplay by remember { mutableIntStateOf(0) }
+
+    LaunchedEffect(user?.level) {
+        val currentLevel = user?.level
+        if (currentLevel != null) {
+            if (previousLevel != null && currentLevel > previousLevel!!) {
+                newLevelToDisplay = currentLevel
+                showLevelUpDialog = true
+            }
+            previousLevel = currentLevel
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
@@ -186,6 +204,13 @@ fun TodayScreen(
                 onDismiss = {
                     viewModel.claimBadgeReward(badge)
                 }
+            )
+        }
+
+        if (showLevelUpDialog) {
+            LevelUpDialog(
+                newLevel = newLevelToDisplay,
+                onDismiss = { showLevelUpDialog = false }
             )
         }
     }
