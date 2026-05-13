@@ -13,6 +13,7 @@ import android.hardware.SensorManager
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import com.SzpontCompany.check.R
+import com.SzpontCompany.check.widgets.WidgetDataUpdater
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -49,6 +50,7 @@ class StepCounterService : Service(), SensorEventListener {
 
             serviceScope.launch {
                 stepRepository.processSensorSteps(totalStepsSinceReboot)
+                WidgetDataUpdater().updateStepsWidgetData(applicationContext)
             }
         }
     }

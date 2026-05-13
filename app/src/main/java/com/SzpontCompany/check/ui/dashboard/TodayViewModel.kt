@@ -10,6 +10,7 @@ import com.SzpontCompany.check.data.user.UserRepository
 import com.SzpontCompany.check.data.habit.Habit
 import com.SzpontCompany.check.data.habit.HabitRepository
 import com.SzpontCompany.check.data.social.ChallengeRepository
+import com.SzpontCompany.check.widgets.updateHabitWidgetData
 import com.SzpontCompany.check.data.steps.StepRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -68,9 +69,23 @@ class TodayViewModel(application: Application) : AndroidViewModel(application) {
                         activeUser = user.copy(currentStreak = 0)
                         viewModelScope.launch {
                             try {
-                                userRepo.updateUserStreaks(user.uid, 0, user.bestStreak, user.lastGlobalStreakDate)
-                            } catch (e: Exception) {}
+                                userRepo.updateUserStreaks(
+                                    uid = user.uid,
+                                    currentStreak = 0,
+                                    bestStreak = user.bestStreak,
+                                    lastGlobalStreakDate = user.lastGlobalStreakDate
+                                )
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
                         }
+                    }
+
+                    try {
+                        val c = getApplication<Application>().applicationContext
+                        updateHabitWidgetData(c, activeUser.currentStreak, activeUser.bestStreak)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
                     }
 
                     val progress = calculateWeeklyProgress(_uiState.value.habits)
@@ -165,6 +180,15 @@ class TodayViewModel(application: Application) : AndroidViewModel(application) {
 
                 if (updatedUser != null && currentUser != updatedUser) {
                     userRepo.updateUserStreaks(updatedUser.uid, updatedUser.currentStreak, updatedUser.bestStreak, updatedUser.lastGlobalStreakDate)
+                    userRepo.updateUserStreaks(
+                        updatedUser.uid,
+                        updatedUser.currentStreak,
+                        updatedUser.bestStreak,
+                        updatedUser.lastGlobalStreakDate
+                    )
+
+                    val context = getApplication<Application>().applicationContext
+                    updateHabitWidgetData(context, updatedUser.currentStreak, updatedUser.bestStreak)
                 }
 
                 if (isDone && !wasDoneAlready) {

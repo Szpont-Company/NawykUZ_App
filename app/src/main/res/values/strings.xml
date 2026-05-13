@@ -509,6 +509,18 @@
     <string name="no_habits_empty">Ten gracz nie ma jeszcze żadnych nawyków.</string>
     <string name="active_habit_subtitle">Aktywny nawyk</string>
     <string name="error_occurred">Wystąpił błąd: %1$s</string>
+    <string name="habit_widget_streak">Aktualny streak</string>
+    <string name="habit_widget_days_unit">dni</string>
+    <string name="habit_widget_personal_best">Rekord:</string>
+    <string name="widget_steps_steps">KROKI</string>
+    <string name="widget_steps_goal">cel: %d</string>
+    <string name="onboarding_first_habit">Twój pierwszy nawyk 👣</string>
+    <string name="onboarding_hero">Ruch to zdrowie! Ustaw swój dzienny cel kroków, aby zacząć budować dobrą rutynę.</string>
+    <string name="onboarding_begin">Rozpocznij</string>
+
+    <string name="habit_steps_name">Kroki</string>
+    <string name="habit_steps_unit">kroków</string>
+    <string name="habit_steps_difficulty">Łatwy</string>
 
     <string name="level_up_dialog_title">Nowy poziom!</string>
     <string name="level_up_dialog_message">Gratulacje!\nOsiągnięto poziom %1$d!</string>

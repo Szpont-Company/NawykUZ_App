@@ -502,6 +502,18 @@
     <string name="no_habits_empty">This player has no habits yet.</string>
     <string name="active_habit_subtitle">Active Habit</string>
     <string name="error_occurred">An error occurred: %1$s</string>
+    <string name="habit_widget_streak">Current Streak</string>
+    <string name="habit_widget_days_unit">days</string>
+    <string name="habit_widget_personal_best">Best:</string>
+    <string name="widget_steps_steps">STEPS</string>
+    <string name="widget_steps_goal">goal: %d</string>
+    <string name="onboarding_first_habit">Your first habit 👣</string>
+    <string name="onboarding_hero">Keep fit! Set your daily steps goal to build a habit.</string>
+    <string name="onboarding_begin">Begin</string>
+
+    <string name="habit_steps_name">Steps</string>
+    <string name="habit_steps_unit">steps</string>
+    <string name="habit_steps_difficulty">Easy</string>
 
     <string name="level_up_dialog_title">Level Up!</string>
     <string name="level_up_dialog_message">Congratulations!\nYou\'ve reached level %1$d!</string>

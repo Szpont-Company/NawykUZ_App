@@ -20,7 +20,9 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
@@ -67,7 +69,6 @@ import com.google.android.gms.ads.MobileAds
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.SzpontCompany.check.ui.community.BattleDetailScreen
 import com.SzpontCompany.check.ui.community.CommunityViewModel
@@ -129,6 +130,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+
 
         checkAndRequestPermissions()
 
@@ -180,139 +183,138 @@ class MainActivity : AppCompatActivity() {
             var currentScreen by remember { mutableStateOf(AppScreen.SPLASH) }
 
             CheckTheme(darkTheme = darkTheme, accent = accentColor) {
-                AnimatedContent(
-                    targetState = currentScreen,
-                    transitionSpec = {
-                        when (targetState) {
-                            AppScreen.DASHBOARD ->
-                                (slideInHorizontally { it } + fadeIn(tween(400))) togetherWith
-                                        (slideOutHorizontally { -it } + fadeOut(tween(300)))
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    AnimatedContent(
+                        targetState = currentScreen,
+                        transitionSpec = {
+                            when (targetState) {
+                                AppScreen.DASHBOARD ->
+                                    (slideInHorizontally { it } + fadeIn(tween(400))) togetherWith
+                                            (slideOutHorizontally { -it } + fadeOut(tween(300)))
 
-                            AppScreen.LOGIN -> {
-                                if (initialState == AppScreen.REGISTER_SUCCESS || initialState == AppScreen.RESET_PASSWORD) {
-                                    (slideInHorizontally { -it } + fadeIn(tween(400))) togetherWith
-                                            (slideOutHorizontally { it } + fadeOut(tween(300)))
-                                } else {
-                                    fadeIn(tween(500)) togetherWith fadeOut(tween(300))
-                                }
-                            }
-
-                            AppScreen.SET_NICKNAME ->
-                                (slideInHorizontally { it } + fadeIn(tween(400))) togetherWith
-                                        (slideOutHorizontally { -it } + fadeOut(tween(300)))
-
-                            AppScreen.SPLASH ->
-                                fadeIn() togetherWith fadeOut()
-
-                            AppScreen.REGISTER_SUCCESS, AppScreen.RESET_PASSWORD ->
-                                (slideInHorizontally { it } + fadeIn(tween(400))) togetherWith
-                                        (slideOutHorizontally { -it } + fadeOut(tween(300)))
-
-                            else -> fadeIn() togetherWith fadeOut()
-                        }
-                    },
-                    label = "app_screen_transition"
-                ) { targetScreen ->
-                    when (targetScreen) {
-                        AppScreen.SPLASH -> {
-                            AnimatedSplashScreen(
-                                onSplashFinished = {
-                                    if (!authViewModel.isLoggedIn) {
-                                        currentScreen = AppScreen.LOGIN
+                                AppScreen.LOGIN -> {
+                                    if (initialState == AppScreen.REGISTER_SUCCESS || initialState == AppScreen.RESET_PASSWORD) {
+                                        (slideInHorizontally { -it } + fadeIn(tween(400))) togetherWith
+                                                (slideOutHorizontally { it } + fadeOut(tween(300)))
                                     } else {
+                                        fadeIn(tween(500)) togetherWith fadeOut(tween(300))
+                                    }
+                                }
+
+                                AppScreen.SET_NICKNAME ->
+                                    (slideInHorizontally { it } + fadeIn(tween(400))) togetherWith
+                                            (slideOutHorizontally { -it } + fadeOut(tween(300)))
+
+                                AppScreen.SPLASH ->
+                                    fadeIn() togetherWith fadeOut()
+
+                                AppScreen.REGISTER_SUCCESS, AppScreen.RESET_PASSWORD ->
+                                    (slideInHorizontally { it } + fadeIn(tween(400))) togetherWith
+                                            (slideOutHorizontally { -it } + fadeOut(tween(300)))
+                            }
+                        },
+                        label = "app_screen_transition"
+                    ) { targetScreen ->
+                        when (targetScreen) {
+                            AppScreen.SPLASH -> {
+                                AnimatedSplashScreen(
+                                    onSplashFinished = {
                                         scope.launch {
-                                            val uid = authViewModel.currentUser.value?.uid
-                                            currentScreen =
-                                                if (uid != null && authViewModel.isNicknameSet(uid)) {
+                                            val user = FirebaseAuth.getInstance().currentUser
+                                            if (user == null) {
+                                                currentScreen = AppScreen.LOGIN
+                                            } else {
+                                                val hasNickname = authViewModel.isNicknameSet(user.uid)
+                                                currentScreen = if (hasNickname) {
                                                     AppScreen.DASHBOARD
                                                 } else {
                                                     AppScreen.SET_NICKNAME
                                                 }
+                                            }
+                                        }
+                                    }
+                                )
+                            }
+
+                            AppScreen.LOGIN -> {
+                                LoginScreen(
+                                    onLoginSuccess = {
+                                        scope.launch {
+                                            val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return@launch
+                                            val hasNickname = authViewModel.isNicknameSet(uid)
+
+                                            currentScreen = if (hasNickname) {
+                                                AppScreen.DASHBOARD
+                                            } else {
+                                                AppScreen.SET_NICKNAME
+                                            }
+                                        }
+                                    },
+                                    onRegisterSuccess = { currentScreen = AppScreen.REGISTER_SUCCESS },
+                                    onForgotPasswordClick = { currentScreen = AppScreen.RESET_PASSWORD }
+                                )
+                            }
+
+                            AppScreen.SET_NICKNAME -> OnboardingScreen(
+                                onOnboardingComplete = { currentScreen = AppScreen.DASHBOARD }
+                            )
+
+                            AppScreen.DASHBOARD -> {
+                                LaunchedEffect(Unit) {
+                                    val currentUser = FirebaseAuth.getInstance().currentUser
+                                    if (currentUser != null) {
+                                        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+                                            if (!task.isSuccessful) {
+                                                Log.w(
+                                                    "FCM",
+                                                    "Fetching FCM registration token failed",
+                                                    task.exception
+                                                )
+                                                return@addOnCompleteListener
+                                            }
+                                            val token = task.result
+                                            Log.d("FCM", "FCM Token: $token")
+
+                                            FirebaseFirestore.getInstance().collection("users")
+                                                .document(currentUser.uid)
+                                                .update("fcmToken", token)
                                         }
                                     }
                                 }
+
+                                RootNavigationGraph(
+                                    onLogout = { currentScreen = AppScreen.LOGIN }
+                                )
+                            }
+
+                            AppScreen.REGISTER_SUCCESS -> RegisterSuccessScreen(
+                                onBack = { currentScreen = AppScreen.LOGIN },
+                                onSuccess = { currentScreen = AppScreen.LOGIN },
+                                accent = MaterialTheme.colorScheme.primary
                             )
-                        }
 
-                        AppScreen.LOGIN -> {
-                            LoginScreen(
-                                onLoginSuccess = {
-                                    scope.launch {
-                                        val uid = FirebaseAuth.getInstance().currentUser?.uid
-                                            ?: run {
-                                                delay(300)
-                                                FirebaseAuth.getInstance().currentUser?.uid
-                                            }
-                                            ?: return@launch
-
-                                        currentScreen = if (authViewModel.isNicknameSet(uid)) {
-                                            AppScreen.DASHBOARD
+                            AppScreen.RESET_PASSWORD -> ResetPasswordScreen(
+                                onBack = { currentScreen = AppScreen.LOGIN },
+                                accent = MaterialTheme.colorScheme.primary,
+                                onPasswordReset = {
+                                    authViewModel.resetPassword { result ->
+                                        if (result.isSuccess) {
+                                            currentScreen = AppScreen.LOGIN
                                         } else {
-                                            AppScreen.SET_NICKNAME
+                                            Log.e(
+                                                "ResetPassword",
+                                                "Error resetting password: ${result.exceptionOrNull()?.message}"
+                                            )
                                         }
                                     }
                                 },
-                                onRegisterSuccess = { currentScreen = AppScreen.REGISTER_SUCCESS },
-                                onForgotPasswordClick = { currentScreen = AppScreen.RESET_PASSWORD }
+                                email = authViewModel.email,
+                                onEmailChange = { authViewModel.onEmailChange(it) }
                             )
                         }
-
-                        AppScreen.SET_NICKNAME -> OnboardingScreen(
-                            onNicknameSaved = { currentScreen = AppScreen.DASHBOARD },
-                        )
-
-                        AppScreen.DASHBOARD -> {
-                            LaunchedEffect(Unit) {
-                                val currentUser = FirebaseAuth.getInstance().currentUser
-                                if (currentUser != null) {
-                                    FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
-                                        if (!task.isSuccessful) {
-                                            Log.w(
-                                                "FCM",
-                                                "Fetching FCM registration token failed",
-                                                task.exception
-                                            )
-                                            return@addOnCompleteListener
-                                        }
-                                        val token = task.result
-                                        Log.d("FCM", "FCM Token: $token")
-
-                                        FirebaseFirestore.getInstance().collection("users")
-                                            .document(currentUser.uid)
-                                            .update("fcmToken", token)
-                                    }
-                                }
-                            }
-
-                            RootNavigationGraph(
-                                onLogout = { currentScreen = AppScreen.LOGIN }
-                            )
-                        }
-
-                        AppScreen.REGISTER_SUCCESS -> RegisterSuccessScreen(
-                            onBack = { currentScreen = AppScreen.LOGIN },
-                            onSuccess = { currentScreen = AppScreen.LOGIN },
-                            accent = MaterialTheme.colorScheme.primary
-                        )
-
-                        AppScreen.RESET_PASSWORD -> ResetPasswordScreen(
-                            onBack = { currentScreen = AppScreen.LOGIN },
-                            accent = MaterialTheme.colorScheme.primary,
-                            onPasswordReset = {
-                                authViewModel.resetPassword { result ->
-                                    if (result.isSuccess) {
-                                        currentScreen = AppScreen.LOGIN
-                                    } else {
-                                        Log.e(
-                                            "ResetPassword",
-                                            "Error resetting password: ${result.exceptionOrNull()?.message}"
-                                        )
-                                    }
-                                }
-                            },
-                            email = authViewModel.email,
-                            onEmailChange = { authViewModel.onEmailChange(it) }
-                        )
                     }
                 }
             }
@@ -395,26 +397,21 @@ class MainActivity : AppCompatActivity() {
         }
 
         LaunchedEffect(activity?.intent) {
-            val intent = activity?.intent
-            val type = intent?.extras?.getString("type")
-            val entityId = intent?.extras?.getString("entityId")
+            val intent = activity?.intent ?: return@LaunchedEffect
+            val type = intent.getStringExtra("type")
+            val entityId = intent.getStringExtra("entityId")
 
             if (type != null) {
                 when (type) {
-                    "BATTLE_RESULT" -> {
-                        entityId?.let { navController.navigate("battle_detail/$it") }
-                    }
-
-                    "BATTLE_INVITE", "FRIEND_REQUEST" -> {
-                        currentTab = BottomTab.COMMUNITY
-                    }
-
-                    "MESSAGE" -> {
+                    "BATTLE_RESULT" -> entityId?.let { navController.navigate("battle_detail/$it") }
+                    "BATTLE_INVITE", "FRIEND_REQUEST", "MESSAGE" -> {
                         currentTab = BottomTab.COMMUNITY
                     }
                 }
-                intent?.removeExtra("type")
-                intent?.removeExtra("entityId")
+
+                // Clear extras so the intent is not handled repeatedly on recomposition.
+                intent.removeExtra("type")
+                intent.removeExtra("entityId")
             }
         }
 

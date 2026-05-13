@@ -45,6 +45,9 @@ android {
     buildFeatures {
         compose = true
         viewBinding = true
+        composeOptions {
+            kotlinCompilerExtensionVersion = "1.5.15"
+        }
         buildConfig = true
     }
 }
@@ -52,6 +55,7 @@ android {
 dependencies {
     implementation("androidx.datastore:datastore-preferences:1.0.0")
     implementation(libs.androidx.compose.foundation)
+    implementation(libs.androidx.glance)
     implementation(libs.play.services.location)
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
     implementation(libs.androidx.core.ktx)
@@ -98,6 +102,8 @@ dependencies {
     implementation("com.google.firebase:firebase-functions")
 
     implementation("com.google.android.gms:play-services-ads:25.2.0")
+
+    implementation("androidx.glance:glance-appwidget:1.1.1")
 
     // Google Maps Compose
     implementation("com.google.maps.android:maps-compose:4.3.3")

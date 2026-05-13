@@ -17,6 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.SzpontCompany.check.ui.theme.CheckTheme
 import com.SzpontCompany.check.ui.theme.Mint
 import kotlin.math.roundToInt
@@ -33,6 +34,10 @@ data class PopularGoal(val value: Int, val label: String)
 fun StepGoalScreen(onBackClick: () -> Unit = {}) {
     var sliderPosition by remember { mutableFloatStateOf(8000f) }
     val currentGoal = (sliderPosition / 100).roundToInt() * 100
+    val viewModel: StepGoalViewModel = viewModel()
+
+    val isSaving = viewModel.isSaving
+    val error = viewModel.error
 
     Column(
         modifier = Modifier
@@ -154,18 +159,23 @@ fun StepGoalScreen(onBackClick: () -> Unit = {}) {
         Spacer(modifier = Modifier.weight(1f))
 
         OutlinedButton(
-            onClick = { },
+            onClick = { viewModel.saveStepGoal(currentGoal) },
             modifier = Modifier.fillMaxWidth().height(64.dp),
             shape = RoundedCornerShape(16.dp),
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)),
-            colors = ButtonDefaults.outlinedButtonColors(containerColor = Color.Transparent)
+            colors = ButtonDefaults.outlinedButtonColors(containerColor = Color.Transparent),
+            enabled = !isSaving
         ) {
-            Text(
-                text = stringResource(R.string.step_goal_save_button),
-                color = MaterialTheme.colorScheme.onBackground,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 18.sp
-            )
+            if (isSaving) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp),
+                    strokeWidth = 2.dp
+                )
+            } else {
+                Text(stringResource(R.string.step_goal_save_button), color = MaterialTheme.colorScheme.onBackground,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 18.sp)
+            }
         }
 
         Spacer(modifier = Modifier.height(32.dp))
