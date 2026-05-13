@@ -17,6 +17,7 @@ class StepRepository(private val context: Context) {
         val DAILY_STEPS_KEY = intPreferencesKey("daily_steps")
         val LAST_SENSOR_READING_KEY = intPreferencesKey("last_sensor_reading")
         val LAST_RECORDED_DATE_KEY = stringPreferencesKey("last_recorded_date")
+        val DAILY_GOAL_KEY = intPreferencesKey("daily_goal")
     }
 
     val todayStepsFlow: Flow<Int> = context.dataStore.data.map { preferences ->
@@ -24,6 +25,12 @@ class StepRepository(private val context: Context) {
         val today = LocalDate.now().toString()
 
         if (savedDate != today) 0 else (preferences[DAILY_STEPS_KEY] ?: 0)
+    }
+
+    suspend fun updateDailyGoal(newGoal: Int) {
+        context.dataStore.edit { prefs ->
+            prefs[DAILY_GOAL_KEY] = newGoal
+        }
     }
 
     suspend fun processSensorSteps(newSensorSteps: Int) {

@@ -8,7 +8,9 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.application
 import androidx.lifecycle.viewModelScope
 import com.SzpontCompany.check.data.habit.HabitRepository
+import com.SzpontCompany.check.data.steps.StepRepository
 import com.SzpontCompany.check.data.user.UserRepository
+import com.SzpontCompany.check.widgets.WidgetDataUpdater
 import kotlinx.coroutines.launch
 
 class StepGoalViewModel(application: Application) : AndroidViewModel(application) {
@@ -29,6 +31,8 @@ class StepGoalViewModel(application: Application) : AndroidViewModel(application
 
             userRepo.updateStepGoal(safeGoal)
             habitRepo.updateStepsGoal(safeGoal, application.applicationContext)
+            StepRepository(application.applicationContext).updateDailyGoal(safeGoal)
+            WidgetDataUpdater().updateStepsWidgetData(application.applicationContext)
         } catch (e: Exception) {
             error = e.message
         } finally {

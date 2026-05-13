@@ -10,9 +10,11 @@ import androidx.compose.runtime.setValue
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.application
 import androidx.lifecycle.viewModelScope
 import com.SzpontCompany.check.data.habit.Habit
 import com.SzpontCompany.check.data.habit.HabitRepository
+import com.SzpontCompany.check.data.steps.StepRepository
 import com.SzpontCompany.check.data.user.UserRepository
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
@@ -263,19 +265,16 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
             val uid = auth.currentUser?.uid
                 ?: return Result.failure(Exception("No user logged in"))
 
-            // defensive: onboarding input -> Firestore (stepGoal)
             val safeGoal = dailySteps
                 .coerceAtLeast(1)
                 .coerceAtMost(100_000)
 
-            // 1) zapisz cel kroków w dokumencie usera
             Firebase.firestore
                 .collection("users")
                 .document(uid)
                 .set(mapOf("stepGoal" to safeGoal), SetOptions.merge())
                 .await()
 
-            // 2) utwórz/aktualizuj specjalny nawyk kroków w subkolekcji habits
             val stepHabit = Habit(
                 name = context.getString(R.string.habit_steps_name),
                 icon = "🚶",
@@ -288,6 +287,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                 isStepsHabit = true
             )
 
+            StepRepository(application.applicationContext).updateDailyGoal(safeGoal)
             habitRepository.upsertStepsHabit(stepHabit)
             Result.success(Unit)
         } catch (e: Exception) {

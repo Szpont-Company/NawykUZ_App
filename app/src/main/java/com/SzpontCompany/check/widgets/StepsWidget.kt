@@ -134,7 +134,7 @@ class StepsWidget : GlanceAppWidget() {
                 .height(4.dp)
                 .cornerRadius(2.dp)
         ) {
-            val segments = 20
+            val segments = 10
             val filledSegments = (progress * segments).toInt()
             val emptyColor = ColorProvider(day = Color(0xFF3A3A3C), night = Color(0xFF3A3A3C))
 
