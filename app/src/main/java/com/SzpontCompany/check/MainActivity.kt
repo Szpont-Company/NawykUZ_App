@@ -397,42 +397,21 @@ class MainActivity : AppCompatActivity() {
         }
 
         LaunchedEffect(activity?.intent) {
-            val intent = activity?.intent
-            val type = intent?.extras?.getString("type")
-            val entityId = intent?.extras?.getString("entityId")
+            val intent = activity?.intent ?: return@LaunchedEffect
+            val type = intent.getStringExtra("type")
+            val entityId = intent.getStringExtra("entityId")
 
-        if (type != null) {
-            when (type) {
-                "BATTLE_RESULT" -> {
-                    entityId?.let { navController.navigate("battle_detail/$it") }
-                }
-                "BATTLE_INVITE", "FRIEND_REQUEST" -> {
-                    currentTab = BottomTab.COMMUNITY
-                }
-                "MESSAGE" -> {
-                    currentTab = BottomTab.COMMUNITY
-                }
-            }
-            intent.removeExtra("type")
-            intent.removeExtra("entityId")
-        }
-    }
             if (type != null) {
                 when (type) {
-                    "BATTLE_RESULT" -> {
-                        entityId?.let { navController.navigate("battle_detail/$it") }
-                    }
-
-                    "BATTLE_INVITE", "FRIEND_REQUEST" -> {
-                        currentTab = BottomTab.COMMUNITY
-                    }
-
-                    "MESSAGE" -> {
+                    "BATTLE_RESULT" -> entityId?.let { navController.navigate("battle_detail/$it") }
+                    "BATTLE_INVITE", "FRIEND_REQUEST", "MESSAGE" -> {
                         currentTab = BottomTab.COMMUNITY
                     }
                 }
-                intent?.removeExtra("type")
-                intent?.removeExtra("entityId")
+
+                // Clear extras so the intent is not handled repeatedly on recomposition.
+                intent.removeExtra("type")
+                intent.removeExtra("entityId")
             }
         }
 

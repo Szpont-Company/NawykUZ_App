@@ -260,18 +260,35 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
     suspend fun saveFirstHabit(dailySteps: Int, context: Context): Result<Unit> {
         return try {
+            val uid = auth.currentUser?.uid
+                ?: return Result.failure(Exception("No user logged in"))
+
+            // defensive: onboarding input -> Firestore (stepGoal)
+            val safeGoal = dailySteps
+                .coerceAtLeast(1)
+                .coerceAtMost(100_000)
+
+            // 1) zapisz cel kroków w dokumencie usera
+            Firebase.firestore
+                .collection("users")
+                .document(uid)
+                .set(mapOf("stepGoal" to safeGoal), SetOptions.merge())
+                .await()
+
+            // 2) utwórz/aktualizuj specjalny nawyk kroków w subkolekcji habits
             val stepHabit = Habit(
                 name = context.getString(R.string.habit_steps_name),
                 icon = "🚶",
                 colorName = "Mint",
                 frequency = "Daily",
-                dailyGoal = dailySteps,
+                dailyGoal = safeGoal,
                 unit = context.getString(R.string.habit_steps_unit),
                 difficulty = context.getString(R.string.habit_steps_difficulty),
-                isActive = true
+                isActive = true,
+                isStepsHabit = true
             )
 
-            habitRepository.addHabit(stepHabit)
+            habitRepository.upsertStepsHabit(stepHabit)
             Result.success(Unit)
         } catch (e: Exception) {
             Log.e(TAG, "Error saving first habit: ${e.message}")
