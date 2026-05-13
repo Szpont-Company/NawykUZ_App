@@ -42,6 +42,8 @@ import com.SzpontCompany.check.R
 import com.SzpontCompany.check.data.habit.Habit
 import com.SzpontCompany.check.ui.community.components.NotificationsViewModel
 import com.SzpontCompany.check.ui.components.UserAvatar
+import com.SzpontCompany.check.ui.profile.BadgeDetailsDialog
+import com.SzpontCompany.check.ui.profile.LevelUpDialog
 import com.SzpontCompany.check.ui.rewards.BadgeUnlockDialog
 import com.SzpontCompany.check.ui.theme.getColorByName
 import com.google.android.gms.ads.AdLoader
@@ -70,6 +72,26 @@ fun TodayScreen(
     val explosions = remember { mutableStateListOf<ExplosionData>() }
     val haptic = LocalHapticFeedback.current
     val coroutineScope = rememberCoroutineScope()
+
+    val stepsHabit = state.habits.find { it.isStepsHabit } ?: Habit(id = "test_steps", name = "Dzienne Kroki", isStepsHabit = true)
+    val regularHabits = state.habits.filter { !it.isStepsHabit }
+
+    val user by viewModel.user.collectAsState()
+
+    var previousLevel by remember { mutableStateOf<Int?>(null) }
+    var showLevelUpDialog by remember { mutableStateOf(false) }
+    var newLevelToDisplay by remember { mutableIntStateOf(0) }
+
+    LaunchedEffect(user?.level) {
+        val currentLevel = user?.level
+        if (currentLevel != null) {
+            if (previousLevel != null && currentLevel > previousLevel!!) {
+                newLevelToDisplay = currentLevel
+                showLevelUpDialog = true
+            }
+            previousLevel = currentLevel
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
@@ -117,6 +139,15 @@ fun TodayScreen(
                     )
                 }
                 Spacer(modifier = Modifier.height(16.dp))
+
+                stepsHabit?.let { habit ->
+                    StepsHabitCard(
+                        habit = habit,
+                        currentSteps = state.todaySteps,
+                        stepGoal = state.user?.stepGoal ?: 8000
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
             }
 
             if (state.habits.isEmpty() && !state.isLoading) {
@@ -135,7 +166,7 @@ fun TodayScreen(
                 }
             }
 
-            itemsIndexed(items = state.habits, key = { _, habit -> habit.id }) { index, habit ->
+            itemsIndexed(items = regularHabits, key = { _, habit -> habit.id }) { index, habit ->
                 HabitCard(
                     habit = habit,
                     onToggleDone = { isNowDone ->
@@ -160,7 +191,7 @@ fun TodayScreen(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
 
-                if ((index + 1) % 3 == 0 && index != state.habits.lastIndex) {
+                if ((index + 1) % 3 == 0 && index != regularHabits.lastIndex) {
                     NativeAdCard()
                     Spacer(modifier = Modifier.height(16.dp))
                 }
@@ -175,8 +206,95 @@ fun TodayScreen(
                 }
             )
         }
+
+        if (showLevelUpDialog) {
+            LevelUpDialog(
+                newLevel = newLevelToDisplay,
+                onDismiss = { showLevelUpDialog = false }
+            )
+        }
     }
 }
+
+@Composable
+fun StepsHabitCard(
+    habit: Habit,
+    currentSteps: Int,
+    stepGoal: Int
+) {
+    val progress = (currentSteps.toFloat() / stepGoal.toFloat()).coerceIn(0f, 1f)
+    val animatedProgress by animateFloatAsState(targetValue = progress, label = "StepsProgress")
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+        )
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "👟", fontSize = 20.sp)
+                    }
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column {
+                        Text(
+                            text = habit.name,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                        Text(
+                            text = "Cel: $stepGoal kroków",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+                Column(horizontalAlignment = Alignment.End) {
+                    Text(
+                        text = currentSteps.toString(),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Black,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(10.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(animatedProgress)
+                        .fillMaxHeight()
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primary)
+                )
+            }
+        }
+    }
+}
+
 
 @Composable
 fun TopSection(

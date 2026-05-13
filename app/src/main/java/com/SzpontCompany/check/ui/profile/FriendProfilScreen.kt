@@ -80,7 +80,7 @@ fun FriendProfileScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            FriendLevelAndXpBar()
+            FriendLevelAndXpBar(user = uiState.user)
 
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -217,7 +217,7 @@ fun FriendUserHeaderSection(user: User?) {
                     .padding(horizontal = 8.dp, vertical = 2.dp)
             ) {
                 Text(
-                    text = "${stringResource(R.string.profile_level)} 6",
+                    text = "${stringResource(R.string.profile_level)} ${user?.level ?: 1}",
                     color = MaterialTheme.colorScheme.background,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold
@@ -278,13 +278,13 @@ fun FriendUserHeaderSection(user: User?) {
 }
 
 @Composable
-fun FriendLevelAndXpBar() {
+fun FriendLevelAndXpBar(user: User?) {
     var animationPlayed by remember { mutableStateOf(false) }
 
-    val currentLevel = 6
-    val targetXp = 800
-    val maxXp = 1000
-    val targetProgress = targetXp.toFloat() / maxXp.toFloat()
+    val currentLevel = user?.level ?: 1
+    val targetXp = user?.xp ?: 0
+    val maxXp = user?.getXpThreshold() ?: 100
+    val targetProgress = if (maxXp > 0) targetXp.toFloat() / maxXp.toFloat() else 0f
 
     val animatedProgress by animateFloatAsState(
         targetValue = if (animationPlayed) targetProgress else 0f,

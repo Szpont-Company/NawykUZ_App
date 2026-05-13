@@ -4,17 +4,30 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.SzpontCompany.check.data.chat.ChatMessage
 import com.SzpontCompany.check.data.chat.ChatRepository
+import com.SzpontCompany.check.data.social.Friend
+import com.SzpontCompany.check.data.social.FriendRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+
+data class ChatUiState(
+    val messages: List<UiChatMessage> = emptyList(),
+    val friend: Friend? = null
+)
+
 class ChatViewModel(
-    private val repository: ChatRepository = ChatRepository()
+    private val repository: ChatRepository = ChatRepository(),
+    private val friendRepository: FriendRepository = FriendRepository()
 ) : ViewModel() {
 
     private val _messages = MutableStateFlow<List<UiChatMessage>>(emptyList())
     val messages: StateFlow<List<UiChatMessage>> = _messages.asStateFlow()
+
+    private val _uiState = MutableStateFlow(ChatUiState())
+    val uiState: StateFlow<ChatUiState> = _uiState.asStateFlow()
 
     private val currentUserId = repository.currentUserId ?: ""
     private var currentFriendId: String? = null
@@ -25,7 +38,16 @@ class ChatViewModel(
 
         viewModelScope.launch {
             repository.getMessages(friendId).collect { rawMessages ->
-                _messages.value = processMessages(rawMessages)
+                val processed = processMessages(rawMessages)
+                _messages.value = processed
+                _uiState.update { it.copy(messages = processed) }
+            }
+        }
+
+        viewModelScope.launch {
+            friendRepository.getMyFriends().collect { friends ->
+                val friend = friends.find { it.uid == friendId }
+                _uiState.update { it.copy(friend = friend) }
             }
         }
     }
@@ -96,4 +118,3 @@ class ChatViewModel(
                now.get(java.util.Calendar.DAY_OF_YEAR) == time.get(java.util.Calendar.DAY_OF_YEAR)
     }
 }
-

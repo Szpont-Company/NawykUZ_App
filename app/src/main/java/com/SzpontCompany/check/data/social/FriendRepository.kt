@@ -250,7 +250,14 @@ class FriendRepository(
             return@callbackFlow
         }
 
-        val listener = firestore.collection("users").document(myId).collection("friends")
+        val friendListeners = mutableMapOf<String, com.google.firebase.firestore.ListenerRegistration>()
+        val friendsData = mutableMapOf<String, Friend>()
+
+        fun emitFriends() {
+            trySend(friendsData.values.toList())
+        }
+
+        val mainListener = firestore.collection("users").document(myId).collection("friends")
             .orderBy("timestamp", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshot, error ->
                 if (error != null || snapshot == null) {
@@ -258,41 +265,66 @@ class FriendRepository(
                     return@addSnapshotListener
                 }
 
-                kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
-                    val friendsList = snapshot.documents.mapNotNull { doc ->
-                        val uid = doc.id
-                        var name = doc.getString("name") ?: ""
-                        var avatarEmoji = doc.getString("avatarEmoji") ?: ""
-                        var bgColor = doc.getString("bgColor") ?: "Mint"
-                        var xp = doc.getLong("xp")?.toInt() ?: 0
-                        var isOnline = false
+                val currentFriendIds = snapshot.documents.map { it.id }
 
-                        try {
-                            val userDoc = firestore.collection("users").document(uid).get().await()
-                            if (userDoc.exists()) {
-                                isOnline = userDoc.getBoolean("isOnline") ?: false
-                                userDoc.getString("name")?.let { name = it }
-                                userDoc.getString("avatarEmoji")?.let { avatarEmoji = it }
-                                userDoc.getString("bgColor")?.let { bgColor = it }
-                                userDoc.getLong("xp")?.toInt()?.let { xp = it }
-                            }
-                        } catch (e: Exception) {}
-
-                        val initials = name.split(" ").mapNotNull { it.firstOrNull()?.uppercase() }.take(2).joinToString("")
-
-                        Friend(
-                            uid = uid,
-                            name = name,
-                            initials = initials,
-                            xp = xp,
-                            avatarEmoji = avatarEmoji,
-                            bgColor = bgColor,
-                            online = isOnline
-                        )
-                    }
-                    trySend(friendsList)
+                val removedIds = friendListeners.keys - currentFriendIds.toSet()
+                removedIds.forEach { id ->
+                    friendListeners.remove(id)?.remove()
+                    friendsData.remove(id)
                 }
+
+                snapshot.documents.forEach { doc ->
+                    val uid = doc.id
+                    val baseName = doc.getString("name") ?: ""
+                    val baseAvatar = doc.getString("avatarEmoji") ?: ""
+                    val baseBgColor = doc.getString("bgColor") ?: "Mint"
+
+                    if (!friendListeners.containsKey(uid)) {
+                        val initials = baseName.split(" ").mapNotNull { it.firstOrNull()?.uppercase() }.take(2).joinToString("")
+                        
+                        friendsData[uid] = Friend(
+                            uid = uid,
+                            name = baseName,
+                            initials = initials,
+                            xp = 0,
+                            avatarEmoji = baseAvatar,
+                            bgColor = baseBgColor,
+                            online = false,
+                            lastActive = 0L
+                        )
+
+                        val userListener = firestore.collection("users").document(uid)
+                            .addSnapshotListener { userSnapshot, userError ->
+                                if (userError == null && userSnapshot != null && userSnapshot.exists()) {
+                                    val isOnline = userSnapshot.getBoolean("isOnline") ?: false
+                                    val lastActiveMs = userSnapshot.getLong("lastActive") ?: 0L
+                                    val name = userSnapshot.getString("name") ?: baseName
+                                    val avatarEmoji = userSnapshot.getString("avatarEmoji") ?: baseAvatar
+                                    val bgColor = userSnapshot.getString("bgColor") ?: baseBgColor
+                                    val xp = userSnapshot.getLong("xp")?.toInt() ?: 0
+                                    val newInitials = name.split(" ").mapNotNull { it.firstOrNull()?.uppercase() }.take(2).joinToString("")
+
+                                    friendsData[uid] = friendsData[uid]!!.copy(
+                                        name = name,
+                                        initials = newInitials,
+                                        avatarEmoji = avatarEmoji,
+                                        bgColor = bgColor,
+                                        xp = xp,
+                                        online = isOnline,
+                                        lastActive = lastActiveMs
+                                    )
+                                    emitFriends()
+                                }
+                            }
+                        friendListeners[uid] = userListener
+                    }
+                }
+                emitFriends()
             }
-        awaitClose { listener.remove() }
+
+        awaitClose {
+            mainListener.remove()
+            friendListeners.values.forEach { it.remove() }
+        }
     }
 }

@@ -53,6 +53,7 @@ android {
 }
 
 dependencies {
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.glance)
     implementation(libs.play.services.location)

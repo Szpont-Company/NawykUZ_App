@@ -6,7 +6,7 @@ data class Friend(
     val initials: String = "",
     val xp: Int = 0,
     val online: Boolean = false,
-    val lastActive: String = "",
+    val lastActive: Long = 0L,
     val mutuals: Int = 0,
     val status: String = "",
     val avatarEmoji: String = "",

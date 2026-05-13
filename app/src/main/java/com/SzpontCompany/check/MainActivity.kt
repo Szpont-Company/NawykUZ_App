@@ -4,6 +4,7 @@ import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
@@ -76,16 +77,63 @@ import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.firestore.FirebaseFirestore
 import android.Manifest
 import android.content.pm.PackageManager
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.SzpontCompany.check.data.steps.StepCounterService
 import com.google.android.gms.location.LocationServices
 
 enum class AppScreen { SPLASH, LOGIN, DASHBOARD, REGISTER_SUCCESS, RESET_PASSWORD, SET_NICKNAME }
 
 class MainActivity : AppCompatActivity() {
+
+    private fun checkAndRequestPermissions() {
+        val permissionsToRequest = mutableListOf<String>()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACTIVITY_RECOGNITION
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                permissionsToRequest.add(Manifest.permission.ACTIVITY_RECOGNITION)
+            }
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                permissionsToRequest.add(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+
+        if (permissionsToRequest.isNotEmpty()) {
+            ActivityCompat.requestPermissions(this, permissionsToRequest.toTypedArray(), 100)
+        } else {
+            startStepCounterService()
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 100) {
+            startStepCounterService()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+
+
+        checkAndRequestPermissions()
 
         CoroutineScope(Dispatchers.IO).launch {
             Log.e("MainActivity", "Initializing Mobile Ads SDK")
@@ -278,49 +326,80 @@ class MainActivity : AppCompatActivity() {
         setIntent(intent)
     }
 
-}
+    private fun startStepCounterService() {
+        val serviceIntent = Intent(this, StepCounterService::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(serviceIntent)
+        } else {
+            startService(serviceIntent)
+        }
+    }
 
-@Composable
-fun RootNavigationGraph(onLogout: () -> Unit) {
-    val navController = rememberNavController()
-    val authViewModel: AuthViewModel = viewModel()
-    val communityViewModel: CommunityViewModel = viewModel()
+    override fun onStart() {
+        super.onStart()
+        updatePresence(true)
+    }
 
-    val notificationsViewModel: NotificationsViewModel = viewModel()
+    override fun onStop() {
+        super.onStop()
+        updatePresence(false)
+    }
 
-    var currentTab by remember { mutableStateOf<BottomTab?>(BottomTab.TODAY) }
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
+    private fun updatePresence(isOnline: Boolean) {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        FirebaseFirestore.getInstance().collection("users").document(uid)
+            .update(
+                mapOf(
+                    "isOnline" to isOnline,
+                    "lastActive" to System.currentTimeMillis()
+                )
+            )
+    }
 
-    val context = LocalContext.current
-    val activity = context as? android.app.Activity
+    @Composable
+    fun RootNavigationGraph(onLogout: () -> Unit) {
+        val navController = rememberNavController()
+        val authViewModel: AuthViewModel = viewModel()
+        val communityViewModel: CommunityViewModel = viewModel()
 
-    LaunchedEffect(Unit) {
-        if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
-            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
-                location?.let {
-                    val uid = FirebaseAuth.getInstance().currentUser?.uid
-                    if (uid != null) {
-                        FirebaseFirestore.getInstance().collection("users").document(uid)
-                            .update(
-                                mapOf(
-                                    "latitude" to it.latitude,
-                                    "longitude" to it.longitude,
-                                    "lastSeenMillis" to System.currentTimeMillis()
+        val notificationsViewModel: NotificationsViewModel = viewModel()
+
+        var currentTab by remember { mutableStateOf<BottomTab?>(BottomTab.TODAY) }
+        val navBackStackEntry by navController.currentBackStackEntryAsState()
+        val currentRoute = navBackStackEntry?.destination?.route
+
+        val context = LocalContext.current
+        val activity = context as? android.app.Activity
+
+        LaunchedEffect(Unit) {
+            if (ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
+                val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
+                fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                    location?.let {
+                        val uid = FirebaseAuth.getInstance().currentUser?.uid
+                        if (uid != null) {
+                            FirebaseFirestore.getInstance().collection("users").document(uid)
+                                .update(
+                                    mapOf(
+                                        "latitude" to it.latitude,
+                                        "longitude" to it.longitude,
+                                        "lastSeenMillis" to System.currentTimeMillis()
+                                    )
                                 )
-                            )
+                        }
                     }
                 }
             }
         }
-    }
 
-
-    LaunchedEffect(activity?.intent) {
-        val intent = activity?.intent
-        val type = intent?.extras?.getString("type")
-        val entityId = intent?.extras?.getString("entityId")
+        LaunchedEffect(activity?.intent) {
+            val intent = activity?.intent
+            val type = intent?.extras?.getString("type")
+            val entityId = intent?.extras?.getString("entityId")
 
         if (type != null) {
             when (type) {
@@ -338,192 +417,214 @@ fun RootNavigationGraph(onLogout: () -> Unit) {
             intent.removeExtra("entityId")
         }
     }
+            if (type != null) {
+                when (type) {
+                    "BATTLE_RESULT" -> {
+                        entityId?.let { navController.navigate("battle_detail/$it") }
+                    }
 
-    Scaffold(
-        bottomBar = {
-            if (currentRoute == "main") {
-                CheckBottomNavigationBar(
-                    currentTab = currentTab ?: BottomTab.TODAY,
-                    onTabSelected = { newTab ->
-                        currentTab = newTab
-                        navController.popBackStack("main", inclusive = false)
-                    },
-                    onAddClick = { /* TODO: Otwórz okno dodawania */ },
-                    notificationsViewModel = notificationsViewModel
+                    "BATTLE_INVITE", "FRIEND_REQUEST" -> {
+                        currentTab = BottomTab.COMMUNITY
+                    }
 
-                )
+                    "MESSAGE" -> {
+                        currentTab = BottomTab.COMMUNITY
+                    }
+                }
+                intent?.removeExtra("type")
+                intent?.removeExtra("entityId")
             }
         }
-    ) { paddingValues ->
-        NavHost(
-            navController = navController,
-            startDestination = "main",
-            modifier = Modifier.padding(paddingValues)
-        ) {
 
-            composable("main") {
-                MainScreen(
-                    currentTab = currentTab ?: BottomTab.TODAY,
-                    onTabSelected = { newTab -> currentTab = newTab },
-                    onProfileClick = {
-                        navController.navigate("profile") {
-                            launchSingleTop = true
-                        }
-                    },
-                    onOptionsClick = {
-                        navController.navigate("settings") {
-                            launchSingleTop = true
-                        }
-                    },
-                    onFriendProfileClick = { friendUid ->
-                        navController.navigate("friend_profile/$friendUid") {
-                            launchSingleTop = true
-                        }
-                    },
-                    onMessageClick = { friend ->
-                        val encodedName = java.net.URLEncoder.encode(friend.name, "UTF-8")
-                        val encodedEmoji = java.net.URLEncoder.encode(
-                            friend.avatarEmoji,
-                            "UTF-8"
-                        )
-                        val route =
-                            "chat_screen?friendId=${friend.uid}&friendName=$encodedName&friendEmoji=$encodedEmoji&friendBgColor=${friend.bgColor}"
-                        navController.navigate(route) {
-                            launchSingleTop = true
-                        }
-                    },
-                    onBattleClick = { battle ->
-                        navController.navigate("battle_detail/${battle.id}") {
-                            launchSingleTop = true
-                        }
-                    },
-
-                    notificationsViewModel = notificationsViewModel,
-
-                    onNavigateToBattleDetail = { battleId ->
-                        navController.navigate("battle_detail/$battleId") {
-                            launchSingleTop = true
-                        }
-                    }
-                )
-            }
-
-            composable("profile") {
-                ProfileScreen(
-                    onBackClick = {
-                        navController.popBackStack("main", inclusive = false)
-                    },
-                    onSettingsClick = {
-                        if (navController.currentDestination?.route == "profile") {
-                            navController.navigate("settings")
-                        }
-                    },
-                    onEditProfileClick = {
-                        if (navController.currentDestination?.route == "profile") {
-                            navController.navigate("edit_profile")
-                        }
-                    },
-                    onRewardsClick = {
-                        if (navController.currentDestination?.route == "profile") {
-                            navController.navigate("rewards")
-                        }
-                    },
-                    onLogoutClick = {
-                        val uid = FirebaseAuth.getInstance().currentUser?.uid
-                        if (uid != null) {
-                            FirebaseFirestore.getInstance().collection("users").document(uid)
-                                .update("fcmToken", com.google.firebase.firestore.FieldValue.delete())
-                                .addOnCompleteListener {
-                                    authViewModel.signOut()
-                                    onLogout()
-                                }
-                        } else {
-                            authViewModel.signOut()
-                            onLogout()
-                        }
-                    }
-                )
-            }
-
-            composable("edit_profile") {
-                EditProfileScreen(
-                    onBackClick = { navController.popBackStack() }
-                )
-            }
-
-            composable(
-                route = "friend_profile/{friendUid}",
-                arguments = listOf(navArgument("friendUid") { defaultValue = "" })
-            ) { backStackEntry ->
-                val friendUid = backStackEntry.arguments?.getString("friendUid") ?: ""
-
-                FriendProfileScreen(
-                    friendUid = friendUid,
-                    onBackClick = { navController.popBackStack() }
-                )
-            }
-
-            composable(
-                route = "chat_screen?friendId={friendId}&friendName={friendName}&friendEmoji={friendEmoji}&friendBgColor={friendBgColor}",
-                arguments = listOf(
-                    navArgument("friendId") { defaultValue = "" },
-                    navArgument("friendName") { defaultValue = "" },
-                    navArgument("friendEmoji") { defaultValue = "" },
-                    navArgument("friendBgColor") { defaultValue = "Mint" }
-                )
-            ) { backStackEntry ->
-                val friendId = backStackEntry.arguments?.getString("friendId") ?: ""
-                val rawName = backStackEntry.arguments?.getString("friendName") ?: ""
-                val rawEmoji = backStackEntry.arguments?.getString("friendEmoji") ?: ""
-
-                val friendName = java.net.URLDecoder.decode(rawName, "UTF-8")
-                val friendEmoji = java.net.URLDecoder.decode(rawEmoji, "UTF-8")
-                val friendBgColor = backStackEntry.arguments?.getString("friendBgColor") ?: "Mint"
-
-                ChatScreen(
-                    friendId = friendId,
-                    onBackClick = { navController.popBackStack() },
-                    friendName = friendName,
-                    friendEmoji = friendEmoji,
-                    friendBgColor = friendBgColor
-                )
-            }
-
-            composable("rewards") {
-                RewardsScreen(
-                    onBackClick = { navController.popBackStack() }
-                )
-            }
-
-            composable("settings") {
-                SettingsNavHost(
-                    onExitSettings = { navController.popBackStack() },
-                    onLogout = onLogout
-                )
-
-            }
-
-            composable(
-                route = "battle_detail/{battleId}",
-                arguments = listOf(navArgument("battleId") { defaultValue = "" })
-            ) { backStackEntry ->
-                val battleId = backStackEntry.arguments?.getString("battleId") ?: ""
-                val battles by communityViewModel.battles.collectAsState()
-                val battle = battles.find { it.id == battleId }
-                val currentUserId = authViewModel.currentUser.value?.uid ?: ""
-
-                if (battle != null) {
-                    BattleDetailScreen(
-                        battle = battle,
-                        currentUserId = currentUserId,
-                        onBackClick = { navController.popBackStack() },
-                        onMarkDoneClick = {
-                            communityViewModel.toggleBattleDone(battle, true)
+        Scaffold(
+            bottomBar = {
+                if (currentRoute == "main") {
+                    CheckBottomNavigationBar(
+                        currentTab = currentTab ?: BottomTab.TODAY,
+                        onTabSelected = { newTab ->
+                            currentTab = newTab
+                            navController.popBackStack("main", inclusive = false)
                         },
-                        onSurrenderClick = {
-                            communityViewModel.surrenderBattle(battle)
+                        onAddClick = { /* TODO: Otwórz okno dodawania */ },
+                        notificationsViewModel = notificationsViewModel
+                    )
+                }
+            }
+        ) { paddingValues ->
+            NavHost(
+                navController = navController,
+                startDestination = "main",
+                modifier = Modifier.padding(paddingValues)
+            ) {
+
+                composable("main") {
+                    MainScreen(
+                        currentTab = currentTab ?: BottomTab.TODAY,
+                        onTabSelected = { newTab -> currentTab = newTab },
+                        onProfileClick = {
+                            navController.navigate("profile") {
+                                launchSingleTop = true
+                            }
+                        },
+                        onOptionsClick = {
+                            navController.navigate("settings") {
+                                launchSingleTop = true
+                            }
+                        },
+                        onFriendProfileClick = { friendUid ->
+                            navController.navigate("friend_profile/$friendUid") {
+                                launchSingleTop = true
+                            }
+                        },
+                        onMessageClick = { friend ->
+                            val encodedName = java.net.URLEncoder.encode(friend.name, "UTF-8")
+                            val encodedEmoji = java.net.URLEncoder.encode(
+                                friend.avatarEmoji,
+                                "UTF-8"
+                            )
+                            val route =
+                                "chat_screen?friendId=${friend.uid}&friendName=$encodedName&friendEmoji=$encodedEmoji&friendBgColor=${friend.bgColor}"
+                            navController.navigate(route) {
+                                launchSingleTop = true
+                            }
+                        },
+                        onBattleClick = { battle ->
+                            navController.navigate("battle_detail/${battle.id}") {
+                                launchSingleTop = true
+                            }
+                        },
+
+                        notificationsViewModel = notificationsViewModel,
+
+                        onNavigateToBattleDetail = { battleId ->
+                            navController.navigate("battle_detail/$battleId") {
+                                launchSingleTop = true
+                            }
                         }
                     )
+                }
+
+                composable("profile") {
+                    ProfileScreen(
+                        onBackClick = {
+                            navController.popBackStack("main", inclusive = false)
+                        },
+                        onSettingsClick = {
+                            if (navController.currentDestination?.route == "profile") {
+                                navController.navigate("settings")
+                            }
+                        },
+                        onEditProfileClick = {
+                            if (navController.currentDestination?.route == "profile") {
+                                navController.navigate("edit_profile")
+                            }
+                        },
+                        onRewardsClick = {
+                            if (navController.currentDestination?.route == "profile") {
+                                navController.navigate("rewards")
+                            }
+                        },
+                        onLogoutClick = {
+                            val uid = FirebaseAuth.getInstance().currentUser?.uid
+                            if (uid != null) {
+                                FirebaseFirestore.getInstance().collection("users").document(uid)
+                                    .update(
+                                        "fcmToken",
+                                        com.google.firebase.firestore.FieldValue.delete()
+                                    )
+                                    .addOnCompleteListener {
+                                        authViewModel.signOut()
+                                        onLogout()
+                                    }
+                            } else {
+                                authViewModel.signOut()
+                                onLogout()
+                            }
+                        }
+                    )
+                }
+
+                composable("edit_profile") {
+                    EditProfileScreen(
+                        onBackClick = { navController.popBackStack() }
+                    )
+                }
+
+                composable(
+                    route = "friend_profile/{friendUid}",
+                    arguments = listOf(navArgument("friendUid") { defaultValue = "" })
+                ) { backStackEntry ->
+                    val friendUid = backStackEntry.arguments?.getString("friendUid") ?: ""
+
+                    FriendProfileScreen(
+                        friendUid = friendUid,
+                        onBackClick = { navController.popBackStack() }
+                    )
+                }
+
+                composable(
+                    route = "chat_screen?friendId={friendId}&friendName={friendName}&friendEmoji={friendEmoji}&friendBgColor={friendBgColor}",
+                    arguments = listOf(
+                        navArgument("friendId") { defaultValue = "" },
+                        navArgument("friendName") { defaultValue = "" },
+                        navArgument("friendEmoji") { defaultValue = "" },
+                        navArgument("friendBgColor") { defaultValue = "Mint" }
+                    )
+                ) { backStackEntry ->
+                    val friendId = backStackEntry.arguments?.getString("friendId") ?: ""
+                    val rawName = backStackEntry.arguments?.getString("friendName") ?: ""
+                    val rawEmoji = backStackEntry.arguments?.getString("friendEmoji") ?: ""
+
+                    val friendName = java.net.URLDecoder.decode(rawName, "UTF-8")
+                    val friendEmoji = java.net.URLDecoder.decode(rawEmoji, "UTF-8")
+                    val friendBgColor =
+                        backStackEntry.arguments?.getString("friendBgColor") ?: "Mint"
+
+                    ChatScreen(
+                        friendId = friendId,
+                        onBackClick = { navController.popBackStack() },
+                        friendName = friendName,
+                        friendEmoji = friendEmoji,
+                        friendBgColor = friendBgColor
+                    )
+                }
+
+                composable("rewards") {
+                    RewardsScreen(
+                        onBackClick = { navController.popBackStack() }
+                    )
+                }
+
+                composable("settings") {
+                    SettingsNavHost(
+                        onExitSettings = { navController.popBackStack() },
+                        onLogout = onLogout
+                    )
+
+                }
+
+                composable(
+                    route = "battle_detail/{battleId}",
+                    arguments = listOf(navArgument("battleId") { defaultValue = "" })
+                ) { backStackEntry ->
+                    val battleId = backStackEntry.arguments?.getString("battleId") ?: ""
+                    val battles by communityViewModel.battles.collectAsState()
+                    val battle = battles.find { it.id == battleId }
+                    val currentUserId = authViewModel.currentUser.value?.uid ?: ""
+
+                    if (battle != null) {
+                        BattleDetailScreen(
+                            battle = battle,
+                            currentUserId = currentUserId,
+                            onBackClick = { navController.popBackStack() },
+                            onMarkDoneClick = {
+                                communityViewModel.toggleBattleDone(battle, true)
+                            },
+                            onSurrenderClick = {
+                                communityViewModel.surrenderBattle(battle)
+                            }
+                        )
+                    }
                 }
             }
         }
