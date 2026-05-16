@@ -12,6 +12,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 class SettingsViewModel(
     private val repository: SettingsRepository,
@@ -35,6 +37,19 @@ class SettingsViewModel(
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = true
     )
+
+    val stepGoalState = repository.stepGoalFlow.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = 8000
+    )
+
+    private val _notificationSubtitleState = MutableStateFlow(Triple(false, "EVERYDAY", "20:00"))
+    val notificationSubtitleState = _notificationSubtitleState.asStateFlow()
+
+    init {
+        refreshNotificationSettings()
+    }
 
     fun updateShowLocation(show: Boolean) {
         viewModelScope.launch { repository.saveShowLocation(show) }
@@ -113,6 +128,20 @@ class SettingsViewModel(
                 onComplete(false)
             }
         }
+    }
+
+    fun refreshNotificationSettings() {
+        _notificationSubtitleState.value = repository.getNotificationPrefs()
+    }
+
+    fun updateStepGoal(newGoal: Int) {
+        viewModelScope.launch { repository.saveStepGoal(newGoal) }
+        //TODO: update step goal in Firestore if needed
+//         val uid = FirebaseAuth.getInstance().currentUser?.uid
+//         if (uid != null) {
+//             FirebaseFirestore.getInstance().collection("users").document(uid)
+//                 .update("stepGoal", newGoal)
+//         }
     }
 }
 

@@ -1,12 +1,15 @@
 package com.SzpontCompany.check.ui.settings
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.SzpontCompany.check.ui.settings.StepGoalScreen
 
 @Composable
 fun SettingsNavHost(
@@ -31,7 +34,16 @@ fun SettingsNavHost(
 
         // 2. Daily Step Goal Screen
         composable("settings_step_goal") {
+            val viewModel: SettingsViewModel = viewModel(
+                factory = SettingsViewModelFactory(LocalContext.current.applicationContext)
+            )
+            val currentGoal by viewModel.stepGoalState.collectAsState()
+
             StepGoalScreen(
+                initialGoal = currentGoal,
+                onSaveGoal = { newGoal ->
+                    viewModel.updateStepGoal(newGoal)
+                },
                 onBackClick = { navController.popBackStack() }
             )
         }

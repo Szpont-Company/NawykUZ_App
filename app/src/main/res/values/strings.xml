@@ -539,7 +539,6 @@
     <string name="dialog_delete_title">Usuwanie konta</string>
     <string name="dialog_delete_desc">Ta operacja jest nieodwracalna. Wszystkie Twoje dane, znajomi, nawyki i statystyki zostaną trwale usunięte.</string>
     <string name="dialog_delete_confirm_prompt">Aby potwierdzić, wpisz słowo %1$s poniżej:</string>
-    <string name="dialog_delete_confirm_word">USUŃ</string>
     <string name="dialog_delete_btn">Usuń konto</string>
     <string name="settings_subtitle_everyday">Codziennie · %1$s</string>
 
@@ -554,4 +553,10 @@
     <string name="profile_share_footer">Check. • Wygrywaj każdy dzień</string>
     <string name="profile_add_friend_desc">Dodaj znajomego</string>
     <string name="dialog_awesome_btn">Super!</string>
+
+    <string name="settings_notification_everyday">Codziennie · %1$s</string>
+    <string name="settings_notification_workdays">W dni robocze · %1$s</string>
+    <string name="settings_notification_custom">Niestandardowe · %1$s</string>
+    <string name="steps_count">%1$,d kroków</string>
+    <string name="dialog_delete_confirm_word">USUŃ</string>
 </resources>

@@ -532,7 +532,6 @@
     <string name="dialog_delete_title">Delete account</string>
     <string name="dialog_delete_desc">This action is irreversible. All your data, friends, habits, and stats will be permanently deleted.</string>
     <string name="dialog_delete_confirm_prompt">To confirm, type the word %1$s below:</string>
-    <string name="dialog_delete_confirm_word">DELETE</string>
     <string name="dialog_delete_btn">Delete account</string>
     <string name="settings_subtitle_everyday">Every day · %1$s</string>
 
@@ -547,4 +546,12 @@
     <string name="profile_share_footer">Check. • Win every day</string>
     <string name="profile_add_friend_desc">Add friend</string>
     <string name="dialog_awesome_btn">Awesome!</string>
+
+    <string name="settings_notification_everyday">Every day · %1$s</string>
+    <string name="settings_notification_workdays">Workdays · %1$s</string>
+    <string name="settings_notification_custom">Custom · %1$s</string>
+
+    <string name="dialog_delete_confirm_word">DELETE</string>
+    <string name="steps_count">%1$,d steps</string>
+
 </resources>
