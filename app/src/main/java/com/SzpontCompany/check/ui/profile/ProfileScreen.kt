@@ -142,6 +142,10 @@ fun ProfileScreen(
         }
 
         if (showShareDialog) {
+
+            val shareTextTemplate = stringResource(R.string.profile_share_text)
+            val shareIntentTitle = stringResource(R.string.profile_share_intent_title)
+
             ShareProfileDialog(
                 uiState = uiState,
                 onDismiss = { showShareDialog = false },
@@ -150,8 +154,7 @@ fun ProfileScreen(
 
                     val streak = uiState.user?.currentStreak ?: 0
                     val battles = uiState.battlesWon
-                    val shareText =
-                        "Hej! Mój streak to $streak dni, a na koncie mam $battles wygranych pojedynków. 🔥 Dołącz do mnie w Check. !"
+                    val shareText = String.format(shareTextTemplate, streak, battles)
 
                     val sendIntent = Intent(Intent.ACTION_SEND).apply {
                         type = "image/png"
@@ -159,7 +162,7 @@ fun ProfileScreen(
                         putExtra(Intent.EXTRA_TEXT, shareText)
                         addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                     }
-                    context.startActivity(Intent.createChooser(sendIntent, "Udostępnij profil"))
+                    context.startActivity(Intent.createChooser(sendIntent, shareIntentTitle))
                 }
             )
         }
@@ -205,7 +208,7 @@ fun ProfileTopBar(onBackClick: () -> Unit, onShareClick: () -> Unit) {
             ) {
                 Icon(
                     imageVector = Icons.Outlined.Share,
-                    contentDescription = "Udostępnij profil",
+                    contentDescription = stringResource(R.string.profile_share_intent_title),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
@@ -224,7 +227,7 @@ fun ProfileTopBar(onBackClick: () -> Unit, onShareClick: () -> Unit) {
             ) {
                 Icon(
                     imageVector = Icons.Outlined.PersonAdd,
-                    contentDescription = "Dodaj znajomego",
+                    contentDescription = stringResource(R.string.profile_add_friend_desc),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
@@ -757,7 +760,7 @@ fun ShareProfileDialog(
         shape = RoundedCornerShape(26.dp),
         title = {
             Text(
-                text = "Udostępnij profil",
+                text = stringResource(R.string.profile_share_dialog_title),
                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                 color = MaterialTheme.colorScheme.onBackground,
                 textAlign = TextAlign.Center,
@@ -836,7 +839,7 @@ fun ShareProfileDialog(
                         Spacer(modifier = Modifier.height(12.dp))
 
                         Text(
-                            text = user?.name ?: "Nieznany",
+                            text = user?.name ?: stringResource(R.string.unknown_user),
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onBackground
@@ -854,17 +857,20 @@ fun ShareProfileDialog(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceEvenly
                         ) {
-                            ShareStatItem(value = "Lvl ${user?.level ?: 1}", label = "Poziom")
+                            ShareStatItem(
+                                value = "Lvl ${user?.level ?: 1}",
+                                label = stringResource(R.string.profile_share_level)
+                            )
 
                             ShareStatItem(
                                 value = "🔥 ${user?.currentStreak ?: 0}",
-                                label = "Streak",
+                                label = stringResource(R.string.profile_share_streak),
                                 valueColor = MaterialTheme.colorScheme.primary
                             )
 
                             ShareStatItem(
                                 value = "🏆 ${uiState.battlesWon}",
-                                label = "Wygrane",
+                                label = stringResource(R.string.profile_share_won),
                                 valueColor = Color(0xFFBA7517)
                             )
                         }
@@ -872,7 +878,7 @@ fun ShareProfileDialog(
                         Spacer(modifier = Modifier.height(24.dp))
 
                         Text(
-                            text = "Check. • Wygrywaj każdy dzień",
+                            text = stringResource(R.string.profile_share_footer),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Medium
@@ -914,7 +920,7 @@ fun ShareProfileDialog(
                     modifier = Modifier.size(20.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Udostępnij", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Text(text = stringResource(R.string.profile_share_btn), fontWeight = FontWeight.Bold, fontSize = 16.sp)
             }
         },
         dismissButton = null
@@ -1021,7 +1027,7 @@ fun BadgeDetailsDialog(
                 shape = RoundedCornerShape(14.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
-                Text("Super!", fontWeight = FontWeight.Bold, color = Color.White)
+                Text(text = stringResource(R.string.dialog_awesome_btn), fontWeight = FontWeight.Bold, color = Color.White)
             }
         }
     )

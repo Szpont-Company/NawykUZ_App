@@ -542,4 +542,16 @@
     <string name="dialog_delete_confirm_word">USUŃ</string>
     <string name="dialog_delete_btn">Usuń konto</string>
     <string name="settings_subtitle_everyday">Codziennie · %1$s</string>
+
+
+    <string name="profile_share_dialog_title">Udostępnij profil</string>
+    <string name="profile_share_intent_title">Udostępnij profil</string>
+    <string name="profile_share_text">Hej! Mój streak to %1$d dni, a na koncie mam %2$d wygranych pojedynków. 🔥 Dołącz do mnie w Check!</string>
+    <string name="profile_share_btn">Udostępnij</string>
+    <string name="profile_share_level">Poziom</string>
+    <string name="profile_share_streak">Streak</string>
+    <string name="profile_share_won">Wygrane</string>
+    <string name="profile_share_footer">Check. • Wygrywaj każdy dzień</string>
+    <string name="profile_add_friend_desc">Dodaj znajomego</string>
+    <string name="dialog_awesome_btn">Super!</string>
 </resources>

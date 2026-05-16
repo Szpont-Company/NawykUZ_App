@@ -535,4 +535,16 @@
     <string name="dialog_delete_confirm_word">DELETE</string>
     <string name="dialog_delete_btn">Delete account</string>
     <string name="settings_subtitle_everyday">Every day · %1$s</string>
+
+
+    <string name="profile_share_dialog_title">Share profile</string>
+    <string name="profile_share_intent_title">Share profile</string>
+    <string name="profile_share_text">Hey! My streak is %1$d days and I\'ve won %2$d battles. 🔥 Join me in Check!</string>
+    <string name="profile_share_btn">Share</string>
+    <string name="profile_share_level">Level</string>
+    <string name="profile_share_streak">Streak</string>
+    <string name="profile_share_won">Won</string>
+    <string name="profile_share_footer">Check. • Win every day</string>
+    <string name="profile_add_friend_desc">Add friend</string>
+    <string name="dialog_awesome_btn">Awesome!</string>
 </resources>
