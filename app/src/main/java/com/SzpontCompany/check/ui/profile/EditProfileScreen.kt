@@ -40,6 +40,7 @@ import com.SzpontCompany.check.data.user.UserRepository
 import com.SzpontCompany.check.ui.components.CheckBackButton
 import com.SzpontCompany.check.ui.theme.*
 import com.SzpontCompany.check.R
+import androidx.compose.ui.res.stringResource
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -227,7 +228,7 @@ fun EditProfileTopBar(onBackClick: () -> Unit) {
         Spacer(modifier = Modifier.width(16.dp))
 
         Text(
-            text = "Edytuj profil",
+            text = stringResource(R.string.edit_profile_title),
             style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
             color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.weight(1f)
@@ -286,7 +287,7 @@ fun LivePreviewSection(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = if (fullName.isBlank()) "Brak danych" else fullName,
+                text = if (fullName.isBlank()) stringResource(R.string.edit_profile_no_data) else fullName,
                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                 color = MaterialTheme.colorScheme.onBackground
             )
@@ -331,7 +332,11 @@ fun AvatarCustomizationSection(
     onBgColorSelected: (Color) -> Unit
 ) {
     Column {
-        val tabs = listOf("Avatar", "Tło", "Ramka")
+        val tabs = listOf(
+            stringResource(R.string.edit_profile_tab_avatar),
+            stringResource(R.string.edit_profile_tab_background),
+            stringResource(R.string.edit_profile_tab_frame)
+        )
 
         Row(
             modifier = Modifier
@@ -368,7 +373,7 @@ fun AvatarCustomizationSection(
         when (selectedTabIndex) {
             0 -> AvatarList(fullName, selectedAvatar, onAvatarSelected)
             1 -> BackgroundColorList(selectedBgColor, onBgColorSelected)
-            2 -> EmptyComingSoon(text = "Rzadkie ramki wkrótce!")
+            2 -> EmptyComingSoon(text = stringResource(R.string.edit_profile_frames_soon))
         }
     }
 }
@@ -486,15 +491,24 @@ fun ProfileFormSection(
 ) {
     val nameParts = fullName.trim().split("\\s+".toRegex())
     val isFullNameError = fullName.isBlank() || nameParts.size < 2
-    val fullNameErrorMsg = if (fullName.isBlank()) "Imię i nazwisko nie może być puste" else if (nameParts.size < 2) "Podaj również nazwisko" else null
+
+    val fullNameEmptyError = stringResource(R.string.edit_profile_err_name_empty)
+    val surnameReqError = stringResource(R.string.edit_profile_err_surname_req)
+    val fullNameErrorMsg = if (fullName.isBlank()) fullNameEmptyError else if (nameParts.size < 2) surnameReqError else null
 
     val isNickFormatError = nickname.length < 3 || !nickname.matches(Regex("^[a-zA-Z0-9_.]+$"))
     val isNickError = isNickFormatError || isNicknameTaken
+
+    val nickEmptyError = stringResource(R.string.edit_profile_err_nick_empty)
+    val nickLengthError = stringResource(R.string.edit_profile_err_nick_length)
+    val nickFormatError = stringResource(R.string.edit_profile_err_nick_format)
+    val nickTakenError = stringResource(R.string.edit_profile_err_nick_taken)
+
     val nickErrorMsg = when {
-        nickname.isBlank() -> "Nick nie może być pusty"
-        nickname.length < 3 -> "Nick musi mieć min. 3 znaki"
-        !nickname.matches(Regex("^[a-zA-Z0-9_.]+$")) -> "Dozwolone litery, cyfry, '_' oraz '.'"
-        isNicknameTaken -> "Nazwa użytkownika jest już zajęta"
+        nickname.isBlank() -> nickEmptyError
+        nickname.length < 3 -> nickLengthError
+        !nickname.matches(Regex("^[a-zA-Z0-9_.]+$")) -> nickFormatError
+        isNicknameTaken -> nickTakenError
         else -> null
     }
 
@@ -503,7 +517,7 @@ fun ProfileFormSection(
             modifier = Modifier.fillMaxWidth(),
             value = fullName,
             onValueChange = onFullNameChange,
-            label = "Imię i Nazwisko",
+            label = stringResource(R.string.edit_profile_name_label),
             isError = isFullNameError,
             errorMessage = fullNameErrorMsg,
             enabled = !isLoading
@@ -512,7 +526,7 @@ fun ProfileFormSection(
             modifier = Modifier.fillMaxWidth(),
             value = nickname,
             onValueChange = onNicknameChange,
-            label = "Nazwa użytkownika (Nick)",
+            label = stringResource(R.string.edit_profile_nickname_label),
             prefix = "@",
             isError = isNickError,
             errorMessage = nickErrorMsg,
@@ -606,13 +620,15 @@ fun ChangeEmailSheet(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
-                "Zmiana e-maila",
+                text = stringResource(R.string.edit_profile_change_email),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
             )
 
             Text(
+                //TODO: Pobierz aktualny email z danych użytkownika i wstaw go tutaj
+//                text = stringResource(R.string.edit_profile_email_desc),
                 "Twój obecny adres to marek.kowalski@gmail.com. Podaj nowy adres oraz hasło do konta, aby potwierdzić zmianę.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -621,7 +637,7 @@ fun ChangeEmailSheet(
             OutlinedTextField(
                 value = newEmail,
                 onValueChange = { newEmail = it },
-                label = { Text("Nowy adres e-mail") },
+                label = { Text(stringResource(R.string.edit_profile_new_email)) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
@@ -631,7 +647,7 @@ fun ChangeEmailSheet(
             OutlinedTextField(
                 value = currentPassword,
                 onValueChange = { currentPassword = it },
-                label = { Text("Hasło do konta") },
+                label = { Text(stringResource(R.string.edit_profile_account_password)) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -654,7 +670,7 @@ fun ChangeEmailSheet(
                     .height(54.dp),
                 shape = RoundedCornerShape(16.dp)
             ) {
-                Text("Zaktualizuj e-mail", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.edit_profile_update_email_btn), fontSize = 16.sp, fontWeight = FontWeight.Bold)
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -703,7 +719,7 @@ fun ChangePasswordSheet(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
-                "Zmiana hasła",
+                stringResource(R.string.edit_profile_change_password),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
@@ -712,7 +728,7 @@ fun ChangePasswordSheet(
             OutlinedTextField(
                 value = oldPassword,
                 onValueChange = { oldPassword = it },
-                label = { Text("Aktualne hasło") },
+                label = { Text(stringResource(R.string.edit_profile_current_password)) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 visualTransformation = if (isOldVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -730,7 +746,7 @@ fun ChangePasswordSheet(
             OutlinedTextField(
                 value = newPassword,
                 onValueChange = { newPassword = it },
-                label = { Text("Nowe hasło") },
+                label = { Text(stringResource(R.string.edit_profile_new_password)) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 visualTransformation = if (isNewVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -769,7 +785,7 @@ fun ChangePasswordSheet(
                     }
                 }
                 Text(
-                    text = "Hasło musi mieć co najmniej 8 znaków, w tym dużą literę, cyfrę i znak specjalny.",
+                    text = stringResource(R.string.edit_profile_password_rule_desc),
                     style = MaterialTheme.typography.labelSmall,
                     color = if (isStrong) Color(0xFF4CAF50) else MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -778,7 +794,7 @@ fun ChangePasswordSheet(
             OutlinedTextField(
                 value = confirmPassword,
                 onValueChange = { confirmPassword = it },
-                label = { Text("Powtórz nowe hasło") },
+                label = { Text(stringResource(R.string.edit_profile_repeat_password)) },
                 isError = confirmPassword.isNotBlank() && !passwordsMatch,
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
@@ -791,7 +807,7 @@ fun ChangePasswordSheet(
                 },
                 supportingText = {
                     if (confirmPassword.isNotEmpty() && !passwordsMatch) {
-                        Text("Hasła nie są identyczne", color = MaterialTheme.colorScheme.error)
+                        Text(stringResource(R.string.edit_profile_password_error_not_match), color = MaterialTheme.colorScheme.error)
                     }
                 },
                 singleLine = true
@@ -807,7 +823,7 @@ fun ChangePasswordSheet(
                     .height(54.dp),
                 shape = RoundedCornerShape(16.dp)
             ) {
-                Text("Zmień hasło", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.edit_profile_change_password_btn), fontSize = 16.sp, fontWeight = FontWeight.Bold)
             }
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -819,7 +835,7 @@ fun ChangePasswordSheet(
 fun SecuritySection(onChangeEmail: () -> Unit, onChangePassword: () -> Unit) {
     Column {
         Text(
-            text = "Konto i bezpieczeństwo",
+            text = stringResource(R.string.edit_profile_security_title),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(bottom = 12.dp)
@@ -831,13 +847,13 @@ fun SecuritySection(onChangeEmail: () -> Unit, onChangePassword: () -> Unit) {
         ) {
             SecurityItem(
                 icon = Icons.Default.Mail,
-                title = "Zmień e-mail",
+                title = stringResource(R.string.edit_profile_change_email),
                 onClick = onChangeEmail
             )
             HorizontalDivider(color = MaterialTheme.colorScheme.background, thickness = 2.dp)
             SecurityItem(
                 icon = Icons.Outlined.Lock,
-                title = "Zmień hasło",
+                title = stringResource(R.string.edit_profile_change_password),
                 onClick = onChangePassword
             )
         }
@@ -898,12 +914,12 @@ fun BottomActions(onSaveClick: () -> Unit, isSaveEnabled: Boolean, isLoading: Bo
                     strokeWidth = 2.dp
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Zapisywanie...", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimary)
+                Text(stringResource(R.string.edit_profile_saving), fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimary)
             } else if (showSuccessAnimation) {
-                Text("Zapisano!", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                Text(stringResource(R.string.edit_profile_saved), fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
             } else {
                 Text(
-                    "Zapisz zmiany",
+                    text = stringResource(R.string.edit_profile_save_changes),
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     color = if (isSaveEnabled) Color.White else MaterialTheme.colorScheme.onSurfaceVariant

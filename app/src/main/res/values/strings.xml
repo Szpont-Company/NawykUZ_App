@@ -174,7 +174,7 @@
     <string name="edit_profile_update_email_btn">Zaktualizuj e-mail</string>
     <string name="edit_profile_password_error_not_match">Hasła nie są identyczne</string>
     <string name="edit_profile_password_rule_desc">Hasło musi mieć co najmniej 8 znaków, w tym dużą literę, cyfrę i znak specjalny.</string>
-    <string name="edit_profile_email_desc">Podaj nowy adres oraz hasło do konta, aby potwierdzić zmianę.</string>
+    <string name="edit_profile_email_desc">Twój obecny adres to %1$s. Podaj nowy adres oraz hasło do konta, aby potwierdzić zmianę.</string>
 
     <!-- ================= REWARDS & STORE ================= -->
     <string name="rewards_title">Nagrody</string>
@@ -513,4 +513,33 @@
     <string name="level_up_dialog_title">Nowy poziom!</string>
     <string name="level_up_dialog_message">Gratulacje!\nOsiągnięto poziom %1$d!</string>
     <string name="level_up_dialog_button">Super!</string>
+
+    <string name="edit_profile_title">Edytuj profil</string>
+    <string name="edit_profile_no_data">Brak danych</string>
+    <string name="edit_profile_tab_avatar">Avatar</string>
+    <string name="edit_profile_tab_background">Tło</string>
+    <string name="edit_profile_tab_frame">Ramka</string>
+    <string name="edit_profile_frames_soon">Rzadkie ramki wkrótce!</string>
+    <string name="edit_profile_name_label">Imię i Nazwisko</string>
+    <string name="edit_profile_nickname_label">Nazwa użytkownika (Nick)</string>
+    <string name="edit_profile_security_title">Konto i bezpieczeństwo</string>
+    <string name="edit_profile_saving">Zapisywanie...</string>
+    <string name="edit_profile_saved">Zapisano!</string>
+    <string name="edit_profile_save_changes">Zapisz zmiany</string>
+    <string name="edit_profile_account_password">Hasło do konta</string>
+    <string name="edit_profile_change_password_btn">Zmień hasło</string>
+
+    <string name="edit_profile_err_name_empty">Imię i nazwisko nie może być puste</string>
+    <string name="edit_profile_err_surname_req">Podaj również nazwisko</string>
+    <string name="edit_profile_err_nick_empty">Nick nie może być pusty</string>
+    <string name="edit_profile_err_nick_length">Nick musi mieć min. 3 znaki</string>
+    <string name="edit_profile_err_nick_format">Dozwolone litery, cyfry, \'_\' oraz \'.\'</string>
+    <string name="edit_profile_err_nick_taken">Nazwa użytkownika jest już zajęta</string>
+
+    <string name="dialog_delete_title">Usuwanie konta</string>
+    <string name="dialog_delete_desc">Ta operacja jest nieodwracalna. Wszystkie Twoje dane, znajomi, nawyki i statystyki zostaną trwale usunięte.</string>
+    <string name="dialog_delete_confirm_prompt">Aby potwierdzić, wpisz słowo %1$s poniżej:</string>
+    <string name="dialog_delete_confirm_word">USUŃ</string>
+    <string name="dialog_delete_btn">Usuń konto</string>
+    <string name="settings_subtitle_everyday">Codziennie · %1$s</string>
 </resources>
