@@ -31,13 +31,25 @@ fun formatGoalNumber(goal: Int): String {
 data class PopularGoal(val value: Int, val label: String)
 
 @Composable
-fun StepGoalScreen(onBackClick: () -> Unit = {}) {
-    var sliderPosition by remember { mutableFloatStateOf(8000f) }
+fun StepGoalScreen(
+    onBackClick: () -> Unit = {},
+    initialGoal: Int = 8000,
+    onSaveGoal: (Int) -> Unit = {}
+) {
+    var sliderPosition by remember(initialGoal) { mutableFloatStateOf(initialGoal.toFloat()) }
     val currentGoal = (sliderPosition / 100).roundToInt() * 100
     val viewModel: StepGoalViewModel = viewModel()
 
     val isSaving = viewModel.isSaving
     val error = viewModel.error
+
+    var hasAttemptedSave by remember { mutableStateOf(false) }
+
+    LaunchedEffect(isSaving) {
+        if (hasAttemptedSave && !isSaving && error == null) {
+            onBackClick()
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -159,7 +171,11 @@ fun StepGoalScreen(onBackClick: () -> Unit = {}) {
         Spacer(modifier = Modifier.weight(1f))
 
         OutlinedButton(
-            onClick = { viewModel.saveStepGoal(currentGoal) },
+            onClick = {
+                hasAttemptedSave = true
+                viewModel.saveStepGoal(currentGoal)
+                onSaveGoal(currentGoal)
+            },
             modifier = Modifier.fillMaxWidth().height(64.dp),
             shape = RoundedCornerShape(16.dp),
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)),

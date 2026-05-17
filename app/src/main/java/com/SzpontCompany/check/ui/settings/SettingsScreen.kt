@@ -61,6 +61,12 @@ fun SettingsScreen(
     val currentAccent by viewModel.accentColorState.collectAsState()
     val currentLanguage by viewModel.languageState.collectAsState()
     val battleNotificationsEnabled by viewModel.battleNotificationsState.collectAsState()
+    val currentStepGoal by viewModel.stepGoalState.collectAsState()
+
+    val notifPrefs by viewModel.notificationSubtitleState.collectAsState()
+    LaunchedEffect(Unit) {
+        viewModel.refreshNotificationSettings()
+    }
 
     var showDeleteDialog by remember { mutableStateOf(false) }
     var isDeleting by remember { mutableStateOf(false) }
@@ -118,10 +124,26 @@ fun SettingsScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         SectionHeader(text = stringResource(R.string.settings_section_notifications))
+
+        val isNotifEnabled = notifPrefs.first
+        val notifFrequency = notifPrefs.second
+        val notifTime = notifPrefs.third
+
+        val notificationSubtitle = if (!isNotifEnabled) {
+            stringResource(R.string.settings_state_off)
+        } else {
+            val freqResId = when (notifFrequency) {
+                "EVERYDAY" -> R.string.settings_notification_everyday
+                "WORKDAYS" -> R.string.settings_notification_workdays
+                else -> R.string.settings_notification_custom
+            }
+            stringResource(freqResId, notifTime)
+        }
+
         SettingsListGroup {
             SettingsRowChevron(
                 title = stringResource(R.string.settings_push_notifications),
-                subtitle = "Codziennie · 08:00",
+                subtitle = notificationSubtitle,
                 icon = Icons.Rounded.Notifications,
                 baseColor = Mint,
                 onClick = onNotificationsClick
@@ -158,7 +180,7 @@ fun SettingsScreen(
             HorizontalDivider(color = MaterialTheme.colorScheme.background, thickness = 2.dp)
             SettingsRowChevron(
                 title = stringResource(R.string.settings_daily_step_goal),
-                subtitle = "8 000 kroków",
+                subtitle = stringResource(R.string.steps_count, currentStepGoal).replace(',', ' '),
                 icon = Icons.Rounded.Adjust,
                 baseColor = Cactus,
                 onClick = onStepGoalClick
@@ -178,7 +200,7 @@ fun SettingsScreen(
         SettingsListGroup {
             SettingsRowChevron(
                 title = stringResource(R.string.settings_profile_privacy),
-                subtitle = "Publiczny",
+                subtitle = stringResource(R.string.settings_mock_privacy),
                 icon = Icons.Rounded.Lock,
                 baseColor = Indigo,
                 onClick = onPrivacyClick
@@ -798,14 +820,19 @@ fun DeleteAccountDialog(
     onDismiss: () -> Unit,
     onConfirm: () -> Unit
 ) {
-    var confirmationText by remember { mutableStateOf("") }
-    val isConfirmed = confirmationText.trim().uppercase() == "USUŃ"
+
+    var textInput by remember { mutableStateOf("") }
+
+    val confirmWord = stringResource(R.string.dialog_delete_confirm_word)
+
+    val isConfirmEnabled = textInput.trim() == confirmWord
+
 
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                text = "Usuwanie konta",
+                text = stringResource(R.string.dialog_delete_title),
                 color = Crimson,
                 fontWeight = FontWeight.Bold
             )
@@ -813,22 +840,22 @@ fun DeleteAccountDialog(
         text = {
             Column {
                 Text(
-                    text = "Ta operacja jest nieodwracalna. Wszystkie Twoje dane, znajomi, nawyki i statystyki zostaną trwale usunięte.",
+                    text = stringResource(R.string.dialog_delete_desc),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 14.sp
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "Aby potwierdzić, wpisz słowo USUŃ poniżej:",
+                    text = stringResource(R.string.dialog_delete_confirm_prompt, confirmWord),
                     color = MaterialTheme.colorScheme.onBackground,
                     fontWeight = FontWeight.Medium,
                     fontSize = 14.sp
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
-                    value = confirmationText,
-                    onValueChange = { confirmationText = it },
-                    placeholder = { Text("USUŃ") },
+                    value = textInput,
+                    onValueChange = { textInput = it },
+                    placeholder = { Text(confirmWord) },
                     singleLine = true,
                     enabled = !isDeleting,
                     shape = RoundedCornerShape(12.dp),
@@ -843,7 +870,7 @@ fun DeleteAccountDialog(
         confirmButton = {
             Button(
                 onClick = onConfirm,
-                enabled = isConfirmed && !isDeleting,
+                enabled = isConfirmEnabled,
                 shape = RoundedCornerShape(12.dp),
                 modifier = Modifier.height(44.dp),
                 colors = ButtonDefaults.buttonColors(
@@ -858,7 +885,7 @@ fun DeleteAccountDialog(
                         strokeWidth = 2.dp
                     )
                 } else {
-                    Text("Usuń konto", color = Color.White, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.dialog_delete_btn), color = Color.White, fontWeight = FontWeight.Bold)
                 }
             }
         },
@@ -869,7 +896,7 @@ fun DeleteAccountDialog(
                 shape = RoundedCornerShape(12.dp),
                 modifier = Modifier.height(44.dp)
             ) {
-                Text("Anuluj", color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Medium)
+                Text(stringResource(R.string.action_cancel), color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Medium)
             }
         },
         containerColor = MaterialTheme.colorScheme.surface,
