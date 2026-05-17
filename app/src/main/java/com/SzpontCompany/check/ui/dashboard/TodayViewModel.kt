@@ -138,7 +138,6 @@ class TodayViewModel(application: Application) : AndroidViewModel(application) {
         val todayString = LocalDate.now().toString()
         val steps = state.todaySteps
 
-        // POPRAWKA: Usunięto 'it.stepsHabit == true', polegamy na 'isStepsHabit' oraz id
         val stepHabit = state.habits.find { it.isStepsHabit == true || it.id == "steps" }
 
         if (stepHabit != null) {
@@ -146,7 +145,11 @@ class TodayViewModel(application: Application) : AndroidViewModel(application) {
             val dailyGoal = stepHabit.dailyGoal
 
             if (steps >= dailyGoal && !isDoneAlready) {
+                // Zalicza nawyk, jeśli cel został osiągnięty
                 toggleHabitCompletion(stepHabit.id, true)
+            } else if (steps < dailyGoal && isDoneAlready) {
+                // Odznacza nawyk, jeśli użytkownik zmienił (podniósł) cel i obecne kroki już nie wystarczają
+                toggleHabitCompletion(stepHabit.id, false)
             }
         }
     }

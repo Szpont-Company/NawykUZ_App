@@ -31,7 +31,10 @@ fun formatGoalNumber(goal: Int): String {
 data class PopularGoal(val value: Int, val label: String)
 
 @Composable
-fun StepGoalScreen(onBackClick: () -> Unit = {}) {
+fun StepGoalScreen(
+    onBackClick: () -> Unit = {},
+    onSaveGoal: (Int) -> Unit = {}
+) {
     val viewModel: StepGoalViewModel = viewModel()
 
     // Obserwacje ze zaktualizowanego ViewModelu
@@ -53,30 +56,15 @@ fun StepGoalScreen(onBackClick: () -> Unit = {}) {
         }
     }
 
-    // Automatyczny powrót na poprzedni ekran gdy zapis się powiedzie
+    // Automatyczny powrót na poprzedni ekran TYLKO RAZ gdy zapis się powiedzie
     LaunchedEffect(saveSuccess) {
         if (saveSuccess) {
             onBackClick()
         }
     }
 
-fun StepGoalScreen(
-    onBackClick: () -> Unit = {},
-    initialGoal: Int = 8000,
-    onSaveGoal: (Int) -> Unit = {}
-) {
-    var sliderPosition by remember(initialGoal) { mutableFloatStateOf(initialGoal.toFloat()) }
     val currentGoal = (sliderPosition / 100).roundToInt() * 100
     val isSaving = viewModel.isSaving
-    val error = viewModel.error
-
-    var hasAttemptedSave by remember { mutableStateOf(false) }
-
-    LaunchedEffect(isSaving) {
-        if (hasAttemptedSave && !isSaving && error == null) {
-            onBackClick()
-        }
-    }
 
     Column(
         modifier = Modifier
@@ -199,7 +187,6 @@ fun StepGoalScreen(
 
         OutlinedButton(
             onClick = {
-                hasAttemptedSave = true
                 viewModel.saveStepGoal(currentGoal)
                 onSaveGoal(currentGoal)
             },
