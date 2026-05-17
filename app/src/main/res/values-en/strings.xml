@@ -174,7 +174,7 @@
     <string name="edit_profile_update_email_btn">Update e-mail</string>
     <string name="edit_profile_password_error_not_match">Passwords do not match</string>
     <string name="edit_profile_password_rule_desc">Password must be at least 8 characters long, include an uppercase letter, a number, and a special character.</string>
-    <string name="edit_profile_email_desc">Enter your new e-mail address and your password to confirm the change.</string>
+    <string name="edit_profile_email_desc">Your current address is %1$s. Enter your new e-mail address and your password to confirm the change.</string>
 
     <!-- ================= REWARDS & STORE ================= -->
     <string name="rewards_title">Rewards</string>
@@ -518,4 +518,52 @@
     <string name="level_up_dialog_title">Level Up!</string>
     <string name="level_up_dialog_message">Congratulations!\nYou\'ve reached level %1$d!</string>
     <string name="level_up_dialog_button">Awesome!</string>
+
+    <string name="edit_profile_title">Edit profile</string>
+    <string name="edit_profile_no_data">No data</string>
+    <string name="edit_profile_tab_avatar">Avatar</string>
+    <string name="edit_profile_tab_background">Background</string>
+    <string name="edit_profile_tab_frame">Frame</string>
+    <string name="edit_profile_frames_soon">Rare frames coming soon!</string>
+    <string name="edit_profile_name_label">Name and Last Name</string>
+    <string name="edit_profile_nickname_label">Username (Nick)</string>
+    <string name="edit_profile_security_title">Account and security</string>
+    <string name="edit_profile_saving">Saving...</string>
+    <string name="edit_profile_saved">Saved!</string>
+    <string name="edit_profile_save_changes">Save changes</string>
+    <string name="edit_profile_account_password">Account password</string>
+    <string name="edit_profile_change_password_btn">Change password</string>
+
+    <string name="edit_profile_err_name_empty">Name cannot be empty</string>
+    <string name="edit_profile_err_surname_req">Provide your last name too</string>
+    <string name="edit_profile_err_nick_empty">Nickname cannot be empty</string>
+    <string name="edit_profile_err_nick_length">Nickname must be at least 3 characters</string>
+    <string name="edit_profile_err_nick_format">Allowed: letters, digits, \'_\' and \'.\'</string>
+    <string name="edit_profile_err_nick_taken">Username is already taken</string>
+
+    <string name="dialog_delete_title">Delete account</string>
+    <string name="dialog_delete_desc">This action is irreversible. All your data, friends, habits, and stats will be permanently deleted.</string>
+    <string name="dialog_delete_confirm_prompt">To confirm, type the word %1$s below:</string>
+    <string name="dialog_delete_btn">Delete account</string>
+    <string name="settings_subtitle_everyday">Every day · %1$s</string>
+
+
+    <string name="profile_share_dialog_title">Share profile</string>
+    <string name="profile_share_intent_title">Share profile</string>
+    <string name="profile_share_text">Hey! My streak is %1$d days and I\'ve won %2$d battles. 🔥 Join me in Check!</string>
+    <string name="profile_share_btn">Share</string>
+    <string name="profile_share_level">Level</string>
+    <string name="profile_share_streak">Streak</string>
+    <string name="profile_share_won">Won</string>
+    <string name="profile_share_footer">Check. • Win every day</string>
+    <string name="profile_add_friend_desc">Add friend</string>
+    <string name="dialog_awesome_btn">Awesome!</string>
+
+    <string name="settings_notification_everyday">Every day · %1$s</string>
+    <string name="settings_notification_workdays">Workdays · %1$s</string>
+    <string name="settings_notification_custom">Custom · %1$s</string>
+
+    <string name="dialog_delete_confirm_word">DELETE</string>
+    <string name="steps_count">%1$,d steps</string>
+
 </resources>
