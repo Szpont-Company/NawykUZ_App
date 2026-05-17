@@ -18,11 +18,13 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_HEALTH" />
 
     <!-- Android 13+ ads-->
     <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
 
     <application
+
         android:name=".CheckApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -34,13 +36,18 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Check">
         <service
+                android:name=".data.steps.StepCounterService"
+                android:exported="false"
+                android:foregroundServiceType="health" />
+        <service
             android:name=".ui.map.LocationTrackingService"
             android:exported="false"
             android:foregroundServiceType="location" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.Check">
+            android:theme="@style/Theme.Check"
+            android:screenOrientation="nosensor">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -55,6 +62,29 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
+
+        <!-- widget-->
+        <receiver android:name="com.SzpontCompany.check.widgets.WidgetReceiver"
+            android:exported="true"
+            android:label="Streak Widget">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_info" />
+        </receiver>
+        <receiver android:name="com.SzpontCompany.check.widgets.StepsWidgetReceiver"
+            android:exported="true"
+            android:label="Steps Widget">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_steps" />
+        </receiver>
+
         <receiver
             android:name=".notifications.HabitReminderReceiver"
             android:exported="false" />
@@ -79,5 +109,6 @@
                 android:resource="@xml/file_paths" />
         </provider>
     </application>
+
 
 </manifest>

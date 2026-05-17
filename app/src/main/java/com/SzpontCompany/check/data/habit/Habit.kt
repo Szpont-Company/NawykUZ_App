@@ -1,5 +1,6 @@
 package com.SzpontCompany.check.data.habit
 
+import com.google.firebase.firestore.PropertyName
 import com.google.firebase.firestore.ServerTimestamp
 import java.util.Date
 
@@ -22,6 +23,10 @@ data class Habit(
 
     val battleId: String? = null,
     val opponentName: String? = null,
+
+    @get:PropertyName("isStepsHabit")
+    @PropertyName("isStepsHabit")
+    val isStepsHabit: Boolean = false,
 
     val streak: Int = 0,
     val monthlyCompletionRate: Int = 0,

@@ -17,6 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.SzpontCompany.check.ui.theme.CheckTheme
 import com.SzpontCompany.check.ui.theme.Mint
 import kotlin.math.roundToInt
@@ -37,6 +38,18 @@ fun StepGoalScreen(
 ) {
     var sliderPosition by remember(initialGoal) { mutableFloatStateOf(initialGoal.toFloat()) }
     val currentGoal = (sliderPosition / 100).roundToInt() * 100
+    val viewModel: StepGoalViewModel = viewModel()
+
+    val isSaving = viewModel.isSaving
+    val error = viewModel.error
+
+    var hasAttemptedSave by remember { mutableStateOf(false) }
+
+    LaunchedEffect(isSaving) {
+        if (hasAttemptedSave && !isSaving && error == null) {
+            onBackClick()
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -159,20 +172,26 @@ fun StepGoalScreen(
 
         OutlinedButton(
             onClick = {
+                hasAttemptedSave = true
+                viewModel.saveStepGoal(currentGoal)
                 onSaveGoal(currentGoal)
-                onBackClick()
             },
             modifier = Modifier.fillMaxWidth().height(64.dp),
             shape = RoundedCornerShape(16.dp),
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)),
-            colors = ButtonDefaults.outlinedButtonColors(containerColor = Color.Transparent)
+            colors = ButtonDefaults.outlinedButtonColors(containerColor = Color.Transparent),
+            enabled = !isSaving
         ) {
-            Text(
-                text = stringResource(R.string.step_goal_save_button),
-                color = MaterialTheme.colorScheme.onBackground,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 18.sp
-            )
+            if (isSaving) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp),
+                    strokeWidth = 2.dp
+                )
+            } else {
+                Text(stringResource(R.string.step_goal_save_button), color = MaterialTheme.colorScheme.onBackground,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 18.sp)
+            }
         }
 
         Spacer(modifier = Modifier.height(32.dp))

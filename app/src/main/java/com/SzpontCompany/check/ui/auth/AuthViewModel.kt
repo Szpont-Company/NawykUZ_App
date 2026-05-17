@@ -3,13 +3,18 @@ package com.SzpontCompany.check.ui.auth
 import android.app.Application
 import android.content.Context
 import android.util.Log
+import com.SzpontCompany.check.R
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.application
 import androidx.lifecycle.viewModelScope
+import com.SzpontCompany.check.data.habit.Habit
+import com.SzpontCompany.check.data.habit.HabitRepository
+import com.SzpontCompany.check.data.steps.StepRepository
 import com.SzpontCompany.check.data.user.UserRepository
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
@@ -35,6 +40,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
    private val auth by lazy { FirebaseAuth.getInstance() }
    val recaptcha = RecaptchaManager(application, viewModelScope)
    private val userRepository by lazy { UserRepository.getInstance(application.applicationContext) }
+   private val habitRepository by lazy { HabitRepository() }
 
     var email by mutableStateOf("")
         private set
@@ -250,6 +256,42 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
         } catch (e: Exception) {
             e.printStackTrace()
+            Result.failure(e)
+        }
+    }
+
+    suspend fun saveFirstHabit(dailySteps: Int, context: Context): Result<Unit> {
+        return try {
+            val uid = auth.currentUser?.uid
+                ?: return Result.failure(Exception("No user logged in"))
+
+            val safeGoal = dailySteps
+                .coerceAtLeast(1)
+                .coerceAtMost(100_000)
+
+            Firebase.firestore
+                .collection("users")
+                .document(uid)
+                .set(mapOf("stepGoal" to safeGoal), SetOptions.merge())
+                .await()
+
+            val stepHabit = Habit(
+                name = context.getString(R.string.habit_steps_name),
+                icon = "🚶",
+                colorName = "Mint",
+                frequency = "Daily",
+                dailyGoal = safeGoal,
+                unit = context.getString(R.string.habit_steps_unit),
+                difficulty = context.getString(R.string.habit_steps_difficulty),
+                isActive = true,
+                isStepsHabit = true
+            )
+
+            StepRepository(application.applicationContext).updateDailyGoal(safeGoal)
+            habitRepository.upsertStepsHabit(stepHabit)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error saving first habit: ${e.message}")
             Result.failure(e)
         }
     }

@@ -41,7 +41,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.SzpontCompany.check.R
 import com.SzpontCompany.check.data.habit.Habit
 import com.SzpontCompany.check.ui.community.components.NotificationsViewModel
-import com.SzpontCompany.check.ui.components.EmojiExplosionEffect
 import com.SzpontCompany.check.ui.components.UserAvatar
 import com.SzpontCompany.check.ui.profile.BadgeDetailsDialog
 import com.SzpontCompany.check.ui.profile.LevelUpDialog
@@ -55,6 +54,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.util.UUID
+import java.util.Locale
 
 data class ExplosionData(val id: Long, val emoji: String)
 
@@ -72,6 +72,9 @@ fun TodayScreen(
     val explosions = remember { mutableStateListOf<ExplosionData>() }
     val haptic = LocalHapticFeedback.current
     val coroutineScope = rememberCoroutineScope()
+
+    val stepsHabit = state.habits.find { it.isStepsHabit } ?: Habit(id = "test_steps", name = "Dzienne Kroki", isStepsHabit = true)
+    val regularHabits = state.habits.filter { !it.isStepsHabit }
 
     val user by viewModel.user.collectAsState()
 
@@ -136,6 +139,15 @@ fun TodayScreen(
                     )
                 }
                 Spacer(modifier = Modifier.height(16.dp))
+
+                stepsHabit?.let { habit ->
+                    StepsHabitCard(
+                        habit = habit,
+                        currentSteps = state.todaySteps,
+                        stepGoal = state.user?.stepGoal ?: 8000
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
             }
 
             if (state.habits.isEmpty() && !state.isLoading) {
@@ -154,7 +166,7 @@ fun TodayScreen(
                 }
             }
 
-            itemsIndexed(items = state.habits, key = { _, habit -> habit.id }) { index, habit ->
+            itemsIndexed(items = regularHabits, key = { _, habit -> habit.id }) { index, habit ->
                 HabitCard(
                     habit = habit,
                     onToggleDone = { isNowDone ->
@@ -179,7 +191,7 @@ fun TodayScreen(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
 
-                if ((index + 1) % 3 == 0 && index != state.habits.lastIndex) {
+                if ((index + 1) % 3 == 0 && index != regularHabits.lastIndex) {
                     NativeAdCard()
                     Spacer(modifier = Modifier.height(16.dp))
                 }
@@ -203,6 +215,86 @@ fun TodayScreen(
         }
     }
 }
+
+@Composable
+fun StepsHabitCard(
+    habit: Habit,
+    currentSteps: Int,
+    stepGoal: Int
+) {
+    val progress = (currentSteps.toFloat() / stepGoal.toFloat()).coerceIn(0f, 1f)
+    val animatedProgress by animateFloatAsState(targetValue = progress, label = "StepsProgress")
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+        )
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "👟", fontSize = 20.sp)
+                    }
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column {
+                        Text(
+                            text = habit.name,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                        Text(
+                            text = "Cel: $stepGoal kroków",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+                Column(horizontalAlignment = Alignment.End) {
+                    Text(
+                        text = currentSteps.toString(),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Black,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(10.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(animatedProgress)
+                        .fillMaxHeight()
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primary)
+                )
+            }
+        }
+    }
+}
+
 
 @Composable
 fun TopSection(
@@ -312,7 +404,7 @@ fun TopSection(
 @Composable
 fun HeroCard(currentStreak: Int, bestStreak: Int, weeklyProgress: List<Float>) {
     val multiplier = (1.0f + (currentStreak * 0.05f)).coerceIn(1.0f, 2.5f)
-    val multiplierText = String.format("%.2f", multiplier)
+    val multiplierText = String.format(Locale.US, "%.2f", multiplier)
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -696,7 +788,7 @@ fun HabitHeatmap(
     val completedDates = habit.completedDates.mapNotNull { dateString ->
         try {
             LocalDate.parse(dateString)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             null
         }
     }
@@ -801,7 +893,7 @@ fun NativeAdCard(modifier: Modifier = Modifier) {
                 factory = { ctx ->
                     val inflater = LayoutInflater.from(ctx)
                     val adView =
-                        inflater.inflate(R.layout.native_ad_habit_card, null) as NativeAdView
+                        inflater.inflate(R.layout.native_ad_habit_card, null, false) as NativeAdView
 
                     val headlineView = adView.findViewById<TextView>(R.id.ad_headline)
                     val bodyView = adView.findViewById<TextView>(R.id.ad_body)

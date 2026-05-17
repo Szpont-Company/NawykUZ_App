@@ -65,6 +65,7 @@ class UserRepository private constructor(
                         currentStreak = snapshot.getLong("currentStreak")?.toInt() ?: 0,
                         bestStreak = snapshot.getLong("bestStreak")?.toInt() ?: 0,
                         lastGlobalStreakDate = snapshot.getString("lastGlobalStreakDate") ?: "",
+                        stepGoal = snapshot.getLong("stepGoal")?.toInt() ?: 8000,
                         unlockedBadges = (snapshot.get("unlockedBadges") as? List<*>)?.mapNotNull { it as? String }
                             ?: emptyList(),
                         coins = snapshot.getLong("coins")?.toInt() ?: 0,
@@ -132,6 +133,9 @@ class UserRepository private constructor(
             currentStreak = document.getLong("currentStreak")?.toInt() ?: 0,
             bestStreak = document.getLong("bestStreak")?.toInt() ?: 0,
             lastGlobalStreakDate = document.getString("lastGlobalStreakDate") ?: "",
+
+            stepGoal = document.getLong("stepGoal")?.toInt() ?: 8000,
+
             unlockedBadges = (document.get("unlockedBadges") as? List<*>)?.mapNotNull { it as? String }
                 ?: emptyList(),
             coins = document.getLong("coins")?.toInt() ?: 0,
@@ -165,6 +169,10 @@ class UserRepository private constructor(
             "currentStreak" to 0,
             "bestStreak" to 0,
             "lastGlobalStreakDate" to "",
+
+            // default
+            "stepGoal" to 8000,
+
             "coins" to 0,
             "xp" to 0,
             "level" to 1,
@@ -187,6 +195,7 @@ class UserRepository private constructor(
             currentStreak = 0,
             bestStreak = 0,
             lastGlobalStreakDate = "",
+            stepGoal = 8000,
             coins = 0,
             xp = 0,
             level = 1
@@ -361,5 +370,13 @@ class UserRepository private constructor(
                 "level" to currentLevel
             )
         ).await()
+    }
+
+    suspend fun updateStepGoal(goal: Int) {
+        val user = auth.currentUser ?: throw Exception("Brak zalogowanego użytkownika")
+        val uid = user.uid
+        firestore.collection("users").document(uid)
+            .update("stepGoal", goal)
+            .await()
     }
 }
