@@ -5,16 +5,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.application
 import androidx.lifecycle.viewModelScope
 import com.SzpontCompany.check.data.habit.HabitRepository
 import com.SzpontCompany.check.data.steps.StepRepository
 import com.SzpontCompany.check.data.user.UserRepository
 import com.SzpontCompany.check.widgets.WidgetDataUpdater
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class StepGoalViewModel(application: Application) : AndroidViewModel(application) {
-    private val userRepo = UserRepository.getInstance(application.applicationContext)
+    private val context = application.applicationContext
+    private val userRepo = UserRepository.getInstance(context)
     private val habitRepo = HabitRepository()
 
     var isSaving by mutableStateOf(false)
@@ -22,17 +24,25 @@ class StepGoalViewModel(application: Application) : AndroidViewModel(application
     var error by mutableStateOf<String?>(null)
         private set
 
+    private val _saveSuccess = MutableStateFlow(false)
+    val saveSuccess = _saveSuccess.asStateFlow()
+
+    val userHabitsFlow = habitRepo.getUserHabits()
+
     fun saveStepGoal(goal: Int) = viewModelScope.launch {
         isSaving = true
         error = null
+        _saveSuccess.value = false
 
         try {
             val safeGoal = goal.coerceIn(1000, 100000)
 
             userRepo.updateStepGoal(safeGoal)
-            habitRepo.updateStepsGoal(safeGoal, application.applicationContext)
-            StepRepository(application.applicationContext).updateDailyGoal(safeGoal)
-            WidgetDataUpdater().updateStepsWidgetData(application.applicationContext)
+            habitRepo.updateStepsGoal(safeGoal, context)
+            StepRepository(context).updateDailyGoal(safeGoal)
+            WidgetDataUpdater().updateStepsWidgetData(context)
+
+            _saveSuccess.value = true
         } catch (e: Exception) {
             error = e.message
         } finally {

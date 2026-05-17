@@ -33,23 +33,34 @@ data class PopularGoal(val value: Int, val label: String)
 @Composable
 fun StepGoalScreen(
     onBackClick: () -> Unit = {},
-    initialGoal: Int = 8000,
     onSaveGoal: (Int) -> Unit = {}
 ) {
-    var sliderPosition by remember(initialGoal) { mutableFloatStateOf(initialGoal.toFloat()) }
-    val currentGoal = (sliderPosition / 100).roundToInt() * 100
     val viewModel: StepGoalViewModel = viewModel()
 
-    val isSaving = viewModel.isSaving
-    val error = viewModel.error
+    val habits by viewModel.userHabitsFlow.collectAsState(initial = emptyList())
+    val saveSuccess by viewModel.saveSuccess.collectAsState()
 
-    var hasAttemptedSave by remember { mutableStateOf(false) }
+    var sliderPosition by remember { mutableFloatStateOf(8000f) }
+    var isInitialized by remember { mutableStateOf(false) }
 
-    LaunchedEffect(isSaving) {
-        if (hasAttemptedSave && !isSaving && error == null) {
+    LaunchedEffect(habits) {
+        if (!isInitialized && habits.isNotEmpty()) {
+            val stepHabit = habits.find { it.isStepsHabit == true || it.id == "steps" }
+            if (stepHabit != null) {
+                sliderPosition = stepHabit.dailyGoal.toFloat().coerceIn(1000f, 20000f)
+            }
+            isInitialized = true
+        }
+    }
+
+    LaunchedEffect(saveSuccess) {
+        if (saveSuccess) {
             onBackClick()
         }
     }
+
+    val currentGoal = (sliderPosition / 100).roundToInt() * 100
+    val isSaving = viewModel.isSaving
 
     Column(
         modifier = Modifier
@@ -172,7 +183,6 @@ fun StepGoalScreen(
 
         OutlinedButton(
             onClick = {
-                hasAttemptedSave = true
                 viewModel.saveStepGoal(currentGoal)
                 onSaveGoal(currentGoal)
             },

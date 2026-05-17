@@ -1,8 +1,6 @@
 package com.SzpontCompany.check.ui.settings
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -37,10 +35,8 @@ fun SettingsNavHost(
             val viewModel: SettingsViewModel = viewModel(
                 factory = SettingsViewModelFactory(LocalContext.current.applicationContext)
             )
-            val currentGoal by viewModel.stepGoalState.collectAsState()
 
             StepGoalScreen(
-                initialGoal = currentGoal,
                 onSaveGoal = { newGoal ->
                     viewModel.updateStepGoal(newGoal)
                 },

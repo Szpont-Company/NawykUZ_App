@@ -52,6 +52,7 @@ class TodayViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             stepRepository.todayStepsFlow.collect { steps ->
                 _uiState.value = _uiState.value.copy(todaySteps = steps)
+                checkAutoCompletion()
             }
         }
     }
@@ -126,6 +127,27 @@ class TodayViewModel(application: Application) : AndroidViewModel(application) {
                 val progress = calculateWeeklyProgress(processedHabits)
                 val userWithProgress = _uiState.value.user?.copy(weeklyProgress = progress)
                 _uiState.value = _uiState.value.copy(habits = processedHabits, user = userWithProgress)
+
+                checkAutoCompletion()
+            }
+        }
+    }
+
+    private fun checkAutoCompletion() {
+        val state = _uiState.value
+        val todayString = LocalDate.now().toString()
+        val steps = state.todaySteps
+
+        val stepHabit = state.habits.find { it.isStepsHabit == true || it.id == "steps" }
+
+        if (stepHabit != null) {
+            val isDoneAlready = stepHabit.completedDates.contains(todayString)
+            val dailyGoal = stepHabit.dailyGoal
+
+            if (steps >= dailyGoal && !isDoneAlready) {
+                toggleHabitCompletion(stepHabit.id, true)
+            } else if (steps < dailyGoal && isDoneAlready) {
+                toggleHabitCompletion(stepHabit.id, false)
             }
         }
     }
@@ -180,12 +202,6 @@ class TodayViewModel(application: Application) : AndroidViewModel(application) {
 
                 if (updatedUser != null && currentUser != updatedUser) {
                     userRepo.updateUserStreaks(updatedUser.uid, updatedUser.currentStreak, updatedUser.bestStreak, updatedUser.lastGlobalStreakDate)
-                    userRepo.updateUserStreaks(
-                        updatedUser.uid,
-                        updatedUser.currentStreak,
-                        updatedUser.bestStreak,
-                        updatedUser.lastGlobalStreakDate
-                    )
 
                     val context = getApplication<Application>().applicationContext
                     updateHabitWidgetData(context, updatedUser.currentStreak, updatedUser.bestStreak)
@@ -213,6 +229,21 @@ class TodayViewModel(application: Application) : AndroidViewModel(application) {
         }
         _uiState.value = _uiState.value.copy(habits = updatedHabits)
         viewModelScope.launch { habitRepo.updateHabitDailyNote(habitId, dateString, newNote) }
+    }
+
+    fun deleteHabit(habitId: String) {
+        val habitToDelete = _uiState.value.habits.find { it.id == habitId }
+        if (habitToDelete?.isStepsHabit == true) {
+            return
+        }
+
+        viewModelScope.launch {
+            try {
+                habitRepo.deleteHabit(habitId)
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(errorMessage = "Błąd podczas usuwania: ${e.message}")
+            }
+        }
     }
 
     fun checkForNewBadges(user: User, battlesWon: Int) {

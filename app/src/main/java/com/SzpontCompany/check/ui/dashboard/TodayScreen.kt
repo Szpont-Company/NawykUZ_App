@@ -187,6 +187,9 @@ fun TodayScreen(
                     },
                     onSaveNote = { date, newNote ->
                         viewModel.updateHabitDailyNote(habit.id, date, newNote)
+                    },
+                    onDelete = {
+                        viewModel.deleteHabit(habit.id)
                     }
                 )
                 Spacer(modifier = Modifier.height(16.dp))
@@ -216,84 +219,7 @@ fun TodayScreen(
     }
 }
 
-@Composable
-fun StepsHabitCard(
-    habit: Habit,
-    currentSteps: Int,
-    stepGoal: Int
-) {
-    val progress = (currentSteps.toFloat() / stepGoal.toFloat()).coerceIn(0f, 1f)
-    val animatedProgress by animateFloatAsState(targetValue = progress, label = "StepsProgress")
 
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
-        )
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(text = "👟", fontSize = 20.sp)
-                    }
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Column {
-                        Text(
-                            text = habit.name,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onBackground
-                        )
-                        Text(
-                            text = "Cel: $stepGoal kroków",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-
-                Column(horizontalAlignment = Alignment.End) {
-                    Text(
-                        text = currentSteps.toString(),
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Black,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(10.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(animatedProgress)
-                        .fillMaxHeight()
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary)
-                )
-            }
-        }
-    }
-}
 
 
 @Composable
@@ -493,10 +419,12 @@ fun MiniBarChart(color: Color, weeklyProgress: List<Float>) {
 fun HabitCard(
     habit: Habit,
     onToggleDone: (Boolean) -> Unit,
-    onSaveNote: (String, String) -> Unit
+    onSaveNote: (String, String) -> Unit,
+    onDelete: () -> Unit = {}
 ) {
     var expanded by remember { mutableStateOf(false) }
     var editingNoteDate by remember { mutableStateOf<String?>(null) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
 
     val today = remember { LocalDate.now() }
     val todayString = remember { today.toString() }
@@ -718,7 +646,8 @@ fun HabitCard(
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Button(
                         onClick = {
@@ -756,6 +685,22 @@ fun HabitCard(
                     ) {
                         Text(if (todayNote.isNotEmpty()) "Edytuj notatkę" else "Notatka")
                     }
+
+                    IconButton(
+                        onClick = { showDeleteDialog = true },
+                        modifier = Modifier
+                            .size(48.dp)
+                            .background(
+                                MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f),
+                                RoundedCornerShape(12.dp)
+                            )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Usuń nawyk",
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                    }
                 }
             }
         }
@@ -769,6 +714,36 @@ fun HabitCard(
                     onSaveNote(date, newNote)
                     editingNoteDate = null
                 }
+            )
+        }
+
+        if (showDeleteDialog) {
+            AlertDialog(
+                onDismissRequest = { showDeleteDialog = false },
+                title = {
+                    Text(text = "Usuń nawyk", fontWeight = FontWeight.Bold)
+                },
+                text = {
+                    Text("Czy na pewno chcesz usunąć nawyk '${habit.name}'? Tej operacji nie można cofnąć.")
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            showDeleteDialog = false
+                            onDelete()
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                    ) {
+                        Text("Usuń")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showDeleteDialog = false }) {
+                        Text("Anuluj", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                },
+                shape = RoundedCornerShape(24.dp),
+                containerColor = MaterialTheme.colorScheme.surface
             )
         }
     }
