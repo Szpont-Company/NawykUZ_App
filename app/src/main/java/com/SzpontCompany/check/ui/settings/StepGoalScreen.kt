@@ -37,26 +37,22 @@ fun StepGoalScreen(
 ) {
     val viewModel: StepGoalViewModel = viewModel()
 
-    // Obserwacje ze zaktualizowanego ViewModelu
     val habits by viewModel.userHabitsFlow.collectAsState(initial = emptyList())
     val saveSuccess by viewModel.saveSuccess.collectAsState()
 
     var sliderPosition by remember { mutableFloatStateOf(8000f) }
     var isInitialized by remember { mutableStateOf(false) }
 
-    // Wczytanie aktualnego celu od użytkownika przy starcie widoku
     LaunchedEffect(habits) {
         if (!isInitialized && habits.isNotEmpty()) {
             val stepHabit = habits.find { it.isStepsHabit == true || it.id == "steps" }
             if (stepHabit != null) {
-                // Ustawiamy odczytaną wartość na suwak
                 sliderPosition = stepHabit.dailyGoal.toFloat().coerceIn(1000f, 20000f)
             }
             isInitialized = true
         }
     }
 
-    // Automatyczny powrót na poprzedni ekran TYLKO RAZ gdy zapis się powiedzie
     LaunchedEffect(saveSuccess) {
         if (saveSuccess) {
             onBackClick()

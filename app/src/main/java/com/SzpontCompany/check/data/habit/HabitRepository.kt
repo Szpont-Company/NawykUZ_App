@@ -32,10 +32,10 @@ class HabitRepository {
             val n = (name ?: "").lowercase(Locale.getDefault())
             val i = icon ?: ""
             return isStepsHabit == true ||
-                stepsHabit == true ||
-                i.contains("🚶") ||
-                n.contains("krok") ||
-                n.contains("step")
+                    stepsHabit == true ||
+                    i.contains("🚶") ||
+                    n.contains("krok") ||
+                    n.contains("step")
         }
 
         val stepDocs = documents.filter { doc ->
@@ -66,7 +66,6 @@ class HabitRepository {
             try {
                 targetDoc.reference.delete().await()
             } catch (_: Exception) {
-                // ignore
             }
 
             targetRef = habitsCol.document(habitId)
@@ -105,7 +104,6 @@ class HabitRepository {
                     try {
                         doc.reference.delete().await()
                     } catch (_: Exception) {
-                        // ignore
                     }
                 }
             }
@@ -118,6 +116,16 @@ class HabitRepository {
 
         docRef.set(habitWithId).await()
         return docRef.id
+    }
+
+    suspend fun deleteHabit(habitId: String) {
+        val uid = auth.currentUser?.uid ?: throw Exception("Brak zalogowanego użytkownika")
+        firestore.collection("users")
+            .document(uid)
+            .collection("habits")
+            .document(habitId)
+            .delete()
+            .await()
     }
 
     fun getUserHabits(): Flow<List<Habit>> = callbackFlow {

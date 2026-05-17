@@ -187,6 +187,9 @@ fun TodayScreen(
                     },
                     onSaveNote = { date, newNote ->
                         viewModel.updateHabitDailyNote(habit.id, date, newNote)
+                    },
+                    onDelete = {
+                        viewModel.deleteHabit(habit.id)
                     }
                 )
                 Spacer(modifier = Modifier.height(16.dp))
@@ -416,10 +419,12 @@ fun MiniBarChart(color: Color, weeklyProgress: List<Float>) {
 fun HabitCard(
     habit: Habit,
     onToggleDone: (Boolean) -> Unit,
-    onSaveNote: (String, String) -> Unit
+    onSaveNote: (String, String) -> Unit,
+    onDelete: () -> Unit = {}
 ) {
     var expanded by remember { mutableStateOf(false) }
     var editingNoteDate by remember { mutableStateOf<String?>(null) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
 
     val today = remember { LocalDate.now() }
     val todayString = remember { today.toString() }
@@ -641,7 +646,8 @@ fun HabitCard(
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Button(
                         onClick = {
@@ -679,6 +685,22 @@ fun HabitCard(
                     ) {
                         Text(if (todayNote.isNotEmpty()) "Edytuj notatkę" else "Notatka")
                     }
+
+                    IconButton(
+                        onClick = { showDeleteDialog = true },
+                        modifier = Modifier
+                            .size(48.dp)
+                            .background(
+                                MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f),
+                                RoundedCornerShape(12.dp)
+                            )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Usuń nawyk",
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                    }
                 }
             }
         }
@@ -692,6 +714,36 @@ fun HabitCard(
                     onSaveNote(date, newNote)
                     editingNoteDate = null
                 }
+            )
+        }
+
+        if (showDeleteDialog) {
+            AlertDialog(
+                onDismissRequest = { showDeleteDialog = false },
+                title = {
+                    Text(text = "Usuń nawyk", fontWeight = FontWeight.Bold)
+                },
+                text = {
+                    Text("Czy na pewno chcesz usunąć nawyk '${habit.name}'? Tej operacji nie można cofnąć.")
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            showDeleteDialog = false
+                            onDelete()
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                    ) {
+                        Text("Usuń")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showDeleteDialog = false }) {
+                        Text("Anuluj", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                },
+                shape = RoundedCornerShape(24.dp),
+                containerColor = MaterialTheme.colorScheme.surface
             )
         }
     }

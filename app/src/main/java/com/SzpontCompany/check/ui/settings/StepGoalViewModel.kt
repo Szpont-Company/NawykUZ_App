@@ -24,11 +24,9 @@ class StepGoalViewModel(application: Application) : AndroidViewModel(application
     var error by mutableStateOf<String?>(null)
         private set
 
-    // Status pomyślnego zapisu, aby cofnąć użytkownika na poprzedni ekran
     private val _saveSuccess = MutableStateFlow(false)
     val saveSuccess = _saveSuccess.asStateFlow()
 
-    // Pozwala na pobranie obecnego celu z bazy nawyków
     val userHabitsFlow = habitRepo.getUserHabits()
 
     fun saveStepGoal(goal: Int) = viewModelScope.launch {
@@ -39,7 +37,6 @@ class StepGoalViewModel(application: Application) : AndroidViewModel(application
         try {
             val safeGoal = goal.coerceIn(1000, 100000)
 
-            // Aktualizacja wszędzie tam, gdzie aplikacja polega na celu kroków
             userRepo.updateStepGoal(safeGoal)
             habitRepo.updateStepsGoal(safeGoal, context)
             StepRepository(context).updateDailyGoal(safeGoal)

@@ -145,10 +145,8 @@ class TodayViewModel(application: Application) : AndroidViewModel(application) {
             val dailyGoal = stepHabit.dailyGoal
 
             if (steps >= dailyGoal && !isDoneAlready) {
-                // Zalicza nawyk, jeśli cel został osiągnięty
                 toggleHabitCompletion(stepHabit.id, true)
             } else if (steps < dailyGoal && isDoneAlready) {
-                // Odznacza nawyk, jeśli użytkownik zmienił (podniósł) cel i obecne kroki już nie wystarczają
                 toggleHabitCompletion(stepHabit.id, false)
             }
         }
@@ -231,6 +229,21 @@ class TodayViewModel(application: Application) : AndroidViewModel(application) {
         }
         _uiState.value = _uiState.value.copy(habits = updatedHabits)
         viewModelScope.launch { habitRepo.updateHabitDailyNote(habitId, dateString, newNote) }
+    }
+
+    fun deleteHabit(habitId: String) {
+        val habitToDelete = _uiState.value.habits.find { it.id == habitId }
+        if (habitToDelete?.isStepsHabit == true) {
+            return
+        }
+
+        viewModelScope.launch {
+            try {
+                habitRepo.deleteHabit(habitId)
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(errorMessage = "Błąd podczas usuwania: ${e.message}")
+            }
+        }
     }
 
     fun checkForNewBadges(user: User, battlesWon: Int) {

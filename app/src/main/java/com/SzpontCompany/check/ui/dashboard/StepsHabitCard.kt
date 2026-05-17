@@ -30,16 +30,13 @@ fun StepsHabitCard(
     val isCompleted = currentSteps >= safeGoal
     val progress = (currentSteps.toFloat() / safeGoal.toFloat()).coerceIn(0f, 1f)
 
-    // Płynna animacja paska postępu
     val animatedProgress by animateFloatAsState(targetValue = progress, label = "StepsProgress")
 
-    // Animacja koloru tła - gdy zaliczone, karta staje się wyróżniona
     val backgroundColor by animateColorAsState(
         targetValue = if (isCompleted) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
         label = "CardBackgroundColor"
     )
 
-    // Animacja koloru paska postępu - bardziej intensywny kolor po ukończeniu
     val progressBarColor by animateColorAsState(
         targetValue = if (isCompleted) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
         label = "ProgressBarColor"
@@ -51,9 +48,7 @@ fun StepsHabitCard(
             .padding(vertical = 8.dp),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = backgroundColor),
-        // Dodajemy ładną obramówkę, gdy cel jest zaliczony
         border = if (isCompleted) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
-        // Uniesienie karty (cień) dodające głębi
         elevation = CardDefaults.cardElevation(defaultElevation = if (isCompleted) 4.dp else 0.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -82,7 +77,6 @@ fun StepsHabitCard(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Pasek postępu
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -102,7 +96,6 @@ fun StepsHabitCard(
                 )
             }
 
-            // Wiadomość o ukończeniu z ikonką
             if (isCompleted) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
