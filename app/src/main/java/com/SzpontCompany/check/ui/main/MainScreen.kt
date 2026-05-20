@@ -18,9 +18,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.SzpontCompany.check.R
 import com.SzpontCompany.check.ui.addhabit.AddHabitHost
 import com.SzpontCompany.check.data.social.Friend
 import com.SzpontCompany.check.data.social.Battle
@@ -154,14 +156,14 @@ fun CheckBottomNavigationBar(
             selected = currentTab == BottomTab.TODAY,
             onClick = { onTabSelected(BottomTab.TODAY) },
             icon = { Icon(Icons.Default.Home, contentDescription = null) },
-            label = { Text("Dziś") },
+            label = { Text(stringResource(R.string.nav_today)) },
             colors = navItemColors
         )
         NavigationBarItem(
             selected = currentTab == BottomTab.STATS,
             onClick = { onTabSelected(BottomTab.STATS) },
             icon = { Icon(Icons.Default.BarChart, contentDescription = null) },
-            label = { Text("Statystyki") },
+            label = { Text(stringResource(R.string.nav_stats)) },
             colors = navItemColors
         )
 
@@ -178,13 +180,13 @@ fun CheckBottomNavigationBar(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
-                        contentDescription = "Dodaj",
+                        contentDescription = stringResource(R.string.nav_add),
                         tint = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier.size(24.dp)
                     )
                 }
             },
-            label = { Text("Dodaj") },
+            label = { Text(stringResource(R.string.nav_add)) },
             colors = NavigationBarItemDefaults.colors(
                 indicatorColor = Color.Transparent
             )
@@ -194,7 +196,7 @@ fun CheckBottomNavigationBar(
             selected = currentTab == BottomTab.MAP,
             onClick = { onTabSelected(BottomTab.MAP) },
             icon = { Icon(Icons.Default.Map, contentDescription = null) },
-            label = { Text("Mapa") },
+            label = { Text(stringResource(R.string.nav_map)) },
             colors = navItemColors
         )
         NavigationBarItem(
@@ -212,7 +214,7 @@ fun CheckBottomNavigationBar(
                     Icon(Icons.Default.People, contentDescription = null)
                 }
             },
-            label = { Text("Społeczność") },
+            label = { Text(stringResource(R.string.nav_community)) },
             colors = navItemColors
         )
     }

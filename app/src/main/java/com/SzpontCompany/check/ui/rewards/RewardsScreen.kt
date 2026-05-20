@@ -335,7 +335,7 @@ fun StoreItem(emoji: String, title: String, subtitle: String, price: String, typ
         Spacer(modifier = Modifier.width(16.dp))
 
         Column(modifier = Modifier.weight(1f)) {
-            Text(text = title, color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.Medium)
+            Text(text = title, color = MaterialTheme.colorScheme.onSurface, fontSize = 15.sp, fontWeight = FontWeight.Medium)
             Text(text = subtitle, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp)
         }
 
@@ -350,7 +350,7 @@ fun StoreItem(emoji: String, title: String, subtitle: String, price: String, typ
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color.Transparent,
-                contentColor = Color.White
+                contentColor = MaterialTheme.colorScheme.primary
             ),
             modifier = Modifier
         ) {

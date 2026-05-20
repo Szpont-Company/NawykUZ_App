@@ -73,7 +73,9 @@ fun TodayScreen(
     val haptic = LocalHapticFeedback.current
     val coroutineScope = rememberCoroutineScope()
 
-    val stepsHabit = state.habits.find { it.isStepsHabit } ?: Habit(id = "test_steps", name = "Dzienne Kroki", isStepsHabit = true)
+    val stepsHabit = state.habits.find { it.isStepsHabit } ?: Habit(id = "test_steps", name = stringResource(
+        R.string.steps_daily_name
+    ), isStepsHabit = true)
     val regularHabits = state.habits.filter { !it.isStepsHabit }
 
     val user by viewModel.user.collectAsState()
@@ -128,12 +130,12 @@ fun TodayScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        "Twoje nawyki (${state.habits.size})",
+                        stringResource(R.string.dashboard_habits, state.habits.size),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onBackground
                     )
                     Text(
-                        "Zobacz wszystkie",
+                        stringResource(R.string.dashboard_show_all),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -159,7 +161,7 @@ fun TodayScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "Brak aktywnych nawyków. Dodaj coś!",
+                            text = stringResource(R.string.dashboard_no_habits),
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
@@ -296,7 +298,7 @@ fun TopSection(
             ) {
                 Icon(
                     imageVector = Icons.Outlined.Notifications,
-                    contentDescription = "Powiadomienia",
+                    contentDescription = stringResource(R.string.dashboard_notifications),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
@@ -320,7 +322,7 @@ fun TopSection(
             ) {
                 Icon(
                     imageVector = Icons.Outlined.Settings,
-                    contentDescription = "Ustawienia",
+                    contentDescription = stringResource(R.string.dashboard_settings),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
@@ -345,9 +347,9 @@ fun HeroCard(currentStreak: Int, bestStreak: Int, weeklyProgress: List<Float>) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column {
-                Text("Aktualny streak", color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f), fontSize = 14.sp)
+                Text(stringResource(R.string.dashboard_current_streak), color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f), fontSize = 14.sp)
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("$currentStreak dni", color = MaterialTheme.colorScheme.onPrimary, fontSize = 32.sp, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.dashboard_days, currentStreak), color = MaterialTheme.colorScheme.onPrimary, fontSize = 32.sp, fontWeight = FontWeight.Bold)
 
                     if (multiplier > 1.0f) {
                         Spacer(modifier = Modifier.width(12.dp))
@@ -367,7 +369,7 @@ fun HeroCard(currentStreak: Int, bestStreak: Int, weeklyProgress: List<Float>) {
                 }
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    "Rekord: $bestStreak dni",
+                    stringResource(R.string.dashboard_days, bestStreak),
                     color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
                     fontSize = 12.sp
                 )
@@ -430,6 +432,7 @@ fun HabitCard(
     val todayString = remember { today.toString() }
     val isDoneToday = habit.completedDates.contains(todayString)
     val todayNote = habit.dailyNotes[todayString] ?: ""
+    val context = LocalContext.current
 
     val expectedDatesInLast30 = remember(habit, today) {
         val last30Dates = (0..29).map { today.minusDays(it.toLong()) }
@@ -439,16 +442,8 @@ fun HabitCard(
                 last30Dates.filter { date ->
                     val dayNameEn = date.dayOfWeek.name
                     val dayNameShortPl =
-                        listOf("Pn", "Wt", "Śr", "Cz", "Pt", "So", "Nd")[date.dayOfWeek.value - 1]
-                    val dayNameLongPl = listOf(
-                        "poniedziałek",
-                        "wtorek",
-                        "środa",
-                        "czwartek",
-                        "piątek",
-                        "sobota",
-                        "niedziela"
-                    )[date.dayOfWeek.value - 1]
+                        context.resources.getStringArray(R.array.days_of_week_short).toList()[date.dayOfWeek.value - 1]
+                    val dayNameLongPl = context.resources.getStringArray(R.array.days_of_week).toList()[date.dayOfWeek.value - 1]
                     val dayValueStr = date.dayOfWeek.value.toString()
 
                     habit.selectedDays.any { selectedDay ->
@@ -554,7 +549,10 @@ fun HabitCard(
                             Text(text = "⚔️", fontSize = 12.sp)
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
-                                text = "Bitwa z: ${habit.opponentName ?: "Nieznajomy"}",
+                                text = stringResource(
+                                    R.string.dashboard_battle_with,
+                                    habit.opponentName ?: stringResource(R.string.battle_stranger)
+                                ),
                                 color = MaterialTheme.colorScheme.onErrorContainer,
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold
@@ -578,7 +576,7 @@ fun HabitCard(
                     if (isDoneToday) {
                         Icon(
                             Icons.Default.CheckCircle,
-                            contentDescription = "Zrobione",
+                            contentDescription = stringResource(R.string.dashboard_done),
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(26.dp)
                         )
@@ -606,7 +604,7 @@ fun HabitCard(
                 IconButton(onClick = { expanded = !expanded }, modifier = Modifier.size(32.dp)) {
                     Icon(
                         imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                        contentDescription = "Rozwiń/Zwiń",
+                        contentDescription = stringResource(R.string.habit_resize),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
@@ -622,7 +620,7 @@ fun HabitCard(
                     StatBox(
                         modifier = Modifier.weight(1f),
                         value = habit.dailyGoal.toString(),
-                        label = habit.unit.ifEmpty { "Cel" })
+                        label = habit.unit.ifEmpty { stringResource(R.string.dashboard_goal) })
                     StatBox(
                         modifier = Modifier.weight(1f),
                         value = habit.streak.toString(),
@@ -631,7 +629,7 @@ fun HabitCard(
                     StatBox(
                         modifier = Modifier.weight(1f),
                         value = "${monthlyPercentage}%",
-                        label = "30 dni"
+                        label = stringResource(R.string.dashboard_30days)
                     )
                 }
 
@@ -669,7 +667,9 @@ fun HabitCard(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            if (isDoneToday) "Zrobione" else "Zaznacz",
+                            if (isDoneToday) stringResource(R.string.habit_done) else stringResource(
+                                R.string.habit_check
+                            ),
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -683,7 +683,9 @@ fun HabitCard(
                         shape = RoundedCornerShape(12.dp),
                         border = null
                     ) {
-                        Text(if (todayNote.isNotEmpty()) "Edytuj notatkę" else "Notatka")
+                        Text(if (todayNote.isNotEmpty()) stringResource(R.string.habit_edit_note) else stringResource(
+                            R.string.habit_note
+                        ))
                     }
 
                     IconButton(
@@ -697,7 +699,7 @@ fun HabitCard(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Delete,
-                            contentDescription = "Usuń nawyk",
+                            contentDescription = stringResource(R.string.habit_remove),
                             tint = MaterialTheme.colorScheme.error
                         )
                     }
@@ -721,10 +723,10 @@ fun HabitCard(
             AlertDialog(
                 onDismissRequest = { showDeleteDialog = false },
                 title = {
-                    Text(text = "Usuń nawyk", fontWeight = FontWeight.Bold)
+                    Text(text = stringResource(R.string.habit_remove), fontWeight = FontWeight.Bold)
                 },
                 text = {
-                    Text("Czy na pewno chcesz usunąć nawyk '${habit.name}'? Tej operacji nie można cofnąć.")
+                    Text(stringResource(R.string.habit_removal_confirm, habit.name))
                 },
                 confirmButton = {
                     Button(
@@ -734,12 +736,12 @@ fun HabitCard(
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
                     ) {
-                        Text("Usuń")
+                        Text(stringResource(R.string.habit_delete))
                     }
                 },
                 dismissButton = {
                     TextButton(onClick = { showDeleteDialog = false }) {
-                        Text("Anuluj", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(stringResource(R.string.habit_cancel), color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 },
                 shape = RoundedCornerShape(24.dp),
@@ -756,7 +758,10 @@ fun HabitHeatmap(
 ) {
     val primaryColor = MaterialTheme.colorScheme.primary
     val bgColor = MaterialTheme.colorScheme.background
-    val daysOfWeek = listOf("Pn", "Wt", "Śr", "Cz", "Pt", "So", "Nd")
+    val context = LocalContext.current
+    val daysOfWeek = remember {
+        context.resources.getStringArray(R.array.days_of_week_short).toList()
+    }
 
     val today = LocalDate.now()
 
@@ -977,7 +982,9 @@ fun HabitNoteDialog(
         containerColor = MaterialTheme.colorScheme.surface,
         title = {
             Text(
-                text = if (isPast) "Podgląd notatki ($dateString)" else "Notatka ($dateString)",
+                text = if (isPast) stringResource(R.string.habit_note_preview, dateString) else stringResource(
+                    R.string.habit_note_date, dateString
+                ),
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
             )
@@ -990,7 +997,7 @@ fun HabitNoteDialog(
                     .fillMaxWidth()
                     .height(140.dp),
                 readOnly = isPast,
-                placeholder = { Text("Zapisz swoje przemyślenia, przeszkody lub sukcesy z tego dnia...") },
+                placeholder = { Text(stringResource(R.string.habit_placeholder)) },
                 shape = RoundedCornerShape(16.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = MaterialTheme.colorScheme.primary,
@@ -1005,7 +1012,7 @@ fun HabitNoteDialog(
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                 ) {
-                    Text("Zapisz", fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.habit_save), fontWeight = FontWeight.Bold)
                 }
             } else {
                 Button(
@@ -1013,14 +1020,14 @@ fun HabitNoteDialog(
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                 ) {
-                    Text("Zamknij", fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.habit_close), fontWeight = FontWeight.Bold)
                 }
             }
         },
         dismissButton = {
             if (!isPast) {
                 TextButton(onClick = onDismiss) {
-                    Text("Anuluj", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(stringResource(R.string.habit_cancel), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         }

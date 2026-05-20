@@ -571,4 +571,57 @@
     <string name="settings_notification_custom">Niestandardowe · %1$s</string>
     <string name="steps_count">%1$,d kroków</string>
     <string name="dialog_delete_confirm_word">USUŃ</string>
+    <string name="dashboard_habits">Twoje nawyki (%1$d)</string>
+    <string name="dashboard_show_all">Zobacz wszystkie</string>
+    <string name="dashboard_no_habits">Brak aktywnych nawyków. Dodaj coś!</string>
+    <string name="dashboard_notifications">Powiadomienia</string>
+    <string name="dashboard_settings">Ustawienia</string>
+    <string name="dashboard_current_streak">Aktualny streak</string>
+    <string name="dashboard_days">%1$d dni</string>
+    <string name="dashboard_battle_with">Bitwa z: %1$s</string>
+    <string name="dashboard_done">Zrobione</string>
+    <string name="dashboard_goal">Cel</string>
+    <string name="dashboard_30days">30 dni</string>
+    <string name="habit_done">Zrobione</string>
+    <string name="habit_check">Zaznacz</string>
+    <string name="habit_edit_note">Edytuj notatkę</string>
+    <string name="habit_note">Notatka</string>
+    <string name="habit_remove">Usuń nawyk</string>
+    <string name="habit_removal_confirm">Czy na pewno chcesz usunąć nawyk \'%1$s\'? Tej operacji nie można cofnąć.</string>
+    <string name="habit_delete">Usuń</string>
+    <string name="habit_cancel">Anuluj</string>
+    <string name="habit_placeholder">Zapisz swoje przemyślenia, przeszkody lub sukcesy z tego dnia...</string>
+    <string name="habit_note_preview">Podgląd notatki (%1$s)</string>
+    <string name="habit_note_date">Notatka (%1$s)</string>
+    <string name="habit_save">Zapisz</string>
+    <string name="habit_close">Zamknij</string>
+    <string name="steps_accomplished">Zaliczono</string>
+    <string name="steps_goal_reached">Cel osiągnięty! 🎉</string>
+    <string name="steps_daily_name">Dzienne Kroki</string>
+    <string name="battle_stranger">Nieznajomy</string>
+    <string name="habit_resize">Rozwiń/Zwiń</string>
+    <string name="nav_today">Dziś</string>
+    <string name="nav_stats">Statystyki</string>
+    <string name="nav_add">Dodaj</string>
+    <string name="nav_map">Mapa</string>
+    <string name="nav_community">Społeczność</string>
+    <string name="ad_ad">Reklama</string>
+    <string-array name="days_of_week_short">
+        <item>Pn</item>
+        <item>Wt</item>
+        <item>Śr</item>
+        <item>Cz</item>
+        <item>Pt</item>
+        <item>So</item>
+        <item>Nd</item>
+    </string-array>
+    <string-array name="days_of_week">
+        <item>Poniedziałek</item>
+        <item>Wtorek</item>
+        <item>Środa</item>
+        <item>Czwartek</item>
+        <item>Piątek</item>
+        <item>Sobota</item>
+        <item>Niedziela</item>
+    </string-array>
 </resources>
