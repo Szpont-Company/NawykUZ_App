@@ -42,7 +42,7 @@ fun AddHabitStep2(
 ) {
     // STAN: Przechowuje angielskie klucze bazy danych
     var frequencyKey by remember { mutableStateOf("DAILY") }
-    var selectedDays by remember { mutableStateOf(setOf("1", "3", "5")) } // Przechowujemy id dnia (1-7)
+    var selectedDays by remember { mutableStateOf(setOf("1", "3", "5")) }
     var timesPerWeek by remember { mutableStateOf(3) }
     var dailyGoal by remember { mutableStateOf(30) }
     var selectedUnitKey by remember { mutableStateOf("MINUTES") }
@@ -55,7 +55,7 @@ fun AddHabitStep2(
         label = "progress_anim"
     )
     LaunchedEffect(Unit) {
-        progress = 0.5f // 50% dla kroku 2
+        progress = 0.5f
     }
 
     // --- SŁOWNIKI (Mapowanie klucza bazy na wyświetlany tekst) ---
@@ -261,9 +261,15 @@ fun AddHabitStep2(
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
         Button(
-            onClick = { onNextClick(frequencyKey, selectedDays, timesPerWeek, dailyGoal, selectedUnitKey) },
+            onClick = {
+                val daysToSave = if (frequencyKey == "DAILY") {
+                    setOf("1", "2", "3", "4", "5", "6", "7")
+                } else {
+                    selectedDays
+                }
+                onNextClick(frequencyKey, daysToSave, timesPerWeek, dailyGoal, selectedUnitKey)
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),

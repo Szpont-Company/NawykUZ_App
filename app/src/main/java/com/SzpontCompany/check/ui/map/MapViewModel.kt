@@ -12,7 +12,6 @@ import com.google.android.gms.maps.model.LatLng
 import com.SzpontCompany.check.BuildConfig
 import com.SzpontCompany.check.data.map.FriendLocation
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
@@ -143,35 +142,57 @@ class MapViewModel(application: Application) : AndroidViewModel(application) {
     private fun observeFriendsLocations() {
         val currentUserId = auth.currentUser?.uid ?: return
 
-        firestore.collection("users")
-            .addSnapshotListener { usersSnapshot, usersError ->
-                if (usersError != null || usersSnapshot == null) {
+        val friendListeners = mutableMapOf<String, com.google.firebase.firestore.ListenerRegistration>()
+        val friendsLocData = mutableMapOf<String, FriendLocation>()
+
+        fun emitLocations() {
+            _friendsLocations.value = friendsLocData.values.toList()
+        }
+
+        firestore.collection("users").document(currentUserId).collection("friends")
+            .addSnapshotListener { friendsSnapshot, friendsError ->
+                if (friendsError != null || friendsSnapshot == null) {
                     return@addSnapshotListener
                 }
 
-                val locations = usersSnapshot.documents.mapNotNull { doc ->
-                    if (doc.id == currentUserId) return@mapNotNull null
+                val currentFriendIds = friendsSnapshot.documents.map { it.id }
 
-                    val lat = doc.getDouble("latitude")
-                    val lng = doc.getDouble("longitude")
-                    val lastSeen = doc.getLong("lastSeenMillis")
-
-                    val showLocation = doc.getBoolean("showLocation") ?: true
-
-                    if (lat != null && lng != null && lastSeen != null && showLocation) {
-                        FriendLocation(
-                            id = doc.id,
-                            name = doc.getString("name") ?: "Nieznany",
-                            emoji = doc.getString("avatarEmoji") ?: "👤",
-                            bgColorName = doc.getString("bgColor") ?: "Mint",
-                            latitude = lat,
-                            longitude = lng,
-                            lastSeenMillis = lastSeen
-                        )
-                    } else null
+                val removedIds = friendListeners.keys - currentFriendIds.toSet()
+                removedIds.forEach { id ->
+                    friendListeners.remove(id)?.remove()
+                    friendsLocData.remove(id)
                 }
 
-                _friendsLocations.value = locations
+                currentFriendIds.forEach { friendId ->
+                    if (!friendListeners.containsKey(friendId)) {
+                        val listener = firestore.collection("users").document(friendId)
+                            .addSnapshotListener { userDoc, userError ->
+                                if (userError == null && userDoc != null && userDoc.exists()) {
+                                    val showLocation = userDoc.getBoolean("showLocation") ?: true
+                                    val lat = userDoc.getDouble("latitude")
+                                    val lng = userDoc.getDouble("longitude")
+                                    val lastSeen = userDoc.getLong("lastSeenMillis")
+
+                                    if (lat != null && lng != null && lastSeen != null && showLocation) {
+                                        friendsLocData[friendId] = FriendLocation(
+                                            id = friendId,
+                                            name = userDoc.getString("name") ?: "Nieznany",
+                                            emoji = userDoc.getString("avatarEmoji") ?: "👤",
+                                            bgColorName = userDoc.getString("bgColor") ?: "Mint",
+                                            latitude = lat,
+                                            longitude = lng,
+                                            lastSeenMillis = lastSeen
+                                        )
+                                    } else {
+                                        friendsLocData.remove(friendId)
+                                    }
+                                    emitLocations()
+                                }
+                            }
+                        friendListeners[friendId] = listener
+                    }
+                }
+                emitLocations()
             }
     }
 
