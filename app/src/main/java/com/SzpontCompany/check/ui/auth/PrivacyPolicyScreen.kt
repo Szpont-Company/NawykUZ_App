@@ -24,11 +24,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.unit.dp
 import com.SzpontCompany.check.R
 import com.SzpontCompany.check.util.loadLocalizedPolicy
 import com.halilibo.richtext.markdown.Markdown
+import com.halilibo.richtext.ui.RichTextStyle
 import com.halilibo.richtext.ui.material3.Material3RichText
+import com.halilibo.richtext.ui.string.RichTextStringStyle
 
 @Composable
 fun PrivacyPolicyScreen(
@@ -86,9 +89,15 @@ fun PrivacyPolicyScreen(
                 color = MaterialTheme.colorScheme.onBackground
             )
         ) {
-
-            Material3RichText {
-
+            Material3RichText(
+                style = RichTextStyle(
+                    stringStyle = RichTextStringStyle(
+                        linkStyle = SpanStyle(
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    )
+                )
+            ) {
                 Markdown(markdown)
             }
         }
