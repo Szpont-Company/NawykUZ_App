@@ -79,7 +79,8 @@ fun LoginScreen(
     onLoginSuccess: () -> Unit,
     onRegisterSuccess: () -> Unit,
     onForgotPasswordClick: () -> Unit,
-
+    onTosClick: () -> Unit,
+    onPrivacyClick: () -> Unit
 ) {
 
     val context = LocalContext.current
@@ -233,7 +234,9 @@ fun LoginScreen(
                         validateCredentials = {viewModel.validateCredentials()},
                         loginErrorMessage = loginError,
                         isLoading = isLoggingIn,
-                        isGoogleLoading = isGoogleLoading
+                        isGoogleLoading = isGoogleLoading,
+                        onTosClick = onTosClick,
+                        onPrivacyClick = onPrivacyClick
                     )
 
                     1 -> RegisterForm(
@@ -270,7 +273,9 @@ fun LoginScreen(
                         },
                         validateCredentials = {viewModel.validateCredentials()},
                         isLoading = isRegistering,
-                        isGoogleLoading = isGoogleLoading
+                        isGoogleLoading = isGoogleLoading,
+                        onTosClick = onTosClick,
+                        onPrivacyClick = onPrivacyClick
                     )
                 }
             }

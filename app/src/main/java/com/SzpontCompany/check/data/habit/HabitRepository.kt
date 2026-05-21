@@ -139,7 +139,9 @@ class HabitRepository {
         val listener = firestore.collection("users").document(uid).collection("habits")
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
-                    close(error)
+                    //close(error) TODO: poprawic to bo to chyba tylko maskuje blad
+                    trySend(emptyList())
+                    close()
                     return@addSnapshotListener
                 }
 

@@ -70,7 +70,11 @@ fun AddHabitStep1(
                     .size(40.dp)
                     .clip(RoundedCornerShape(12.dp))
                     .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-                    .border(width = 1.dp, color = MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(12.dp))
+                    .border(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        RoundedCornerShape(12.dp)
+                    )
                     .clickable { onBackClick() },
                 contentAlignment = Alignment.Center
             ) {
@@ -146,7 +150,11 @@ fun AddHabitStep1(
                         modifier = Modifier
                             .size(50.dp)
                             .clip(RoundedCornerShape(16.dp))
-                            .background(if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                            .background(
+                                if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f) else MaterialTheme.colorScheme.surfaceVariant.copy(
+                                    alpha = 0.5f
+                                )
+                            )
                             .border(
                                 width = if (isSelected) 2.dp else 1.dp,
                                 color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
@@ -189,7 +197,11 @@ fun AddHabitStep1(
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .border(width = 1.dp, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f), shape = RoundedCornerShape(20.dp)),
+                    .border(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
+                        shape = RoundedCornerShape(20.dp)
+                    ),
                 shape = RoundedCornerShape(20.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
             ) {
@@ -217,7 +229,7 @@ fun AddHabitStep1(
                         )
                         Text(
                             // Przykładowy tekst podglądu – tu zostawiłem statyczny dla efektu wizualnego
-                            text = "Cel: 30 min • codziennie",
+                            text = stringResource(R.string.add_habit_preview),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

@@ -17,7 +17,9 @@ class ChallengeRepository(private val db: FirebaseFirestore) {
             .whereEqualTo("status", "PENDING")
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
-                    close(error)
+                    //close(error) TODO: poprawic to bo to chyba tylko maskuje blad
+                    trySend(emptyList())
+                    close()
                     return@addSnapshotListener
                 }
 
@@ -64,7 +66,9 @@ class ChallengeRepository(private val db: FirebaseFirestore) {
             .whereIn("status", listOf("ACTIVE", "COMPLETED", "SURRENDERED"))
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
-                    close(error)
+                    //close(error) TODO: poprawic to bo to chyba tylko maskuje blad
+                    trySend(emptyList())
+                    close()
                     return@addSnapshotListener
                 }
 

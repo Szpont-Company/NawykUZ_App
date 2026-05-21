@@ -14,9 +14,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.SzpontCompany.check.R
 import com.SzpontCompany.check.data.habit.Habit
 
 @Composable
@@ -103,13 +105,13 @@ fun StepsHabitCard(
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.CheckCircle,
-                        contentDescription = "Zaliczono",
+                        contentDescription = stringResource(R.string.steps_accomplished),
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = "Cel osiągnięty! 🎉",
+                        text = stringResource(R.string.steps_goal_reached),
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary

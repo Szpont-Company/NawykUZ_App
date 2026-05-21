@@ -43,7 +43,7 @@
                     android:id="@+id/ad_badge"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Reklama"
+                    android:text="@string/ad_ad"
                     android:textSize="9sp"
                     android:textStyle="bold"
                     android:paddingHorizontal="4dp"

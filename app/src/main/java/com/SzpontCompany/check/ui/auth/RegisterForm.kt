@@ -121,7 +121,9 @@ fun RegisterForm(
     validateCredentials: () -> Boolean,
     emailErrorMessage: String?,
     isLoading: Boolean = false,
-    isGoogleLoading : Boolean = false
+    isGoogleLoading : Boolean = false,
+    onTosClick: () -> Unit,
+    onPrivacyClick: () -> Unit
 ) {
     var visible by remember { mutableStateOf(false) }
     val context = LocalContext.current
@@ -326,9 +328,9 @@ fun RegisterForm(
     }
     Spacer(modifier = Modifier.height(16.dp))
 
-        TermsText(
-            onTosClick = { /*TODO*/ },
-            onPrivacyClick = { /*TODO*/ },
-            type = TermsType.SIGN_UP
-        )
+    TermsText(
+        onTosClick = {onTosClick()},
+        onPrivacyClick = {onPrivacyClick()},
+        type = TermsType.LOGIN,
+    )
 }
