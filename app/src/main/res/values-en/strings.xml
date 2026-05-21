@@ -618,4 +618,24 @@
     <string name="nav_stats">Stats</string>
     <string name="nav_add">Add</string>
     <string name="nav_map">Map</string>
+    <string name="error_location_permissions">No location permission granted!</string>
+    <string name="map_time">time</string>
+    <string name="map_steps">steps</string>
+    <string name="map_saving">Saving route...</string>
+    <string name="map_tracking">Began tracking route!</string>
+    <string name="map_finish">Save and finish</string>
+    <string name="map_begin_training">Begin Training</string>
+    <string name="map_my_routes">My Routes</string>
+    <string name="map_friends">Friends</string>
+    <string name="map_no_routes">No saved routes.</string>
+    <string name="map_unknown_date">Unknown date</string>
+    <string name="map_routemap">Route map</string>
+    <string name="route_distance">Distance</string>
+    <string name="route_time">Time</string>
+    <string name="route_steps">Steps</string>
+    <string name="larger_map">Larger map</string>
+    <string name="close_btn">Close</string>
+    <string name="show_on_map">Show on map</string>
+    <string name="add_habit_preview">Goal: 30 min • daily</string>
+
 </resources>

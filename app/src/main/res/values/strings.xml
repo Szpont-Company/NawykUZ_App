@@ -606,6 +606,25 @@
     <string name="nav_map">Mapa</string>
     <string name="nav_community">Społeczność</string>
     <string name="ad_ad">Reklama</string>
+    <string name="error_location_permissions">Brak uprawnień do lokalizacji!</string>
+    <string name="map_time">czas</string>
+    <string name="map_steps">kroki</string>
+    <string name="map_saving">Zapisywanie trasy...</string>
+    <string name="map_tracking">Rozpoczęto śledzenie trasy!</string>
+    <string name="map_finish">Zakończ i Zapisz</string>
+    <string name="map_begin_training">Rozpocznij Trening</string>
+    <string name="map_my_routes">Moje Trasy</string>
+    <string name="map_friends">Znajomi</string>
+    <string name="map_no_routes">Brak zapisanych tras.</string>
+    <string name="map_unknown_date">Nieznana data</string>
+    <string name="map_routemap">Mapa przebytej trasy</string>
+    <string name="route_distance">Dystans</string>
+    <string name="route_time">Czas</string>
+    <string name="route_steps">Kroki</string>
+    <string name="larger_map">Powiększona mapa</string>
+    <string name="close_btn">Zamknij</string>
+    <string name="show_on_map">Pokaż na mapie</string>
+    <string name="add_habit_preview">Cel: 30 min • codziennie</string>
     <string-array name="days_of_week_short">
         <item>Pn</item>
         <item>Wt</item>

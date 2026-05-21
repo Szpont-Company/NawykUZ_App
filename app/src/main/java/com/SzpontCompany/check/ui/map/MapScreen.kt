@@ -1,6 +1,7 @@
 package com.SzpontCompany.check.ui.map
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -52,6 +53,7 @@ import com.SzpontCompany.check.ui.map.createAvatarMarker
 
 enum class MapTab { ROUTES, FRIENDS }
 
+@SuppressLint("LocalContextGetResourceValueCall")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MapScreen(
@@ -170,7 +172,8 @@ fun MapScreen(
                     if (locationPermissionGranted) {
                         viewModel.toggleTracking(context)
                     } else {
-                        Toast.makeText(context, "Brak uprawnień do lokalizacji!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context,
+                            context.getString(R.string.error_location_permissions), Toast.LENGTH_SHORT).show()
                     }
                 },
                 routesHistory = routesHistory,
@@ -282,6 +285,7 @@ fun MapOverlays(
     }
 }
 
+@SuppressLint("LocalContextGetResourceValueCall")
 @Composable
 fun MapSheetContent(
     selectedTab: MapTab,
@@ -306,24 +310,28 @@ fun MapSheetContent(
             .padding(bottom = 16.dp)
     ) {
         Row(Modifier.padding(horizontal = 16.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-            StatCell(duration, "czas", true)
+            StatCell(duration, stringResource(R.string.map_time), true)
             Spacer(Modifier.weight(1f))
             StatCell(distance, "km")
             Spacer(Modifier.weight(1f))
-            StatCell(steps, "kroki")
+            StatCell(steps, stringResource(R.string.map_steps))
             Spacer(Modifier.weight(1f))
             StatCell(calories, "kcal")
         }
 
         Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.Center
         ) {
             Button(
                 onClick = {
                     Toast.makeText(
                         context,
-                        if (isTracking) "Zapisywanie trasy..." else "Rozpoczęto śledzenie trasy!",
+                        if (isTracking) context.getString(R.string.map_saving) else context.getString(
+                            R.string.map_tracking
+                        ),
                         Toast.LENGTH_SHORT
                     ).show()
                     onToggleTracking()
@@ -332,10 +340,12 @@ fun MapSheetContent(
                     containerColor = if (isTracking) Color(0xFFE24B4A) else MaterialTheme.colorScheme.primary
                 ),
                 shape = RoundedCornerShape(16.dp),
-                modifier = Modifier.fillMaxWidth().height(48.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp)
             ) {
                 Text(
-                    text = if (isTracking) "Zakończ i Zapisz" else "Rozpocznij Trening",
+                    text = if (isTracking) stringResource(R.string.map_finish) else stringResource(R.string.map_begin_training),
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
                     color = Color.White
@@ -344,16 +354,18 @@ fun MapSheetContent(
         }
 
         Row(Modifier.padding(horizontal = 16.dp)) {
-            MapTabItem("Moje Trasy", selectedTab == MapTab.ROUTES) { onTabSelected(MapTab.ROUTES) }
-            MapTabItem("Znajomi", selectedTab == MapTab.FRIENDS) { onTabSelected(MapTab.FRIENDS) }
+            MapTabItem(stringResource(R.string.map_my_routes), selectedTab == MapTab.ROUTES) { onTabSelected(MapTab.ROUTES) }
+            MapTabItem(stringResource(R.string.map_friends), selectedTab == MapTab.FRIENDS) { onTabSelected(MapTab.FRIENDS) }
         }
 
         if (selectedTab == MapTab.ROUTES) {
             var selectedImageUrl by remember { mutableStateOf<String?>(null) }
             Spacer(modifier = Modifier.height(8.dp))
             if (routesHistory.isEmpty()) {
-                Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
-                    Text("Brak zapisanych tras.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Box(modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(32.dp), contentAlignment = Alignment.Center) {
+                    Text(stringResource(R.string.map_no_routes), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             } else {
                 LazyColumn(
@@ -362,7 +374,9 @@ fun MapSheetContent(
                 ) {
                     items(routesHistory) { route ->
                         val dateFormat = SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault())
-                        val dateStr = if (route.startTime > 0) dateFormat.format(Date(route.startTime)) else "Nieznana data"
+                        val dateStr = if (route.startTime > 0) dateFormat.format(Date(route.startTime)) else context.getString(
+                            R.string.map_unknown_date
+                        )
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -374,7 +388,7 @@ fun MapSheetContent(
                                 if (route.mapImageUrl.isNotEmpty()) {
                                     AsyncImage(
                                         model = route.mapImageUrl,
-                                        contentDescription = "Mapa przebytej trasy",
+                                        contentDescription = stringResource(R.string.map_routemap),
                                         contentScale = ContentScale.Crop,
                                         modifier = Modifier
                                             .fillMaxWidth()
@@ -388,15 +402,15 @@ fun MapSheetContent(
                                     Spacer(Modifier.height(8.dp))
                                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                                         Column {
-                                            Text("Dystans", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                            Text(stringResource(R.string.route_distance), fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                             Text("${String.format(Locale.US, "%.2f", route.distanceKm)} km", fontSize=15.sp, fontWeight = FontWeight.Bold)
                                         }
                                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                            Text("Czas", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                            Text(stringResource(R.string.route_time), fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                             Text(formatDuration(route.durationMs), fontSize=15.sp, fontWeight = FontWeight.Bold)
                                         }
                                         Column(horizontalAlignment = Alignment.End) {
-                                            Text("Kroki", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                            Text(stringResource(R.string.route_steps), fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                             Text("${route.steps}", fontSize=15.sp, fontWeight = FontWeight.Bold)
                                         }
                                     }
@@ -429,7 +443,7 @@ fun MapSheetContent(
                     ) {
                         AsyncImage(
                             model = selectedImageUrl,
-                            contentDescription = "Powiększona mapa",
+                            contentDescription = stringResource(R.string.larger_map),
                             contentScale = ContentScale.Fit,
                             modifier = Modifier.fillMaxSize()
                         )
@@ -442,7 +456,7 @@ fun MapSheetContent(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Close,
-                                contentDescription = "Zamknij",
+                                contentDescription = stringResource(R.string.close_btn),
                                 tint = Color.White,
                                 modifier = Modifier.size(32.dp)
                             )
@@ -455,7 +469,9 @@ fun MapSheetContent(
         if (selectedTab == MapTab.FRIENDS) {
             Spacer(modifier = Modifier.height(8.dp))
             if (friendsLocations.isEmpty()) {
-                Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+                Box(modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(32.dp), contentAlignment = Alignment.Center) {
                     Text(stringResource(R.string.map_friends_empty), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             } else {
@@ -557,7 +573,7 @@ fun FriendLocationCard(
         ) {
             Icon(
                 imageVector = Icons.Outlined.LocationOn,
-                contentDescription = "Pokaż na mapie",
+                contentDescription = stringResource(R.string.show_on_map),
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(20.dp)
             )
@@ -568,7 +584,11 @@ fun FriendLocationCard(
 @Composable
 private fun ZoomButton(symbol: String, onClick: () -> Unit) {
     Box(
-        modifier = Modifier.size(40.dp).clip(RoundedCornerShape(8.dp)).background(MaterialTheme.colorScheme.surface).clickable { onClick() },
+        modifier = Modifier
+            .size(40.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .background(MaterialTheme.colorScheme.surface)
+            .clickable { onClick() },
         contentAlignment = Alignment.Center
     ) {
         Text(symbol, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
@@ -586,13 +606,19 @@ private fun StatCell(value: String, label: String, highlight: Boolean = false) {
 @Composable
 private fun MapTabItem(label: String, selected: Boolean, onClick: () -> Unit) {
     Column(
-        modifier = Modifier.clickable { onClick() }.padding(12.dp),
+        modifier = Modifier
+            .clickable { onClick() }
+            .padding(12.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(label, color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium)
         if (selected) {
             Spacer(modifier = Modifier.height(4.dp))
-            Box(Modifier.height(3.dp).width(20.dp).clip(RoundedCornerShape(1.5.dp)).background(MaterialTheme.colorScheme.primary))
+            Box(Modifier
+                .height(3.dp)
+                .width(20.dp)
+                .clip(RoundedCornerShape(1.5.dp))
+                .background(MaterialTheme.colorScheme.primary))
         }
     }
 }
