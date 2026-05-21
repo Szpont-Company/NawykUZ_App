@@ -49,7 +49,6 @@ import com.google.maps.android.compose.*
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
-import com.SzpontCompany.check.ui.map.createAvatarMarker
 
 enum class MapTab { ROUTES, FRIENDS }
 
