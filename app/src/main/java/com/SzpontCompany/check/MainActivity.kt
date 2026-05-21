@@ -80,9 +80,11 @@ import android.content.pm.PackageManager
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.SzpontCompany.check.data.steps.StepCounterService
+import com.SzpontCompany.check.ui.auth.PrivacyPolicyScreen
+import com.SzpontCompany.check.ui.auth.TosScreen
 import com.google.android.gms.location.LocationServices
 
-enum class AppScreen { SPLASH, LOGIN, DASHBOARD, REGISTER_SUCCESS, RESET_PASSWORD, SET_NICKNAME }
+enum class AppScreen { SPLASH, LOGIN, DASHBOARD, REGISTER_SUCCESS, RESET_PASSWORD, SET_NICKNAME, TOS, PRIVACY }
 
 class MainActivity : AppCompatActivity() {
 
@@ -214,6 +216,15 @@ class MainActivity : AppCompatActivity() {
                                 AppScreen.REGISTER_SUCCESS, AppScreen.RESET_PASSWORD ->
                                     (slideInHorizontally { it } + fadeIn(tween(400))) togetherWith
                                             (slideOutHorizontally { -it } + fadeOut(tween(300)))
+
+                                AppScreen.TOS ->
+                                    (slideInHorizontally { it } + fadeIn(tween(400))) togetherWith
+                                            (slideOutHorizontally { -it } + fadeOut(tween(300)))
+
+                                AppScreen.PRIVACY ->
+                                    (slideInHorizontally { it } + fadeIn(tween(400))) togetherWith
+                                            (slideOutHorizontally { -it } + fadeOut(tween(300)))
+
                             }
                         },
                         label = "app_screen_transition"
@@ -254,7 +265,9 @@ class MainActivity : AppCompatActivity() {
                                         }
                                     },
                                     onRegisterSuccess = { currentScreen = AppScreen.REGISTER_SUCCESS },
-                                    onForgotPasswordClick = { currentScreen = AppScreen.RESET_PASSWORD }
+                                    onForgotPasswordClick = { currentScreen = AppScreen.RESET_PASSWORD },
+                                    onTosClick = {currentScreen = AppScreen.TOS},
+                                    onPrivacyClick = {currentScreen = AppScreen.PRIVACY}
                                 )
                             }
 
@@ -314,6 +327,9 @@ class MainActivity : AppCompatActivity() {
                                 email = authViewModel.email,
                                 onEmailChange = { authViewModel.onEmailChange(it) }
                             )
+
+                            AppScreen.TOS -> TosScreen(onAccept = { currentScreen = AppScreen.LOGIN })
+                            AppScreen.PRIVACY -> PrivacyPolicyScreen(onAccept = { currentScreen = AppScreen.LOGIN })
                         }
                     }
                 }

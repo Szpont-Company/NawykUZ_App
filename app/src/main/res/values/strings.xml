@@ -625,6 +625,11 @@
     <string name="close_btn">Zamknij</string>
     <string name="show_on_map">Pokaż na mapie</string>
     <string name="add_habit_preview">Cel: 30 min • codziennie</string>
+    <string name="tos_success">Teraz możesz zaakceptować ToS</string>
+    <string name="tos_scroll">Przewiń w dół aby kontynuować</string>
+    <string name="tos_accept">Akceptuj</string>
+    <string name="privacy_success">Teraz możesz zaakceptować politykę prywatności</string>
+    <string name="privacy_scroll">Przewiń w dół aby kontynuować</string>
     <string-array name="days_of_week_short">
         <item>Pn</item>
         <item>Wt</item>

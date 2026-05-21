@@ -637,5 +637,11 @@
     <string name="close_btn">Close</string>
     <string name="show_on_map">Show on map</string>
     <string name="add_habit_preview">Goal: 30 min • daily</string>
+    <string name="tos_success">Now you can accept ToS</string>
+    <string name="tos_scroll">Scroll down to continue</string>
+    <string name="tos_accept">Accept</string>
+    <string name="privacy_success">Now you can accept Privacy Policy</string>
+    <string name="privacy_scroll">Scroll down to continue</string>
+
 
 </resources>

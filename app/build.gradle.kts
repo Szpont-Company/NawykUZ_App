@@ -112,6 +112,10 @@ dependencies {
     implementation("com.google.android.gms:play-services-location:21.1.0")
     implementation("com.google.maps.android:android-maps-utils:3.4.0")
     implementation("io.coil-kt:coil-compose:2.6.0")
+
+    // ToS
+    implementation("com.halilibo.compose-richtext:richtext-commonmark:0.17.0")
+    implementation("com.halilibo.compose-richtext:richtext-ui-material3:0.17.0")
 }
 
 kotlin {

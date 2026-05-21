@@ -53,7 +53,9 @@ fun LogInForm(
     validateCredentials: () -> Boolean,
     loginErrorMessage: String?,
     isLoading: Boolean = false,
-    isGoogleLoading : Boolean = false
+    isGoogleLoading : Boolean = false,
+    onTosClick: () -> Unit,
+    onPrivacyClick: () -> Unit
 ) {
     var visible by remember { mutableStateOf(false) }
     var isEmailError by remember { mutableStateOf(false) }
@@ -227,8 +229,8 @@ fun LogInForm(
     Spacer(modifier = Modifier.height(16.dp))
 
     TermsText(
-        onTosClick = { /*TODO*/ },
-        onPrivacyClick = { /*TODO*/ },
+        onTosClick = {onTosClick()},
+        onPrivacyClick = {onPrivacyClick()},
         type = TermsType.LOGIN,
     )
 }
