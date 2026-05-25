@@ -84,10 +84,42 @@ import com.SzpontCompany.check.ui.auth.PrivacyPolicyScreen
 import com.SzpontCompany.check.ui.auth.TosScreen
 import com.google.android.gms.location.LocationServices
 
+/**
+ * Enum reprezentujący główne ekrany aplikacji.
+ */
 enum class AppScreen { SPLASH, LOGIN, DASHBOARD, REGISTER_SUCCESS, RESET_PASSWORD, SET_NICKNAME, TOS, PRIVACY }
 
+/**
+ * MainActivity - główna aktywność aplikacji Check.
+ *
+ * Odpowiada za:
+ * - Zarządzanie nawigacją w aplikacji (routing ekranów)
+ * - Obsługę uprawnień (krokomierz, notyfikacje, lokalizacja)
+ * - Inicjalizację Firebase i AdMob SDK
+ * - Zarządzanie tematem (jasny/ciemny) i kolorami akcentu
+ * - Śledzenie statusu online użytkownika
+ * - Obsługę logowania i wylogowywania
+ *
+ * Flow ekranów:
+ * SPLASH -> LOGIN -> SET_NICKNAME -> DASHBOARD
+ *           \-> REGISTER_SUCCESS
+ *           \-> RESET_PASSWORD
+ *
+ * @since 1.0
+ * @author Szpont Company
+ */
 class MainActivity : AppCompatActivity() {
 
+    /**
+     * Sprawdza i wyświetla dialog do zatwierdzenia uprawnień wymaganych do działania aplikacji.
+     *
+     * Uprawnienia:
+     * - ACTIVITY_RECOGNITION (Android 10+) - do liczenia kroków
+     * - POST_NOTIFICATIONS (Android 13+) - do powiadomień push
+     * - ACCESS_FINE_LOCATION - do śledzenia lokalizacji
+     *
+     * Po zatwierdzeniu uprawnień startuje serwis liczenia kroków.
+     */
     private fun checkAndRequestPermissions() {
         val permissionsToRequest = mutableListOf<String>()
 
@@ -118,6 +150,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Wywoływana gdy użytkownik odpowie na dialog uprawnień.
+     */
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -129,14 +164,25 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Inicjalizuje aktywność główną aplikacji.
+     *
+     * Kroki:
+     * 1. Ustawia orientację na portret
+     * 2. Sprawdza uprawnienia
+     * 3. Inicjalizuje Google Mobile Ads SDK
+     * 4. Tworzy interfejs z Jetpack Compose
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Zablokuj orientację na portret
         requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
-
+        // Sprawdź uprawnienia
         checkAndRequestPermissions()
 
+        // Zainicjalizuj AdMob
         CoroutineScope(Dispatchers.IO).launch {
             Log.e("MainActivity", "Initializing Mobile Ads SDK")
             MobileAds.initialize(this@MainActivity) {}
@@ -342,6 +388,12 @@ class MainActivity : AppCompatActivity() {
         setIntent(intent)
     }
 
+    /**
+     * Startuje serwis liczenia kroków jako serwis pierwszoplanowy.
+     *
+     * Na Android 8+ serwisy w tle muszą być serwisami pierwszoplanowymi z notyfikacją.
+     * Na starszych wersjach startuje zwykły serwis.
+     */
     private fun startStepCounterService() {
         val serviceIntent = Intent(this, StepCounterService::class.java)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -351,16 +403,31 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Wywoływana gdy aktywność wejdzie na pierwszy plan.
+     *
+     * Aktualizuje status użytkownika na "online" w Firestore.
+     */
     override fun onStart() {
         super.onStart()
         updatePresence(true)
     }
 
+    /**
+     * Wywoływana gdy aktywność opuści pierwszy plan.
+     *
+     * Aktualizuje status użytkownika na "offline" w Firestore.
+     */
     override fun onStop() {
         super.onStop()
         updatePresence(false)
     }
 
+    /**
+     * Aktualizuje status online/offline użytkownika w Firestore.
+     *
+     * @param isOnline true jeśli użytkownik jest online, false jeśli offline
+     */
     private fun updatePresence(isOnline: Boolean) {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
         FirebaseFirestore.getInstance().collection("users").document(uid)
@@ -372,6 +439,23 @@ class MainActivity : AppCompatActivity() {
             )
     }
 
+    /**
+     * Główny graf nawigacji aplikacji.
+     *
+     * Definiuje wszystkie ekrany i trasy navigacji dla sekcji DASHBOARD.
+     *
+     * Ekrany:
+     * - main: Główny dashboard z dolnym paskiem nawigacji
+     * - profile: Profil użytkownika
+     * - edit_profile: Edycja profilu
+     * - friend_profile/{friendUid}: Profil przyjaciela
+     * - chat_screen: Chat z przyjacielem
+     * - settings: Ustawienia aplikacji
+     * - rewards: Ekran nagród
+     * - battle_detail/{battleId}: Szczegóły bitwy
+     *
+     * @param onLogout Callback wywoływany przy wylogowaniu
+     */
     @Composable
     fun RootNavigationGraph(onLogout: () -> Unit) {
         val navController = rememberNavController()

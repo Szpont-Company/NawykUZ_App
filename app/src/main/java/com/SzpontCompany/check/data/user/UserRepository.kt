@@ -16,18 +16,42 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 
+/**
+ * UserRepository - repozytorium zarządzające danymi użytkownika.
+ *
+ * Odpowiada za:
+ * - Pobieranie i przechowywanie danych użytkownika z Firestore
+ * - Obserwowanie zmian profilu użytkownika w real-time
+ * - Aktualizację profilu użytkownika
+ * - Zarządzanie osiągnięciami i nagrodami
+ * - Operacje na koncie (rejestracja, usunięcie konta)
+ * - Cache lokalny dla szybszego dostępu
+ *
+ * Używa wzorca Singleton do zapewnienia jednej instancji w aplikacji.
+ * Obsługuje real-time synchronizację danych z Firestore.
+ *
+ * @since 1.0
+ * @author Szpont Company
+ */
 class UserRepository private constructor(
     private val auth: FirebaseAuth,
     private val firestore: FirebaseFirestore,
     private val cache: UserCache
 ) {
 
+    /** Listener do zmian w profilu użytkownika */
     private var userListener: ListenerRegistration? = null
 
     companion object {
         @Volatile
         private var INSTANCE: UserRepository? = null
 
+        /**
+         * Pobiera lub tworzy instancję UserRepository (Singleton).
+         *
+         * @param context Kontekst aplikacji
+         * @return Jedyna instancja UserRepository
+         */
         fun getInstance(context: Context): UserRepository {
             return INSTANCE ?: synchronized(this) {
                 INSTANCE ?: UserRepository(
@@ -39,9 +63,25 @@ class UserRepository private constructor(
         }
     }
 
+    /** State Flow emitujący aktualne dane użytkownika */
     private val _userFlow = MutableStateFlow<User?>(value = null)
+
+    /**
+     * Publiczny State Flow dla aktualnych danych użytkownika.
+     *
+     * Obserwujesz ten flow aby otrzymywać aktualizacje profilu w real-time.
+     */
     val userFlow: StateFlow<User?> = _userFlow.asStateFlow()
 
+    /**
+     * Rozpoczyna obserwację zmian profilu użytkownika w Firestore.
+     *
+     * Nasłuchuje zmian dokumentu użytkownika i aktualizuje State Flow
+     * oraz cache lokalny. Automatycznie obsługuje disconnect/reconnect.
+     *
+     * Może być wywoływane wielokrotnie - drugi i kolejne wywołania
+     * są ignorowane jeśli listener już istnieje.
+     */
     fun startUserObservation() {
         val uid = auth.currentUser?.uid ?: return
         if (userListener != null) return
@@ -81,11 +121,29 @@ class UserRepository private constructor(
             }
     }
 
+    /**
+     * Zatrzymuje obserwację zmian profilu użytkownika.
+     *
+     * Powinno być wywoływane przy wylogowaniu lub niszczeniu fragmentu/aktywności.
+     */
     fun stopObservation() {
         userListener?.remove()
         userListener = null
     }
 
+    /**
+     * Pobiera dane aktualnego użytkownika.
+     *
+     * Logika:
+     * 1. Jeśli użytkownik jest zalogowany, próbuje pobrać z cache
+     * 2. Jeśli cache jest ważny, zwraca cache bez zapytania do Firestore
+     * 3. W przeciwnym razie pobiera świeże dane z Firestore
+     * 4. Jeśli nie ma zalogowanego użytkownika, próbuje użyć ostatniego cache offline
+     *
+     * @param forceRefresh Jeśli true, pomija cache i pobiera zawsze z Firestore
+     * @return Obiekt User
+     * @throws Exception Jeśli nie ma zalogowanego użytkownika i brak cache offline
+     */
     suspend fun getUser(forceRefresh: Boolean = false): User {
         val firebaseUser = auth.currentUser
 
@@ -152,12 +210,24 @@ class UserRepository private constructor(
         return user
     }
 
+    /**
+     * Czyści cache lokalny i State Flow.
+     *
+     * Wywoływane przy wylogowaniu użytkownika.
+     */
     fun clearCache() {
         stopObservation()
         cache.clear()
         _userFlow.value = null
     }
 
+    /**
+     * Zapisuje dane nowego użytkownika po rejestracji.
+     *
+     * @param uid Identyfikator Firebase
+     * @param name Pełne imię
+     * @param email Adres email
+     */
     suspend fun saveUserData(uid: String, name: String, email: String) {
         val userData = mapOf(
             "uid" to uid,
@@ -204,6 +274,12 @@ class UserRepository private constructor(
         _userFlow.value = updatedUser
     }
 
+    /**
+     * Sprawdza czy dany pseudonim jest już zarezerwowany.
+     *
+     * @param nickname Pseudonim do sprawdzenia
+     * @return true jeśli pseudonim jest zajęty
+     */
     suspend fun isNicknameTaken(nickname: String): Boolean {
         if (nickname.isBlank()) return false
         val myUid = auth.currentUser?.uid
@@ -215,6 +291,18 @@ class UserRepository private constructor(
         return snapshot.documents.any { it.id != myUid }
     }
 
+    /**
+     * Aktualizuje profil użytkownika za pomocą Cloud Function.
+     *
+     * Funkcja backend:
+     * - Aktualizuje główny dokument użytkownika
+     * - Propaguje zmiany avatara i koloru do profili przyjaciół
+     *
+     * @param name Nowe pełne imię
+     * @param nickname Nowy pseudonim
+     * @param avatarEmoji Nowy avatar
+     * @param bgColor Nowy kolor tła
+     */
     suspend fun updateProfileViaFunctions(
         name: String,
         nickname: String,
@@ -266,6 +354,12 @@ class UserRepository private constructor(
         }
     }
 
+    /**
+     * Usuwa konto użytkownika i wszystkie powiązane dane.
+     *
+     * Korzysta z Cloud Function do spełnienia wymagań RODO.
+     * Wylogowuje użytkownika po usunięciu konta.
+     */
     suspend fun deleteUserAccount() {
         val user = auth.currentUser ?: throw Exception("Brak zalogowanego użytkownika")
 
@@ -277,6 +371,11 @@ class UserRepository private constructor(
         _userFlow.value = null
     }
 
+    /**
+     * Obserwuje liczbę monet użytkownika w real-time.
+     *
+     * @return Flow emitujący bieżącą liczbę monet
+     */
     fun getUserCoins(): Flow<Int> = callbackFlow {
         val uid = auth.currentUser?.uid
 
@@ -302,6 +401,16 @@ class UserRepository private constructor(
         awaitClose { listener.remove() }
     }
 
+    /**
+     * Aktualizuje streak użytkownika w Firestore.
+     *
+     * Wywoływane gdy zmienia się stan wykonania nawyków dla dnia.
+     *
+     * @param uid ID użytkownika
+     * @param currentStreak Aktualny ciąg dni
+     * @param bestStreak Najlepszy ciąg
+     * @param lastGlobalStreakDate Data ostatniej aktualizacji streaka
+     */
     suspend fun updateUserStreaks(
         uid: String,
         currentStreak: Int,
@@ -329,12 +438,30 @@ class UserRepository private constructor(
         }
     }
 
+    /**
+     * Przyznaje odznaką (badge) użytkownikowi.
+     *
+     * @param uid ID użytkownika
+     * @param badgeId ID odznaki do przyznania
+     */
     suspend fun claimBadge(uid: String, badgeId: String) {
         firestore.collection("users").document(uid)
             .update("unlockedBadges", FieldValue.arrayUnion(badgeId))
             .await()
     }
 
+    /**
+     * Dodaje nagrody (XP i monety) użytkownikowi.
+     *
+     * Automatycznie oblicza:
+     * - Level up/down
+     * - Maksimum progów XP
+     * - Minimalna wartość monet (nie może być ujemna)
+     *
+     * @param uid ID użytkownika
+     * @param addedXp Liczba XP do dodania
+     * @param addedCoins Liczba monet do dodania (może być ujemna)
+     */
     suspend fun addReward(uid: String, addedXp: Int, addedCoins: Int) {
         val userDoc = firestore.collection("users").document(uid)
 
@@ -372,6 +499,11 @@ class UserRepository private constructor(
         ).await()
     }
 
+    /**
+     * Aktualizuje cel kroków na dzień dla użytkownika.
+     *
+     * @param goal Nowy cel kroków
+     */
     suspend fun updateStepGoal(goal: Int) {
         val user = auth.currentUser ?: throw Exception("Brak zalogowanego użytkownika")
         val uid = user.uid

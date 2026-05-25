@@ -21,8 +21,38 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+/**
+ * HabitReminderReceiver - odbiornik powiadomień (broadcast receiver) dla przypomnień nawyków.
+ *
+ * Odbiera zaplanowane powiadomienia (przez AlarmManager) o wykonaniu nawyków.
+ * Sprawdza czy nawyk został już wykonany dzisiaj i wysyła powiadomienie jeśli nie.
+ *
+ * Funkcje:
+ * - Odbieranie zaplanowanych przypomnień o nawyków
+ * - Sprawdzanie statusu nawyku w Firestore
+ * - Wyświetlanie powiadomień push
+ * - Ponowne planowanie przypomnień na następny dzień
+ * - Obsługa powiadomień porannych i wieczornych
+ *
+ * Konfiguracja:
+ * - Respektuje ustawienia użytkownika (włącz/wyłącz dźwięk, wibracje)
+ * - Respektuje preferencje powiadomień (porannie/wieczorem)
+ * - Przesyła intent do MainActivity po kliknięciu powiadomienia
+ *
+ * @since 1.0
+ * @author Szpont Company
+ */
 class HabitReminderReceiver : BroadcastReceiver() {
 
+    /**
+     * Wywoływana gdy odbiornik otrzyma powiadomienie zaplanowane.
+     *
+     * Jeśli to powiadomienie wieczorne, asynchronicznie sprawdza w Firestore
+     * czy nawyk już został wykonany. Dla porannych zawsze wyświetla powiadomienie.
+     *
+     * @param context Kontekst aplikacji
+     * @param intent Intent z danymi nawyku (habitId, habitName, habitIcon, isEvening)
+     */
     override fun onReceive(context: Context, intent: Intent) {
         val habitId = intent.getStringExtra("HABIT_ID") ?: return
         val habitName = intent.getStringExtra("HABIT_NAME") ?: "Nawyk"
@@ -69,6 +99,20 @@ class HabitReminderReceiver : BroadcastReceiver() {
         }
     }
 
+    /**
+     * Wysyła powiadomienie push do użytkownika.
+     *
+     * Tworzy kanał notyfikacji (Android 8+), ustawia dźwięk i wibracje
+     * oraz dodaje intent do MainActivity.
+     *
+     * @param context Kontekst aplikacji
+     * @param habitId ID nawyku
+     * @param name Nazwa nawyku
+     * @param icon Emoji nawyku
+     * @param isEvening true dla przypomnień wieczornych
+     * @param playSound Czy grać dźwięk
+     * @param shouldVibrate Czy wywoływać wibracje
+     */
     private fun showNotification(context: Context, habitId: String, name: String, icon: String, isEvening: Boolean, playSound: Boolean, shouldVibrate: Boolean) {
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val dynamicChannelId = "specific_habit_reminders_s${playSound}_v${shouldVibrate}"
@@ -120,6 +164,15 @@ class HabitReminderReceiver : BroadcastReceiver() {
         manager.notify(habitId.hashCode() + if (isEvening) 1 else 0, builder.build())
     }
 
+    /**
+     * Planuje następne powiadomienie dla nawyku.
+     *
+     * Sprawdza czy nawyk jest aktywny i ma włączone odpowiednie przypomnienia,
+     * a następnie planuje następne powiadomienie na następny dzień.
+     *
+     * @param context Kontekst aplikacji
+     * @param intent Intent z danymi nawyku
+     */
     private fun reschedule(context: Context, intent: Intent) {
         val habitId = intent.getStringExtra("HABIT_ID") ?: return
         val habitName = intent.getStringExtra("HABIT_NAME") ?: "Nawyk"
@@ -153,6 +206,18 @@ class HabitReminderReceiver : BroadcastReceiver() {
         }
     }
 
+    /**
+     * Planuje powiadomienie na konkretną godzinę.
+     *
+     * Parsuje czas z formatu "HH:mm" i przekazuje do NotificationScheduler.
+     *
+     * @param context Kontekst aplikacji
+     * @param habitId ID nawyku
+     * @param name Nazwa nawyku
+     * @param icon Emoji nawyku
+     * @param time Godzina w formacie "HH:mm"
+     * @param isEvening Czy to wieczorne powiadomienie
+     */
     private fun scheduleNext(context: Context, habitId: String, name: String, icon: String, time: String, isEvening: Boolean) {
         val parts = time.split(":")
         val h = parts.getOrNull(0)?.toIntOrNull() ?: if (isEvening) 20 else 8

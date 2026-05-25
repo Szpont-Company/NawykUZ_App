@@ -9,7 +9,37 @@ import com.SzpontCompany.check.data.steps.dataStore
 import kotlinx.coroutines.flow.first
 import java.time.LocalDate
 
+/**
+ * WidgetDataUpdater - aktualizuje dane wyświetlane na widżetach aplikacji.
+ *
+ * Odpowiada za:
+ * - Pobieranie bieżących danych kroków z DataStore
+ * - Aktualizacja widżetu kroków z najnowszymi wartościami
+ * - Reset danych dla nowego dnia
+ *
+ * Obsługuje widżet kroków (StepsWidget) wyświetlający:
+ * - Aktualną liczbę kroków dzisiaj
+ * - Cel kroków na dzień
+ * - Procent wykonania
+ *
+ * @since 1.0
+ * @author Szpont Company
+ */
 class WidgetDataUpdater {
+    /**
+     * Aktualizuje dane widżetu kroków ze świeżymi wartościami z DataStore.
+     *
+     * Logika:
+     * 1. Pobiera preferencje kroków z DataStore
+     * 2. Sprawdza czy data się nie zmieniła (reset kroków dla nowego dnia)
+     * 3. Pobiera wszystkie zarejestrowane widżety StepsWidget
+     * 4. Aktualizuje stan każdego widżetu
+     * 5. Odświeża UI widżetu
+     *
+     * Wywoływane automatycznie za każdym razem gdy zmienia się liczba kroków.
+     *
+     * @param context Kontekst aplikacji
+     */
     suspend fun updateStepsWidgetData(context: Context) {
         val prefs = context.dataStore.data.first()
         val today = LocalDate.now().toString()

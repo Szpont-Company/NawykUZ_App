@@ -14,8 +14,35 @@ import com.SzpontCompany.check.R
 import com.SzpontCompany.check.ui.settings.NotificationFrequency
 import java.util.Calendar
 
+/**
+ * ReminderReceiver - odbiornik powiadomień dla głównych przypomnień o nawyków.
+ *
+ * Obsługuje:
+ * - Powiadomienia zaplanowane przez AlarmManager
+ * - Reaktywacja przypomnień po restarcie urządzenia (BOOT_COMPLETED)
+ * - Częstość powiadomień (codziennie, dni robocze, własny harmonogram)
+ * - Wyświetlanie powiadomień z uwzględnieniem preferencji użytkownika
+ *
+ * Logika:
+ * 1. Sprawdza czy powiadomienia są włączone
+ * 2. Sprawdza czy dzisiaj powinno być powiadomienie (na podstawie częstości)
+ * 3. Wyświetla powiadomienie
+ * 4. Planuje następne powiadomienie
+ *
+ * @since 1.0
+ * @author Szpont Company
+ */
 class ReminderReceiver : BroadcastReceiver() {
 
+    /**
+     * Wywoływana gdy odbiornik otrzyma zaplanowane powiadomienie.
+     *
+     * Obsługuje również specjalny intent ACTION_BOOT_COMPLETED po restarcie urządzenia
+     * w celu przywrócenia zaplanowanych przypomnień.
+     *
+     * @param context Kontekst aplikacji
+     * @param intent Intent zawierający dane (ACTION_BOOT_COMPLETED lub zaplanowane powiadomienie)
+     */
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == Intent.ACTION_BOOT_COMPLETED) {
             val prefs = context.getSharedPreferences("check_notifications", Context.MODE_PRIVATE)
@@ -58,6 +85,16 @@ class ReminderReceiver : BroadcastReceiver() {
         NotificationScheduler(context).scheduleDailyReminder(savedHour, savedMinute)
     }
 
+    /**
+     * Wyświetla powiadomienie push dla głównego przypomnienia.
+     *
+     * Tworzy kanał notyfikacji (Android 8+), ustawia dźwięk i wibracje.
+     * Powiadomienie otwiera MainActivity po kliknięciu.
+     *
+     * @param context Kontekst aplikacji
+     * @param playSound Czy grać dźwięk powiadomienia
+     * @param shouldVibrate Czy wywoływać wibracje
+     */
     private fun showNotification(context: Context, playSound: Boolean, shouldVibrate: Boolean) {
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 

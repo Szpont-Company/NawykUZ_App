@@ -8,9 +8,34 @@ import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
 
+/**
+ * RewardedAdManager - manager do pokazywania nagrodowych reklam video.
+ *
+ * Singleton zarządzający cyklem życia reklam video z nagrodami.
+ * Umożliwia użytkownikowi zarobienie monetek/XP poprzez obejrzenie reklamy.
+ *
+ * Funkcje:
+ * - Ładowanie reklam video nagrodzonych
+ * - Wyświetlanie reklam i pobieranie nagród
+ * - Automatyczne przeładowanie reklam po pokazaniu
+ *
+ * Używa Google AdMob z testowym ID jednostki reklamowej.
+ *
+ * @since 1.0
+ * @author Szpont Company
+ */
 object RewardedAdManager {
+    /** Instancja załadowanej reklamy */
     private var rewardedAd: RewardedAd? = null
 
+    /**
+     * Ładuje nagrodzony spot reklamowy z AdMob.
+     *
+     * Musi być wywoływane przed pierwszym wywołaniem [show].
+     * Reklamy mogą być ładowane w tle nawet gdy użytkownik nie ma zamiaru jej ogląda.
+     *
+     * @param context Kontekst aplikacji do ładowania reklamy
+     */
     fun load(context: Context) {
         val adRequest = AdRequest.Builder().build()
 
@@ -32,6 +57,15 @@ object RewardedAdManager {
         )
     }
 
+    /**
+     * Wyświetla nagrodzony spot reklamowy użytkownikowi.
+     *
+     * Po obejrzeniu reklamy callback [onReward] otrzyma ilość przyznanych punktów.
+     * Po wyświetleniu reklama jest automatycznie zwalniania i następnie ładowana nowa.
+     *
+     * @param activity Aktywność do wyświetlenia reklamy
+     * @param onReward Callback z ilością nagrodę (np. monety lub XP)
+     */
     fun show(activity: Activity, onReward: (Int) -> Unit) {
 
         rewardedAd?.show(activity) { rewardItem ->
