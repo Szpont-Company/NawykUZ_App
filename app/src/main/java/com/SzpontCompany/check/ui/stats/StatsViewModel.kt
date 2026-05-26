@@ -29,7 +29,7 @@ data class StatsUiState(
     val selectedTimeRangeIndex: Int = 0,
     val selectedHabitId: String? = null,
 
-    val weeklyChartData: List<Pair<String, Float>> = emptyList(),
+    val weeklyChartData: List<Pair<Int, Float>> = emptyList(),
     val weeklyAveragePercentage: Int = 0
 )
 
@@ -100,7 +100,7 @@ class StatsViewModel(
             0
         }
 
-        val chartData = mutableListOf<Pair<String, Float>>()
+        val chartData = mutableListOf<Pair<Int, Float>>()
         var totalSumForAverage = 0f
 
         for (i in 6 downTo 0) {
@@ -108,15 +108,15 @@ class StatsViewModel(
             cal.add(Calendar.DAY_OF_YEAR, -i)
             val dateStr = dateFormat.format(cal.time)
 
-            val dayName = when (cal.get(Calendar.DAY_OF_WEEK)) {
-                Calendar.MONDAY -> "Pn"
-                Calendar.TUESDAY -> "Wt"
-                Calendar.WEDNESDAY -> "Śr"
-                Calendar.THURSDAY -> "Cz"
-                Calendar.FRIDAY -> "Pt"
-                Calendar.SATURDAY -> "So"
-                Calendar.SUNDAY -> "Nd"
-                else -> ""
+            val dayIndex = when (cal.get(Calendar.DAY_OF_WEEK)) {
+                Calendar.MONDAY -> 0
+                Calendar.TUESDAY -> 1
+                Calendar.WEDNESDAY -> 2
+                Calendar.THURSDAY -> 3
+                Calendar.FRIDAY -> 4
+                Calendar.SATURDAY -> 5
+                Calendar.SUNDAY -> 6
+                else -> 0
             }
 
             val completedCount = filteredHabits.count { it.completedDates.contains(dateStr) }
@@ -127,7 +127,7 @@ class StatsViewModel(
             } else 0f
 
             totalSumForAverage += dailyValue
-            chartData.add(Pair(dayName, dailyValue))
+            chartData.add(Pair(dayIndex, dailyValue))
         }
 
         val weeklyAveragePercentage = if (chartData.isNotEmpty()) {

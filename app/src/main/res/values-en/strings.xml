@@ -643,5 +643,36 @@
     <string name="privacy_success">Now you can accept Privacy Policy</string>
     <string name="privacy_scroll">Scroll down to continue</string>
 
+    <!-- Stats -->
+    <string name="stats_title">Statistics</string>
+    <string name="stats_range_7d">7 days</string>
+    <string name="stats_range_30d">30 days</string>
+    <string name="stats_range_3m">3 mon.</string>
+    <string name="stats_range_all">All</string>
+    <string name="stats_last_7d">Last 7 days</string>
+    <string name="stats_last_30d">Last 30 days</string>
+    <string name="stats_last_90d">Last 90 days</string>
+    <string name="stats_total">Total</string>
+    <string name="stats_completed">Completed</string>
+    <string name="stats_effectiveness">Effectiveness</string>
+    <string name="stats_best_streak">Best streak</string>
+    <string name="stats_current_record">Current record</string>
+    <string name="stats_coins_xp">Coins (XP)</string>
+    <string name="stats_coins_desc">For Habit Battles</string>
+    <string name="stats_filter_all">All</string>
+    <string name="stats_weekly_activity">Weekly activity</string>
+    <string name="stats_weekly_avg">Avg. %1$d%% / day</string>
+    <string name="stats_habit_map">Habit map (10 weeks)</string>
+    <string name="stats_10_weeks_ago">10 weeks ago</string>
+    <string name="stats_today">today</string>
+    <string name="stats_details_title">Habits - details</string>
+    <string name="stats_details_desc">Habit effectiveness (Win Rate) in the selected period.</string>
+    <string name="stats_no_habits_filter">No habits for the selected filter.</string>
+    <string name="stats_streak_days_suffix">%1$d days streak</string>
+    <string name="unknown_habit">Unknown habit</string>
+    <string name="stats_streak_calendar">Streak calendar</string>
+    <string name="stats_legend_completed">Completed</string>
+    <string name="stats_legend_skipped">Skipped</string>
+    <string name="stats_legend_no_data">No data</string>
 
 </resources>

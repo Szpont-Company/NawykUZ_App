@@ -23,6 +23,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.res.stringArrayResource
+import androidx.compose.ui.res.stringResource
+import com.SzpontCompany.check.R
 import com.SzpontCompany.check.data.habit.Habit
 import java.time.LocalDate
 import java.text.SimpleDateFormat
@@ -110,7 +113,7 @@ fun StatsTopSection() {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = "Statystyki",
+            text = stringResource(R.string.stats_title),
             style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.onBackground,
             fontWeight = FontWeight.Bold
@@ -120,7 +123,12 @@ fun StatsTopSection() {
 
 @Composable
 fun TimeRangeSelector(selectedIndex: Int, onSelect: (Int) -> Unit) {
-    val options = listOf("7 dni", "30 dni", "3 mies.", "Wszystko")
+    val options = listOf(
+        stringResource(R.string.stats_range_7d),
+        stringResource(R.string.stats_range_30d),
+        stringResource(R.string.stats_range_3m),
+        stringResource(R.string.stats_range_all)
+    )
 
     Row(
         modifier = Modifier
@@ -160,23 +168,23 @@ fun MetricsGrid(
     timeRangeIndex: Int
 ) {
     val timeRangeText = when(timeRangeIndex) {
-        0 -> "Ostatnie 7 dni"
-        1 -> "Ostatnie 30 dni"
-        2 -> "Ostatnie 90 dni"
-        else -> "Łącznie"
+        0 -> stringResource(R.string.stats_last_7d)
+        1 -> stringResource(R.string.stats_last_30d)
+        2 -> stringResource(R.string.stats_last_90d)
+        else -> stringResource(R.string.stats_total)
     }
 
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             MetricCard(
                 modifier = Modifier.weight(1f),
-                title = "Ukończono",
+                title = stringResource(R.string.stats_completed),
                 value = totalCompleted.toString(),
                 subtext = timeRangeText, subtextColor = MaterialTheme.colorScheme.primary
             )
             MetricCard(
                 modifier = Modifier.weight(1f),
-                title = "Skuteczność",
+                title = stringResource(R.string.stats_effectiveness),
                 value = "$successRate%",
                 subtext = timeRangeText, subtextColor = MaterialTheme.colorScheme.primary
             )
@@ -184,16 +192,16 @@ fun MetricsGrid(
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             MetricCard(
                 modifier = Modifier.weight(1f),
-                title = "Najdłuższy streak",
+                title = stringResource(R.string.stats_best_streak),
                 value = bestStreak.toString(),
-                valueSuffix = "dni",
-                subtext = "Aktualny rekord", subtextColor = MaterialTheme.colorScheme.onSurfaceVariant
+                valueSuffix = stringResource(R.string.habit_widget_days_unit),
+                subtext = stringResource(R.string.stats_current_record), subtextColor = MaterialTheme.colorScheme.onSurfaceVariant
             )
             MetricCard(
                 modifier = Modifier.weight(1f),
-                title = "Monety (XP)",
+                title = stringResource(R.string.stats_coins_xp),
                 value = coins.toString(),
-                subtext = "Na walki Habit Battle", subtextColor = MaterialTheme.colorScheme.primary
+                subtext = stringResource(R.string.stats_coins_desc), subtextColor = MaterialTheme.colorScheme.primary
             )
         }
     }
@@ -236,7 +244,7 @@ fun HabitFilterChips(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         FilterChip(
-            text = "Wszystko",
+            text = stringResource(R.string.stats_filter_all),
             isSelected = selectedHabitId == null,
             onClick = { onSelect(null) }
         )
@@ -275,9 +283,11 @@ fun FilterChip(text: String, isSelected: Boolean, onClick: () -> Unit) {
 
 @Composable
 fun WeeklyActivityChart(
-    chartData: List<Pair<String, Float>>,
+    chartData: List<Pair<Int, Float>>,
     averagePercentage: Int
 ) {
+    val daysOfWeek = stringArrayResource(R.array.days_of_week_short)
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -285,8 +295,8 @@ fun WeeklyActivityChart(
             .padding(16.dp)
     ) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(text = "Aktywność tygodniowa", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
-            Text(text = "Śr. $averagePercentage% / dzień", fontSize = 12.sp, color = MaterialTheme.colorScheme.primary)
+            Text(text = stringResource(R.string.stats_weekly_activity), fontSize = 14.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
+            Text(text = stringResource(R.string.stats_weekly_avg, averagePercentage), fontSize = 12.sp, color = MaterialTheme.colorScheme.primary)
         }
         Spacer(modifier = Modifier.height(16.dp))
         Row(
@@ -297,7 +307,8 @@ fun WeeklyActivityChart(
             verticalAlignment = Alignment.Bottom
         ) {
             chartData.forEachIndexed { index, data ->
-                val dayLabel = data.first
+                val dayIndex = data.first
+                val dayLabel = daysOfWeek.getOrElse(dayIndex) { "" }
                 val value = data.second
                 val isToday = index == chartData.lastIndex
 
@@ -345,7 +356,7 @@ fun HeatmapSection(habits: List<Habit>) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Mapa nawyków (10 tyg.)",
+                text = stringResource(R.string.stats_habit_map),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
@@ -376,7 +387,7 @@ fun HeatmapSection(habits: List<Habit>) {
         }
         Spacer(modifier = Modifier.height(16.dp))
 
-        val daysOfWeek = listOf("Pn", "Wt", "Śr", "Cz", "Pt", "So", "Nd")
+        val daysOfWeek = stringArrayResource(R.array.days_of_week_short).toList()
 
         Column(verticalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.fillMaxWidth()) {
             daysOfWeek.forEachIndexed { dayIndex, dayLabel ->
@@ -428,8 +439,8 @@ fun HeatmapSection(habits: List<Habit>) {
         }
         Spacer(modifier = Modifier.height(8.dp))
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text("10 tyg. temu", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Text("dziś", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(stringResource(R.string.stats_10_weeks_ago), fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(stringResource(R.string.stats_today), fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
@@ -438,13 +449,13 @@ fun HeatmapSection(habits: List<Habit>) {
 fun HabitDetailsSection(habits: List<Habit>, timeRangeIndex: Int) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
-            text = "Nawyki - szczegóły",
+            text = stringResource(R.string.stats_details_title),
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onBackground,
         )
         Text(
-            text = "Skuteczność (Win Rate) nawyków w wybranym okresie.",
+            text = stringResource(R.string.stats_details_desc),
             fontSize = 12.sp,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(bottom = 12.dp, top = 2.dp)
@@ -458,7 +469,7 @@ fun HabitDetailsSection(habits: List<Habit>, timeRangeIndex: Int) {
         ) {
             if (habits.isEmpty()) {
                 Text(
-                    text = "Brak nawyków dla wybranego filtru.",
+                    text = stringResource(R.string.stats_no_habits_filter),
                     fontSize = 13.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -509,9 +520,9 @@ fun HabitDetailsSection(habits: List<Habit>, timeRangeIndex: Int) {
 
                     HabitDetailItem(
                         emoji = habit.icon.ifEmpty { "🎯" },
-                        name = habit.name.ifEmpty { "Nieznany nawyk" },
+                        name = habit.name.ifEmpty { stringResource(R.string.unknown_habit) },
                         percent = percentString,
-                        streak = "${habit.streak} dni streak",
+                        streak = stringResource(R.string.stats_streak_days_suffix, habit.streak),
                         progress = realProgress,
                         color = habitColor
                     )
@@ -565,7 +576,7 @@ fun StreakCalendarSection(habits: List<Habit>) {
 
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
-            text = "Streak kalendarz",
+            text = stringResource(R.string.stats_streak_calendar),
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onBackground,
@@ -576,7 +587,7 @@ fun StreakCalendarSection(habits: List<Habit>) {
                 .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(16.dp))
                 .padding(16.dp)
         ) {
-            val daysOfWeek = listOf("Pn", "Wt", "Śr", "Cz", "Pt", "So", "Nd")
+            val daysOfWeek = stringArrayResource(R.array.days_of_week_short).toList()
 
             Column(verticalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.fillMaxWidth()) {
                 daysOfWeek.forEachIndexed { dayIndex, dayLabel ->
@@ -625,9 +636,9 @@ fun StreakCalendarSection(habits: List<Habit>) {
             }
             Spacer(modifier = Modifier.height(16.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                LegendItem(color = MaterialTheme.colorScheme.primary, label = "Ukończono")
-                LegendItem(color = Color(0xFFE24B4A), label = "Pominięto")
-                LegendItem(color = MaterialTheme.colorScheme.surfaceVariant, label = "Brak danych")
+                LegendItem(color = MaterialTheme.colorScheme.primary, label = stringResource(R.string.stats_legend_completed))
+                LegendItem(color = Color(0xFFE24B4A), label = stringResource(R.string.stats_legend_skipped))
+                LegendItem(color = MaterialTheme.colorScheme.surfaceVariant, label = stringResource(R.string.stats_legend_no_data))
             }
         }
     }
