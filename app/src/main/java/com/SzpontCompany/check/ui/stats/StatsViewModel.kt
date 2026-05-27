@@ -18,6 +18,28 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
+/**
+ * Stan UI dla ekranu statystyk.
+ *
+ * Zawiera wszystkie dane potrzebne do wyświetlenia statystyk użytkownika:
+ * - Informacje o użytkowniku
+ * - Lista wszystkich nawyków
+ * - Filtrowane nawyki na podstawie wybranego przedziału czasowego
+ * - Statystyki ogólne (monety, procent sukcesu)
+ * - Dane do wykresu tygodniowego
+ *
+ * @property isLoading true jeśli dane się ładują
+ * @property user Dane bieżącego użytkownika
+ * @property habits Wszystkie nawyki użytkownika
+ * @property filteredHabits Nawyki przefiltrowane na podstawie czasem
+ * @property coins Liczba zdobytych monet
+ * @property totalCompletedHabits Łączna liczba wykonanych nawyków
+ * @property overallSuccessRate Procentowy wskaźnik powodzenia
+ * @property selectedTimeRangeIndex Indeks wybranego przedziału czasowego (0=7 dni, 1=30 dni, 2=90 dni)
+ * @property selectedHabitId ID wybranego nawyku do szczegółów
+ * @property weeklyChartData Dane dla wykresu tygodniowego (dzień, wartość)
+ * @property weeklyAveragePercentage Średni procent sukcesu w tygodniu
+ */
 data class StatsUiState(
     val isLoading: Boolean = true,
     val user: User? = null,
@@ -33,6 +55,25 @@ data class StatsUiState(
     val weeklyAveragePercentage: Int = 0
 )
 
+/**
+ * ViewModel dla ekranu statystyk.
+ *
+ * Zarządza:
+ * - Pobieraniem danych użytkownika i nawyków z repozytoriów
+ * - Filtrowaniem nawyków na podstawie wybranego przedziału czasowego
+ * - Obliczaniem statystyk (procent sukcesu, średnie)
+ * - Przygotowaniem danych dla wykresów
+ *
+ * Obsługuje zakresy czasowe:
+ * - 7 dni (tydzień)
+ * - 30 dni (miesiąc)
+ * - 90 dni (kwartał)
+ *
+ * @property userRepository Repozytorium do pobierania danych użytkownika
+ * @property habitRepository Repozytorium do pobierania nawyków
+ *
+ * @since 1.0
+ */
 class StatsViewModel(
     private val userRepository: UserRepository,
     private val habitRepository: HabitRepository

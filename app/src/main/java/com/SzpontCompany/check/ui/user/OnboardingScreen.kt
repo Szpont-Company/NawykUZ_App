@@ -43,11 +43,37 @@ import com.SzpontCompany.check.ui.auth.AuthViewModel
 import com.SzpontCompany.check.ui.auth.LogInHeader
 import kotlinx.coroutines.launch
 
+/**
+ * Enum reprezentujący kroki procesu onboardingu.
+ */
 enum class OnboardingStep {
+    /**
+     * Krok 1: Ustawienie nicku użytkownika
+     */
     NICKNAME,
+    /**
+     * Krok 2: Ustawienie celu dzienny (liczba kroków)
+     */
     FIRST_HABIT
 }
 
+/**
+ * Ekran onboardingu dla nowych użytkowników.
+ *
+ * Przeprowadza użytkownika przez proces konfiguracji po pierwszym zalogowaniu:
+ * 1. Wybór unikalnego nicku (3-20 znaków, tylko litery, cyfry, podkreślnik)
+ * 2. Ustawienie celu dziennego dla liczenia kroków
+ *
+ * Walidacja:
+ * - Nick musi spełniać format regex: ^[a-zA-Z0-9_]{3,20}$
+ * - Nick nie może być już zajęty w bazie danych
+ * - Cel musi być liczbą dodatnią
+ *
+ * @param onOnboardingComplete Callback wywoływany po ukończeniu onboardingu
+ * @param authViewModel ViewModel do zarządzania autentykacją i danymi użytkownika
+ *
+ * @since 1.0
+ */
 @Composable
 fun OnboardingScreen(
     onOnboardingComplete: (dailySteps: Int) -> Unit,

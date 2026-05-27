@@ -36,37 +36,90 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
+/**
+ * AuthViewModel - zarządza logowaniem i rejestracją użytkownika.
+ *
+ * Odpowiada za:
+ * - Logowanie za pomocą email/hasła
+ * - Rejestrację nowych użytkowników
+ * - Logowanie przez Google (OpenID Connect)
+ * - Reset hasła
+ * - Wylogowywanie
+ * - Zarządzanie stanem użytkownika
+ * - Walidacja danych wejściowych
+ * - Integracja z reCAPTCHA dla bezpieczeństwa
+ *
+ * Korzysta z:
+ * - Firebase Authentication
+ * - Credential Manager (Google Sign-In)
+ * - reCAPTCHA do weryfikacji
+ *
+ * @since 1.0
+ * @author Szpont Company
+ */
 class AuthViewModel(application: Application) : AndroidViewModel(application) {
-   private val auth by lazy { FirebaseAuth.getInstance() }
-   val recaptcha = RecaptchaManager(application, viewModelScope)
-   private val userRepository by lazy { UserRepository.getInstance(application.applicationContext) }
-   private val habitRepository by lazy { HabitRepository() }
+    private val auth by lazy { FirebaseAuth.getInstance() }
+    val recaptcha = RecaptchaManager(application, viewModelScope)
+    private val userRepository by lazy { UserRepository.getInstance(application.applicationContext) }
+    private val habitRepository by lazy { HabitRepository() }
 
+    /**
+     * Adres email użytkownika.
+     */
     var email by mutableStateOf("")
         private set
 
+    /**
+     * Hasło użytkownika.
+     */
     var password by mutableStateOf("")
         private set
+    /**
+     * Nazwa/nick użytkownika.
+     */
     var name by mutableStateOf("")
         private set
 
+    /**
+     * Aktualizuje adres email.
+     *
+     * @param newEmail Nowy adres email (będzie przyciętym od spacji)
+     */
     fun onEmailChange(newEmail: String) {
         email = newEmail.trim()
         emailError = null
     }
+    /**
+     * Aktualizuje hasło.
+     *
+     * @param newPassword Nowe hasło
+     */
     fun onPasswordChange(newPassword: String) {
         password = newPassword
         passwordError = null
     }
+    /**
+     * Aktualizuje nazwę/nick użytkownika.
+     *
+     * @param newName Nowa nazwa
+     */
     fun onNameChange(newName: String) {
         name = newName
     }
+    /**
+     * Resetuje hasło użytkownika na podany email.
+     *
+     * @param onResult Callback z wynikiem operacji (sukces/błąd)
+     */
     fun resetPassword(onResult: (Result<Unit>) -> Unit) {
         viewModelScope.launch {
             val result = resetPassword(email)
             onResult(result)
         }
     }
+    /**
+     * Czyści przechowywane dane logowania.
+     */
     private fun cleanCredentials() {
         email = ""
         password = ""
@@ -75,8 +128,14 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         passwordError = null
     }
 
+    /**
+     * Błąd walidacji adresu email.
+     */
     var emailError by mutableStateOf<String?>(null)
         private set
+    /**
+     * Błąd walidacji hasła.
+     */
     var passwordError by mutableStateOf<String?>(null)
         private set
 

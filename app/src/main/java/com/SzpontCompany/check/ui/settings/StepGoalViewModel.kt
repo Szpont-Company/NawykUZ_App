@@ -14,6 +14,24 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+/**
+ * ViewModel dla ustawiania celu dziennego kroków.
+ *
+ * Zarządza:
+ * - Zapisywaniem nowego celu kroków do bazy danych
+ * - Aktualizacją celu w nawyku "Kroki"
+ * - Aktualizacją widżetu kroków
+ * - Walidacją wartości (1000 - 100000 kroków)
+ * - Obsługą błędów podczas zapisu
+ *
+ * Synchronizuje cel z:
+ * - UserRepository (profil użytkownika)
+ * - HabitRepository (nawyk kroków)
+ * - StepRepository (lokalne preferencje)
+ * - Widżetami (aktualizacja wyświetlanego celu)
+ *
+ * @since 1.0
+ */
 class StepGoalViewModel(application: Application) : AndroidViewModel(application) {
     private val context = application.applicationContext
     private val userRepo = UserRepository.getInstance(context)

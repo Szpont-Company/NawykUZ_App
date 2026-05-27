@@ -6,7 +6,18 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
-// Set of Material typography styles to start with
+/**
+ * Typografia Material 3 dla aplikacji Check.
+ *
+ * Definiuje style tekstowe używane w całej aplikacji.
+ * Domyślnie używa czcionki systemowej z dostosowanymi rozmiarami i wagami.
+ *
+ * Dostępne style:
+ * - bodyLarge: Główny tekst (16sp)
+ * - titleLarge: Nagłówki główne (22sp)
+ * - labelSmall: Etykiety (11sp)
+ * - i inne standardowe style Material 3
+ */
 val Typography = Typography(
     bodyLarge = TextStyle(
         fontFamily = FontFamily.Default,

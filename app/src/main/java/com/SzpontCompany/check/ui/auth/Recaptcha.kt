@@ -33,6 +33,22 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.SzpontCompany.check.R
 
+/**
+ * Wyświetla checkbox weryfikacji reCAPTCHA v3.
+ *
+ * Komponenta umożliwia użytkownikowi zatwierdzić weryfikację reCAPTCHA.
+ * Zmienia wygląd (kolor, ikonkę) w zależności od stanu weryfikacji.
+ *
+ * Zawiera:
+ * - Checkbox do zaznaczenia
+ * - Tekst "I'm not a robot"
+ * - Logo reCAPTCHA Google
+ * - Animacje przejścia stanów
+ *
+ * @param verified true jeśli weryfikacja przeszła pomyślnie
+ * @param onCaptchaClick Callback wywoływany po kliknięciu na checkbox
+ * @param modifier Modifier do stylizacji komponenty
+ */
 @Composable
 fun CaptchaBox(
     verified: Boolean,

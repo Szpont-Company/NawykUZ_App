@@ -15,6 +15,23 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
+/**
+ * ViewModel dla ekranu ustawień aplikacji.
+ *
+ * Zarządza:
+ * - Preferencjami motywu (jasny/ciemny/auto)
+ * - Kolorem akcentu interfejsu
+ * - Widocznością lokalizacji
+ * - Celem dzienny kroków
+ * - Ustawieniami notyfikacji
+ *
+ * Przechowuje preferencje zarówno lokalnie (SharedPreferences) jak i w Firestore.
+ *
+ * @property repository Repozytorium do zarządzania ustawieniami lokalnie
+ * @property userRepository Repozytorium do synchronizacji z Firestore
+ *
+ * @since 1.0
+ */
 class SettingsViewModel(
     private val repository: SettingsRepository,
     private val userRepository : UserRepository

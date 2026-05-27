@@ -71,7 +71,29 @@ fun getLogoForAccent(accent: Color): Int {
         else -> R.drawable.logo_mint
     }
 }
-
+/**
+ * Ekran logowania i rejestracji.
+ *
+ * Wyświetla dwie główne opcje:
+ * 1. Logowanie za pomocą email/hasła
+ * 2. Rejestracja nowego konta
+ *
+ * Funkcje:
+ * - Przełączanie między formą logowania a rejestracją
+ * - Logowanie przez Google (OpenID Connect)
+ * - Resetowanie hasła
+ * - Walidacja danych wejściowych
+ * - Weryfikacja reCAPTCHA
+ * - Linki do regulaminu i polityki prywatności
+ *
+ * @param onLoginSuccess Callback wywoływany po pomyślnym zalogowaniu
+ * @param onRegisterSuccess Callback wywoływany po pomyślnym zarejestrowaniu
+ * @param onForgotPasswordClick Callback wywoływany po kliknięciu "Zapomniałeś hasła?"
+ * @param onTosClick Callback wywoływany po kliknięciu na regulamin
+ * @param onPrivacyClick Callback wywoływany po kliknięciu na politykę prywatności
+ *
+ * @since 1.0
+ */
 @SuppressLint("LocalContextGetResourceValueCall")
 @Composable
 fun LoginScreen(

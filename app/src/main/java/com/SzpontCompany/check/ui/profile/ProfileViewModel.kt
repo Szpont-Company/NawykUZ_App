@@ -13,6 +13,22 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
+/**
+ * ViewModel dla ekranu profilu użytkownika.
+ *
+ * Zarządza:
+ * - Pobieraniem i wyświetlaniem danych profilu użytkownika
+ * - Obliczaniem statystyk (liczba przyjaciół, bitew, monet, procentu sukcesu)
+ * - Zarządzaniem relacjami społecznym (przyjaciele, wyzwania)
+ *
+ * Integruje się z repozytoriami:
+ * - UserRepository: Dane profilu użytkownika
+ * - HabitRepository: Nawyki użytkownika
+ * - FriendRepository: Lista przyjaciół
+ * - ChallengeRepository: Aktywne wyzwania
+ *
+ * @since 1.0
+ */
 class ProfileViewModel(application: Application) : AndroidViewModel(application) {
 
     private val userRepository = UserRepository.getInstance(application.applicationContext)

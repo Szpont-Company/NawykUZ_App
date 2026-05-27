@@ -15,6 +15,29 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import com.google.firebase.functions.FirebaseFunctions
 
+/**
+ * Manager do obsługi reCAPTCHA v3.
+ *
+ * Zarządza:
+ * - Inicjalizacją klienta reCAPTCHA
+ * - Generowaniem tokenów dla akcji (SIGNUP, LOGIN, itp.)
+ * - Weryfikacją tokenów na serwerze Firebase
+ * - Pobieraniem wyników weryfikacji
+ *
+ * reCAPTCHA v3 automatycznie ocenia czy użytkownik jest człowiekiem
+ * bez potrzeby interakcji (captcha puzzle).
+ *
+ * Obsługiwane akcje:
+ * - SIGNUP: Rejestracja nowego użytkownika
+ * - LOGIN: Logowanie
+ *
+ * @property application Kontekst aplikacji
+ * @property scope CoroutineScope do operacji asynchronicznych
+ * @property siteKey Klucz witryny reCAPTCHA (publiczny)
+ * @property functions Firebase Functions do weryfikacji na serwerze
+ *
+ * @since 1.0
+ */
 class RecaptchaManager(
     private val application: Application,
     private val scope: CoroutineScope,

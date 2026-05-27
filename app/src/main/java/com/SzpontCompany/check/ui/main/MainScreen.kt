@@ -33,10 +33,57 @@ import com.SzpontCompany.check.ui.community.CommunityScreen
 import com.SzpontCompany.check.ui.community.components.NotificationsSheet
 import com.SzpontCompany.check.ui.community.components.NotificationsViewModel
 
+/**
+ * Enum reprezentujący główne zakładki aplikacji.
+ */
 enum class BottomTab {
-    TODAY, STATS, MAP, COMMUNITY, ADD
+    /**
+     * Zakładka dzisiejszych nawyków
+     */
+    TODAY,
+    /**
+     * Zakładka statystyk
+     */
+    STATS,
+    /**
+     * Zakładka z mapą przyjaciół
+     */
+    MAP,
+    /**
+     * Zakładka społeczności (bitwy, wyzwania)
+     */
+    COMMUNITY,
+    /**
+     * Przycisk dodania nowego nawyku
+     */
+    ADD
 }
 
+/**
+ * Główny ekran aplikacji ze wszystkimi sekcjami.
+ *
+ * Wyświetla zawartość na podstawie wybranej zakładki:
+ * - TODAY: Dzisiejsze nawyki i streaki
+ * - STATS: Statystyki i wykresy postępu
+ * - MAP: Mapa z lokalizacjami przyjaciół
+ * - COMMUNITY: Społeczność, bitwy, wyzwania
+ *
+ * Zawiera górny pasek menu i dolny pasek nawigacji.
+ * Obsługuje dialog dodawania nowych nawyków.
+ *
+ * @param currentTab Aktualnie wybrana zakładka
+ * @param onTabSelected Callback wywoływany przy zmianie zakładki
+ * @param onProfileClick Callback otwierający profil użytkownika
+ * @param onOptionsClick Callback otwierający ustawienia
+ * @param onNotificationsClick Callback otwierający powiadomienia
+ * @param onFriendProfileClick Callback otwierający profil przyjaciela
+ * @param onMessageClick Callback otwierający wiadomości z przyjacielem
+ * @param onBattleClick Callback otwierający szczegóły bitwy
+ * @param notificationsViewModel ViewModel do zarządzania powiadomieniami
+ * @param onNavigateToBattleDetail Callback do nawigacji do szczegółów bitwy
+ *
+ * @since 1.0
+ */
 @Composable
 fun MainScreen(
     currentTab: BottomTab,

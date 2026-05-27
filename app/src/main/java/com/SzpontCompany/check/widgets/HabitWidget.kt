@@ -41,14 +41,46 @@ import com.SzpontCompany.check.MainActivity
 import com.SzpontCompany.check.R
 
 
+/**
+ * Klucz przechowywania koloru akcentu w preferencjach widżetu.
+ */
 val widgetAccentColorKey = intPreferencesKey("widget_accent_color")
+/**
+ * Klucz przechowywania aktualnego streaka nawyku w preferencjach widżetu.
+ */
 val widgetStreakKey = intPreferencesKey("widget_habit_streak")
+/**
+ * Klucz przechowywania rekordu najdłuższego streaka w preferencjach widżetu.
+ */
 val widgetRecordKey = intPreferencesKey("widget_habit_record")
 
+/**
+ * Widżet wyświetlający aktualny i osobisty rekord streaka nawyku.
+ *
+ * Wyświetla:
+ * - Aktualny streak (liczba dni z rzędu)
+ * - Osobisty rekord streaka
+ * - Graficzny wykres z 7 słupkami reprezentującymi ostatnie dni
+ *
+ * Kliknięcie widżetu otwiera główną aplikację.
+ *
+ * Dane widżetu są przechowywane w systemie preferencji Glance.
+ *
+ * @since 1.0
+ */
 class HabitWidget : GlanceAppWidget() {
 
     override val stateDefinition: GlanceStateDefinition<*> = PreferencesGlanceStateDefinition
 
+    /**
+     * Dostarcza treść widżetu.
+     *
+     * Odczytuje dane z systemowych preferencji (streak, rekord, kolor akcentu)
+     * i renderuje interfejs widżetu.
+     *
+     * @param context Kontekst aplikacji
+     * @param id Identyfikator widżetu Glance
+     */
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         provideContent {
             val prefs = currentState<Preferences>()
@@ -63,6 +95,15 @@ class HabitWidget : GlanceAppWidget() {
         }
     }
 
+    /**
+     * Renderuje zawartość wizualną widżetu.
+     *
+     * Wyświetla aktualny streak, osobisty rekord i graficzny wykres.
+     *
+     * @param streak Aktualny streak (liczba dni z rzędu)
+     * @param record Osobisty rekord najdłuższego streaka
+     * @param accentColor Kolor akcentu stosowany do tła widżetu
+     */
     @Composable
     private fun MyContent(streak: Int, record: Int, accentColor: Color) {
         val context = LocalContext.current
@@ -134,6 +175,16 @@ class HabitWidget : GlanceAppWidget() {
     }
 }
 
+/**
+ * Aktualizuje dane streaka i rekordu w widżecie HabitWidget.
+ *
+ * Uruchamia asynchronicznie aktualizację wszystkich instancji widżetu HabitWidget
+ * na ekranie głównym urządzenia.
+ *
+ * @param context Kontekst aplikacji
+ * @param newStreak Nowa wartość aktualnego streaka
+ * @param newRecord Nowa wartość rekordu streaka
+ */
 fun updateHabitWidgetData(context: Context, newStreak: Int, newRecord: Int) {
     CoroutineScope(Dispatchers.IO).launch {
         val manager = GlanceAppWidgetManager(context)
@@ -149,6 +200,15 @@ fun updateHabitWidgetData(context: Context, newStreak: Int, newRecord: Int) {
     }
 }
 
+/**
+ * Aktualizuje kolor akcentu we wszystkich widżetach aplikacji.
+ *
+ * Aktualizuje zarówno widżet kroków jak i widżet nawyku nowym kolorem akcentu.
+ * Operacja wykonywana jest asynchronicznie w tle.
+ *
+ * @param context Kontekst aplikacji
+ * @param newColor Nowy kolor akcentu
+ */
 fun updateWidgetAccentColor(context: Context, newColor: Color) {
     CoroutineScope(Dispatchers.IO).launch {
         val manager = GlanceAppWidgetManager(context)

@@ -30,13 +30,43 @@ import com.SzpontCompany.check.MainActivity
 import com.SzpontCompany.check.R
 import java.util.Locale
 
+/**
+ * Klucz przechowywania liczby kroków w preferencjach widżetu.
+ */
 val widgetStepsKey = intPreferencesKey("widget_steps")
+/**
+ * Klucz przechowywania celu dzienny kroków w preferencjach widżetu.
+ */
 val widgetGoalKey = intPreferencesKey("widget_goal")
 
+/**
+ * Widżet aplikacyjny wyświetlający liczbę kroków i postęp w stosunku do celu.
+ *
+ * Wyświetla:
+ * - Aktualna liczba kroków
+ * - Procent osiągnięcia celu
+ * - Graficzny pasek postępu (10 segmentów)
+ * - Cel dzienny
+ *
+ * Kliknięcie widżetu otwiera główną aplikację.
+ *
+ * Dane widżetu są przechowywane w systemie preferencji Glance.
+ *
+ * @since 1.0
+ */
 class StepsWidget : GlanceAppWidget() {
 
     override val stateDefinition: GlanceStateDefinition<*> = PreferencesGlanceStateDefinition
 
+    /**
+     * Dostarcza treść widżetu.
+     *
+     * Odczytuje dane z systemowych preferencji (liczba kroków, cel),
+     * oblicza procent postępu i renderuje interfejs widżetu.
+     *
+     * @param context Kontekst aplikacji
+     * @param id Identyfikator widżetu Glance
+     */
     override suspend fun provideGlance(context: Context, id: GlanceId) {
 
         provideContent {
@@ -57,6 +87,16 @@ class StepsWidget : GlanceAppWidget() {
         }
     }
 
+    /**
+     * Renderuje zawartość wizualną widżetu.
+     *
+     * Wyświetla liczbę kroków, procent postępu i graficzny pasek postępu.
+     *
+     * @param steps Aktualna liczba kroków
+     * @param goal Cel dzienny (liczba kroków)
+     * @param progress Procent postępu (0.0 - 1.0)
+     * @param accentColor Kolor akcentu stosowany do paska postępu
+     */
     @Composable
     private fun StepsWidgetContent(steps: Int, goal: Int, progress: Float, accentColor: Color) {
         val progressPercent = (progress * 100).toInt()
@@ -126,6 +166,15 @@ class StepsWidget : GlanceAppWidget() {
         }
     }
 
+    /**
+     * Renderuje pasek postępu składający się z 10 segmentów.
+     *
+     * Liczba wypełnionych segmentów odpowiada procentowi postępu.
+     * Segmenty są zaokrąglone i oddalone od siebie.
+     *
+     * @param progress Procent postępu (0.0 - 1.0)
+     * @param accentColor Kolor akcentu dla wypełnionych segmentów
+     */
     @Composable
     private fun ProgressBar(progress: Float, accentColor: ColorProvider) {
         Row(
