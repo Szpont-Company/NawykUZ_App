@@ -54,7 +54,6 @@ class AuthRepositoryTest {
         val weakPassword = "123"
         val username = "TestUser"
 
-        // Używamy RuntimeException, aby Mockito nie protestowało o checked exceptions
         val exception = RuntimeException("Password too weak")
         doThrow(exception).whenever(mockAuth)
             .createUserWithEmailAndPassword(eq(email), eq(weakPassword))
@@ -70,7 +69,6 @@ class AuthRepositoryTest {
         val password = "SecurePassword123!"
         val username = "TestUser"
 
-        // Używamy RuntimeException, aby Mockito nie protestowało o checked exceptions
         val exception = RuntimeException("Email already in use")
         doThrow(exception).whenever(mockAuth)
             .createUserWithEmailAndPassword(eq(email), eq(password))
