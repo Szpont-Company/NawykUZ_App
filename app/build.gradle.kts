@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.gms.google.services)
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+    id("org.jetbrains.dokka") version "1.9.20"
 }
 
 android {
@@ -121,5 +122,17 @@ dependencies {
 kotlin {
     compilerOptions {
         jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+    }
+}
+
+tasks.withType<org.jetbrains.dokka.gradle.DokkaTask>().configureEach {
+    dokkaSourceSets {
+        // Tworzymy nasz własny profil omijający ograniczenia Androida
+        register("myAppSources") {
+            // Bezwzględne wskazanie folderu z Twoim kodem
+            sourceRoots.from(file("src/main/java"))
+            // Żeby złapało wszystkie klasy (w tym singletony i metody prywatne)
+            includeNonPublic.set(true)
+        }
     }
 }
