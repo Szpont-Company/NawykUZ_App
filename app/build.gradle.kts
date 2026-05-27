@@ -10,6 +10,12 @@ android {
     namespace = "com.SzpontCompany.check"
     compileSdk = 36
 
+    testOptions {
+        unitTests {
+            isReturnDefaultValues = true
+        }
+    }
+
     defaultConfig {
         applicationId = "com.SzpontCompany.check"
         minSdk = 26

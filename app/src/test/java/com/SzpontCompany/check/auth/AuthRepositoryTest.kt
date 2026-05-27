@@ -1,8 +1,6 @@
 package com.SzpontCompany.check.auth
 
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseAuthUserCollisionException
-import com.google.firebase.auth.FirebaseAuthWeakPasswordException
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -56,7 +54,8 @@ class AuthRepositoryTest {
         val weakPassword = "123"
         val username = "TestUser"
 
-        val exception = FirebaseAuthWeakPasswordException("ERROR_WEAK_PASSWORD", "Password too weak", "Reason")
+        // Używamy RuntimeException, aby Mockito nie protestowało o checked exceptions
+        val exception = RuntimeException("Password too weak")
         doThrow(exception).whenever(mockAuth)
             .createUserWithEmailAndPassword(eq(email), eq(weakPassword))
 
@@ -71,7 +70,8 @@ class AuthRepositoryTest {
         val password = "SecurePassword123!"
         val username = "TestUser"
 
-        val exception = FirebaseAuthUserCollisionException("ERROR_EMAIL_ALREADY_IN_USE", "Email already in use")
+        // Używamy RuntimeException, aby Mockito nie protestowało o checked exceptions
+        val exception = RuntimeException("Email already in use")
         doThrow(exception).whenever(mockAuth)
             .createUserWithEmailAndPassword(eq(email), eq(password))
 
@@ -129,7 +129,7 @@ class AuthRepositoryTest {
         val email = "test@example.com"
         val wrongPassword = "WrongPassword"
 
-        val exception = Exception("Bad password")
+        val exception = RuntimeException("Bad password")
         doThrow(exception).whenever(mockAuth)
             .signInWithEmailAndPassword(eq(email), eq(wrongPassword))
 
@@ -142,7 +142,7 @@ class AuthRepositoryTest {
         val nonExistentEmail = "nonexistent@example.com"
         val password = "SomePassword123!"
 
-        val exception = Exception("User not found")
+        val exception = RuntimeException("User not found")
         doThrow(exception).whenever(mockAuth)
             .signInWithEmailAndPassword(eq(nonExistentEmail), eq(password))
 
@@ -236,7 +236,6 @@ class AuthRepositoryTest {
         assertTrue(isLoggedIn)
     }
 }
-
 
 open class AuthRepository(private val auth: FirebaseAuth, private val firestore: FirebaseFirestore) {
     open suspend fun register(email: String, password: String, username: String): Result<Unit> {
